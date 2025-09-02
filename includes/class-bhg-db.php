@@ -162,7 +162,17 @@ class BHG_DB {
             }
         }
 
-        // Ensure indexes on guesses (hunt_id, user_id)
+        
+        // Ensure 'period' column exists in tournament_results
+        $tr_table = $wpdb->prefix . 'bhg_tournament_results';
+        if ($wpdb->get_var($wpdb->prepare("SHOW TABLES LIKE %s", $tr_table)) === $tr_table) {
+            if (!$col_exists($tr_table, 'period')) {
+                $wpdb->query("ALTER TABLE `{$tr_table}` ADD COLUMN `period` VARCHAR(20) NOT NULL DEFAULT 'weekly' AFTER `user_id`");
+                error_log('[BHG] Added missing column period to ' . $tr_table);
+            }
+        }
+
+// Ensure indexes on guesses (hunt_id, user_id)
         $g_table = $wpdb->prefix . 'bhg_guesses';
         if ($wpdb->get_var($wpdb->prepare("SHOW TABLES LIKE %s", $g_table)) === $g_table) {
             if (!$index_exists($g_table, 'hunt_id_idx')) {
