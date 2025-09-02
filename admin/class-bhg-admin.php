@@ -143,9 +143,15 @@ class BHG_Admin {
         
         if (!empty($_POST['id'])) {
             $hunt_id = intval($_POST['id']);
-            $wpdb->update($table, $data, ['id' => $hunt_id], $format, ['%d']);
+            $result = $wpdb->update($table, $data, ['id' => $hunt_id], $format, ['%d']);
+            if (false === $result) {
+                wp_die(__('Error updating bonus hunt', 'bonus-hunt-guesser'));
+            }
         } else {
-            $wpdb->insert($table, $data, $format);
+            $result = $wpdb->insert($table, $data, $format);
+            if (false === $result) {
+                wp_die(__('Error creating bonus hunt', 'bonus-hunt-guesser'));
+            }
             $hunt_id = (int) $wpdb->insert_id;
         }
 
@@ -200,13 +206,17 @@ class BHG_Admin {
 
         $closed_at = current_time('mysql');
 
-        $wpdb->update($table, [
+        $result = $wpdb->update($table, [
             'status' => 'closed',
             'final_balance' => $final,
             'winner_user_id' => $winner_user_id,
             'winner_diff' => $winner_diff,
             'closed_at' => $closed_at,
         ], ['id' => $id], ['%s', '%f', '%d', '%f', '%s'], ['%d']);
+
+        if (false === $result) {
+            wp_die(__('Error closing bonus hunt', 'bonus-hunt-guesser'));
+        }
 
         $headers = [];
         $from = get_bloginfo('admin_email');
@@ -281,9 +291,15 @@ class BHG_Admin {
         }
         $exists = $wpdb->get_var($wpdb->prepare("SELECT id FROM $table WHERE t_key=%s", $key));
         if ($exists) {
-            $wpdb->update($table, ['t_value' => $val], ['id' => $exists], ['%s'], ['%d']);
+            $result = $wpdb->update($table, ['t_value' => $val], ['id' => $exists], ['%s'], ['%d']);
+            if (false === $result) {
+                wp_die(__('Error updating translation', 'bonus-hunt-guesser'));
+            }
         } else {
-            $wpdb->insert($table, ['t_key' => $key, 't_value' => $val], ['%s', '%s']);
+            $result = $wpdb->insert($table, ['t_key' => $key, 't_value' => $val], ['%s', '%s']);
+            if (false === $result) {
+                wp_die(__('Error creating translation', 'bonus-hunt-guesser'));
+            }
         }
         wp_safe_redirect(admin_url('admin.php?page=bhg-translations&updated=1'));
         exit;
@@ -306,9 +322,15 @@ class BHG_Admin {
         
         if (!empty($_POST['id'])) {
             $id = intval($_POST['id']);
-            $wpdb->update($table, ['name'=>$name,'slug'=>$slug,'url'=>$url], ['id'=>$id], ['%s','%s','%s'], ['%d']);
+            $result = $wpdb->update($table, ['name'=>$name,'slug'=>$slug,'url'=>$url], ['id'=>$id], ['%s','%s','%s'], ['%d']);
+            if (false === $result) {
+                wp_die(__('Error updating affiliate', 'bonus-hunt-guesser'));
+            }
         } else {
-            $wpdb->insert($table, ['name'=>$name,'slug'=>$slug,'url'=>$url], ['%s','%s','%s']);
+            $result = $wpdb->insert($table, ['name'=>$name,'slug'=>$slug,'url'=>$url], ['%s','%s','%s']);
+            if (false === $result) {
+                wp_die(__('Error creating affiliate', 'bonus-hunt-guesser'));
+            }
         }
         wp_safe_redirect(admin_url('admin.php?page=bhg-affiliates&updated=1'));
         exit;
@@ -326,7 +348,12 @@ class BHG_Admin {
         global $wpdb;
         $table = $this->table('bhg_affiliate_websites');
         $id = intval($_POST['id'] ?? 0);
-        if ($id) $wpdb->delete($table, ['id'=>$id], ['%d']);
+        if ($id) {
+            $result = $wpdb->delete($table, ['id'=>$id], ['%d']);
+            if (false === $result) {
+                wp_die(__('Error deleting affiliate', 'bonus-hunt-guesser'));
+            }
+        }
         wp_safe_redirect(admin_url('admin.php?page=bhg-affiliates&deleted=1'));
         exit;
     }
@@ -354,9 +381,15 @@ class BHG_Admin {
         
         if (!empty($_POST['id'])) {
             $id = intval($_POST['id']);
-            $wpdb->update($table, $data, ['id'=>$id], $format, ['%d']);
+            $result = $wpdb->update($table, $data, ['id'=>$id], $format, ['%d']);
+            if (false === $result) {
+                wp_die(__('Error updating ad', 'bonus-hunt-guesser'));
+            }
         } else {
-            $wpdb->insert($table, $data, $format);
+            $result = $wpdb->insert($table, $data, $format);
+            if (false === $result) {
+                wp_die(__('Error creating ad', 'bonus-hunt-guesser'));
+            }
         }
         wp_safe_redirect(admin_url('admin.php?page=bhg-ads&updated=1'));
         exit;
@@ -371,6 +404,7 @@ class BHG_Admin {
         $r_table = $wpdb->prefix . 'bhg_tournament_results';
         $h_table = $wpdb->prefix . 'bhg_bonus_hunts';
 
+        // Use direct queries for TRUNCATE and DELETE operations
         $wpdb->query("TRUNCATE TABLE $r_table");
         $wpdb->query("DELETE FROM $t_table");
 
@@ -380,13 +414,16 @@ class BHG_Admin {
             $id = $wpdb->get_var($wpdb->prepare("SELECT id FROM $t_table WHERE period=%s AND period_key=%s", $period, $period_key));
             if ($id) return (int)$id;
             if ($title === null) $title = ucfirst($period) . ' ' . $period_key;
-            $wpdb->insert($t_table, [
+            $result = $wpdb->insert($t_table, [
                 'title' => $title,
                 'period' => $period,
                 'period_key' => $period_key,
                 'status' => 'active',
                 'created_at' => current_time('mysql'),
             ], ['%s', '%s', '%s', '%s', '%s']);
+            if (false === $result) {
+                return 0;
+            }
             return (int)$wpdb->insert_id;
         };
 
@@ -407,11 +444,13 @@ class BHG_Admin {
             $yearly_id  = $ensure_tournament('yearly',  $yearKey,  $yearKey . ' Tournament');
 
             foreach ([$weekly_id, $monthly_id, $yearly_id] as $tid){
-                $wpdb->query($wpdb->prepare(
-                    "INSERT INTO $r_table (tournament_id, user_id, wins) VALUES (%d, %d, 1)
-                     ON DUPLICATE KEY UPDATE wins = wins + 1",
-                    $tid, $user_id
-                ));
+                if ($tid > 0) {
+                    $wpdb->query($wpdb->prepare(
+                        "INSERT INTO $r_table (tournament_id, user_id, wins) VALUES (%d, %d, 1)
+                         ON DUPLICATE KEY UPDATE wins = wins + 1",
+                        $tid, $user_id
+                    ));
+                }
             }
         }
 
@@ -444,13 +483,16 @@ class BHG_Admin {
             $id = $wpdb->get_var($wpdb->prepare("SELECT id FROM $tournaments_table WHERE period=%s AND period_key=%s", $period, $period_key));
             if ($id) return (int)$id;
             if ($title === null) $title = ucfirst($period) . ' ' . $period_key;
-            $wpdb->insert($tournaments_table, [
+            $result = $wpdb->insert($tournaments_table, [
                 'title' => $title,
                 'period' => $period,
                 'period_key' => $period_key,
                 'status' => 'active',
                 'created_at' => current_time('mysql')
             ], ['%s', '%s', '%s', '%s', '%s']);
+            if (false === $result) {
+                return 0;
+            }
             return (int)$wpdb->insert_id;
         };
 
@@ -459,11 +501,13 @@ class BHG_Admin {
         $yearly_id  = $ensure_tournament('yearly',  $yearKey,  $yearKey . ' Tournament');
 
         foreach ([$weekly_id, $monthly_id, $yearly_id] as $tid){
-            $wpdb->query($wpdb->prepare(
-                "INSERT INTO $results_table (tournament_id, user_id, wins) VALUES (%d, %d, 1)
-                 ON DUPLICATE KEY UPDATE wins = wins + 1",
-                $tid, (int)$winner_user_id
-            ));
+            if ($tid > 0) {
+                $wpdb->query($wpdb->prepare(
+                    "INSERT INTO $results_table (tournament_id, user_id, wins) VALUES (%d, %d, 1)
+                     ON DUPLICATE KEY UPDATE wins = wins + 1",
+                    $tid, (int)$winner_user_id
+                ));
+            }
         }
     }
 
@@ -482,9 +526,15 @@ class BHG_Admin {
         $exists = $wpdb->get_var($wpdb->prepare("SELECT id FROM $table WHERE user_id=%d AND hunt_id=%d", $uid, $hunt_id));
         
         if ($exists){
-            $wpdb->update($table, ['guess_value'=>$guess, 'updated_at'=>current_time('mysql', 1)], ['id'=>$exists], ['%f','%s'], ['%d']);
+            $result = $wpdb->update($table, ['guess_value'=>$guess, 'updated_at'=>current_time('mysql', 1)], ['id'=>$exists], ['%f','%s'], ['%d']);
+            if (false === $result) {
+                wp_die(__('Error updating guess', 'bonus-hunt-guesser'));
+            }
         } else {
-            $wpdb->insert($table, ['user_id'=>$uid, 'hunt_id'=>$hunt_id, 'guess_value'=>$guess, 'created_at'=>current_time('mysql', 1)], ['%d','%d','%f','%s']);
+            $result = $wpdb->insert($table, ['user_id'=>$uid, 'hunt_id'=>$hunt_id, 'guess_value'=>$guess, 'created_at'=>current_time('mysql', 1)], ['%d','%d','%f','%s']);
+            if (false === $result) {
+                wp_die(__('Error creating guess', 'bonus-hunt-guesser'));
+            }
         }
         
         $redirect_url = wp_get_referer() ?: home_url('/');

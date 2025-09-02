@@ -5,13 +5,13 @@ class BHG_Models {
   public static function active_hunt(){
     global $wpdb;
     $t = BHG_DB::table('bonus_hunts');
-    return $wpdb->get_row("SELECT * FROM {$t} WHERE status='open' ORDER BY id DESC LIMIT 1");
+    return $wpdb->get_row($wpdb->prepare("SELECT * FROM {$t} WHERE status = %s ORDER BY id DESC LIMIT 1", 'open'));
   }
   
   public static function get_hunt($id){
     global $wpdb; 
     $t = BHG_DB::table('bonus_hunts');
-    return $wpdb->get_row($wpdb->prepare("SELECT * FROM {$t} WHERE id=%d", $id));
+    return $wpdb->get_row($wpdb->prepare("SELECT * FROM {$t} WHERE id = %d", $id));
   }
   
   public static function list_hunts($limit=50){
@@ -23,6 +23,8 @@ class BHG_Models {
   public static function save_hunt($data){
     global $wpdb; 
     $t = BHG_DB::table('bonus_hunts');
+    
+    // Validate and sanitize all inputs
     $row = [
       'title' => sanitize_text_field($data['title'] ?? 'Untitled'),
       'starting_balance' => floatval($data['starting_balance'] ?? 0),
@@ -33,8 +35,9 @@ class BHG_Models {
     ];
     
     if (!empty($data['id'])){
-      $wpdb->update($t, $row, ['id' => intval($data['id'])]);
-      return intval($data['id']);
+      $id = intval($data['id']);
+      $wpdb->update($t, $row, ['id' => $id]);
+      return $id;
     } else {
       $wpdb->insert($t, $row);
       return intval($wpdb->insert_id);
@@ -44,16 +47,22 @@ class BHG_Models {
   public static function upsert_guess($hunt_id, $user_id, $guess){
     global $wpdb; 
     $t = BHG_DB::table('guesses');
+    
+    // Validate inputs
+    $hunt_id = intval($hunt_id);
+    $user_id = intval($user_id);
+    $guess = floatval($guess);
+    
     $exists = $wpdb->get_var($wpdb->prepare(
-      "SELECT id FROM {$t} WHERE hunt_id=%d AND user_id=%d", 
+      "SELECT id FROM {$t} WHERE hunt_id = %d AND user_id = %d", 
       $hunt_id, 
       $user_id
     ));
     
     $row = [
-      'hunt_id' => intval($hunt_id), 
-      'user_id' => intval($user_id), 
-      'guess' => floatval($guess), 
+      'hunt_id' => $hunt_id, 
+      'user_id' => $user_id, 
+      'guess' => $guess, 
       'updated_at' => current_time('mysql')
     ];
     
@@ -70,18 +79,24 @@ class BHG_Models {
   public static function guesses($hunt_id, $orderby='guess', $order='ASC', $paged=1, $per_page=20){
     global $wpdb; 
     $t = BHG_DB::table('guesses');
+    
+    // Validate and sanitize inputs
+    $hunt_id = intval($hunt_id);
     $allowed = ['guess', 'user_id'];
     $orderby = in_array($orderby, $allowed, true) ? $orderby : 'guess';
     $order = strtoupper($order) === 'DESC' ? 'DESC' : 'ASC';
+    $paged = max(1, intval($paged));
+    $per_page = max(1, intval($per_page));
     $offset = max(0, ($paged-1)*$per_page);
     
     $total = (int)$wpdb->get_var($wpdb->prepare(
-      "SELECT COUNT(*) FROM {$t} WHERE hunt_id=%d", 
+      "SELECT COUNT(*) FROM {$t} WHERE hunt_id = %d", 
       $hunt_id
     ));
     
+    // Note: We can't use placeholders for ORDER BY column names, so we validate above
     $rows = $wpdb->get_results($wpdb->prepare(
-      "SELECT * FROM {$t} WHERE hunt_id=%d ORDER BY {$orderby} {$order} LIMIT %d OFFSET %d", 
+      "SELECT * FROM {$t} WHERE hunt_id = %d ORDER BY {$orderby} {$order} LIMIT %d OFFSET %d", 
       $hunt_id, 
       $per_page, 
       $offset
@@ -93,6 +108,11 @@ class BHG_Models {
   public static function get_guesses($limit = 10, $offset = 0) {
     global $wpdb;
     $t = BHG_DB::table('guesses');
+    
+    // Validate inputs
+    $limit = max(1, intval($limit));
+    $offset = max(0, intval($offset));
+    
     return $wpdb->get_results(
       $wpdb->prepare("SELECT * FROM {$t} ORDER BY id DESC LIMIT %d OFFSET %d", $limit, $offset)
     );
@@ -100,12 +120,17 @@ class BHG_Models {
   
   public static function close_hunt($hunt_id, $final_balance){
     global $wpdb; 
+    
+    // Validate inputs
+    $hunt_id = intval($hunt_id);
+    $final_balance = floatval($final_balance);
+    
     $hunt = self::get_hunt($hunt_id); 
     if (!$hunt) return false;
     
     $t = BHG_DB::table('guesses');
     $rows = $wpdb->get_results($wpdb->prepare(
-      "SELECT user_id, guess FROM {$t} WHERE hunt_id=%d", 
+      "SELECT user_id, guess FROM {$t} WHERE hunt_id = %d", 
       $hunt_id
     ));
     
@@ -114,7 +139,7 @@ class BHG_Models {
     $best_diff = null;
     
     foreach ($rows as $r){
-      $diff = abs(floatval($final_balance) - floatval($r->guess));
+      $diff = abs($final_balance - floatval($r->guess));
       if ($best_diff === null || $diff < $best_diff){
         $best_diff = $diff; 
         $winner = intval($r->user_id);
@@ -123,11 +148,11 @@ class BHG_Models {
     
     $bt = BHG_DB::table('bonus_hunts');
     $wpdb->update($bt, [
-      'final_balance' => floatval($final_balance),
+      'final_balance' => $final_balance,
       'status' => 'closed',
       'winner_user_id' => $winner,
       'closed_at' => current_time('mysql'),
-    ], ['id' => intval($hunt_id)]);
+    ], ['id' => $hunt_id]);
 
     do_action('bhg_hunt_closed', $hunt_id, $final_balance, $winner);
     return $winner;
@@ -137,24 +162,27 @@ class BHG_Models {
     global $wpdb; 
     $t = BHG_DB::table('bonus_hunts');
     
+    // Validate inputs
+    $user_id = intval($user_id);
+    
     if ($period === 'month'){
       $ym = current_time('Y-m');
       return (int)$wpdb->get_var($wpdb->prepare(
-        "SELECT COUNT(*) FROM {$t} WHERE winner_user_id=%d AND DATE_FORMAT(closed_at,'%%Y-%%m')=%s", 
+        "SELECT COUNT(*) FROM {$t} WHERE winner_user_id = %d AND DATE_FORMAT(closed_at, '%%Y-%%m') = %s", 
         $user_id, 
         $ym
       ));
     } elseif ($period === 'year'){
       $y = current_time('Y');
       return (int)$wpdb->get_var($wpdb->prepare(
-        "SELECT COUNT(*) FROM {$t} WHERE winner_user_id=%d AND DATE_FORMAT(closed_at,'%%Y')=%s", 
+        "SELECT COUNT(*) FROM {$t} WHERE winner_user_id = %d AND DATE_FORMAT(closed_at, '%%Y') = %s", 
         $user_id, 
         $y
       ));
     }
     
     return (int)$wpdb->get_var($wpdb->prepare(
-      "SELECT COUNT(*) FROM {$t} WHERE winner_user_id=%d", 
+      "SELECT COUNT(*) FROM {$t} WHERE winner_user_id = %d", 
       $user_id
     ));
   }
@@ -162,8 +190,13 @@ class BHG_Models {
   public static function previous_hunts($limit=20){
     global $wpdb; 
     $t = BHG_DB::table('bonus_hunts');
+    
+    // Validate input
+    $limit = max(1, intval($limit));
+    
     return $wpdb->get_results($wpdb->prepare(
-      "SELECT * FROM {$t} WHERE status='closed' ORDER BY closed_at DESC LIMIT %d", 
+      "SELECT * FROM {$t} WHERE status = %s ORDER BY closed_at DESC LIMIT %d", 
+      'closed',
       $limit
     ));
   }

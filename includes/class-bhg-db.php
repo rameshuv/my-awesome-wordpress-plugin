@@ -445,7 +445,7 @@ class BHG_DB {
         global $wpdb;
         
         return $wpdb->get_results($wpdb->prepare(
-            "SELECT * FROM {$wpdp->prefix}bhg_tournaments WHERE status = %s ORDER BY created_at DESC",
+            "SELECT * FROM {$wpdb->prefix}bhg_tournaments WHERE status = %s ORDER BY created_at DESC",
             'active'
         ));
     }
