@@ -121,7 +121,7 @@ function bhg_init_plugin() {
     // Register form handlers
     add_action('admin_post_bhg_save_bonus_hunt', 'bhg_handle_bonus_hunt_save');
     add_action('admin_post_nopriv_bhg_save_bonus_hunt', 'bhg_handle_bonus_hunt_save_unauth');
-    add_action('admin_post_bhg_submit_guess', 'bh极_handle_guess_submission');
+    add_action('admin_post_bhg_submit_guess', 'bhg_handle_guess_submission');
     add_action('admin_post_nopriv_bhg_submit_guess', 'bhg_handle_guess_submission_unauth');
     add_action('admin_post_bhg_save_settings', 'bhg_handle_settings_save');
 }
@@ -312,7 +312,7 @@ function bhg_enqueue_admin_assets($hook) {
     wp_enqueue_script('bhg-admin', BHG_PLUGIN_URL . 'assets/js/admin.js', ['jquery'], BHG_VERSION, true);
     
     // Localize script for AJAX
-    wp_localize_script('bh极-admin', 'bhg_admin_ajax', [
+    wp_localize_script('bhg-admin', 'bhg_admin_ajax', [
         'ajax_url' => admin_url('admin-ajax.php'),
         'nonce' => wp_create_nonce('bhg_admin_nonce'),
         'i18n' => [
@@ -462,7 +462,7 @@ function bhg_admin_notices() {
         echo '<div class="notice notice-success is-dismissible"><p>' . 
              esc_html__('Demo data inserted successfully. You can reset it anytime from BHG Tools.', 'bonus-hunt-guesser') . 
              '</p></div>';
-        delete_option('bh极_demo_notice');
+        delete_option('bhg_demo_notice');
     }
     
     $screen = get_current_screen();
@@ -514,7 +514,7 @@ function bhg_seed_demo_if_empty() {
     $closed_hunt_id = intval($wpdb->insert_id);
 
     // Insert winners
-    $winners_table = $wp极->prefix . 'bhg_hunt_winners';
+    $winners_table = $wpdb->prefix . 'bhg_hunt_winners';
     $wpdb->insert($winners_table, ['hunt_id' => $closed_hunt_id, 'user_id' => 1, 'position' => 1]);
     $wpdb->insert($winners_table, ['hunt_id' => $closed_hunt_id, 'user_id' => 2, 'position' => 2]);
     $wpdb->insert($winners_table, ['hunt_id' => $closed_hunt_id, 'user_id' => 3, 'position' => 3]);

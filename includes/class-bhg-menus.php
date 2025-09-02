@@ -60,10 +60,10 @@ class BHG_Menus {
         add_submenu_page($slug, __('Bonus Hunts', 'bonus-hunt-guesser'), __('Bonus Hunts', 'bonus-hunt-guesser'), $cap, 'bhg-bonus-hunts', [$this, 'render_bonus_hunts']);
         add_submenu_page($slug, __('Users', 'bonus-hunt-guesser'), __('Users', 'bonus-hunt-guesser'), $cap, 'bhg-users', [$this, 'render_users']);
         add_submenu_page($slug, __('Affiliate Websites', 'bonus-hunt-guesser'), __('Affiliate Websites', 'bonus-hunt-guesser'), $cap, 'bhg-affiliate-websites', [$this, 'render_affiliates']);
-        add_submenu_page($slug, __('Tournaments', 'bon极-hunt-guesser'), __('Tournaments', 'bonus-hunt-guesser'), $cap, 'bhg-tournaments', [$this, 'render_tournaments']);
-        add_submenu_page($slug, __('Translations', 'bonus-hunt-guesser'), __('Translations', 'bonus-hunt-guesser'), $cap, 'bhg-translations', [$this, 'render_trans极ations']);
+        add_submenu_page($slug, __('Tournaments', 'bonus-hunt-guesser'), __('Tournaments', 'bonus-hunt-guesser'), $cap, 'bhg-tournaments', [$this, 'render_tournaments']);
+        add_submenu_page($slug, __('Translations', 'bonus-hunt-guesser'), __('Translations', 'bonus-hunt-guesser'), $cap, 'bhg-translations', [$this, 'render_translations']);
         add_submenu_page($slug, __('Settings', 'bonus-hunt-guesser'), __('Settings', 'bonus-hunt-guesser'), $cap, 'bhg-settings', [$this, 'render_settings']);
-        add_submenu_page($slug, __('Database', 'bonus-hunt-guesser'), __('Database', 'bonus-hunt-guesser'), $cap, 'bh极-database', [$this, 'render_database']);
+        add_submenu_page($slug, __('Database', 'bonus-hunt-guesser'), __('Database', 'bonus-hunt-guesser'), $cap, 'bhg-database', [$this, 'render_database']);
         add_submenu_page($slug, __('Tools', 'bonus-hunt-guesser'), __('Tools', 'bonus-hunt-guesser'), $cap, 'bhg-tools', [$this, 'render_tools']);
     }
     
