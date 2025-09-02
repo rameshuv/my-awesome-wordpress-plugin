@@ -29,9 +29,9 @@ if (!empty($_GET['edit'])) {
             <h2><?php echo $edit ? esc_html__('Edit Hunt', 'bonus-hunt-guesser') : esc_html__('Add New Hunt', 'bonus-hunt-guesser'); ?></h2>
             <form method="post" action="<?php echo esc_url(admin_url('admin-post.php')); ?>">
                 <input type="hidden" name="action" value="bhg_save_hunt" />
-                <?php wp_nonce_field('bhg_save_hunt'); ?>
+                <?php wp_nonce_field('bhg_save_hunt', 'bhg_save_hunt_nonce'); ?>
                 <?php if ($edit): ?>
-                    <input type="hidden" name="hunt_id" value="<?php echo intval($edit->id); ?>" />
+                    <input type="hidden" name="id" value="<?php echo intval($edit->id); ?>" />
                 <?php endif; ?>
                 <table class="form-table">
                     <tr>
@@ -112,8 +112,8 @@ if (!empty($_GET['edit'])) {
                                 <?php if ($r->status !== 'closed'): ?>
                                     <form method="post" action="<?php echo esc_url(admin_url('admin-post.php')); ?>" style="display:inline;margin-right:8px;">
                                         <input type="hidden" name="action" value="bhg_close_hunt" />
-                                        <?php wp_nonce_field('bhg_close_hunt'); ?>
-                                        <input type="hidden" name="hunt_id" value="<?php echo intval($r->id); ?>" />
+                                        <?php wp_nonce_field('bhg_close_hunt', 'bhg_close_hunt_nonce'); ?>
+                                        <input type="hidden" name="id" value="<?php echo intval($r->id); ?>" />
                                         <input type="number" step="0.01" min="0" max="100000000" name="final_balance" 
                                                placeholder="<?php esc_attr_e('Final Balance €', 'bonus-hunt-guesser'); ?>" required style="width:140px;" />
                                         <button class="button button-primary" onclick="return confirm('<?php echo esc_attr__('Close this hunt and send results?', 'bonus-hunt-guesser'); ?>')">
@@ -122,8 +122,8 @@ if (!empty($_GET['edit'])) {
                                     </form>
                                     <form method="post" action="<?php echo esc_url(admin_url('admin-post.php')); ?>" style="display:inline;">
                                         <input type="hidden" name="action" value="bhg_close_hunt" />
-                                        <?php wp_nonce_field('bhg_close_hunt'); ?>
-                                        <input type="hidden" name="hunt_id" value="<?php echo intval($r->id); ?>" />
+                                        <?php wp_nonce_field('bhg_close_hunt', 'bhg_close_hunt_nonce'); ?>
+                                        <input type="hidden" name="id" value="<?php echo intval($r->id); ?>" />
                                         <button class="button button-secondary" onclick="return confirm('<?php echo esc_attr__('Close this hunt?', 'bonus-hunt-guesser'); ?>')">
                                             <?php esc_html_e('Close', 'bonus-hunt-guesser'); ?>
                                         </button>

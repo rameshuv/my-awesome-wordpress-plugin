@@ -32,7 +32,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['bhg_nonce'])) {
             <h2><?php echo $edit ? esc_html__('Edit Ad', 'bonus-hunt-guesser') : esc_html__('Create Ad', 'bonus-hunt-guesser'); ?></h2>
             <form method="post" action="<?php echo esc_url(admin_url('admin-post.php')); ?>">
                 <input type="hidden" name="action" value="bhg_save_ad" />
-                <?php wp_nonce_field('bhg_action', 'bhg_nonce'); ?>
+                <?php wp_nonce_field('bhg_save_ad', 'bhg_save_ad_nonce'); ?>
                 <?php if ($edit): ?>
                     <input type="hidden" name="id" value="<?php echo intval($edit->id); ?>" />
                 <?php endif; ?>

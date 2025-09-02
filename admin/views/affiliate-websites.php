@@ -23,7 +23,7 @@ if (!empty($_GET['edit']) && is_numeric($_GET['edit'])) {
             <h2><?php echo $edit ? esc_html__('Edit Site', 'bonus-hunt-guesser') : esc_html__('Add New Site', 'bonus-hunt-guesser'); ?></h2>
             <form method="post" action="<?php echo esc_url(admin_url('admin-post.php')); ?>">
                 <input type="hidden" name="action" value="bhg_save_affiliate">
-                <?php wp_nonce_field('bhg_save_affiliate_nonce', 'bhg_nonce'); ?>
+                <?php wp_nonce_field('bhg_save_affiliate', 'bhg_save_affiliate_nonce'); ?>
                 <?php if ($edit): ?>
                     <input type="hidden" name="id" value="<?php echo intval($edit->id); ?>" />
                 <?php endif; ?>
@@ -76,7 +76,7 @@ if (!empty($_GET['edit']) && is_numeric($_GET['edit'])) {
                                     </a>
                                     <form method="post" action="<?php echo esc_url(admin_url('admin-post.php')); ?>" style="display:inline;">
                                         <input type="hidden" name="action" value="bhg_delete_affiliate" />
-                                        <?php wp_nonce_field('bhg_delete_affiliate_nonce', 'bhg_nonce'); ?>
+                                        <?php wp_nonce_field('bhg_save_affiliate', 'bhg_save_affiliate_nonce'); ?>
                                         <input type="hidden" name="id" value="<?php echo intval($r->id); ?>" />
                                         <button type="submit" class="button button-link-delete" onclick="return confirm('<?php echo esc_js(__('Delete this site?', 'bonus-hunt-guesser')); ?>')">
                                             <?php esc_html_e('Delete', 'bonus-hunt-guesser'); ?>
