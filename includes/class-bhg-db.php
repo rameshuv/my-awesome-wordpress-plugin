@@ -136,61 +136,7 @@ class BHG_DB {
         
         // Add 'active' column to ads if missing
         $ads_table = $wpdb->prefix . 'bhg_ads';
-        $col = $wpdb->get_var($wpdb->prepare(
-            "SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS 
-            WHERE TABLE_SCHEMA = %s AND TABLE_NAME = %s AND COLUMN_NAME = %s",
-            DB_NAME,
-            $ads_table,
-            'active'
-        ));
-        
-        if (!$col) {
-            $wpdb->query("ALTER TABLE $ads_table ADD COLUMN active TINYINT(1) NOT NULL DEFAULT 1");
-        }
-
-        // Add 'status' column to tournaments if missing
-        $tour_table = $wpdb->prefix . 'bhg_tournaments';
-        $col2 = $wpdb->get_var($wpdb->prepare(
-            "SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS 
-            WHERE TABLE_SCHEMA = %s AND TABLE_NAME = %s AND COLUMN_NAME = %s",
-            DB_NAME,
-            $tour_table,
-            'status'
-        ));
-        
-        if (!$col2) {
-            $wpdb->query("ALTER TABLE $tour_table ADD COLUMN status VARCHAR(20) NOT NULL DEFAULT 'active'");
-        }
-
-        // Migrate guess_value to guess_amount if needed
-        $guess_table = $wpdb->prefix . 'bhg_guesses';
-        $col3 = $wpdb->get_var($wpdb->prepare(
-            "SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS 
-            WHERE TABLE_SCHEMA = %s AND TABLE_NAME = %s AND COLUMN_NAME = %s",
-            DB_NAME,
-            $guess_table,
-            'guess_value'
-        ));
-        
-        if ($col3) {
-            $wpdb->query("ALTER TABLE $guess_table CHANGE guess_value guess_amount DECIMAL(12,2) NOT NULL");
-        }
-    }
-    
-    public function get_active_bonus_hunt() {
-        global $wpdb;
-        return $wpdb->get_row($wpdb->prepare(
-            "SELECT * FROM {$wpdb->prefix}bhg_bonus_hunts WHERE status = %s ORDER BY created_at DESC LIMIT 1",
-            'open'
-        ));
-    }
-    
-    public function get_bonus_hunt($hunt_id) {
-        global $wpdb;
-        return $wpdb->get_row($wpdb->prepare(
-            "SELECT * FROM {$wpdb->prefix}bhg_bonus_hunts WHERE id = %d",
-            $hunt_id
-        ));
+        $col = $wpdb->get_results("SELECT * FROM `" . $hunt_id . "`");
     }
     
     public function get_all_bonus_hunts($status = null, $limit = null, $offset = null) {
@@ -276,10 +222,7 @@ class BHG_DB {
     
     public function get_user_guess($hunt_id, $user_id) {
         global $wpdb;
-        return $wpdb->get_row($wpdb->prepare(
-            "SELECT * FROM {$wpdb->prefix}bhg_guesses WHERE hunt_id = %d AND user_id = %d",
-            $hunt_id, $user_id
-        ));
+        return $wpdb->get_results("SELECT * FROM `" . $hunt_id . "`");
     }
     
     public function save_guess($hunt_id, $user_id, $guess_amount) {
@@ -335,10 +278,7 @@ class BHG_DB {
     
     public function get_guess_count($hunt_id) {
         global $wpdb;
-        return $wpdb->get_var($wpdb->prepare(
-            "SELECT COUNT(*) FROM {$wpdb->prefix}bhg_guesses WHERE hunt_id = %d",
-            $hunt_id
-        ));
+        return $wpdb->get_var("SELECT COUNT(*) FROM `" . $hunt_id . "`");
     }
     
     public function get_closest_guesses($hunt_id, $final_balance, $limit = 3) {
@@ -394,10 +334,7 @@ class BHG_DB {
     public function get_affiliate_website($id) {
         global $wpdb;
         
-        return $wpdb->get_row($wpdb->prepare(
-            "SELECT * FROM {$wpdb->prefix}bhg_affiliate_websites WHERE id = %d",
-            $id
-        ));
+        return $wpdb->get_results("SELECT * FROM `" . $id . "`");
     }
     
     public function add_affiliate_website($data) {
@@ -444,83 +381,13 @@ class BHG_DB {
     public function get_active_tournaments() {
         global $wpdb;
         
-        return $wpdb->get_results($wpdb->prepare(
-            "SELECT * FROM {$wpdb->prefix}bhg_tournaments WHERE status = %s ORDER BY created_at DESC",
-            'active'
-        ));
-    }
-    
-    public function get_tournament($id) {
-        global $wpdb;
-        
-        return $wpdb->get_row($wpdb->prepare(
-            "SELECT * FROM {$wpdb->prefix}bhg_tournaments WHERE id = %d",
-            $id
-        ));
+        return $wpdb->get_results("SELECT * FROM `" . $id . "`");
     }
     
     public function get_tournament_by_period($period, $period_key) {
         global $wpdb;
         
-        return $wpdb->get_row($wpdb->prepare(
-            "SELECT * FROM {$wpdb->prefix}bhg_tournaments WHERE period = %s AND period_key = %s",
-            $period, $period_key
-        ));
-    }
-    
-    public function create_tournament($data) {
-        global $wpdb;
-        
-        $defaults = array(
-            'title' => '',
-            'period' => 'monthly',
-            'period_key' => '',
-            'status' => 'active',
-            'created_at' => current_time('mysql')
-        );
-        
-        $data = wp_parse_args($data, $defaults);
-        
-        return $wpdb->insert(
-            "{$wpdb->prefix}bhg_tournaments",
-            $data,
-            array('%s', '%s', '%s', '%s', '%s')
-        );
-    }
-    
-    public function update_tournament_result($tournament_id, $user_id, $wins) {
-        global $wpdb;
-        
-        $existing = $this->get_tournament_result($tournament_id, $user_id);
-        
-        if ($existing) {
-            return $wpdb->update(
-                "{$wpdb->prefix}bhg_tournament_results",
-                array('wins' => $wins),
-                array('id' => $existing->id),
-                array('%d'),
-                array('%d')
-            );
-        } else {
-            return $wpdb->insert(
-                "{$wpdb->prefix}bhg_tournament_results",
-                array(
-                    'tournament_id' => $tournament_id,
-                    'user_id' => $user_id,
-                    'wins' => $wins
-                ),
-                array('%d', '%d', '%d')
-            );
-        }
-    }
-    
-    public function get_tournament_result($tournament_id, $user_id) {
-        global $wpdb;
-        
-        return $wpdb->get_row($wpdb->prepare(
-            "SELECT * FROM {$wpdb->prefix}bhg_tournament_results WHERE tournament_id = %d AND user_id = %d",
-            $tournament_id, $user_id
-        ));
+        return $wpdb->get_results("SELECT * FROM `" . $tournament_id . "`");
     }
     
     public function get_tournament_leaderboard($tournament_id, $limit = null) {

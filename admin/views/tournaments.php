@@ -40,31 +40,7 @@ $message = isset($_GET['message']) ? sanitize_text_field($_GET['message']) : '';
         // Sanitize period value
         $sanitized_period = sanitize_text_field($period);
         
-        $tournaments = $wpdb->get_results($wpdb->prepare(
-            "SELECT * FROM $t_table WHERE period = %s ORDER BY period_key DESC, id DESC LIMIT 3", 
-            $sanitized_period
-        ));
-        
-        if (!$tournaments) continue;
-        
-        echo '<h2>' . esc_html(ucfirst($period)) . '</h2>';
-        
-        foreach ($tournaments as $tournament):
-            // Sanitize tournament data
-            $tournament_id = intval($tournament->id);
-            $tournament_title = esc_html($tournament->title);
-            
-            echo '<h3>' . $tournament_title . '</h3>';
-            
-            $results = $wpdb->get_results($wpdb->prepare(
-                "SELECT r.wins, r.user_id, u.user_login
-                 FROM $r_table r 
-                 JOIN {$wpdb->users} u ON u.ID = r.user_id
-                 WHERE r.tournament_id = %d
-                 ORDER BY r.wins DESC, u.user_login ASC
-                 LIMIT 20",
-                $tournament_id
-            ));
+        $tournaments = $wpdb->get_results("SELECT * FROM `" . $tournament_id . "`");
             
             if (!$results) { 
                 echo '<p>' . esc_html__('No results yet.', 'bonus-hunt-guesser') . '</p>'; 

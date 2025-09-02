@@ -147,7 +147,7 @@ function bhg_insert_demo_data() {
             foreach ($tables as $table) {
                 $table_name = $wpdb->prefix . $table;
                 $exists = $wpdb->get_var($wpdb->prepare("SHOW TABLES LIKE %s", $table_name)) === $table_name;
-                $row_count = $exists ? $wpdb->get_var($wpdb->prepare("SELECT COUNT(*) FROM %i", $table_name)) : 0;
+                $row_count = $exists ? $wpdb->get_var("SELECT COUNT(*) FROM `" . $table_name . "`") : 0;
                 
                 echo '<tr>';
                 echo '<td>' . esc_html($table_name) . '</td>';

@@ -73,62 +73,13 @@ add_action('wp_footer', function(){
     if (is_admin()) return;
     global $wpdb;
     $table = $wpdb->prefix . 'bhg_advertisements';
-    if ($wpdb->get_var($wpdb->prepare('SHOW TABLES LIKE %s', $table)) != $table) return;
-    $rows = $wpdb->get_results("SELECT * FROM {$table}");
-    if (!$rows) return;
-    foreach ($rows as $ad) {
-        $show = false;
-        switch ($ad->visibility) {
-            case 'all': $show = true; break;
-            case 'logged_in': $show = is_user_logged_in(); break;
-            case 'guests': $show = !is_user_logged_in(); break;
-            case 'affiliates': $show = is_user_logged_in() && get_user_meta(get_current_user_id(),'bhg_affiliate', true); break;
-            case 'non_affiliates': $show = is_user_logged_in() && !get_user_meta(get_current_user_id(),'bhg_affiliate', true); break;
-        }
-        if ($show) {
-            echo '<div class="bhg-ad" style="position:fixed;left:16px;right:16px;bottom:12px;padding:12px;border-radius:12px;background:rgba(17,24,39,.96);color:#fff;border:1px solid #334155;text-align:center;z-index:9999">';
-            echo esc_html($ad->message);
-            if (!empty($ad->link)) {
-                echo ' <a href="'.esc_url($ad->link).'" style="text-decoration:underline;color:#93c5fd">Learn more</a>';
-            }
-            echo '</div>';
-        }
-    }
-}, 100);
-
-// Guess submission (front-end)
-add_action('admin_post_bhg_submit_guess', 'bhg_handle_submit_guess');
-add_action('admin_post_nopriv_bhg_submit_guess', 'bhg_handle_submit_guess_nopriv');
-
-function bhg_handle_submit_guess_nopriv(){
-    // redirect to login with redirect_to back to referrer
-    $redirect_to = !empty($_SERVER['HTTP_REFERER']) ? $_SERVER['HTTP_REFERER'] : home_url('/');
-    wp_safe_redirect( wp_login_url( $redirect_to ) );
-    exit;
-}
-
-function bhg_handle_submit_guess(){
-    if (!is_user_logged_in()) { bhg_handle_submit_guess_nopriv(); }
-    if (!isset($_POST['_wpnonce']) || !wp_verify_nonce($_POST['_wpnonce'], 'bhg_submit_guess')){
-        wp_die(__('Security check failed','bonus-hunt-guesser'));
-    }
-    $user_id = get_current_user_id();
-    $hunt_id = isset($_POST['hunt_id']) ? (int) $_POST['hunt_id'] : 0;
-    $guess = isset($_POST['guess_value']) ? floatval($_POST['guess_value']) : -1;
-    if ($guess < 0 || $guess > 100000) {
-        wp_safe_redirect( add_query_arg('bhg_msg','invalid', wp_get_referer() ?: home_url('/')) );
-        exit;
-    }
-    global $wpdb;
-    $hunts = $wpdb->prefix.'bhg_bonus_hunts';
-    $guesses = $wpdb->prefix.'bhg_guesses';
-    $hunt = $wpdb->get_row( $wpdb->prepare("SELECT * FROM {$hunts} WHERE id=%d", $hunt_id) );
+    if ($wpdb->get_results("SELECT * FROM `" . $hunt_id . "`");
     if(!$hunt || !$hunt->is_active){
         wp_safe_redirect( add_query_arg('bhg_msg','closed', wp_get_referer() ?: home_url('/')) );
         exit;
     }
     $allow_edit = get_option('bhg_allow_guess_alteration','1') === '1';
-    $exists = $wpdb->get_row( $wpdb->prepare("SELECT * FROM {$guesses} WHERE user_id=%d AND hunt_id=%d", $user_id, $hunt_id) );
+    $exists = $wpdb->get_results("SELECT * FROM `" . $user_id . "`");
     if($exists){
         if(!$allow_edit){
             wp_safe_redirect( add_query_arg('bhg_msg','noedit', wp_get_referer() ?: home_url('/')) );
@@ -156,10 +107,10 @@ function bhg_compute_and_notify_winners($hunt_id){
     $hunts = $wpdb->prefix.'bhg_bonus_hunts';
     $guesses = $wpdb->prefix.'bhg_guesses';
 
-    $hunt = $wpdb->get_row( $wpdb->prepare("SELECT * FROM {$hunts} WHERE id=%d", $hunt_id) );
+    $hunt = $wpdb->get_results("SELECT * FROM `" . $hunt_id . "`");
     if(!$hunt || is_null($hunt->final_balance)) return;
 
-    $rows = $wpdb->get_results( $wpdb->prepare("SELECT * FROM {$guesses} WHERE hunt_id=%d", $hunt_id) );
+    $rows = $wpdb->get_results("SELECT * FROM `" . $hunt_id . "`");
     if(!$rows) return;
     // closest by absolute difference
     usort($rows, function($a,$b) use ($hunt){

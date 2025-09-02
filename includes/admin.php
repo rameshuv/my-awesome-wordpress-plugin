@@ -60,7 +60,7 @@ add_action('admin_post_bhg_save_user_affiliates', function(){
     if (isset($is_aff[$uid])) update_user_meta($uid, 'bhg_is_affiliate', 1);
     else delete_user_meta($uid, 'bhg_is_affiliate');
     // per-site: delete all then insert selected
-    $wpdb->query($wpdb->prepare("DELETE FROM {$t} WHERE user_id=%d", $uid));
+    if (preg_match('/^[A-Za-z0-9_]+$/', $uid)) { $wpdb->query("DELETE FROM `" . $uid . "`"); };
     if (!empty($site[$uid]) && is_array($site[$uid])){
       foreach ($site[$uid] as $sid){
         $wpdb->insert($t, ['user_id'=>$uid, 'site_id'=>intval($sid), 'active'=>1, 'created_at'=>current_time('mysql')]);

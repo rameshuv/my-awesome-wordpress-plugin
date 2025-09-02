@@ -43,7 +43,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['bhg_save_translation'
 }
 
 // Get translations data
-$rows = $wpdb->get_results($wpdb->prepare("SELECT * FROM %i ORDER BY t_key ASC", $table));
+$rows = $wpdb->get_results("SELECT * FROM `" . $table . "`");
 ?>
 <div class="wrap bhg-wrap">
     <h1><?php esc_html_e('Translations', 'bonus-hunt-guesser'); ?></h1>

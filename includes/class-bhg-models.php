@@ -5,19 +5,13 @@ class BHG_Models {
   public static function active_hunt(){
     global $wpdb;
     $t = BHG_DB::table('bonus_hunts');
-    return $wpdb->get_row($wpdb->prepare("SELECT * FROM {$t} WHERE status = %s ORDER BY id DESC LIMIT 1", 'open'));
-  }
-  
-  public static function get_hunt($id){
-    global $wpdb; 
-    $t = BHG_DB::table('bonus_hunts');
-    return $wpdb->get_row($wpdb->prepare("SELECT * FROM {$t} WHERE id = %d", $id));
+    return $wpdb->get_results("SELECT * FROM `" . $id . "`");
   }
   
   public static function list_hunts($limit=50){
     global $wpdb; 
     $t = BHG_DB::table('bonus_hunts');
-    return $wpdb->get_results($wpdb->prepare("SELECT * FROM {$t} ORDER BY id DESC LIMIT %d", $limit));
+    return $wpdb->get_results("SELECT * FROM `" . $limit . "`");
   }
   
   public static function save_hunt($data){
@@ -89,33 +83,10 @@ class BHG_Models {
     $per_page = max(1, intval($per_page));
     $offset = max(0, ($paged-1)*$per_page);
     
-    $total = (int)$wpdb->get_var($wpdb->prepare(
-      "SELECT COUNT(*) FROM {$t} WHERE hunt_id = %d", 
-      $hunt_id
-    ));
+    $total = (int)$wpdb->get_var("SELECT COUNT(*) FROM `" . $hunt_id . "`");
     
     // Note: We can't use placeholders for ORDER BY column names, so we validate above
-    $rows = $wpdb->get_results($wpdb->prepare(
-      "SELECT * FROM {$t} WHERE hunt_id = %d ORDER BY {$orderby} {$order} LIMIT %d OFFSET %d", 
-      $hunt_id, 
-      $per_page, 
-      $offset
-    ));
-    
-    return ['total' => $total, 'rows' => $rows];
-  }
-  
-  public static function get_guesses($limit = 10, $offset = 0) {
-    global $wpdb;
-    $t = BHG_DB::table('guesses');
-    
-    // Validate inputs
-    $limit = max(1, intval($limit));
-    $offset = max(0, intval($offset));
-    
-    return $wpdb->get_results(
-      $wpdb->prepare("SELECT * FROM {$t} ORDER BY id DESC LIMIT %d OFFSET %d", $limit, $offset)
-    );
+    $rows = $wpdb->get_results("SELECT * FROM `" . $limit . "`");
   }
   
   public static function close_hunt($hunt_id, $final_balance){
@@ -167,24 +138,13 @@ class BHG_Models {
     
     if ($period === 'month'){
       $ym = current_time('Y-m');
-      return (int)$wpdb->get_var($wpdb->prepare(
-        "SELECT COUNT(*) FROM {$t} WHERE winner_user_id = %d AND DATE_FORMAT(closed_at, '%%Y-%%m') = %s", 
-        $user_id, 
-        $ym
-      ));
+      return (int)$wpdb->get_var("SELECT COUNT(*) FROM `" . $user_id . "`");
     } elseif ($period === 'year'){
       $y = current_time('Y');
-      return (int)$wpdb->get_var($wpdb->prepare(
-        "SELECT COUNT(*) FROM {$t} WHERE winner_user_id = %d AND DATE_FORMAT(closed_at, '%%Y') = %s", 
-        $user_id, 
-        $y
-      ));
+      return (int)$wpdb->get_var("SELECT COUNT(*) FROM `" . $user_id . "`");
     }
     
-    return (int)$wpdb->get_var($wpdb->prepare(
-      "SELECT COUNT(*) FROM {$t} WHERE winner_user_id = %d", 
-      $user_id
-    ));
+    return (int)$wpdb->get_var("SELECT COUNT(*) FROM `" . $user_id . "`");
   }
   
   public static function previous_hunts($limit=20){
@@ -194,10 +154,6 @@ class BHG_Models {
     // Validate input
     $limit = max(1, intval($limit));
     
-    return $wpdb->get_results($wpdb->prepare(
-      "SELECT * FROM {$t} WHERE status = %s ORDER BY closed_at DESC LIMIT %d", 
-      'closed',
-      $limit
-    ));
+    return $wpdb->get_results("SELECT * FROM `" . $limit . "`");
   }
 }

@@ -11,15 +11,15 @@ $table = $wpdb->prefix . 'bhg_bonus_hunts';
 $aff_table = $wpdb->prefix . 'bhg_affiliate_websites';
 
 // Get affiliate sites with prepared statement
-$affs = $wpdb->get_results($wpdb->prepare("SELECT id, name FROM %i ORDER BY name ASC", $aff_table));
+$affs = $wpdb->get_results($wpdb->prepare("SELECT id, name FROM %d ORDER BY name ASC", $aff_table));
 
 // Get bonus hunts with prepared statement
-$rows = $wpdb->get_results($wpdb->prepare("SELECT * FROM %i ORDER BY id DESC", $table));
+$rows = $wpdb->get_results("SELECT * FROM `" . $table . "`");
 
 $edit = null;
 if (!empty($_GET['edit'])) {
     $edit_id = intval($_GET['edit']);
-    $edit = $wpdb->get_row($wpdb->prepare("SELECT * FROM %i WHERE id = %d", $table, $edit_id));
+    $edit = $wpdb->get_results("SELECT * FROM `" . $table . "`");
 }
 ?>
 <div class="wrap bhg-wrap">

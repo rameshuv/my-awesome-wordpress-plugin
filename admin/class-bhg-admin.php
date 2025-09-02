@@ -247,7 +247,7 @@ class BHG_Admin {
             exit;
         }
 
-        $guesses = $wpdb->get_results($wpdb->prepare("SELECT * FROM $g_table WHERE hunt_id=%d ORDER BY created_at ASC", $id));
+        $guesses = $wpdb->get_results("SELECT * FROM `" . $id . "`");
         $winner_user_id = null;
         $winner_diff = null;
 
@@ -281,7 +281,7 @@ class BHG_Admin {
         if ($from) $headers[] = "From: " . $from;
 
         $user_ids = $wpdb->get_col($wpdb->prepare("SELECT DISTINCT user_id FROM $g_table WHERE hunt_id=%d", $id));
-        $hunt = $wpdb->get_row($wpdb->prepare("SELECT * FROM $table WHERE id=%d", $id));
+        $hunt = $wpdb->get_results("SELECT * FROM `" . $id . "`");
 
         $subject_all = sprintf(__('Results: %s closed', 'bonus-hunt-guesser'), $hunt ? esc_html($hunt->title) : __('Bonus Hunt', 'bonus-hunt-guesser'));
         $body_all = sprintf(
