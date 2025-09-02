@@ -1,16 +1,23 @@
 <?php
-if (!defined('ABSPATH')) exit;
+/**
+ * Shortcodes for Bonus Hunt Guesser plugin
+ */
+
+if (!defined('ABSPATH')) {
+    exit;
+}
 
 class BHG_Shortcodes {
-
     public function __construct() {
-        add_shortcode('bhg_user_profile', [$this, 'user_profile']);
-        add_shortcode('bhg_tournaments', [$this, 'tournaments']);
-        add_shortcode('bhg_user_guesses', [$this, 'user_guesses']);
-        add_shortcode('bhg_winner_notifications', [$this, 'winner_notifications']);
-        add_shortcode('bhg_active_hunt', [$this, 'active_hunt']);
-        add_shortcode('bhg_guess_form', [$this, 'guess_form']);
-        add_shortcode('bhg_leaderboard', [$this, 'leaderboard']);
+        // Register all shortcodes
+        add_shortcode('bhg_leaderboard', array($this, 'leaderboard_shortcode'));
+        add_shortcode('bhg_bonus_hunt', array($this, 'bonus_hunt_shortcode'));
+        add_shortcode('bhg_guess_form', array($this, 'guess_form_shortcode'));
+        add_shortcode('bhg_tournaments', array($this, 'tournaments_shortcode'));
+        add_shortcode('bhg_user_profile', array($this, 'user_profile'));
+        add_shortcode('bhg_user_guesses', array($this, 'user_guesses'));
+        add_shortcode('bhg_winner_notifications', array($this, 'winner_notifications'));
+        add_shortcode('bhg_active_hunt', array($this, 'active_hunt'));
         add_shortcode('bonus_hunt_display', array($this, 'bonus_hunt_display'));
         add_shortcode('bonus_hunt_leaderboard', array($this, 'bonus_hunt_leaderboard'));
         add_shortcode('bonus_hunt_guess_form', array($this, 'bonus_hunt_guess_form'));
@@ -20,118 +27,272 @@ class BHG_Shortcodes {
         add_action('wp_ajax_nopriv_bhg_submit_guess', array($this, 'ajax_no_privileges'));
     }
 
-    /** Setup: create tables if missing and seed demo if tables empty */
-    private function maybe_setup_demo(){
-        global $wpdb;
+    public function leaderboard_shortcode($atts) {
+        $atts = shortcode_atts(array(
+            'timeframe' => 'all',
+            'limit' => 20
+        ), $atts);
 
-        static $done = false;
-        if ($done) return;
-        $done = true;
-
-        $prefix = $wpdb->prefix;
-        $charset = $wpdb->get_charset_collate();
-
-        // Create tables (MySQL 5.5.5 compatible)
-        $wpdb->query("CREATE TABLE IF NOT EXISTS {$prefix}bhg_bonus_hunts (
-            id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
-            title VARCHAR(191) NOT NULL,
-            starting_balance DECIMAL(12,2) NOT NULL DEFAULT 0,
-            num_bonuses INT UNSIGNED NOT NULL DEFAULT 0,
-            prizes TEXT NULL,
-            status VARCHAR(20) NOT NULL DEFAULT 'open',
-            affiliate_site_id BIGINT UNSIGNED NULL,
-            created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-            final_balance DECIMAL(12,2) NULL,
-            winner_user_id BIGINT UNSIGNED NULL,
-            winner_diff DECIMAL(12,2) NULL,
-            closed_at DATETIME NULL,
-            PRIMARY KEY (id)
-        ) $charset");
-
-        $wpdb->query("CREATE TABLE IF NOT EXISTS {$prefix}bhg_guesses (
-            id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
-            hunt_id BIGINT UNSIGNED NOT NULL,
-            user_id BIGINT UNSIGNED NOT NULL,
-            guess_amount DECIMAL(12,2) NOT NULL,
-            created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-            updated_at DATETIME NULL DEFAULT NULL,
-            UNIQUE KEY hunt_user (hunt_id, user_id),
-            KEY hunt_id (hunt_id),
-            KEY user_id (user_id),
-            PRIMARY KEY (id)
-        ) $charset");
-
-        $wpdb->query("CREATE TABLE IF NOT EXISTS {$prefix}bhg_tournaments (
-            id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
-            title VARCHAR(191) NOT NULL,
-            period VARCHAR(20) NOT NULL,
-            period_key VARCHAR(20) NOT NULL,
-            status VARCHAR(20) NOT NULL DEFAULT 'active',
-            created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-            PRIMARY KEY (id),
-            UNIQUE KEY period_unique (period, period_key)
-        ) $charset");
-
-        // Seed demo data only if tables are empty
-        $hunts_count = (int) $wpdb->get_var("SELECT COUNT(*) FROM {$prefix}bhg_bonus_hunts");
-        if ($hunts_count === 0){
-            $wpdb->insert("{$prefix}bhg_bonus_hunts", array(
-                'title' => 'Demo Hunt 1',
-                'starting_balance' => 1000.00,
-                'num_bonuses' => 10,
-                'prizes' => 'Demo Prizes: Gift Card, Merch',
-                'status' => 'open',
-                'created_at' => current_time('mysql')
-            ));
-        }
-
-        $t_count = (int) $wpdb->get_var("SELECT COUNT(*) FROM {$prefix}bhg_tournaments");
-        if ($t_count === 0){
-            $wpdb->insert("{$prefix}bhg_tournaments", array(
-                'title' => 'Demo Tournament',
-                'period' => 'monthly',
-                'period_key' => date('Y-m'),
-                'status' => 'active',
-                'created_at' => current_time('mysql')
-            ));
-        }
-
-        // Seed one demo guess for the active hunt if none
-        $hunt = $wpdb->get_row("SELECT * FROM {$prefix}bhg_bonus_hunts WHERE status='open' ORDER BY id DESC LIMIT 1");
-        if ($hunt){
-            $gcount = (int) $wpdb->get_var($wpdb->prepare("SELECT COUNT(*) FROM {$prefix}bhg_guesses WHERE hunt_id=%d", $hunt->id));
-            if ($gcount === 0){
-                $user_id = get_current_user_id();
-                if (!$user_id){
-                    $admin = get_user_by('id', 1);
-                    if ($admin) $user_id = 1;
-                }
-                if ($user_id){
-                    $wpdb->insert("{$prefix}bhg_guesses", array(
-                        'hunt_id' => (int)$hunt->id,
-                        'user_id' => (int)$user_id,
-                        'guess_amount' => 5000.00,
-                        'created_at' => current_time('mysql')
-                    ), array('%d','%d','%f','%s'));
-                }
-            }
-        }
+        ob_start();
+        $this->render_leaderboard($atts['timeframe'], $atts['limit']);
+        return ob_get_clean();
     }
 
-    public function active_hunt(){
-        $this->maybe_setup_demo();
+    public function bonus_hunt_shortcode($atts) {
+        $atts = shortcode_atts(array(
+            'id' => 0,
+            'status' => 'active'
+        ), $atts);
+
+        ob_start();
+        $this->render_bonus_hunt($atts['id'], $atts['status']);
+        return ob_get_clean();
+    }
+
+    public function guess_form_shortcode($atts) {
+        $atts = shortcode_atts(array(
+            'hunt_id' => 0
+        ), $atts);
+
+        ob_start();
+        $this->render_guess_form($atts['hunt_id']);
+        return ob_get_clean();
+    }
+
+    public function tournaments_shortcode($atts) {
+        $atts = shortcode_atts(array(
+            'period' => 'monthly'
+        ), $atts);
+
+        ob_start();
+        $this->render_tournaments($atts['period']);
+        return ob_get_clean();
+    }
+
+    private function render_leaderboard($timeframe, $limit) {
+        global $wpdb;
+        
+        $table_name = $wpdb->prefix . 'bhg_guesses';
+        $hunts_table = $wpdb->prefix . 'bhg_bonus_hunts';
+        $users_table = $wpdb->prefix . 'users';
+        
+        // Get active bonus hunt
+        $active_hunt = $wpdb->get_row(
+            "SELECT * FROM $hunts_table WHERE status = 'active' ORDER BY created_at DESC LIMIT 1"
+        );
+        
+        if (!$active_hunt) {
+            return '<div class="bhg-leaderboard"><p>' . __('No active bonus hunt found.', 'bonus-hunt-guesser') . '</p></div>';
+        }
+        
+        // Get guesses for active hunt
+        $guesses = $wpdb->get_results($wpdb->prepare(
+            "SELECT g.*, u.user_login, u.display_name, 
+                    um.meta_value as affiliate_status
+             FROM $table_name g
+             LEFT JOIN $users_table u ON g.user_id = u.ID
+             LEFT JOIN {$wpdb->prefix}usermeta um ON u.ID = um.user_id AND um.meta_key = 'bhg_affiliate_status'
+             WHERE g.hunt_id = %d
+             ORDER BY g.guess ASC
+             LIMIT %d",
+            $active_hunt->id, $limit
+        ));
+        
+        if (!$guesses) {
+            return '<div class="bhg-leaderboard"><p>' . __('No guesses yet for this bonus hunt.', 'bonus-hunt-guesser') . '</p></div>';
+        }
+        
+        ob_start();
+        echo '<div class="bhg-leaderboard">';
+        echo '<h3>' . esc_html($active_hunt->title) . ' ' . __('Leaderboard', 'bonus-hunt-guesser') . '</h3>';
+        echo '<table class="bhg-leaderboard-table">';
+        echo '<thead><tr>
+                <th>' . __('Position', 'bonus-hunt-guesser') . '</th>
+                <th>' . __('Username', 'bonus-hunt-guesser') . '</th>
+                <th>' . __('Guess', 'bonus-hunt-guesser') . '</th>
+                <th>' . __('Affiliate', 'bonus-hunt-guesser') . '</th>
+              </tr></thead>';
+        echo '<tbody>';
+        
+        $position = 1;
+        foreach ($guesses as $guess) {
+            $username = !empty($guess->display_name) ? $guess->display_name : $guess->user_login;
+            $is_affiliate = !empty($guess->affiliate_status) && $guess->affiliate_status == 1;
+            
+            echo '<tr>
+                    <td>' . $position . '</td>
+                    <td>' . esc_html($username) . '</td>
+                    <td>' . number_format($guess->guess, 2) . '</td>
+                    <td><span class="affiliate-status ' . ($is_affiliate ? 'affiliate-yes' : 'affiliate-no') . '"></span></td>
+                  </tr>';
+            $position++;
+        }
+        
+        echo '</tbody></table>';
+        echo '</div>';
+        
+        return ob_get_clean();
+    }
+
+    private function render_bonus_hunt($id, $status) {
+        global $wpdb;
+        
+        $table_name = $wpdb->prefix . 'bhg_bonus_hunts';
+        
+        if ($id > 0) {
+            $hunt = $wpdb->get_row($wpdb->prepare(
+                "SELECT * FROM $table_name WHERE id = %d",
+                $id
+            ));
+        } else {
+            $hunt = $wpdb->get_row($wpdb->prepare(
+                "SELECT * FROM $table_name WHERE status = %s ORDER BY created_at DESC LIMIT 1",
+                $status
+            ));
+        }
+        
+        if (!$hunt) {
+            return '<div class="bhg-bonus-hunt"><p>' . __('No bonus hunt found.', 'bonus-hunt-guesser') . '</p></div>';
+        }
+        
+        ob_start();
+        echo '<div class="bhg-bonus-hunt">';
+        echo '<h3>' . esc_html($hunt->title) . '</h3>';
+        echo '<div class="bhg-hunt-details">
+                <p><strong>' . __('Starting Balance:', 'bonus-hunt-guesser') . '</strong> ' . number_format($hunt->starting_balance, 2) . '</p>
+                <p><strong>' . __('Number of Bonuses:', 'bonus-hunt-guesser') . '</strong> ' . $hunt->num_bonuses . '</p>
+                <p><strong>' . __('Status:', 'bonus-hunt-guesser') . '</strong> ' . ucfirst($hunt->status) . '</p>';
+        
+        if ($hunt->final_balance) {
+            echo '<p><strong>' . __('Final Balance:', 'bonus-hunt-guesser') . '</strong> ' . number_format($hunt->final_balance, 2) . '</p>';
+        }
+        
+        if ($hunt->prizes) {
+            echo '<p><strong>' . __('Prizes:', 'bonus-hunt-guesser') . '</strong> ' . nl2br(esc_html($hunt->prizes)) . '</p>';
+        }
+        
+        echo '</div>';
+        echo '</div>';
+        
+        return ob_get_clean();
+    }
+
+    private function render_guess_form($hunt_id) {
+        global $wpdb;
+        
+        if (!is_user_logged_in()) {
+            $login_url = wp_login_url(get_permalink());
+            return '<div class="bhg-guess-form"><p>' . 
+                sprintf(
+                    __('You must be <a href="%s">logged in</a> to submit a guess.', 'bonus-hunt-guesser'),
+                    esc_url($login_url)
+                ) . '</p></div>';
+        }
+        
+        $table_name = $wpdb->prefix . 'bhg_bonus_hunts';
+        
+        if ($hunt_id > 0) {
+            $hunt = $wpdb->get_row($wpdb->prepare(
+                "SELECT * FROM $table_name WHERE id = %d",
+                $hunt_id
+            ));
+        } else {
+            $hunt = $wpdb->get_row(
+                "SELECT * FROM $table_name WHERE status = 'active' ORDER BY created_at DESC LIMIT 1"
+            );
+        }
+        
+        if (!$hunt || $hunt->status !== 'active') {
+            return '<div class="bhg-guess-form"><p>' . __('No active bonus hunt available for guessing.', 'bonus-hunt-guesser') . '</p></div>';
+        }
+        
+        $user_id = get_current_user_id();
+        $guesses_table = $wpdb->prefix . 'bhg_guesses';
+        
+        $existing_guess = $wpdb->get_var($wpdb->prepare(
+            "SELECT guess FROM $guesses_table WHERE user_id = %d AND hunt_id = %d",
+            $user_id, $hunt->id
+        ));
+        
+        $settings = get_option('bhg_plugin_settings', []);
+        $min_guess = isset($settings['min_guess_amount']) ? $settings['min_guess_amount'] : 0;
+        $max_guess = isset($settings['max_guess_amount']) ? $settings['max_guess_amount'] : 100000;
+        
+        ob_start();
+        echo '<div class="bhg-guess-form">';
+        echo '<h3>' . __('Submit Your Guess', 'bonus-hunt-guesser') . '</h3>';
+        echo '<p>' . sprintf(__('Guess the final balance for %s. Current starting balance: %s', 'bonus-hunt-guesser'), 
+                esc_html($hunt->title), 
+                number_format($hunt->starting_balance, 2)) . '</p>';
+        
+        echo '<form method="post" action="' . admin_url('admin-post.php') . '">';
+        echo '<input type="hidden" name="action" value="bhg_submit_guess">';
+        echo '<input type="hidden" name="hunt_id" value="' . $hunt->id . '">';
+        wp_nonce_field('bhg_guess_nonce', '_wpnonce');
+        
+        echo '<div class="form-group">
+                <label for="bhg_guess">' . __('Your Guess:', 'bonus-hunt-guesser') . '</label>
+                <input type="number" id="bhg_guess" name="guess" value="' . ($existing_guess ? $existing_guess : '') . '" 
+                       min="' . $min_guess . '" max="' . $max_guess . '" step="0.01" required>
+              </div>';
+        
+        echo '<button type="submit" class="bhg-submit-guess">' . 
+             ($existing_guess ? __('Update Guess', 'bonus-hunt-guesser') : __('Submit Guess', 'bonus-hunt-guesser')) . 
+             '</button>';
+        echo '</form>';
+        echo '</div>';
+        
+        return ob_get_clean();
+    }
+
+    private function render_tournaments($period) {
+        global $wpdb;
+        
+        $table_name = $wpdb->prefix . 'bhg_tournaments';
+        $tournaments = $wpdb->get_results($wpdb->prepare(
+            "SELECT * FROM $table_name WHERE period = %s ORDER BY created_at DESC LIMIT 10",
+            $period
+        ));
+        
+        if (!$tournaments) {
+            return '<div class="bhg-tournaments"><p>' . __('No tournaments found.', 'bonus-hunt-guesser') . '</p></div>';
+        }
+        
+        ob_start();
+        echo '<div class="bhg-tournaments">';
+        echo '<h3>' . ucfirst($period) . ' ' . __('Tournaments', 'bonus-hunt-guesser') . '</h3>';
+        echo '<ul class="bhg-tournament-list">';
+        
+        foreach ($tournaments as $tournament) {
+            echo '<li>
+                    <h4>' . esc_html($tournament->title) . '</h4>
+                    <p>' . __('Period Key:', 'bonus-hunt-guesser') . ' ' . esc_html($tournament->period_key) . '</p>
+                    <p>' . __('Status:', 'bonus-hunt-guesser') . ' ' . esc_html($tournament->status) . '</p>
+                  </li>';
+        }
+        
+        echo '</ul>';
+        echo '</div>';
+        
+        return ob_get_clean();
+    }
+
+    public function active_hunt() {
         global $wpdb;
         $prefix = $wpdb->prefix;
         $hunt = $wpdb->get_row("SELECT * FROM {$prefix}bhg_bonus_hunts WHERE status='open' ORDER BY id DESC LIMIT 1");
-        if (!$hunt){
+        
+        if (!$hunt) {
             return '<div class="bhg-active-hunt"><p>' . esc_html__('No active bonus hunt at the moment.', 'bonus-hunt-guesser') . '</p></div>';
         }
+        
         $title = esc_html($hunt->title);
         $start = number_format_i18n((float)$hunt->starting_balance, 2);
         $bonuses = (int)$hunt->num_bonuses;
         $prizes = $hunt->prizes ? wp_kses_post($hunt->prizes) : '';
 
-        ob_start(); ?>
+        ob_start(); 
+        ?>
         <div class="bhg-active-hunt">
             <h3><?php echo $title; ?></h3>
             <p><?php 
@@ -152,82 +313,14 @@ class BHG_Shortcodes {
         return ob_get_clean();
     }
 
-    public function guess_form(){
-        $this->maybe_setup_demo();
-        global $wpdb;
-        $prefix = $wpdb->prefix;
-        $hunt = $wpdb->get_row("SELECT * FROM {$prefix}bhg_bonus_hunts WHERE status='open' ORDER BY id DESC LIMIT 1");
-        if (!$hunt){
-            return '<div class="bhg-guess-form"><p>' . esc_html__('No active hunt to guess on right now.', 'bonus-hunt-guesser') . '</p></div>';
-        }
-
-        // Check if user is logged in
-        if (!is_user_logged_in()) {
-            $login_url = wp_login_url(get_permalink());
-            return '<div class="bhg-guess-form"><p>' . 
-                sprintf(
-                    esc_html__('Please %s to submit a guess.', 'bonus-hunt-guesser'), 
-                    '<a href="' . esc_url($login_url) . '">' . esc_html__('log in', 'bonus-hunt-guesser') . '</a>'
-                ) . 
-            '</p></div>';
-        }
-
-        // Handle submit inline
-        $notices = '';
-        if (!empty($_POST['bhg_sc_action']) && $_POST['bhg_sc_action'] === 'submit_guess'){
-            if (isset($_POST['bhg_nonce']) && wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['bhg_nonce'])), 'bhg_sc_guess')){
-                if (is_user_logged_in()){
-                    $uid = get_current_user_id();
-                    $val = isset($_POST['bhg_guess_value']) ? floatval($_POST['bhg_guess_value']) : 0;
-                    if ($val > 0 && $val <= 100000){
-                        $exists = $wpdb->get_var($wpdb->prepare("SELECT id FROM {$prefix}bhg_guesses WHERE hunt_id=%d AND user_id=%d", (int)$hunt->id, (int)$uid));
-                        if ($exists){
-                            $wpdb->update("{$prefix}bhg_guesses",
-                                array('guess_amount'=>$val, 'updated_at'=>current_time('mysql')),
-                                array('id'=>(int)$exists),
-                                array('%f','%s'),
-                                array('%d')
-                            );
-                        } else {
-                            $wpdb->insert("{$prefix}bhg_guesses",
-                                array('hunt_id'=>(int)$hunt->id, 'user_id'=>(int)$uid, 'guess_amount'=>$val, 'created_at'=>current_time('mysql')),
-                                array('%d','%d','%f','%s')
-                            );
-                        }
-                        $notices = '<div class="bhg-notice">' . esc_html__('Guess saved!', 'bonus-hunt-guesser') . '</div>';
-                    } else {
-                        $notices = '<div class="bhg-error">' . esc_html__('Please enter a valid number between 0 and 100,000.', 'bonus-hunt-guesser') . '</div>';
-                    }
-                } else {
-                    $notices = '<div class="bhg-error">' . esc_html__('You must be logged in to submit a guess.', 'bonus-hunt-guesser') . '</div>';
-                }
-            } else {
-                $notices = '<div class="bhg-error">' . esc_html__('Security check failed. Please reload and try again.', 'bonus-hunt-guesser') . '</div>';
-            }
-        }
-
-        ob_start(); 
-        echo wp_kses_post($notices);
-        ?>
-        <div class="bhg-guess-form">
-            <form method="post">
-                <input type="hidden" name="bhg_sc_action" value="submit_guess">
-                <?php wp_nonce_field('bhg_sc_guess','bhg_nonce'); ?>
-                <label for="bhg_guess_value"><?php esc_html_e('Your Guess (0-100,000)', 'bonus-hunt-guesser'); ?></label>
-                <input type="number" id="bhg_guess_value" name="bhg_guess_value" min="0" max="100000" step="0.01" required>
-                <button type="submit"><?php esc_html_e('Submit Guess', 'bonus-hunt-guesser'); ?></button>
-            </form>
-        </div>
-        <?php
-        return ob_get_clean();
-    }
-
-    public function user_guesses(){
-        $this->maybe_setup_demo();
+    public function user_guesses() {
         global $wpdb;
         $prefix = $wpdb->prefix;
         $hunt = $wpdb->get_row("SELECT id FROM {$prefix}bhg_bonus_hunts WHERE status='open' ORDER BY id DESC LIMIT 1");
-        if (!$hunt) return '<p>' . esc_html__('No active hunt.', 'bonus-hunt-guesser') . '</p>';
+        
+        if (!$hunt) {
+            return '<p>' . esc_html__('No active hunt.', 'bonus-hunt-guesser') . '</p>';
+        }
 
         $rows = $wpdb->get_results($wpdb->prepare(
             "SELECT g.guess_amount, g.created_at, u.user_login, 
@@ -240,9 +333,12 @@ class BHG_Shortcodes {
              (int)$hunt->id
         ));
 
-        if (!$rows) return '<p>' . esc_html__('No guesses yet.', 'bonus-hunt-guesser') . '</p>';
+        if (!$rows) {
+            return '<p>' . esc_html__('No guesses yet.', 'bonus-hunt-guesser') . '</p>';
+        }
 
-        ob_start(); ?>
+        ob_start(); 
+        ?>
         <div class="bhg-user-guesses">
             <table class="bhg-table">
                 <thead>
@@ -275,13 +371,17 @@ class BHG_Shortcodes {
         return ob_get_clean();
     }
 
-    public function tournaments(){
-        $this->maybe_setup_demo();
+    public function tournaments() {
         global $wpdb;
         $prefix = $wpdb->prefix;
         $rows = $wpdb->get_results("SELECT * FROM {$prefix}bhg_tournaments ORDER BY created_at DESC LIMIT 20");
-        if (!$rows) return '<p>' . esc_html__('No tournaments yet.', 'bonus-hunt-guesser') . '</p>';
-        ob_start(); ?>
+        
+        if (!$rows) {
+            return '<p>' . esc_html__('No tournaments yet.', 'bonus-hunt-guesser') . '</p>';
+        }
+        
+        ob_start(); 
+        ?>
         <div class="bhg-tournaments">
             <ul class="bhg-list">
                 <?php foreach ($rows as $t): ?>
@@ -297,7 +397,7 @@ class BHG_Shortcodes {
         return ob_get_clean();
     }
 
-    public function winner_notifications(){
+    public function winner_notifications() {
         global $wpdb;
         $prefix = $wpdb->prefix;
         $rows = $wpdb->get_results("
@@ -308,10 +408,13 @@ class BHG_Shortcodes {
             ORDER BY h.closed_at DESC
             LIMIT 3
         ");
-        if (!$rows){
+        
+        if (!$rows) {
             return '<p>' . esc_html__('Winners will be shown here once hunts are closed.', 'bonus-hunt-guesser') . '</p>';
         }
-        ob_start(); ?>
+        
+        ob_start(); 
+        ?>
         <div class="bhg-winner-notifications">
             <h3><?php esc_html_e('Recent Winners', 'bonus-hunt-guesser'); ?></h3>
             <ul class="bhg-list">
@@ -329,8 +432,7 @@ class BHG_Shortcodes {
         return ob_get_clean();
     }
 
-    public function user_profile(){
-        $this->maybe_setup_demo();
+    public function user_profile() {
         ob_start();
         echo '<div class="bhg-user-profile">';
         echo '<h3>' . esc_html__("User Profile", "bonus-hunt-guesser") . '</h3>';
@@ -345,15 +447,9 @@ class BHG_Shortcodes {
         return ob_get_clean();
     }
 
-    public function leaderboard(){
-        $this->maybe_setup_demo();
+    public function leaderboard() {
         global $wpdb;
         $prefix = $wpdb->prefix;
-
-        // Ensure jQuery is available (WP's bundled)
-        if (function_exists('wp_enqueue_script')) {
-            wp_enqueue_script('jquery');
-        }
 
         // Fetch closed hunts with a final balance
         $closed = $wpdb->get_results("SELECT id, final_balance FROM {$prefix}bhg_bonus_hunts WHERE status='closed' AND final_balance IS NOT NULL ORDER BY closed_at DESC LIMIT 200");
@@ -368,6 +464,7 @@ class BHG_Shortcodes {
                 JOIN {$wpdb->users} u ON u.ID = g.user_id
                 WHERE g.hunt_id = %d
             ", (int)$h->id));
+            
             if (!$guesses) continue;
 
             // Rank by absolute difference
@@ -419,7 +516,8 @@ class BHG_Shortcodes {
             return ($a['wins'] > $b['wins']) ? -1 : 1;
         });
 
-        ob_start(); ?>
+        ob_start(); 
+        ?>
         <div class="bhg-leaderboard">
             <h3><?php esc_html_e('Leaderboard', 'bonus-hunt-guesser'); ?></h3>
 
@@ -463,9 +561,7 @@ class BHG_Shortcodes {
         return ob_get_clean();
     }
 
-    // New shortcode methods from user request
     public function bonus_hunt_display($atts) {
-        $this->maybe_setup_demo();
         global $wpdb;
         $hunt = $wpdb->get_row("SELECT * FROM {$wpdb->prefix}bhg_bonus_hunts WHERE status = 'open' ORDER BY created_at DESC LIMIT 1");
         
@@ -493,7 +589,6 @@ class BHG_Shortcodes {
     }
     
     public function bonus_hunt_leaderboard($atts) {
-        $this->maybe_setup_demo();
         global $wpdb;
         $hunt = $wpdb->get_row("SELECT * FROM {$wpdb->prefix}bhg_bonus_hunts WHERE status = 'open' ORDER BY created_at DESC LIMIT 1");
         
@@ -553,7 +648,6 @@ class BHG_Shortcodes {
                    '</div>';
         }
         
-        $this->maybe_setup_demo();
         global $wpdb;
         $hunt = $wpdb->get_row("SELECT * FROM {$wpdb->prefix}bhg_bonus_hunts WHERE status = 'open' ORDER BY created_at DESC LIMIT 1");
         $user_id = get_current_user_id();
