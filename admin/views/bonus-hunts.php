@@ -10,11 +10,11 @@ global $wpdb;
 $table = $wpdb->prefix . 'bhg_bonus_hunts';
 $aff_table = $wpdb->prefix . 'bhg_affiliate_websites';
 
-// Get affiliate sites with prepared statement
-$affs = $wpdb->get_results($wpdb->prepare("SELECT id, name FROM $aff_table ORDER BY name ASC"));
+// Get affiliate sites without prepared statement (static query)
+$affs = $wpdb->get_results("SELECT id, name FROM $aff_table ORDER BY name ASC");
 
-// Get bonus hunts with prepared statement
-$rows = $wpdb->get_results($wpdb->prepare("SELECT * FROM $table ORDER BY id DESC"));
+// Get bonus hunts without prepared statement (static query)
+$rows = $wpdb->get_results("SELECT * FROM $table ORDER BY id DESC");
 
 $edit = null;
 if (!empty($_GET['edit'])) {

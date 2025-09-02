@@ -8,29 +8,22 @@ if (!current_user_can('manage_options')) {
 
 global $wpdb;
 
-// Use prepared statements for all database queries
-$hunts = $wpdb->get_var($wpdb->prepare(
-    "SELECT COUNT(*) FROM {$wpdb->prefix}bhg_bonus_hunts"
-));
+// Use direct queries for static queries without variables
+$hunts = $wpdb->get_var("SELECT COUNT(*) FROM {$wpdb->prefix}bhg_bonus_hunts");
 
-$guesses = $wpdb->get_var($wpdb->prepare(
-    "SELECT COUNT(*) FROM {$wpdb->prefix}bhg_guesses"
-));
+$guesses = $wpdb->get_var("SELECT COUNT(*) FROM {$wpdb->prefix}bhg_guesses");
 
-$affs = $wpdb->get_var($wpdb->prepare(
-    "SELECT COUNT(*) FROM {$wpdb->prefix}bhg_affiliate_websites"
-));
+$affs = $wpdb->get_var("SELECT COUNT(*) FROM {$wpdb->prefix}bhg_affiliate_websites");
 
-// Get recent winners with prepared statement
-$winners = $wpdb->get_results($wpdb->prepare(
+// Get recent winners with direct query
+$winners = $wpdb->get_results(
     "SELECT h.title, u.display_name, h.final_balance, h.winner_diff, h.closed_at 
      FROM {$wpdb->prefix}bhg_bonus_hunts h
-     LEFT JOIN {$wpdb->prefix}users u ON h.winner_user_id = u.ID
+     LEFT JOIN {$wpdb->users} u ON h.winner_user_id = u.ID
      WHERE h.winner_user_id IS NOT NULL 
      ORDER BY h.closed_at DESC 
-     LIMIT %d",
-    5
-));
+     LIMIT 5"
+);
 ?>
 <div class="wrap bhg-wrap">
     <h1><?php esc_html_e('Bonus Hunt Dashboard', 'bonus-hunt-guesser'); ?></h1>
