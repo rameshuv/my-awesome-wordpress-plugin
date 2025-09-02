@@ -131,15 +131,48 @@ class BHG_DB {
         }
     }
 
+    
+    
     public static function migrate() {
         global $wpdb;
-        
-        // Add 'active' column to ads if missing
+        // Ensure expected columns exist without using undefined variables
+        $charset_collate = $wpdb->get_charset_collate();
+
+        // Helper to check if a column exists
+        $col_exists = function($table, $column) use ($wpdb){
+            $table = esc_sql($table);
+            $column = esc_sql($column);
+            $row = $wpdb->get_row("SHOW COLUMNS FROM `{$table}` LIKE '{$column}'");
+            return !empty($row);
+        };
+
+        // Helper to check if an index exists
+        $index_exists = function($table, $index_name) use ($wpdb){
+            $table = esc_sql($table);
+            $index_name = esc_sql($index_name);
+            $row = $wpdb->get_row("SHOW INDEX FROM `{$table}` WHERE Key_name = '{$index_name}'");
+            return !empty($row);
+        };
+
+        // Ensure 'active' column exists in bhg_ads
         $ads_table = $wpdb->prefix . 'bhg_ads';
-        $col = $wpdb->get_results("SELECT * FROM `" . $hunt_id . "`");
-    }
-    
-    public function get_all_bonus_hunts($status = null, $limit = null, $offset = null) {
+        if ($wpdb->get_var($wpdb->prepare("SHOW TABLES LIKE %s", $ads_table)) === $ads_table) {
+            if (!$col_exists($ads_table, 'active')) {
+                $wpdb->query("ALTER TABLE `{$ads_table}` ADD COLUMN `active` TINYINT(1) NOT NULL DEFAULT 1 AFTER `visibility`");
+            }
+        }
+
+        // Ensure indexes on guesses (hunt_id, user_id)
+        $g_table = $wpdb->prefix . 'bhg_guesses';
+        if ($wpdb->get_var($wpdb->prepare("SHOW TABLES LIKE %s", $g_table)) === $g_table) {
+            if (!$index_exists($g_table, 'hunt_id_idx')) {
+                $wpdb->query("ALTER TABLE `{$g_table}` ADD INDEX `hunt_id_idx` (`hunt_id`)");
+            }
+            if (!$index_exists($g_table, 'user_id_idx')) {
+                $wpdb->query("ALTER TABLE `{$g_table}` ADD INDEX `user_id_idx` (`user_id`)");
+            }
+        }
+    }public function get_all_bonus_hunts($status = null, $limit = null, $offset = null) {
         global $wpdb;
         
         $query = "SELECT * FROM {$wpdb->prefix}bhg_bonus_hunts";

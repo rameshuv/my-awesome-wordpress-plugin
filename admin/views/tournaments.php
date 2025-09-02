@@ -6,69 +6,55 @@ if (!current_user_can('manage_options')) {
     wp_die(__('You do not have sufficient permissions to access this page.', 'bonus-hunt-guesser'));
 }
 
-// Process any success messages
-$message = isset($_GET['message']) ? sanitize_text_field($_GET['message']) : '';
-?>
+global $wpdb;
+$t_table = $wpdb->prefix . 'bhg_tournaments';
+$r_table = $wpdb->prefix . 'bhg_tournament_results';
 
+$periods = array('weekly' => __('Weekly', 'bonus-hunt-guesser'),
+                 'monthly' => __('Monthly', 'bonus-hunt-guesser'),
+                 'yearly' => __('Yearly', 'bonus-hunt-guesser'));
+?>
 <div class="wrap">
     <h1><?php esc_html_e('Tournaments', 'bonus-hunt-guesser'); ?></h1>
 
-    <?php if ($message === 'rebuild_success'): ?>
-        <div class="notice notice-success is-dismissible">
-            <p><?php esc_html_e('Tournament standings rebuilt successfully.', 'bonus-hunt-guesser'); ?></p>
-        </div>
-    <?php elseif ($message === 'rebuild_error'): ?>
-        <div class="notice notice-error is-dismissible">
-            <p><?php esc_html_e('Error rebuilding tournament standings. Please try again.', 'bonus-hunt-guesser'); ?></p>
-        </div>
-    <?php endif; ?>
+    <p><?php esc_html_e('View current standings by period.', 'bonus-hunt-guesser'); ?></p>
 
-    <form method="post" action="<?php echo esc_url(admin_url('admin-post.php')); ?>" style="margin:16px 0;">
-        <input type="hidden" name="action" value="bhg_rebuild_tournaments">
-        <?php wp_nonce_field('bhg_rebuild_tournaments', 'bhg_rebuild_nonce'); ?>
-        <button class="button button-primary"><?php esc_html_e('Rebuild Tournament Standings', 'bonus-hunt-guesser'); ?></button>
-    </form>
-
-    <?php
-    global $wpdb;
-    $t_table = $wpdb->prefix . 'bhg_tournaments';
-    $r_table = $wpdb->prefix . 'bhg_tournament_results';
-
-    $periods = ['weekly', 'monthly', 'yearly'];
-    
-    foreach ($periods as $period):
-        // Sanitize period value
-        $sanitized_period = sanitize_text_field($period);
-        
-        $tournaments = $wpdb->get_results("SELECT * FROM `" . $tournament_id . "`");
-            
-            if (!$results) { 
-                echo '<p>' . esc_html__('No results yet.', 'bonus-hunt-guesser') . '</p>'; 
-                continue; 
-            }
-            
-            echo '<table class="widefat striped"><thead><tr>
-                <th>#</th>
-                <th>' . esc_html__('User', 'bonus-hunt-guesser') . '</th>
-                <th>' . esc_html__('Wins', 'bonus-hunt-guesser') . '</th>
-            </tr></thead><tbody>';
-            
-            $rank = 1;
-            foreach ($results as $result) {
-                $username = esc_html($result->user_login);
-                $wins = intval($result->wins);
-                
-                echo '<tr>
-                    <td>' . $rank . '</td>
-                    <td>' . $username . '</td>
-                    <td>' . $wins . '</td>
-                </tr>';
-                
-                $rank++;
-            }
-            
-            echo '</tbody></table>';
-        endforeach;
-    endforeach;
-    ?>
+    <?php foreach ($periods as $key => $label): ?>
+        <h2><?php echo esc_html($label); ?></h2>
+        <?php
+        // Fetch top 50 standings for this period, if table exists
+        $has_table = ($wpdb->get_var($wpdb->prepare('SHOW TABLES LIKE %s', $r_table)) === $r_table);
+        if ($has_table) {
+            // Join with WP users table to retrieve display name / username
+            $users_table = $wpdb->users;
+            $rows = $wpdb->get_results($wpdb->prepare("SELECT u.display_name AS username, r.wins FROM {$r_table} r JOIN {$users_table} u ON r.user_id = u.ID WHERE r.period = %s ORDER BY r.wins DESC, u.display_name ASC LIMIT 50", $key));
+        } else {
+            $rows = array();
+        }
+        ?>
+        <table class="widefat striped">
+            <thead>
+                <tr>
+                    <th><?php esc_html_e('Position', 'bonus-hunt-guesser'); ?></th>
+                    <th><?php esc_html_e('Username', 'bonus-hunt-guesser'); ?></th>
+                    <th><?php esc_html_e('Wins', 'bonus-hunt-guesser'); ?></th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php if (empty($rows)): ?>
+                    <tr><td colspan="3"><?php esc_html_e('No data available.', 'bonus-hunt-guesser'); ?></td></tr>
+                <?php else: ?>
+                    <?php $rank = 1; ?>
+                    <?php foreach ($rows as $row): ?>
+                        <tr>
+                            <td><?php echo intval($rank); ?></td>
+                            <td><?php echo esc_html($row->username); ?></td>
+                            <td><?php echo intval($row->wins); ?></td>
+                        </tr>
+                        <?php $rank++; ?>
+                    <?php endforeach; ?>
+                <?php endif; ?>
+            </tbody>
+        </table>
+    <?php endforeach; ?>
 </div>

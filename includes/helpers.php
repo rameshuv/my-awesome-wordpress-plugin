@@ -42,9 +42,23 @@ if (!function_exists('bhg_t')) {
     function bhg_t($key, $default = '') {
         global $wpdb;
         static $cache = [];
-        if (isset($cache[$key])) return $cache[$key];
+
+        if (isset($cache[$key])) {
+            return $cache[$key];
+        }
+
         $table = $wpdb->prefix . 'bhg_translations';
-        $row = $wpdb->get_results("SELECT * FROM `" . $user_id . "`");
+        $row = $wpdb->get_row(
+            $wpdb->prepare("SELECT value FROM $table WHERE `key` = %s", $key)
+        );
+
+        if ($row && isset($row->value)) {
+            $cache[$key] = $row->value;
+            return $row->value;
+        }
+
+        return $default;
+    }
 }
 
 // Helper function to format currency
@@ -54,13 +68,14 @@ function bhg_format_currency($amount) {
 
 // Helper function to validate guess value
 function bhg_validate_guess($guess) {
-    $min_guess = get_option('bhg_settings')['min_guess'] ?? 0;
-    $max_guess = get_option('bhg_settings')['max_guess'] ?? 100000;
-    
+    $settings = get_option('bhg_settings', []);
+    $min_guess = $settings['min_guess'] ?? 0;
+    $max_guess = $settings['max_guess'] ?? 100000;
+
     if (!is_numeric($guess)) {
         return false;
     }
-    
+
     $guess = floatval($guess);
     return ($guess >= $min_guess && $guess <= $max_guess);
 }
@@ -71,13 +86,13 @@ function bhg_get_user_display_name($user_id) {
     if (!$user) {
         return __('Unknown User', 'bonus-hunt-guesser');
     }
-    
+
     $display_name = $user->display_name ?: $user->user_login;
     $is_affiliate = get_user_meta($user_id, 'bhg_affiliate_status', true);
-    
+
     if ($is_affiliate) {
         $display_name .= ' <span class="bhg-affiliate-indicator" title="' . esc_attr__('Affiliate User', 'bonus-hunt-guesser') . '">★</span>';
     }
-    
+
     return $display_name;
 }

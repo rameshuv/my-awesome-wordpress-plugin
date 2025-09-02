@@ -80,7 +80,9 @@ function bhg_activate_plugin() {
     ]);
     
     // Seed demo data if empty
-    bhg_seed_demo_if_empty();
+    if (function_exists('bhg_seed_demo_if_empty')) {
+        bhg_seed_demo_if_empty();
+    }
     update_option('bhg_demo_notice', 1);
 }
 
@@ -97,13 +99,17 @@ function bhg_init_plugin() {
     
     // Initialize components
     if (is_admin()) {
-        new BHG_Admin();
+        if (class_exists('BHG_Admin')) {
+            new BHG_Admin();
+        }
         if (class_exists('BHG_Demo')) {
             new BHG_Demo();
         }
     }
     
-    new BHG_Shortcodes();
+    if (class_exists('BHG_Shortcodes')) {
+        new BHG_Shortcodes();
+    }
     
     // Initialize menus using the singleton pattern
     if (class_exists('BHG_Menus')) {
@@ -363,19 +369,48 @@ function bhg_should_show_ad($visibility) {
     return true;
 }
 
+/**
+ * Safe and validated ads query builder.
+ *
+ * Note: table name must be validated (alphanumeric + underscore) because you cannot use
+ * $wpdb->prepare placeholders for table names. Then prepare the rest of the query.
+ */
 function bhg_build_ads_query($table, $placement = 'footer') {
     global $wpdb;
-    
-    // Check if 'active' column exists
-    $col = $wpdb->get_results("SELECT * FROM `" . $table . "`");
+
+    // Validate table variable (only allow alphanumeric and underscore)
+    if (!is_string($table) || !preg_match('/^[A-Za-z0-9_]+$/', $table)) {
+        return array();
     }
-    
-    bhg_seed_demo_if_empty();
-    
-    if (defined('WP_DEBUG_LOG') && WP_DEBUG_LOG) {
-        $u = wp_get_current_user();
-        error_log('[BHG DEMO] Demo data reset by admin (user: ' . ($u ? $u->user_login : 'unknown') . ')');
+
+    // Build safe table name with prefix if required
+    // If caller passes full table name already (with prefix), we accept it.
+    $safe_table = esc_sql($table);
+    // If the provided value does not contain prefix, add WP prefix + BHG_TABLE_PREFIX
+    if (strpos($safe_table, $wpdb->prefix) !== 0) {
+        // try to assume it's a table suffix like 'bhg_ads' or 'ads'
+        if (strpos($safe_table, BHG_TABLE_PREFIX) === 0 || strpos($safe_table, 'bhg_') === 0) {
+            // already has bhg_ prefix
+            $safe_table = $safe_table;
+        } else {
+            // treat as suffix
+            $safe_table = $wpdb->prefix . $safe_table;
+        }
     }
+
+    // Ensure final safe table name still matches allowed characters (just in case)
+    if (!preg_match('/^[A-Za-z0-9_]+$/', str_replace($wpdb->prefix, '', $safe_table))) {
+        return array();
+    }
+
+    // Use prepare for the placement value
+    $query = $wpdb->prepare(
+        "SELECT * FROM `{$safe_table}` WHERE placement = %s AND active = %d",
+        $placement,
+        1
+    );
+
+    return $wpdb->get_results($query);
 }
 
 // AJAX handler for loading leaderboard data
@@ -401,7 +436,7 @@ function bhg_load_leaderboard_ajax() {
 function bhg_generate_leaderboard_html($timeframe) {
     // This function should be implemented in includes/helpers.php
     // Placeholder implementation
-    return '<div class="bhg-leaderboard" data-timeframe="' . esc_attr($timeframe) . '">Leaderboard content for ' . $timeframe . '</div>';
+    return '<div class="bhg-leaderboard" data-timeframe="' . esc_attr($timeframe) . '">Leaderboard content for ' . esc_html($timeframe) . '</div>';
 }
 
 // Helper function to check if user is affiliate

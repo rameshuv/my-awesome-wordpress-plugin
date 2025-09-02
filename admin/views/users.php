@@ -12,9 +12,7 @@ $affiliate_websites = [];
 
 // Get affiliate websites for multi-site support
 global $wpdb;
-$affiliate_websites = $wpdb->get_results(
-    $wpdb->prepare("SELECT id, name FROM {$wpdb->prefix}bhg_affiliate_websites")
-);
+$affiliate_websites = $wpdb->get_results("SELECT id, name FROM {$wpdb->prefix}bhg_affiliate_websites");
 
 // Process form submission with proper security checks
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['bhg_update_users'])) {
