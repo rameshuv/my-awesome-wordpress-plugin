@@ -1,0 +1,8 @@
+.bhg-wrap .bhg-cards{display:flex;gap:16px;margin-top:12px}
+.bhg-wrap .bhg-card{background:#fff;border:1px solid #ddd;padding:16px;border-radius:12px;min-width:140px;box-shadow:0 1px 2px rgba(0,0,0,.03)}
+.bhg-grid{display:grid;grid-template-columns:1fr 1fr;gap:24px}
+.bhg-col{background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:16px}
+.bhg-table{width:100%}
+.bhg-dot{display:inline-block;width:10px;height:10px;border-radius:50%}
+.bhg-dot.green{background:#16a34a}
+.bhg-dot.red{background:#dc2626}

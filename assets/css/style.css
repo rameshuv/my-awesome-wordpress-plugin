@@ -1,0 +1,129 @@
+
+/* Bonus Hunt Guesser - Elegant Light Theme (Pink/Gray) */
+/* Applies to both admin and frontend */
+:root{
+  --bhg-bg:#f7f7f7;
+  --bhg-card:#ffffff;
+  --bhg-text:#333333;
+  --bhg-sub:#6b7280;
+  --bhg-border:#e5e7eb;
+  --bhg-accent:#f8c9d4; /* light pink */
+  --bhg-accent-strong:#ec4899;
+  --bhg-accent-hover:#db2777;
+  --bhg-shadow:0 2px 6px rgba(0,0,0,.08);
+  --bhg-radius:10px;
+}
+
+.bhg-scope, .wrap.bhg-admin, .bhg-frontend { 
+  background: var(--bhg-bg);
+  color: var(--bhg-text);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Inter, Arial, "Noto Sans", "Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol", sans-serif;
+}
+
+.bhg-card{
+  background: var(--bhg-card);
+  border: 1px solid var(--bhg-border);
+  border-radius: var(--bhg-radius);
+  box-shadow: var(--bhg-shadow);
+  padding: 16px;
+  margin: 12px 0;
+}
+
+.bhg-header{
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--bhg-accent-strong);
+  margin: 0 0 12px 0;
+}
+
+.bhg-sub{
+  color: var(--bhg-sub);
+  font-size: 13px;
+}
+
+.bhg-btn{
+  display:inline-block;
+  background: var(--bhg-accent-strong);
+  color:#fff;
+  border:none;
+  border-radius:8px;
+  padding:10px 14px;
+  cursor:pointer;
+  text-decoration:none;
+  transition: background .2s ease, transform .05s ease;
+}
+.bhg-btn:hover{ background: var(--bhg-accent-hover); }
+.bhg-btn:active{ transform: translateY(1px); }
+.bhg-btn.secondary{
+  background:#e5e7eb;
+  color:#333;
+}
+.bhg-btn.secondary:hover{ background:#d1d5db; }
+
+.bhg-input, .bhg-select{
+  width:100%;
+  max-width:520px;
+  background:#fff;
+  border:1px solid var(--bhg-border);
+  border-radius:8px;
+  padding:10px 12px;
+  color:var(--bhg-text);
+  outline:none;
+  transition:border .2s ease, box-shadow .2s ease;
+}
+.bhg-input:focus, .bhg-select:focus{
+  border-color: var(--bhg-accent-strong);
+  box-shadow: 0 0 0 3px rgba(236,72,153,.15);
+}
+
+.bhg-table{
+  width:100%;
+  border-collapse: collapse;
+  background:#fff;
+  border:1px solid var(--bhg-border);
+  border-radius: var(--bhg-radius);
+  overflow:hidden;
+}
+.bhg-table th, .bhg-table td{
+  padding:10px 12px;
+  border-bottom:1px solid var(--bhg-border);
+  text-align:left;
+}
+.bhg-table th{
+  background:#f3f4f6;
+  color:#111;
+}
+.bhg-badge{
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  padding:4px 8px;
+  border-radius:999px;
+  background: var(--bhg-accent);
+  color:#ffffff;
+  font-size:12px;
+  font-weight:600;
+}
+
+.bhg-tabs{
+  display:flex; gap:8px; margin-bottom:12px; flex-wrap:wrap;
+}
+.bhg-tab{
+  padding:8px 12px; border-radius:999px; border:1px solid var(--bhg-border);
+  background:#fff; color:#555; text-decoration:none;
+}
+.bhg-tab.active{
+  border-color: var(--bhg-accent-strong);
+  color: var(--bhg-accent-strong);
+  box-shadow: 0 0 0 3px rgba(236,72,153,.12);
+}
+
+.bhg-notice{
+  padding:10px 12px; border-left:4px solid var(--bhg-accent-strong);
+  background:#fff; border:1px solid var(--bhg-border); border-radius:6px;
+}
+
+/* light accent separators on admin pages */
+.wrap.bhg-admin h1, .wrap.bhg-admin h2 { color:#111; }
+.wrap.bhg-admin .page-title-action{ background: var(--bhg-accent-strong); color:#fff; border:none; }
+.wrap.bhg-admin .page-title-action:hover{ background: var(--bhg-accent-hover); }
