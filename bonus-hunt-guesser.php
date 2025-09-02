@@ -70,12 +70,13 @@ function bhg_activate_plugin() {
     
     // Set default options
     add_option('bhg_version', BHG_VERSION);
-    add_option('bhg_settings', [
-        'allow_guess_edit' => 1,
+    add_option('bhg_plugin_settings', [
+        'allow_guess_changes' => 'yes',
+        'default_tournament_period' => 'monthly',
+        'min_guess_amount' => 0,
+        'max_guess_amount' => 100000,
         'ads_enabled' => 1,
         'email_from' => get_bloginfo('admin_email'),
-        'min_guess' => 0,
-        'max_guess' => 100000,
     ]);
     
     // Seed demo data if empty
@@ -116,6 +117,188 @@ function bhg_init_plugin() {
     if (class_exists('BHG_Utils')) {
         BHG_Utils::init_hooks();
     }
+    
+    // Register form handlers
+    add_action('admin_post_bhg_save_bonus_hunt', 'bhg_handle_bonus_hunt_save');
+    add_action('admin_post_nopriv_bhg_save_bonus_hunt', 'bhg_handle_bonus_hunt_save_unauth');
+    add_action('admin_post_bhg_submit_guess', 'bh极_handle_guess_submission');
+    add_action('admin_post_nopriv_bhg_submit_guess', 'bhg_handle_guess_submission_unauth');
+    add_action('admin_post_bhg_save_settings', 'bhg_handle_settings_save');
+}
+
+// Form handler for settings save
+function bhg_handle_settings_save() {
+    // Check user capabilities
+    if (!current_user_can('manage_options')) {
+        wp_die(__('You do not have sufficient permissions to perform this action.', 'bonus-hunt-guesser'));
+    }
+    
+    // Verify nonce
+    if (!isset($_POST['bhg_settings_nonce']) || !wp_verify_nonce($_POST['bhg_settings_nonce'], 'bhg_save_settings_nonce')) {
+        wp_redirect(admin_url('admin.php?page=bhg_settings&error=nonce_failed'));
+        exit;
+    }
+    
+    // Sanitize and validate data
+    $settings = array();
+    
+    if (isset($_POST['bhg_default_tournament_period'])) {
+        $period = sanitize_text_field($_POST['bhg_default_tournament_period']);
+        if (in_array($period, array('weekly', 'monthly', 'yearly'))) {
+            $settings['default_tournament_period'] = $period;
+        }
+    }
+    
+    if (isset($_POST['bhg_max_guess_amount'])) {
+        $max = floatval($_POST['bhg_max_guess_amount']);
+        if ($max >= 0) {
+            $settings['max_guess_amount'] = $max;
+        }
+    }
+    
+    if (isset($_POST['bhg_min_guess_amount'])) {
+        $min = floatval($_POST['bhg_min_guess_amount']);
+        if ($min >= 0) {
+            $settings['min_guess_amount'] = $min;
+        }
+    }
+    
+    // Validate that min is not greater than max
+    if (isset($settings['min_guess_amount']) && isset($settings['max_guess_amount']) && 
+        $settings['min_guess_amount'] > $settings['max_guess_amount']) {
+        wp_redirect(admin_url('admin.php?page=bhg_settings&error=invalid_data'));
+        exit;
+    }
+    
+    if (isset($_POST['bhg_allow_guess_changes'])) {
+        $allow = sanitize_text_field($_POST['bhg_allow_guess_changes']);
+        if (in_array($allow, array('yes', 'no'))) {
+            $settings['allow_guess_changes'] = $allow;
+        }
+    }
+    
+    if (isset($_POST['bhg_ads_enabled'])) {
+        $ads_enabled = sanitize_text_field($_POST['bhg_ads_enabled']);
+        $settings['ads_enabled'] = $ads_enabled === '1' ? 1 : 0;
+    }
+    
+    if (isset($_POST['bhg_email_from'])) {
+        $email_from = sanitize_email($_POST['bhg_email_from']);
+        if ($email_from) {
+            $settings['email_from'] = $email_from;
+        }
+    }
+    
+    // Save settings
+    update_option('bhg_plugin_settings', $settings);
+    
+    // Redirect back to settings page
+    wp_redirect(admin_url('admin.php?page=bhg_settings&message=saved'));
+    exit;
+}
+
+// Form handler for bonus hunt save (admin)
+function bhg_handle_bonus_hunt_save() {
+    // Verify nonce
+    if (!isset($_POST['_wpnonce']) || !wp_verify_nonce($_POST['_wpnonce'], 'bhg_form_nonce')) {
+        wp_die('Security check failed');
+    }
+    
+    if (!current_user_can('manage_options')) {
+        wp_die('Access denied');
+    }
+    
+    // Process form data
+    global $wpdb;
+    $table_name = $wpdb->prefix . 'bhg_bonus_hunts';
+    
+    $data = [
+        'title' => sanitize_text_field($_POST['title']),
+        'starting_balance' => floatval($_POST['starting_balance']),
+        'num_bonuses' => intval($_POST['num_bonuses']),
+        'prizes' => sanitize_textarea_field($_POST['prizes']),
+        'status' => sanitize_text_field($_POST['status']),
+        'updated_at' => current_time('mysql', 1)
+    ];
+    
+    if (isset($_POST['final_balance'])) {
+        $data['final_balance'] = floatval($_POST['final_balance']);
+    }
+    
+    if (isset($_POST['id']) && !empty($_POST['id'])) {
+        // Update existing hunt
+        $wpdb->update(
+            $table_name,
+            $data,
+            ['id' => intval($_POST['id'])]
+        );
+    } else {
+        // Insert new hunt
+        $data['created_at'] = current_time('mysql', 1);
+        $wpdb->insert($table_name, $data);
+    }
+    
+    wp_redirect(admin_url('admin.php?page=bhg_bonus_hunts&message=saved'));
+    exit;
+}
+
+function bhg_handle_bonus_hunt_save_unauth() {
+    wp_die('You must be logged in to submit this form');
+}
+
+// Form handler for guess submission (frontend)
+function bhg_handle_guess_submission() {
+    // Verify nonce
+    if (!isset($_POST['_wpnonce']) || !wp_verify_nonce($_POST['_wpnonce'], 'bhg_guess_nonce')) {
+        wp_die('Security check failed');
+    }
+    
+    if (!is_user_logged_in()) {
+        wp_die('You must be logged in to submit a guess');
+    }
+    
+    // Process guess submission
+    global $wpdb;
+    $table_name = $wpdb->prefix . 'bhg_guesses';
+    $user_id = get_current_user_id();
+    $hunt_id = intval($_POST['hunt_id']);
+    $guess = floatval($_POST['guess']);
+    
+    // Check if user already has a guess for this hunt
+    $existing_guess = $wpdb->get_var($wpdb->prepare(
+        "SELECT id FROM {$table_name} WHERE user_id = %d AND hunt_id = %d",
+        $user_id, $hunt_id
+    ));
+    
+    if ($existing_guess) {
+        // Update existing guess
+        $wpdb->update(
+            $table_name,
+            [
+                'guess' => $guess,
+                'updated_at' => current_time('mysql', 1)
+            ],
+            ['id' => $existing_guess]
+        );
+    } else {
+        // Insert new guess
+        $wpdb->insert($table_name, [
+            'user_id' => $user_id,
+            'hunt_id' => $hunt_id,
+            'guess' => $guess,
+            'created_at' => current_time('mysql', 1),
+            'updated_at' => current_time('mysql', 1)
+        ]);
+    }
+    
+    // Redirect back to the page with success message
+    $redirect_url = add_query_arg('guess_submitted', '1', wp_get_referer());
+    wp_redirect($redirect_url);
+    exit;
+}
+
+function bhg_handle_guess_submission_unauth() {
+    wp_die('You must be logged in to submit a guess');
 }
 
 // Enqueue admin assets
@@ -129,7 +312,7 @@ function bhg_enqueue_admin_assets($hook) {
     wp_enqueue_script('bhg-admin', BHG_PLUGIN_URL . 'assets/js/admin.js', ['jquery'], BHG_VERSION, true);
     
     // Localize script for AJAX
-    wp_localize_script('bhg-admin', 'bhg_admin_ajax', [
+    wp_localize_script('bh极-admin', 'bhg_admin_ajax', [
         'ajax_url' => admin_url('admin-ajax.php'),
         'nonce' => wp_create_nonce('bhg_admin_nonce'),
         'i18n' => [
@@ -277,9 +460,9 @@ add_action('admin_notices', 'bhg_admin_notices');
 function bhg_admin_notices() {
     if (get_option('bhg_demo_notice')) {
         echo '<div class="notice notice-success is-dismissible"><p>' . 
-             esc_html__('Demo data inserted successfully. You can reset it anytime from BHG Tools.', 'bon极s-hunt-guesser') . 
+             esc_html__('Demo data inserted successfully. You can reset it anytime from BHG Tools.', 'bonus-hunt-guesser') . 
              '</p></div>';
-        delete_option('bhg_demo_notice');
+        delete_option('bh极_demo_notice');
     }
     
     $screen = get_current_screen();
@@ -300,7 +483,7 @@ function bhg_seed_demo_if_empty() {
     
     // Check hunts
     $hunts_table = $wpdb->prefix . 'bhg_bonus_hunts';
-    $count = intval($wpdb->get_var("SELECT COUNT(*) FROM {$hunts_table}"));
+    $count = intval($wpdb->get_var($wpdb->prepare("SELECT COUNT(*) FROM %i", $hunts_table)));
     
     if ($count > 0) {
         return;
@@ -331,7 +514,7 @@ function bhg_seed_demo_if_empty() {
     $closed_hunt_id = intval($wpdb->insert_id);
 
     // Insert winners
-    $winners_table = $wpdb->prefix . 'bhg_hunt_winners';
+    $winners_table = $wp极->prefix . 'bhg_hunt_winners';
     $wpdb->insert($winners_table, ['hunt_id' => $closed_hunt_id, 'user_id' => 1, 'position' => 1]);
     $wpdb->insert($winners_table, ['hunt_id' => $closed_hunt_id, 'user_id' => 2, 'position' => 2]);
     $wpdb->insert($winners_table, ['hunt_id' => $closed_hunt_id, 'user_id' => 3, 'position' => 3]);
@@ -371,7 +554,7 @@ function bhg_seed_demo_if_empty() {
 }
 
 // Reset demo data
-function bh极_reset_demo_and_seed() {
+function bhg_reset_demo_and_seed() {
     if (!current_user_can('manage_options')) {
         wp_die(esc_html__('Insufficient permissions', 'bonus-hunt-guesser'));
     }
@@ -386,7 +569,7 @@ function bh极_reset_demo_and_seed() {
     ];
     
     foreach ($tables as $table) {
-        $wpdb->query("DELETE FROM {$table}");
+        $wpdb->query($wpdb->prepare("DELETE FROM %i", $table));
     }
     
     bhg_seed_demo_if_empty();

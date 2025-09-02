@@ -15,36 +15,15 @@ if (!empty($_GET['edit']) && is_numeric($_GET['edit'])) {
     $edit_id = intval($_GET['edit']);
     $edit = $wpdb->get_row($wpdb->prepare("SELECT * FROM $table WHERE id = %d", $edit_id));
 }
-
-// Process form submissions
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    // Verify nonce for save action
-    if (isset($_POST['action']) && $_POST['action'] === 'bhg_save_affiliate') {
-        if (!wp_verify_nonce($_POST['bhg_nonce'], 'bhg_save_affiliate')) {
-            wp_die(__('Security check failed', 'bonus-hunt-guesser'));
-        }
-        
-        // Process save logic here (would typically be in a separate handler)
-    }
-    
-    // Verify nonce for delete action
-    if (isset($_POST['action']) && $_POST['action'] === 'bhg_delete_affiliate') {
-        if (!wp_verify_nonce($_POST['bhg_nonce'], 'bhg_delete_affiliate')) {
-            wp_die(__('Security check failed', 'bonus-hunt-guesser'));
-        }
-        
-        // Process delete logic here (would typically be in a separate handler)
-    }
-}
 ?>
 <div class="wrap bhg-wrap">
     <h1><?php esc_html_e('Affiliate Websites', 'bonus-hunt-guesser'); ?></h1>
     <div class="bhg-grid">
         <div class="bhg-col">
             <h2><?php echo $edit ? esc_html__('Edit Site', 'bonus-hunt-guesser') : esc_html__('Add New Site', 'bonus-hunt-guesser'); ?></h2>
-            <form method="post" action="<?php echo esc_url(admin_url('admin.php?page=bhg-affiliates')); ?>">
-                <input type="hidden" name="action" value="bhg_save_affiliate" />
-                <?php wp_nonce_field('bhg_save_affiliate', 'bhg_nonce'); ?>
+            <form method="post" action="<?php echo esc_url(admin_url('admin-post.php')); ?>">
+                <input type="hidden" name="action" value="bhg_save_affiliate">
+                <?php wp_nonce_field('bhg_save_affiliate_nonce', 'bhg_nonce'); ?>
                 <?php if ($edit): ?>
                     <input type="hidden" name="id" value="<?php echo intval($edit->id); ?>" />
                 <?php endif; ?>
@@ -95,9 +74,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                     <a href="<?php echo esc_url(admin_url('admin.php?page=bhg-affiliates&edit=' . intval($r->id))); ?>" class="button">
                                         <?php esc_html_e('Edit', 'bonus-hunt-guesser'); ?>
                                     </a>
-                                    <form method="post" action="<?php echo esc_url(admin_url('admin.php?page=bhg-affiliates')); ?>" style="display:inline;">
+                                    <form method="post" action="<?php echo esc_url(admin_url('admin-post.php')); ?>" style="display:inline;">
                                         <input type="hidden" name="action" value="bhg_delete_affiliate" />
-                                        <?php wp_nonce_field('bhg_delete_affiliate', 'bhg_nonce'); ?>
+                                        <?php wp_nonce_field('bhg_delete_affiliate_nonce', 'bhg_nonce'); ?>
                                         <input type="hidden" name="id" value="<?php echo intval($r->id); ?>" />
                                         <button type="submit" class="button button-link-delete" onclick="return confirm('<?php echo esc_js(__('Delete this site?', 'bonus-hunt-guesser')); ?>')">
                                             <?php esc_html_e('Delete', 'bonus-hunt-guesser'); ?>

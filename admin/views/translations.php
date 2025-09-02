@@ -8,7 +8,6 @@ if (!current_user_can('manage_options')) {
 
 global $wpdb;
 $table = $wpdb->prefix . 'bhg_translations';
-$rows = $wpdb->get_results("SELECT * FROM $table ORDER BY t_key ASC");
 
 // Handle form submission
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['bhg_save_translation'])) {
@@ -37,13 +36,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['bhg_save_translation'
         
         if ($result !== false) {
             $message = __('Translation saved successfully.', 'bonus-hunt-guesser');
-            // Refresh data
-            $rows = $wpdb->get_results("SELECT * FROM $table ORDER BY t_key ASC");
         } else {
             $error = __('Error saving translation.', 'bonus-hunt-guesser');
         }
     }
 }
+
+// Get translations data
+$rows = $wpdb->get_results($wpdb->prepare("SELECT * FROM %i ORDER BY t_key ASC", $table));
 ?>
 <div class="wrap bhg-wrap">
     <h1><?php esc_html_e('Translations', 'bonus-hunt-guesser'); ?></h1>

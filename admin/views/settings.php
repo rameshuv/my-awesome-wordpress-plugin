@@ -5,40 +5,7 @@ if (!defined('ABSPATH')) {
 
 // Check user capabilities
 if (!current_user_can('manage_options')) {
-    wp_die(__('You do not have sufficient permissions to access this page.'));
-}
-
-// Handle form submission
-if (isset($_POST['bhg_settings_submit'])) {
-    // Verify nonce
-    if (!wp_verify_nonce($_POST['bhg_settings_nonce'], 'bhg_save_settings')) {
-        wp_die(__('Security check failed.'));
-    }
-    
-    // Sanitize and save settings
-    $settings = array();
-    
-    if (isset($_POST['bhg_default_tournament_period'])) {
-        $settings['default_tournament_period'] = sanitize_text_field($_POST['bhg_default_tournament_period']);
-    }
-    
-    if (isset($_POST['bhg_max_guess_amount'])) {
-        $settings['max_guess_amount'] = floatval($_POST['bhg_max_guess_amount']);
-    }
-    
-    if (isset($_POST['bhg_min_guess_amount'])) {
-        $settings['min_guess_amount'] = floatval($_POST['bhg_min_guess_amount']);
-    }
-    
-    if (isset($_POST['bhg_allow_guess_changes'])) {
-        $settings['allow_guess_changes'] = sanitize_text_field($_POST['bhg_allow_guess_changes']);
-    }
-    
-    update_option('bhg_plugin_settings', $settings);
-    
-    echo '<div class="notice notice-success is-dismissible"><p>' . 
-         __('Settings saved successfully.', 'bonus-hunt-guesser') . 
-         '</p></div>';
+    wp_die(__('You do not have sufficient permissions to access this page.', 'bonus-hunt-guesser'));
 }
 
 // Get current settings
@@ -48,13 +15,40 @@ $current_settings = get_option('bhg_plugin_settings', array(
     'min_guess_amount' => 0,
     'allow_guess_changes' => 'yes'
 ));
+
+// Handle settings save via admin-post.php
+if (isset($_GET['message']) && $_GET['message'] === 'saved') {
+    echo '<div class="notice notice-success is-dismissible"><p>' . 
+         __('Settings saved successfully.', 'bonus-hunt-guesser') . 
+         '</p></div>';
+}
+
+// Handle error messages
+if (isset($_GET['error'])) {
+    $error_message = '';
+    switch ($_GET['error']) {
+        case 'nonce_failed':
+            $error_message = __('Security check failed. Please try again.', 'bonus-hunt-guesser');
+            break;
+        case 'invalid_data':
+            $error_message = __('Invalid data submitted. Please check your inputs.', 'bonus-hunt-guesser');
+            break;
+        default:
+            $error_message = __('An error occurred while saving settings.', 'bonus-hunt-guesser');
+    }
+    
+    if (!empty($error_message)) {
+        echo '<div class="notice notice-error is-dismissible"><p>' . $error_message . '</p></div>';
+    }
+}
 ?>
 
 <div class="wrap">
     <h1><?php _e('Bonus Hunt Guesser Settings', 'bonus-hunt-guesser'); ?></h1>
     
-    <form method="post" action="">
-        <?php wp_nonce_field('bhg_save_settings', 'bhg_settings_nonce'); ?>
+    <form method="post" action="<?php echo esc_url(admin_url('admin-post.php')); ?>">
+        <input type="hidden" name="action" value="bhg_save_settings">
+        <?php wp_nonce_field('bhg_save_settings_nonce', 'bhg_settings_nonce'); ?>
         
         <table class="form-table">
             <tr>
@@ -90,7 +84,7 @@ $current_settings = get_option('bhg_plugin_settings', array(
                 <td>
                     <input type="number" name="bhg_min_guess_amount" id="bhg_min_guess_amount" 
                            value="<?php echo esc_attr($current_settings['min_guess_amount']); ?>" 
-                           class="regular-text" step="0.01" min="0">
+                           class="regular-text" step="0.01" min="0" required>
                     <p class="description">
                         <?php _e('Minimum amount users can guess for a bonus hunt.', 'bonus-hunt-guesser'); ?>
                     </p>
@@ -106,7 +100,7 @@ $current_settings = get_option('bhg_plugin_settings', array(
                 <td>
                     <input type="number" name="bhg_max_guess_amount" id="bhg_max_guess_amount" 
                            value="<?php echo esc_attr($current_settings['max_guess_amount']); ?>" 
-                           class="regular-text" step="0.01" min="0">
+                           class="regular-text" step="0.01" min="0" required>
                     <p class="description">
                         <?php _e('Maximum amount users can guess for a bonus hunt.', 'bonus-hunt-guesser'); ?>
                     </p>

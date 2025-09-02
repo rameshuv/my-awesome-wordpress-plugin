@@ -13,7 +13,7 @@ $affiliate_websites = [];
 // Get affiliate websites for multi-site support
 global $wpdb;
 $affiliate_websites = $wpdb->get_results(
-    "SELECT id, name FROM {$wpdb->prefix}bhg_affiliate_websites"
+    $wpdb->prepare("SELECT id, name FROM {$wpdb->prefix}bhg_affiliate_websites")
 );
 
 // Process form submission with proper security checks
@@ -55,7 +55,8 @@ $users = get_users([
 <div class="wrap bhg-wrap">
     <h1><?php esc_html_e('Users & Affiliate Status', 'bonus-hunt-guesser'); ?></h1>
     
-    <form method="post">
+    <form method="post" action="<?php echo esc_url(admin_url('admin-post.php')); ?>">
+        <input type="hidden" name="action" value="bhg_update_users">
         <?php wp_nonce_field('bhg_update_users_nonce', '_wpnonce_bhg_update_users'); ?>
         <input type="hidden" name="bhg_update_users" value="1" />
         

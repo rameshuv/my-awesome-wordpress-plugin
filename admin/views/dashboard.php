@@ -28,8 +28,6 @@ $winners = $wpdb->get_results(
 <div class="wrap bhg-wrap">
     <h1><?php esc_html_e('Bonus Hunt Dashboard', 'bonus-hunt-guesser'); ?></h1>
     
-    <?php wp_nonce_field('bhg_dashboard_action', 'bhg_dashboard_nonce'); ?>
-    
     <div class="bhg-cards">
         <div class="bhg-card"><h3><?php echo intval($hunts); ?></h3><p><?php esc_html_e('Bonus Hunts', 'bonus-hunt-guesser'); ?></p></div>
         <div class="bhg-card"><h3><?php echo intval($guesses); ?></h3><p><?php esc_html_e('Guesses', 'bonus-hunt-guesser'); ?></p></div>

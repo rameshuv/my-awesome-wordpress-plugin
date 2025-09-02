@@ -10,25 +10,16 @@ global $wpdb;
 $table = $wpdb->prefix . 'bhg_bonus_hunts';
 $aff_table = $wpdb->prefix . 'bhg_affiliate_websites';
 
-// Get affiliate sites without prepared statement (static query)
-$affs = $wpdb->get_results("SELECT id, name FROM $aff_table ORDER BY name ASC");
+// Get affiliate sites with prepared statement
+$affs = $wpdb->get_results($wpdb->prepare("SELECT id, name FROM %i ORDER BY name ASC", $aff_table));
 
-// Get bonus hunts without prepared statement (static query)
-$rows = $wpdb->get_results("SELECT * FROM $table ORDER BY id DESC");
+// Get bonus hunts with prepared statement
+$rows = $wpdb->get_results($wpdb->prepare("SELECT * FROM %i ORDER BY id DESC", $table));
 
 $edit = null;
 if (!empty($_GET['edit'])) {
     $edit_id = intval($_GET['edit']);
-    $edit = $wpdb->get_row($wpdb->prepare("SELECT * FROM $table WHERE id = %d", $edit_id));
-}
-
-// Handle form submissions with nonce verification
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    if (isset($_POST['bhg_nonce']) && wp_verify_nonce($_POST['bhg_nonce'], 'bhg_action')) {
-        // Process form data here (this would typically be in a separate handler)
-    } else {
-        wp_die(__('Security check failed.', 'bonus-hunt-guesser'));
-    }
+    $edit = $wpdb->get_row($wpdb->prepare("SELECT * FROM %i WHERE id = %d", $table, $edit_id));
 }
 ?>
 <div class="wrap bhg-wrap">
@@ -38,7 +29,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <h2><?php echo $edit ? esc_html__('Edit Hunt', 'bonus-hunt-guesser') : esc_html__('Add New Hunt', 'bonus-hunt-guesser'); ?></h2>
             <form method="post" action="<?php echo esc_url(admin_url('admin-post.php')); ?>">
                 <input type="hidden" name="action" value="bhg_save_hunt" />
-                <?php wp_nonce_field('bhg_action', 'bhg_nonce'); ?>
+                <?php wp_nonce_field('bhg_save_hunt_action', 'bhg_save_hunt_nonce'); ?>
                 <?php if ($edit): ?>
                     <input type="hidden" name="id" value="<?php echo intval($edit->id); ?>" />
                 <?php endif; ?>
@@ -121,7 +112,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                 <?php if ($r->status !== 'closed'): ?>
                                     <form method="post" action="<?php echo esc_url(admin_url('admin-post.php')); ?>" style="display:inline;margin-right:8px;">
                                         <input type="hidden" name="action" value="bhg_close_hunt" />
-                                        <?php wp_nonce_field('bhg_action', 'bhg_nonce'); ?>
+                                        <?php wp_nonce_field('bhg_close_hunt_action', 'bhg_close_hunt_nonce'); ?>
                                         <input type="hidden" name="id" value="<?php echo intval($r->id); ?>" />
                                         <input type="number" step="0.01" min="0" max="100000000" name="final_balance" 
                                                placeholder="<?php esc_attr_e('Final Balance €', 'bonus-hunt-guesser'); ?>" required style="width:140px;" />
@@ -130,8 +121,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                         </button>
                                     </form>
                                     <form method="post" action="<?php echo esc_url(admin_url('admin-post.php')); ?>" style="display:inline;">
-                                        <input type="hidden" name="action" value="bhg_close_hunt" />
-                                        <?php wp_nonce_field('bhg_action', 'bhg_nonce'); ?>
+                                        <input type="hidden" name="action" value="bhg_close_hunt_simple" />
+                                        <?php wp_nonce_field('bhg_close_hunt_simple_action', 'bhg_close_hunt_simple_nonce'); ?>
                                         <input type="hidden" name="id" value="<?php echo intval($r->id); ?>" />
                                         <button class="button button-secondary" onclick="return confirm('<?php echo esc_attr__('Close this hunt?', 'bonus-hunt-guesser'); ?>')">
                                             <?php esc_html_e('Close', 'bonus-hunt-guesser'); ?>

@@ -1,17 +1,31 @@
 <?php
 if (!defined('ABSPATH')) exit;
+
+// Check user capabilities
+if (!current_user_can('manage_options')) {
+    wp_die(__('You do not have sufficient permissions to access this page.', 'bonus-hunt-guesser'));
+}
+
+// Process any success messages
+$message = isset($_GET['message']) ? sanitize_text_field($_GET['message']) : '';
 ?>
 
 <div class="wrap">
     <h1><?php esc_html_e('Tournaments', 'bonus-hunt-guesser'); ?></h1>
 
-    <?php if (isset($_GET['bhg_rebuilt']) && sanitize_text_field($_GET['bhg_rebuilt']) === '1'): ?>
-        <div class="notice notice-success"><p><?php esc_html_e('Tournament standings rebuilt successfully.', 'bonus-hunt-guesser'); ?></p></div>
+    <?php if ($message === 'rebuild_success'): ?>
+        <div class="notice notice-success is-dismissible">
+            <p><?php esc_html_e('Tournament standings rebuilt successfully.', 'bonus-hunt-guesser'); ?></p>
+        </div>
+    <?php elseif ($message === 'rebuild_error'): ?>
+        <div class="notice notice-error is-dismissible">
+            <p><?php esc_html_e('Error rebuilding tournament standings. Please try again.', 'bonus-hunt-guesser'); ?></p>
+        </div>
     <?php endif; ?>
 
     <form method="post" action="<?php echo esc_url(admin_url('admin-post.php')); ?>" style="margin:16px 0;">
-        <?php wp_nonce_field('bhg_rebuild_tournaments_action', 'bhg_rebuild_tournaments_nonce'); ?>
-        <input type="hidden" name="action" value="bhg_rebuild_tournaments" />
+        <input type="hidden" name="action" value="bhg_rebuild_tournaments">
+        <?php wp_nonce_field('bhg_rebuild_tournaments', 'bhg_rebuild_nonce'); ?>
         <button class="button button-primary"><?php esc_html_e('Rebuild Tournament Standings', 'bonus-hunt-guesser'); ?></button>
     </form>
 
@@ -21,32 +35,62 @@ if (!defined('ABSPATH')) exit;
     $r_table = $wpdb->prefix . 'bhg_tournament_results';
 
     $periods = ['weekly', 'monthly', 'yearly'];
-    foreach ($periods as $p):
-        $tournaments = $wpdb->get_results($wpdb->prepare("SELECT * FROM $t_table WHERE period = %s ORDER BY period_key DESC, id DESC LIMIT 3", $p));
+    
+    foreach ($periods as $period):
+        // Sanitize period value
+        $sanitized_period = sanitize_text_field($period);
+        
+        $tournaments = $wpdb->get_results($wpdb->prepare(
+            "SELECT * FROM $t_table WHERE period = %s ORDER BY period_key DESC, id DESC LIMIT 3", 
+            $sanitized_period
+        ));
+        
         if (!$tournaments) continue;
-        echo '<h2>' . esc_html(ucfirst($p)) . '</h2>';
-        foreach ($tournaments as $t):
-            echo '<h3>' . esc_html($t->title) . '</h3>';
-            $rows = $wpdb->get_results($wpdb->prepare(
+        
+        echo '<h2>' . esc_html(ucfirst($period)) . '</h2>';
+        
+        foreach ($tournaments as $tournament):
+            // Sanitize tournament data
+            $tournament_id = intval($tournament->id);
+            $tournament_title = esc_html($tournament->title);
+            
+            echo '<h3>' . $tournament_title . '</h3>';
+            
+            $results = $wpdb->get_results($wpdb->prepare(
                 "SELECT r.wins, r.user_id, u.user_login
                  FROM $r_table r 
                  JOIN {$wpdb->users} u ON u.ID = r.user_id
                  WHERE r.tournament_id = %d
                  ORDER BY r.wins DESC, u.user_login ASC
                  LIMIT 20",
-                $t->id
+                $tournament_id
             ));
             
-            if (!$rows) { 
+            if (!$results) { 
                 echo '<p>' . esc_html__('No results yet.', 'bonus-hunt-guesser') . '</p>'; 
                 continue; 
             }
             
-            echo '<table class="widefat striped"><thead><tr><th>#</th><th>' . esc_html__('User', 'bonus-hunt-guesser') . '</th><th>' . esc_html__('Wins', 'bonus-hunt-guesser') . '</th></tr></thead><tbody>';
-            $i = 1; 
-            foreach ($rows as $r) {
-                echo '<tr><td>' . intval($i++) . '</td><td>' . esc_html($r->user_login) . '</td><td>' . intval($r->wins) . '</td></tr>';
+            echo '<table class="widefat striped"><thead><tr>
+                <th>#</th>
+                <th>' . esc_html__('User', 'bonus-hunt-guesser') . '</th>
+                <th>' . esc_html__('Wins', 'bonus-hunt-guesser') . '</th>
+            </tr></thead><tbody>';
+            
+            $rank = 1;
+            foreach ($results as $result) {
+                $username = esc_html($result->user_login);
+                $wins = intval($result->wins);
+                
+                echo '<tr>
+                    <td>' . $rank . '</td>
+                    <td>' . $username . '</td>
+                    <td>' . $wins . '</td>
+                </tr>';
+                
+                $rank++;
             }
+            
             echo '</tbody></table>';
         endforeach;
     endforeach;

@@ -14,12 +14,68 @@ class BHG_Admin {
         add_action('admin_post_bhg_save_ad', [$this, 'save_ad']);
         add_action('admin_post_bhg_rebuild_tournaments', [$this, 'rebuild_tournaments']);
         add_action('admin_post_bhg_reset_demo', [$this, 'handle_reset_demo']);
+        add_action('admin_init', [$this, 'handle_form_submissions']);
         add_action('admin_init', [$this, 'check_nonce_referer']);
     }
 
     public function check_nonce_referer() {
         if (isset($_GET['page']) && strpos($_GET['page'], 'bhg') === 0 && !current_user_can('manage_options')) {
             wp_die(__('You do not have sufficient permissions to access this page.', 'bonus-hunt-guesser'));
+        }
+    }
+
+    public function handle_form_submissions() {
+        if (isset($_POST['action']) && $_POST['action'] === 'bhg_save_bonus_hunt') {
+            if (!isset($_POST['_wpnonce']) || !wp_verify_nonce($_POST['_wpnonce'], 'bhg_form_nonce')) {
+                wp_die(__('Security check failed', 'bonus-hunt-guesser'));
+            }
+            
+            if (!current_user_can('manage_options')) {
+                wp_die(__('Unauthorized', 'bonus-hunt-guesser'));
+            }
+            
+            global $wpdb;
+            $table = $this->table('bhg_bonus_hunts');
+
+            $data = [
+                'title' => sanitize_text_field($_POST['title'] ?? ''),
+                'starting_balance' => floatval($_POST['starting_balance'] ?? 0),
+                'num_bonuses' => intval($_POST['num_bonuses'] ?? 0),
+                'prizes' => wp_kses_post($_POST['prizes'] ?? ''),
+                'status' => sanitize_text_field($_POST['status'] ?? 'open'),
+                'affiliate_site_id' => ($_POST['affiliate_site_id'] ?? '') !== '' ? intval($_POST['affiliate_site_id']) : null,
+            ];
+
+            $format = ['%s', '%f', '%d', '%s', '%s', '%d'];
+            $hunt_id = 0;
+            
+            if (!empty($_POST['id'])) {
+                $hunt_id = intval($_POST['id']);
+                $result = $wpdb->update($table, $data, ['id' => $hunt_id], $format, ['%d']);
+                if (false === $result) {
+                    wp_die(__('Error updating bonus hunt', 'bonus-hunt-guesser'));
+                }
+            } else {
+                $result = $wpdb->insert($table, $data, $format);
+                if (false === $result) {
+                    wp_die(__('Error creating bonus hunt', 'bonus-hunt-guesser'));
+                }
+                $hunt_id = (int) $wpdb->insert_id;
+            }
+
+            try {
+                $hunt = $wpdb->get_row($wpdb->prepare("SELECT id, status, winner_user_id, closed_at FROM $table WHERE id=%d", $hunt_id));
+                if ($hunt && $hunt->status === 'closed' && !empty($hunt->winner_user_id)) {
+                    $this->update_tournament_results((int)$hunt->id, (int)$hunt->winner_user_id, $hunt->closed_at);
+                }
+            } catch (Throwable $e) {
+                if (defined('WP_DEBUG') && WP_DEBUG) {
+                    error_log('[BHG] Tournament update (save_hunt) error: ' . $e->getMessage());
+                }
+            }
+
+            wp_safe_redirect(admin_url('admin.php?page=bhg-bonus-hunts&updated=1'));
+            exit;
         }
     }
 
