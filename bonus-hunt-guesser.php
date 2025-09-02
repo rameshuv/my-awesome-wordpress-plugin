@@ -67,6 +67,7 @@ function bhg_activate_plugin() {
     
     $db = new BHG_DB();
     $db->install();
+    $db->update_tables(); // Run updates on activation
     
     // Set default options
     add_option('bhg_version', BHG_VERSION);

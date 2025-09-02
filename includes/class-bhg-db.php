@@ -48,17 +48,18 @@ class BHG_DB {
         ) $charset_collate";
         dbDelta($sql);
 
-        // Tournaments table
+        // Tournaments table (updated structure)
         $table_name = $wpdb->prefix . 'bhg_tournaments';
         $sql = "CREATE TABLE $table_name (
             id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
-            title VARCHAR(191) NOT NULL,
+            type VARCHAR(20) NOT NULL,
             period VARCHAR(20) NOT NULL,
-            period_key VARCHAR(20) NOT NULL,
+            start_date DATETIME NOT NULL,
+            end_date DATETIME NOT NULL,
             status VARCHAR(20) NOT NULL DEFAULT 'active',
             created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
             PRIMARY KEY (id),
-            UNIQUE KEY period_unique (period, period_key)
+            UNIQUE KEY type_period (type, period)
         ) $charset_collate";
         dbDelta($sql);
 
@@ -70,6 +71,21 @@ class BHG_DB {
             user_id BIGINT UNSIGNED NOT NULL,
             wins INT UNSIGNED NOT NULL DEFAULT 0,
             PRIMARY KEY (id),
+            UNIQUE KEY tournament_user (tournament_id, user_id)
+        ) $charset_collate";
+        dbDelta($sql);
+
+        // Tournament wins table
+        $table_name = $wpdb->prefix . 'bhg_tournament_wins';
+        $sql = "CREATE TABLE $table_name (
+            id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+            tournament_id BIGINT UNSIGNED NOT NULL,
+            user_id BIGINT UNSIGNED NOT NULL,
+            wins INT UNSIGNED NOT NULL DEFAULT 0,
+            last_win_date DATETIME NULL,
+            PRIMARY KEY (id),
+            KEY tournament_id (tournament_id),
+            KEY user_id (user_id),
             UNIQUE KEY tournament_user (tournament_id, user_id)
         ) $charset_collate";
         dbDelta($sql);
@@ -126,21 +142,6 @@ class BHG_DB {
         ) $charset_collate";
         dbDelta($sql);
 
-        // Tournament wins table (newly added)
-        $table_name = $wpdb->prefix . 'bhg_tournament_wins';
-        $sql = "CREATE TABLE $table_name (
-            id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
-            tournament_id BIGINT UNSIGNED NOT NULL,
-            user_id BIGINT UNSIGNED NOT NULL,
-            wins INT UNSIGNED NOT NULL DEFAULT 0,
-            last_win_date DATETIME NULL,
-            PRIMARY KEY (id),
-            KEY tournament_id (tournament_id),
-            KEY user_id (user_id),
-            UNIQUE KEY tournament_user (tournament_id, user_id)
-        ) $charset_collate";
-        dbDelta($sql);
-
         if (function_exists('bhg_log')) {
             bhg_log('All tables created successfully');
         }
@@ -191,6 +192,48 @@ class BHG_DB {
             }
             if (!$index_exists($g_table, 'user_id_idx')) {
                 $wpdb->query("ALTER TABLE `{$g_table}` ADD INDEX `user_id_idx` (`user_id`)");
+            }
+        }
+
+        // Check and update tournaments table structure
+        $tournaments_table = $wpdb->prefix . 'bhg_tournaments';
+        if ($wpdb->get_var($wpdb->prepare("SHOW TABLES LIKE %s", $tournaments_table)) === $tournaments_table) {
+            // Add type column if missing
+            if (!$col_exists($tournaments_table, 'type')) {
+                $wpdb->query("ALTER TABLE `{$tournaments_table}` ADD COLUMN `type` VARCHAR(20) NOT NULL AFTER `id`");
+                error_log('[BHG] Added missing column type to ' . $tournaments_table);
+            }
+            
+            // Add period column if missing (or check if it needs to be modified)
+            if (!$col_exists($tournaments_table, 'period')) {
+                $wpdb->query("ALTER TABLE `{$tournaments_table}` ADD COLUMN `period` VARCHAR(20) NOT NULL AFTER `type`");
+                error_log('[BHG] Added missing column period to ' . $tournaments_table);
+            }
+            
+            // Add start_date column if missing
+            if (!$col_exists($tournaments_table, 'start_date')) {
+                $wpdb->query("ALTER TABLE `{$tournaments_table}` ADD COLUMN `start_date` DATETIME NOT NULL AFTER `period`");
+                error_log('[BHG] Added missing column start_date to ' . $tournaments_table);
+            }
+            
+            // Add end_date column if missing
+            if (!$col_exists($tournaments_table, 'end_date')) {
+                $wpdb->query("ALTER TABLE `{$tournaments_table}` ADD COLUMN `end_date` DATETIME NOT NULL AFTER `start_date`");
+                error_log('[BHG] Added missing column end_date to ' . $tournaments_table);
+            }
+            
+            // Remove old columns if they exist
+            if ($col_exists($tournaments_table, 'title')) {
+                $wpdb->query("ALTER TABLE `{$tournaments_table}` DROP COLUMN `title`");
+            }
+            
+            if ($col_exists($tournaments_table, 'period_key')) {
+                $wpdb->query("ALTER TABLE `{$tournaments_table}` DROP COLUMN `period_key`");
+            }
+            
+            // Add unique index if it doesn't exist
+            if (!$index_exists($tournaments_table, 'type_period')) {
+                $wpdb->query("ALTER TABLE `{$tournaments_table}` ADD UNIQUE INDEX `type_period` (`type`, `period`)");
             }
         }
     }
@@ -451,12 +494,12 @@ class BHG_DB {
         );
     }
     
-    public function get_tournament_by_period($period, $period_key) {
+    public function get_tournament_by_period($type, $period) {
         global $wpdb;
         
         return $wpdb->get_row($wpdb->prepare(
-            "SELECT * FROM {$wpdb->prefix}bhg_tournaments WHERE period = %s AND period_key = %s",
-            $period, $period_key
+            "SELECT * FROM {$wpdb->prefix}bhg_tournaments WHERE type = %s AND period = %s",
+            $type, $period
         ));
     }
     
@@ -468,6 +511,25 @@ class BHG_DB {
                  JOIN {$wpdb->users} u ON tr.user_id = u.ID
                  WHERE tr.tournament_id = %d
                  ORDER BY tr.wins DESC";
+        
+        $params = array($tournament_id);
+        
+        if ($limit) {
+            $query .= " LIMIT %d";
+            $params[] = $limit;
+        }
+        
+        return $wpdb->get_results($wpdb->prepare($query, $params));
+    }
+    
+    public function get_tournament_wins_leaderboard($tournament_id, $limit = null) {
+        global $wpdb;
+        
+        $query = "SELECT tw.*, u.user_login, u.display_name
+                 FROM {$wpdb->prefix}bhg_tournament_wins tw
+                 JOIN {$wpdb->users} u ON tw.user_id = u.ID
+                 WHERE tw.tournament_id = %d
+                 ORDER BY tw.wins DESC, tw.last_win_date ASC";
         
         $params = array($tournament_id);
         
@@ -593,45 +655,6 @@ class BHG_DB {
             array('id' => $id),
             array('%d')
         );
-    }
-
-    // New methods for tournament functionality
-    public function create_tournament_tables() {
-        global $wpdb;
-        
-        $charset_collate = $wpdb->get_charset_collate();
-        
-        // Tournament table
-        $table_name = $wpdb->prefix . 'bhg_tournaments';
-        $sql = "CREATE TABLE $table_name (
-            id mediumint(9) NOT NULL AUTO_INCREMENT,
-            type varchar(20) NOT NULL,
-            period varchar(20) NOT NULL,
-            start_date datetime NOT NULL,
-            end_date datetime NOT NULL,
-            status varchar(20) DEFAULT 'active',
-            created_at datetime DEFAULT CURRENT_TIMESTAMP,
-            PRIMARY KEY (id),
-            UNIQUE KEY type_period (type, period)
-        ) $charset_collate;";
-        
-        // Tournament wins table
-        $table_name2 = $wpdb->prefix . 'bhg_tournament_wins';
-        $sql2 = "CREATE TABLE $table_name2 (
-            id mediumint(9) NOT NULL AUTO_INCREMENT,
-            tournament_id mediumint(9) NOT NULL,
-            user_id bigint(20) NOT NULL,
-            wins mediumint(9) DEFAULT 0,
-            last_win_date datetime,
-            PRIMARY KEY (id),
-            KEY tournament_id (tournament_id),
-            KEY user_id (user_id),
-            UNIQUE KEY tournament_user (tournament_id, user_id)
-        ) $charset_collate;";
-        
-        require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
-        dbDelta($sql);
-        dbDelta($sql2);
     }
 
     public function record_tournament_win($user_id, $bonus_hunt_id) {
