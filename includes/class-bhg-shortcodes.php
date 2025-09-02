@@ -161,14 +161,25 @@ class BHG_Shortcodes {
             return '<div class="bhg-guess-form"><p>' . esc_html__('No active hunt to guess on right now.', 'bonus-hunt-guesser') . '</p></div>';
         }
 
+        // Check if user is logged in
+        if (!is_user_logged_in()) {
+            $login_url = wp_login_url(get_permalink());
+            return '<div class="bhg-guess-form"><p>' . 
+                sprintf(
+                    esc_html__('Please %s to submit a guess.', 'bonus-hunt-guesser'), 
+                    '<a href="' . esc_url($login_url) . '">' . esc_html__('log in', 'bonus-hunt-guesser') . '</a>'
+                ) . 
+            '</p></div>';
+        }
+
         // Handle submit inline
         $notices = '';
-        if (!empty($_POST['bhg_sc_action']) && $_POST['bhg_sc_action']==='submit_guess'){
+        if (!empty($_POST['bhg_sc_action']) && $_POST['bhg_sc_action'] === 'submit_guess'){
             if (isset($_POST['bhg_nonce']) && wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['bhg_nonce'])), 'bhg_sc_guess')){
                 if (is_user_logged_in()){
                     $uid = get_current_user_id();
                     $val = isset($_POST['bhg_guess_value']) ? floatval($_POST['bhg_guess_value']) : 0;
-                    if ($val > 0){
+                    if ($val > 0 && $val <= 100000){
                         $exists = $wpdb->get_var($wpdb->prepare("SELECT id FROM {$prefix}bhg_guesses WHERE hunt_id=%d AND user_id=%d", (int)$hunt->id, (int)$uid));
                         if ($exists){
                             $wpdb->update("{$prefix}bhg_guesses",
@@ -185,7 +196,7 @@ class BHG_Shortcodes {
                         }
                         $notices = '<div class="bhg-notice">' . esc_html__('Guess saved!', 'bonus-hunt-guesser') . '</div>';
                     } else {
-                        $notices = '<div class="bhg-error">' . esc_html__('Please enter a valid number.', 'bonus-hunt-guesser') . '</div>';
+                        $notices = '<div class="bhg-error">' . esc_html__('Please enter a valid number between 0 and 100,000.', 'bonus-hunt-guesser') . '</div>';
                     }
                 } else {
                     $notices = '<div class="bhg-error">' . esc_html__('You must be logged in to submit a guess.', 'bonus-hunt-guesser') . '</div>';
@@ -193,16 +204,6 @@ class BHG_Shortcodes {
             } else {
                 $notices = '<div class="bhg-error">' . esc_html__('Security check failed. Please reload and try again.', 'bonus-hunt-guesser') . '</div>';
             }
-        }
-
-        if (!is_user_logged_in()){
-            $login_url = wp_login_url( get_permalink() );
-            return '<div class="bhg-guess-form"><p>' . 
-                sprintf(
-                    esc_html__('Please %s to submit a guess.', 'bonus-hunt-guesser'), 
-                    '<a href="' . esc_url($login_url) . '">' . esc_html__('log in','bonus-hunt-guesser') . '</a>'
-                ) . 
-            '</p></div>';
         }
 
         ob_start(); 
@@ -229,7 +230,8 @@ class BHG_Shortcodes {
         if (!$hunt) return '<p>' . esc_html__('No active hunt.', 'bonus-hunt-guesser') . '</p>';
 
         $rows = $wpdb->get_results($wpdb->prepare(
-            "SELECT g.guess_amount, g.created_at, u.user_login 
+            "SELECT g.guess_amount, g.created_at, u.user_login, 
+                    (SELECT meta_value FROM {$wpdb->usermeta} WHERE user_id = u.ID AND meta_key = 'bhg_affiliate_status' LIMIT 1) as is_affiliate
              FROM {$prefix}bhg_guesses g 
              JOIN {$wpdb->users} u ON g.user_id=u.ID 
              WHERE g.hunt_id=%d 
@@ -246,14 +248,22 @@ class BHG_Shortcodes {
                 <thead>
                     <tr>
                         <th><?php esc_html_e('User', 'bonus-hunt-guesser'); ?></th>
+                        <th><?php esc_html_e('Affiliate', 'bonus-hunt-guesser'); ?></th>
                         <th><?php esc_html_e('Guess', 'bonus-hunt-guesser'); ?></th>
                         <th><?php esc_html_e('Submitted', 'bonus-hunt-guesser'); ?></th>
                     </tr>
                 </thead>
                 <tbody>
-                <?php foreach ($rows as $r): ?>
+                <?php foreach ($rows as $r): 
+                    $is_affiliate = !empty($r->is_affiliate) && $r->is_affiliate === '1';
+                ?>
                     <tr>
                         <td><?php echo esc_html($r->user_login); ?></td>
+                        <td>
+                            <span class="bhg-affiliate-status <?php echo $is_affiliate ? 'affiliate-yes' : 'affiliate-no'; ?>">
+                                ●
+                            </span>
+                        </td>
                         <td>€<?php echo esc_html(number_format_i18n((float)$r->guess_amount, 2)); ?></td>
                         <td><?php echo esc_html(mysql2date(get_option('date_format').' '.get_option('time_format'), $r->created_at)); ?></td>
                     </tr>
@@ -493,7 +503,7 @@ class BHG_Shortcodes {
         
         $guesses = $wpdb->get_results($wpdb->prepare(
             "SELECT g.*, u.user_login, u.display_name, 
-             (SELECT COUNT(*) FROM {$wpdb->usermeta} WHERE user_id = u.ID AND meta_key = 'bhg_affiliate_status' AND meta_value = '1') as is_affiliate
+             (SELECT meta_value FROM {$wpdb->usermeta} WHERE user_id = u.ID AND meta_key = 'bhg_affiliate_status' LIMIT 1) as is_affiliate
              FROM {$wpdb->prefix}bhg_guesses g
              JOIN {$wpdb->users} u ON g.user_id = u.ID
              WHERE g.hunt_id = %d
@@ -515,13 +525,15 @@ class BHG_Shortcodes {
                     </tr>
                 </thead>
                 <tbody>
-                    <?php foreach ($guesses as $index => $guess): ?>
+                    <?php foreach ($guesses as $index => $guess): 
+                    $is_affiliate = !empty($guess->is_affiliate) && $guess->is_affiliate === '1';
+                    ?>
                     <tr>
                         <td><?php echo (int)($index + 1); ?></td>
                         <td><?php echo esc_html($guess->display_name ?: $guess->user_login); ?></td>
                         <td>€<?php echo esc_html(number_format($guess->guess_amount, 2)); ?></td>
                         <td>
-                            <span class="bhg-affiliate-status <?php echo $guess->is_affiliate ? 'affiliate-yes' : 'affiliate-no'; ?>">
+                            <span class="bhg-affiliate-status <?php echo $is_affiliate ? 'affiliate-yes' : 'affiliate-no'; ?>">
                                 ●
                             </span>
                         </td>

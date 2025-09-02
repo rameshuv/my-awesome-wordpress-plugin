@@ -138,3 +138,87 @@
     border-radius: 50%;
     animation: spin 1s linear infinite;
 }
+/* Affiliate status indicator */
+.bhg-affiliate-status {
+    font-size: 20px;
+}
+
+.bhg-affiliate-status.affiliate-yes {
+    color: #00ff00; /* Green for affiliates */
+}
+
+.bhg-affiliate-status.affiliate-no {
+    color: #ff0000; /* Red for non-affiliates */
+}
+
+/* General styling */
+.bhg-container {
+    margin: 20px 0;
+}
+
+.bhg-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.bhg-table th, .bhg-table td {
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    text-align: left;
+}
+
+.bhg-table th {
+    background-color: #f5f5f5;
+}
+
+.bhg-notice {
+    background-color: #dff0d8;
+    border: 1px solid #d6e9c6;
+    color: #3c763d;
+    padding: 10px;
+    margin-bottom: 15px;
+}
+
+.bhg-error {
+    background-color: #f2dede;
+    border: 1px solid #ebccd1;
+    color: #a94442;
+    padding: 10px;
+    margin-bottom: 15px;
+}
+
+.bhg-form-group {
+    margin-bottom: 15px;
+}
+
+.bhg-form-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+}
+
+.bhg-form-group input {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+.bhg-submit-button {
+    background-color: #0073aa;
+    color: white;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.bhg-submit-button:hover {
+    background-color: #005a87;
+}
+
+.bhg-message {
+    margin-top: 15px;
+    padding: 10px;
+    border-radius: 4px;
+}
