@@ -25,6 +25,84 @@ define('BHG_PLUGIN_DIR', plugin_dir_path(__FILE__));
 define('BHG_PLUGIN_URL', plugin_dir_url(__FILE__));
 define('BHG_TABLE_PREFIX', 'bhg_');
 
+// Simple BHG_DB class for activation
+class BHG_DB {
+    private $table_prefix;
+
+    public function __construct() {
+        global $wpdb;
+        $this->table_prefix = $wpdb->prefix . BHG_TABLE_PREFIX;
+    }
+
+    public function create_tables() {
+        global $wpdb;
+        
+        require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
+        
+        $charset_collate = $wpdb->get_charset_collate();
+        
+        // Bonus hunts table
+        $table_name = $this->table_prefix . 'bonus_hunts';
+        $sql = "CREATE TABLE $table_name (
+            id int(11) NOT NULL AUTO_INCREMENT,
+            title varchar(255) NOT NULL,
+            starting_balance decimal(10,2) NOT NULL,
+            num_bonuses int(11) NOT NULL,
+            prizes text,
+            status varchar(20) DEFAULT 'active',
+            final_balance decimal(10,2) DEFAULT NULL,
+            created_at datetime NOT NULL,
+            updated_at datetime NOT NULL,
+            PRIMARY KEY (id)
+        ) $charset_collate;";
+        dbDelta($sql);
+        
+        // Guesses table
+        $table_name = $this->table_prefix . 'guesses';
+        $sql = "CREATE TABLE $table_name (
+            id int(11) NOT NULL AUTO_INCREMENT,
+            user_id int(11) NOT NULL,
+            hunt_id int(11) NOT NULL,
+            guess decimal(10,2) NOT NULL,
+            created_at datetime NOT NULL,
+            updated_at datetime NOT NULL,
+            PRIMARY KEY (id),
+            KEY user_id (user_id),
+            KEY hunt_id (hunt_id)
+        ) $charset_collate;";
+        dbDelta($sql);
+        
+        // Ads table
+        $table_name = $this->table_prefix . 'ads';
+        $sql = "CREATE TABLE $table_name (
+            id int(11) NOT NULL AUTO_INCREMENT,
+            title varchar(255) NOT NULL,
+            content text NOT NULL,
+            placement varchar(50) NOT NULL,
+            visibility varchar(20) DEFAULT 'all',
+            active tinyint(1) DEFAULT 1,
+            created_at datetime NOT NULL,
+            PRIMARY KEY (id)
+        ) $charset_collate;";
+        dbDelta($sql);
+        
+        error_log('[BHG] All tables created successfully');
+    }
+    
+    public static function migrate() {
+        // Future database migration logic
+        $current_version = get_option('bhg_db_version', '1.0');
+        
+        if (version_compare($current_version, '1.0', '=')) {
+            // Initial version, nothing to migrate
+            return;
+        }
+        
+        // Add future migration logic here
+        update_option('bhg_db_version', '1.0');
+    }
+}
+
 // Autoloader for plugin classes
 spl_autoload_register(function ($class) {
     if (strpos($class, 'BHG_') !== 0) {
@@ -32,7 +110,6 @@ spl_autoload_register(function ($class) {
     }
     
     $class_map = [
-        'BHG_DB' => 'includes/class-bhg-db.php',
         'BHG_Admin' => 'admin/class-bhg-admin.php',
         'BHG_Shortcodes' => 'includes/class-bhg-shortcodes.php',
         'BHG_Logger' => 'includes/class-bhg-logger.php',
@@ -55,19 +132,13 @@ spl_autoload_register(function ($class) {
 require_once BHG_PLUGIN_DIR . 'includes/helpers.php';
 
 // Activation hook: create tables and set default options
-register_activation_hook(__FILE__, 'bhg_activate_plugin');
-function bhg_activate_plugin() {
+function bhg_activate_plugin($network_wide) {
     if (!current_user_can('activate_plugins')) {
         return;
     }
     
-    if (!class_exists('BHG_DB')) {
-        require_once BHG_PLUGIN_DIR . 'includes/class-bhg-db.php';
-    }
-    
     $db = new BHG_DB();
-    $db->install();
-    $db->update_tables(); // Run updates on activation
+    $db->create_tables();
     
     // Set default options
     add_option('bhg_version', BHG_VERSION);
@@ -85,7 +156,11 @@ function bhg_activate_plugin() {
         bhg_seed_demo_if_empty();
     }
     update_option('bhg_demo_notice', 1);
+    
+    // Flush rewrite rules after database changes
+    flush_rewrite_rules();
 }
+register_activation_hook(__FILE__, 'bhg_activate_plugin');
 
 // Deactivation hook (no destructive actions)
 register_deactivation_hook(__FILE__, function() {
@@ -372,9 +447,6 @@ function bhg_should_show_ad($visibility) {
 
 /**
  * Safe and validated ads query builder.
- *
- * Note: table name must be validated (alphanumeric + underscore) because you cannot use
- * $wpdb->prepare placeholders for table names. Then prepare the rest of the query.
  */
 function bhg_build_ads_query($table, $placement = 'footer') {
     global $wpdb;
@@ -385,21 +457,16 @@ function bhg_build_ads_query($table, $placement = 'footer') {
     }
 
     // Build safe table name with prefix if required
-    // If caller passes full table name already (with prefix), we accept it.
     $safe_table = esc_sql($table);
-    // If the provided value does not contain prefix, add WP prefix + BHG_TABLE_PREFIX
     if (strpos($safe_table, $wpdb->prefix) !== 0) {
-        // try to assume it's a table suffix like 'bhg_ads' or 'ads'
         if (strpos($safe_table, BHG_TABLE_PREFIX) === 0 || strpos($safe_table, 'bhg_') === 0) {
-            // already has bhg_ prefix
             $safe_table = $safe_table;
         } else {
-            // treat as suffix
             $safe_table = $wpdb->prefix . $safe_table;
         }
     }
 
-    // Ensure final safe table name still matches allowed characters (just in case)
+    // Ensure final safe table name still matches allowed characters
     if (!preg_match('/^[A-Za-z0-9_]+$/', str_replace($wpdb->prefix, '', $safe_table))) {
         return array();
     }
@@ -435,8 +502,6 @@ function bhg_load_leaderboard_ajax() {
 
 // Helper function to generate leaderboard HTML
 function bhg_generate_leaderboard_html($timeframe) {
-    // This function should be implemented in includes/helpers.php
-    // Placeholder implementation
     return '<div class="bhg-leaderboard" data-timeframe="' . esc_attr($timeframe) . '">Leaderboard content for ' . esc_html($timeframe) . '</div>';
 }
 
