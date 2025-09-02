@@ -57,6 +57,10 @@ require_once BHG_PLUGIN_DIR . 'includes/helpers.php';
 // Activation hook: create tables and set default options
 register_activation_hook(__FILE__, 'bhg_activate_plugin');
 function bhg_activate_plugin() {
+    if (!current_user_can('activate_plugins')) {
+        return;
+    }
+    
     if (!class_exists('BHG_DB')) {
         require_once BHG_PLUGIN_DIR . 'includes/class-bhg-db.php';
     }
@@ -244,7 +248,7 @@ function bhg_add_tools_menu() {
     add_submenu_page(
         'bhg', 
         __('Tools', 'bonus-hunt-guesser'), 
-        __('Tools', 'bon极-hunt-guesser'), 
+        __('Tools', 'bonus-hunt-guesser'), 
         'manage_options', 
         'bhg-tools', 
         'bhg_tools_page'
@@ -273,7 +277,7 @@ add_action('admin_notices', 'bhg_admin_notices');
 function bhg_admin_notices() {
     if (get_option('bhg_demo_notice')) {
         echo '<div class="notice notice-success is-dismissible"><p>' . 
-             esc_html__('Demo data inserted successfully. You can reset it anytime from BHG Tools.', 'bonus-hunt-guesser') . 
+             esc_html__('Demo data inserted successfully. You can reset it anytime from BHG Tools.', 'bon极s-hunt-guesser') . 
              '</p></div>';
         delete_option('bhg_demo_notice');
     }
@@ -367,7 +371,7 @@ function bhg_seed_demo_if_empty() {
 }
 
 // Reset demo data
-function bhg_reset_demo_and_seed() {
+function bh极_reset_demo_and_seed() {
     if (!current_user_can('manage_options')) {
         wp_die(esc_html__('Insufficient permissions', 'bonus-hunt-guesser'));
     }
@@ -446,7 +450,7 @@ function bhg_extra_user_profile_fields($user) {
     <h3><?php esc_html_e('Bonus Hunt Guesser Information', 'bonus-hunt-guesser'); ?></h3>
     <table class="form-table">
         <tr>
-            <th><label for="bh极_affiliate_status"><?php esc_html_e('Affiliate Status', 'bonus-hunt-guesser'); ?></label></th>
+            <th><label for="bhg_affiliate_status"><?php esc_html_e('Affiliate Status', 'bonus-hunt-guesser'); ?></label></th>
             <td>
                 <input type="checkbox" name="bhg_affiliate_status" id="bhg_affiliate_status" value="1" <?php checked($affiliate_status, 1); ?> />
                 <span class="description"><?php esc_html_e('Check if this user is an affiliate.', 'bonus-hunt-guesser'); ?></span>
@@ -457,10 +461,10 @@ function bhg_extra_user_profile_fields($user) {
 }
 
 add_action('personal_options_update', 'bhg_save_extra_user_profile_fields');
-add_action('edit_user_profile_update', 'bh极_save_extra_user_profile_fields');
+add_action('edit_user_profile_update', 'bhg_save_extra_user_profile_fields');
 
 function bhg_save_extra_user_profile_fields($user_id) {
-    if (!current_user_can('edit_user', $user极_id)) {
+    if (!current_user_can('edit_user', $user_id)) {
         return false;
     }
     
