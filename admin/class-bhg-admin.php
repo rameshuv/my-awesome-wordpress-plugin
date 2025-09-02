@@ -39,6 +39,10 @@ class BHG_Admin {
     }
 
     public function dashboard(){
+        if (!current_user_can('manage_options')) {
+            wp_die(__('You do not have sufficient permissions to access this page.', 'bonus-hunt-guesser'));
+        }
+        
         global $wpdb;
         $winners = $wpdb->get_results($wpdb->prepare(
             "SELECT h.title, u.display_name, h.final_balance, h.winner_diff, h.closed_at
@@ -52,14 +56,61 @@ class BHG_Admin {
         include BHG_PLUGIN_DIR . 'admin/views/dashboard.php';
     }
 
-    public function bonus_hunts(){ include BHG_PLUGIN_DIR . 'admin/views/bonus-hunts.php'; }
-    public function tournaments(){ include BHG_PLUGIN_DIR . 'admin/views/tournaments.php'; }
-    public function users(){ include BHG_PLUGIN_DIR . 'admin/views/users.php'; }
-    public function affiliates(){ include BHG_PLUGIN_DIR . 'admin/views/affiliate-websites.php'; }
-    public function advertising(){ include BHG_PLUGIN_DIR . 'admin/views/advertising.php'; }
-    public function translations(){ include BHG_PLUGIN_DIR . 'admin/views/translations.php'; }
-    public function database(){ include BHG_PLUGIN_DIR . 'admin/views/database.php'; }
-    public function settings(){ if (class_exists('BHG_Settings')) BHG_Settings::render(); }
+    public function bonus_hunts(){ 
+        if (!current_user_can('manage_options')) {
+            wp_die(__('You do not have sufficient permissions to access this page.', 'bonus-hunt-guesser'));
+        }
+        include BHG_PLUGIN_DIR . 'admin/views/bonus-hunts.php'; 
+    }
+    
+    public function tournaments(){ 
+        if (!current_user_can('manage_options')) {
+            wp_die(__('You do not have sufficient permissions to access this page.', 'bonus-hunt-guesser'));
+        }
+        include BHG_PLUGIN_DIR . 'admin/views/tournaments.php'; 
+    }
+    
+    public function users(){ 
+        if (!current_user_can('manage_options')) {
+            wp_die(__('You do not have sufficient permissions to access this page.', 'bonus-hunt-guesser'));
+        }
+        include BHG_PLUGIN_DIR . 'admin/views/users.php'; 
+    }
+    
+    public function affiliates(){ 
+        if (!current_user_can('manage_options')) {
+            wp_die(__('You do not have sufficient permissions to access this page.', 'bonus-hunt-guesser'));
+        }
+        include BHG_PLUGIN_DIR . 'admin/views/affiliate-websites.php'; 
+    }
+    
+    public function advertising(){ 
+        if (!current_user_can('manage_options')) {
+            wp_die(__('You do not have sufficient permissions to access this page.', 'bonus-hunt-guesser'));
+        }
+        include BHG_PLUGIN_DIR . 'admin/views/advertising.php'; 
+    }
+    
+    public function translations(){ 
+        if (!current_user_can('manage_options')) {
+            wp_die(__('You do not have sufficient permissions to access this page.', 'bonus-hunt-guesser'));
+        }
+        include BHG_PLUGIN_DIR . 'admin/views/translations.php'; 
+    }
+    
+    public function database(){ 
+        if (!current_user_can('manage_options')) {
+            wp_die(__('You do not have sufficient permissions to access this page.', 'bonus-hunt-guesser'));
+        }
+        include BHG_PLUGIN_DIR . 'admin/views/database.php'; 
+    }
+    
+    public function settings(){ 
+        if (!current_user_can('manage_options')) {
+            wp_die(__('You do not have sufficient permissions to access this page.', 'bonus-hunt-guesser'));
+        }
+        if (class_exists('BHG_Settings')) BHG_Settings::render(); 
+    }
 
     private function table($name){
         global $wpdb;
@@ -442,7 +493,9 @@ class BHG_Admin {
     }
 
     public function bhg_tools_page(){
-        if (!current_user_can('manage_options')) return;
+        if (!current_user_can('manage_options')) {
+            wp_die(__('You do not have sufficient permissions to access this page.', 'bonus-hunt-guesser'));
+        }
         ?>
         <div class="wrap">
             <h1><?php esc_html_e('BHG Tools', 'bonus-hunt-guesser'); ?></h1>
@@ -457,6 +510,10 @@ class BHG_Admin {
     }
 
     public function handle_reset_demo(){
+        if (!current_user_can('manage_options')) {
+            wp_die(__('Unauthorized', 'bonus-hunt-guesser'));
+        }
+        
         if (empty($_POST['bhg_nonce']) || !wp_verify_nonce($_POST['bhg_nonce'], 'bhg_reset_demo')){
             wp_die(__('Invalid request','bonus-hunt-guesser'));
         }

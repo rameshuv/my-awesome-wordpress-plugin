@@ -179,9 +179,10 @@ class BHG_DB {
     
     public function get_active_bonus_hunt() {
         global $wpdb;
-        return $wpdb->get_row(
-            "SELECT * FROM {$wpdb->prefix}bhg_bonus_hunts WHERE status = 'open' ORDER BY created_at DESC LIMIT 1"
-        );
+        return $wpdb->get_row($wpdb->prepare(
+            "SELECT * FROM {$wpdb->prefix}bhg_bonus_hunts WHERE status = %s ORDER BY created_at DESC LIMIT 1",
+            'open'
+        ));
     }
     
     public function get_bonus_hunt($hunt_id) {
@@ -443,9 +444,10 @@ class BHG_DB {
     public function get_active_tournaments() {
         global $wpdb;
         
-        return $wpdb->get_results(
-            "SELECT * FROM {$wpdb->prefix}bhg_tournaments WHERE status = 'active' ORDER BY created_at DESC"
-        );
+        return $wpdb->get_results($wpdb->prepare(
+            "SELECT * FROM {$wpdp->prefix}bhg_tournaments WHERE status = %s ORDER BY created_at DESC",
+            'active'
+        ));
     }
     
     public function get_tournament($id) {
