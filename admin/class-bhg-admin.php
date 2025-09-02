@@ -16,6 +16,14 @@ class BHG_Admin {
         add_action('admin_post_bhg_reset_demo', [$this, 'handle_reset_demo']);
         add_action('admin_init', [$this, 'handle_form_submissions']);
         add_action('admin_init', [$this, 'check_nonce_referer']);
+        
+        // Add tournament initialization
+        add_action('init', [$this, 'init_tournaments']);
+    }
+
+    public function init_tournaments() {
+        // Ensure current tournaments exist
+        $this->ensure_current_tournaments();
     }
 
     public function check_nonce_referer() {
@@ -123,7 +131,185 @@ class BHG_Admin {
         if (!current_user_can('manage_options')) {
             wp_die(__('You do not have sufficient permissions to access this page.', 'bonus-hunt-guesser'));
         }
-        include BHG_PLUGIN_DIR . 'admin/views/tournaments.php'; 
+        
+        // Ensure tournaments exist
+        $this->ensure_current_tournaments();
+        
+        // Display the tournaments page
+        echo '<div class="wrap">';
+        echo '<h1>' . esc_html__('Tournaments', 'bonus-hunt-guesser') . '</h1>';
+        
+        echo '<div class="tab-wrapper">';
+        echo '<h2 class="nav-tab-wrapper">';
+        echo '<a href="#weekly" class="nav-tab nav-tab-active">' . esc_html__('Weekly', 'bonus-hunt-guesser') . '</a>';
+        echo '<a href="#monthly" class="nav-tab">' . esc_html__('Monthly', 'bonus-hunt-guesser') . '</a>';
+        echo '<a href="#yearly" class="nav-tab">' . esc_html__('Yearly', 'bonus-hunt-guesser') . '</a>';
+        echo '</h2>';
+        
+        echo '<div id="weekly" class="tab-content">';
+        echo '<h3>' . esc_html__('Weekly Tournament Standings', 'bonus-hunt-guesser') . '</h3>';
+        $this->display_tournament_table('weekly');
+        echo '</div>';
+        
+        echo '<div id="monthly" class="tab-content" style="display:none;">';
+        echo '<h3>' . esc_html__('Monthly Tournament Standings', 'bonus-hunt-guesser') . '</h3>';
+        $this->display_tournament_table('monthly');
+        echo '</div>';
+        
+        echo '<div id="yearly" class="tab-content" style="display:none;">';
+        echo '<h3>' . esc_html__('Yearly Tournament Standings', 'bonus-hunt-guesser') . '</h3>';
+        $this->display_tournament_table('yearly');
+        echo '</div>';
+        echo '</div>';
+        echo '</div>';
+        
+        // Add JavaScript for tab functionality
+        echo '<script>
+        jQuery(document).ready(function($) {
+            $(\'.nav-tab-wrapper a\').click(function(e) {
+                e.preventDefault();
+                $(\'.nav-tab-wrapper a\').removeClass(\'nav-tab-active\');
+                $(this).addClass(\'nav-tab-active\');
+                $(\'.tab-content\').hide();
+                $($(this).attr(\'href\')).show();
+            });
+        });
+        </script>';
+    }
+    
+    private function display_tournament_table($type) {
+        global $wpdb;
+        
+        $current_period = $this->get_current_period($type);
+        $table_name = $wpdb->prefix . 'bhg_tournaments';
+        $wins_table = $wpdb->prefix . 'bhg_tournament_wins';
+        $users_table = $wpdb->prefix . 'users';
+        
+        // Get current tournament
+        $tournament = $wpdb->get_row($wpdb->prepare(
+            "SELECT * FROM $table_name WHERE type = %s AND period = %s",
+            $type, $current_period
+        ));
+        
+        if (!$tournament) {
+            echo '<p>' . esc_html__('No tournament data available.', 'bonus-hunt-guesser') . '</p>';
+            return;
+        }
+        
+        // Get tournament wins
+        $results = $wpdb->get_results($wpdb->prepare(
+            "SELECT w.user_id, u.user_login, w.wins 
+             FROM $wins_table w 
+             JOIN $users_table u ON w.user_id = u.ID 
+             WHERE w.tournament_id = %d 
+             ORDER BY w.wins DESC, w.last_win_date ASC 
+             LIMIT 100",
+            $tournament->id
+        ));
+        
+        if (empty($results)) {
+            echo '<p>' . esc_html__('No data available.', 'bonus-hunt-guesser') . '</p>';
+            return;
+        }
+        
+        echo '<table class="wp-list-table widefat fixed striped">';
+        echo '<thead><tr>
+            <th>' . esc_html__('Position', 'bonus-hunt-guesser') . '</th>
+            <th>' . esc_html__('Username', 'bonus-hunt-guesser') . '</th>
+            <th>' . esc_html__('Wins', 'bonus-hunt-guesser') . '</th>
+        </tr></thead>';
+        echo '<tbody>';
+        
+        $position = 1;
+        foreach ($results as $row) {
+            echo '<tr>
+                <td>' . $position . '</td>
+                <td>' . esc_html($row->user_login) . '</td>
+                <td>' . $row->wins . '</td>
+            </tr>';
+            $position++;
+        }
+        
+        echo '</tbody></table>';
+    }
+    
+    private function get_current_period($type) {
+        switch ($type) {
+            case 'weekly':
+                return date('Y-W');
+            case 'monthly':
+                return date('Y-m');
+            case 'yearly':
+                return date('Y');
+            default:
+                return '';
+        }
+    }
+    
+    private function ensure_current_tournaments() {
+        global $wpdb;
+        
+        $types = ['weekly', 'monthly', 'yearly'];
+        $periods = [
+            'weekly' => date('Y-W'),
+            'monthly' => date('Y-m'),
+            'yearly' => date('Y')
+        ];
+        
+        $table_name = $wpdb->prefix . 'bhg_tournaments';
+        
+        foreach ($types as $type) {
+            $period = $periods[$type];
+            
+            // Check if tournament exists
+            $tournament = $wpdb->get_row($wpdb->prepare(
+                "SELECT id FROM $table_name WHERE type = %s AND period = %s",
+                $type, $period
+            ));
+            
+            if (!$tournament) {
+                // Create the tournament
+                $start_date = $this->get_period_start_date($type, $period);
+                $end_date = $this->get_period_end_date($type, $period);
+                
+                $wpdb->insert($table_name, [
+                    'type' => $type,
+                    'period' => $period,
+                    'start_date' => $start_date,
+                    'end_date' => $end_date,
+                    'status' => 'active'
+                ], ['%s', '%s', '%s', '%s', '%s']);
+            }
+        }
+    }
+    
+    private function get_period_start_date($type, $period) {
+        switch ($type) {
+            case 'weekly':
+                // Parse year and week from period (format: Y-W)
+                list($year, $week) = explode('-', $period);
+                return date('Y-m-d', strtotime($year . 'W' . $week . '1'));
+            case 'monthly':
+                return $period . '-01';
+            case 'yearly':
+                return $period . '-01-01';
+            default:
+                return date('Y-m-d');
+        }
+    }
+    
+    private function get_period_end_date($type, $period) {
+        switch ($type) {
+            case 'weekly':
+                list($year, $week) = explode('-', $period);
+                return date('Y-m-d', strtotime($year . 'W' . $week . '7'));
+            case 'monthly':
+                return date('Y-m-t', strtotime($period . '-01'));
+            case 'yearly':
+                return $period . '-12-31';
+            default:
+                return date('Y-m-d');
+        }
     }
     
     public function users(){ 
