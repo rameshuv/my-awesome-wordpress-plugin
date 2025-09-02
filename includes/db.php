@@ -179,5 +179,3 @@ function bhg_compute_and_notify_winners($hunt_id){
         wp_mail($user->user_email, $subject, $body);
     }
 }
-
-}

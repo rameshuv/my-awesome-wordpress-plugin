@@ -1,1 +1,140 @@
-.bhg-hunt-result h3{cursor:pointer;margin:0 0 8px 0} .bhg-hunt-result table{margin-top:8px} .bhg-tabs .tab-buttons button{margin-right:6px;padding:6px 12px;border:1px solid #ccc;background:#fff;border-radius:4px} .bhg-tabs .tab-buttons button.active{background:#f1f1f1}
+.bhg-box{border:1px solid #e5e7eb;border-radius:12px;padding:16px;margin:12px 0;background:#fff}
+.bhg-guess-form input[type=number]{border:1px solid #94a3b8;border-radius:8px;padding:8px;margin-left:8px}
+.bhg-guess-form button{padding:8px 12px;border-radius:8px;border:1px solid #64748b;background:#f8fafc;cursor:pointer}
+.bhg-leaderboard{width:100%;border-collapse:collapse}
+.bhg-leaderboard th,.bhg-leaderboard td{border:1px solid #e2e8f0;padding:8px}
+
+.bhg-tabs{display:flex;gap:8px;margin-bottom:8px}.bhg-tab{border:1px solid #cbd5e1;border-radius:8px;padding:6px 10px;background:#fff;cursor:pointer}.bhg-ads-footer{margin-top:16px}.bhg-ad-item{border:1px dashed #cbd5e1;border-radius:8px;padding:8px;margin-top:8px}
+
+/* BHG button standard */
+.bhg-btn-submit{display:inline-block;padding:10px 16px;border-radius:10px;border:1px solid #0f172a;background:#0ea5e9;color:#fff;cursor:pointer}
+.bhg-btn-submit:hover{filter:brightness(0.95)}
+/* spacing above submit buttons following inputs */
+.bhg-field+.bhg-actions, .bhg-guess-form .bhg-actions{margin-top:20px}
+.bhg-guess-form button[type=submit]{background:#0ea5e9;border-color:#0f172a;color:#fff;padding:10px 16px;border-radius:10px}
+/* Error states */
+.bhg-form input.error {
+    border-color: #dc3232;
+    box-shadow: 0 0 2px rgba(220, 50, 50, 0.8);
+}
+
+/* Loading states */
+.bhg-submit-btn.loading {
+    opacity: 0.7;
+    position: relative;
+    padding-left: 40px;
+}
+
+.bhg-submit-btn.loading:after {
+    content: "";
+    position: absolute;
+    left: 15px;
+    top: 50%;
+    width: 18px;
+    height: 18px;
+    margin-top: -9px;
+    border: 2px solid #f3f3f3;
+    border-top: 2px solid #3498db;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Alert messages */
+.bhg-alert {
+    padding: 12px;
+    margin: 10px 0;
+    border-radius: 4px;
+    border: 1px solid transparent;
+}
+
+.bhg-alert-error {
+    color: #721c24;
+    background-color: #f8d7da;
+    border-color: #f5c6cb;
+}
+
+.bhg-alert-success {
+    color: #155724;
+    background-color: #d4edda;
+    border-color: #c3e6cb;
+}
+
+/* Tooltips */
+.bhg-affiliate-status {
+    position: relative;
+    display: inline-block;
+}
+
+.bhg-tooltip {
+    position: absolute;
+    bottom: 125%;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 5px 10px;
+    background-color: #333;
+    color: #fff;
+    border-radius: 4px;
+    white-space: nowrap;
+    z-index: 1000;
+}
+
+.bhg-tooltip:after {
+    content: "";
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    margin-left: -5px;
+    border-width: 5px;
+    border-style: solid;
+    border-color: #333 transparent transparent transparent;
+}
+
+/* Table sorting */
+.bhg-leaderboard .sortable {
+    cursor: pointer;
+    position: relative;
+    padding-right: 20px;
+}
+
+.bhg-leaderboard .sortable:after {
+    content: "↕";
+    position: absolute;
+    right: 5px;
+    opacity: 0.5;
+}
+
+.bhg-leaderboard .sortable.asc:after {
+    content: "↑";
+    opacity: 1;
+}
+
+.bhg-leaderboard .sortable.desc:after {
+    content: "↓";
+    opacity: 1;
+}
+
+/* Tab loading state */
+.bhg-tab-content.loading {
+    opacity: 0.7;
+    position: relative;
+    min-height: 100px;
+}
+
+.bhg-tab-content.loading:after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 30px;
+    height: 30px;
+    margin: -15px 0 0 -15px;
+    border: 3px solid #f3f3f3;
+    border-top: 3px solid #3498db;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}

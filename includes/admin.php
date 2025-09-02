@@ -99,5 +99,3 @@ add_action('admin_post_bhg_save_ads', function(){
   wp_safe_redirect(add_query_arg(['page'=>'bhg-advertising','saved'=>'1'], admin_url('admin.php')));
   exit;
 });
-
-}
