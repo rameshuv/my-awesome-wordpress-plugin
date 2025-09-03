@@ -1,0 +1,47 @@
+UPGRADE NOTES — Bonus Hunt Guesser (Consolidated)
+
+1) BACKUP FIRST
+   - Backup your database and your existing plugin folder.
+
+2) INSTALL / UPDATE
+   - Deactivate the old plugin.
+   - Replace the entire plugin folder with this build OR install the ZIP via Plugins → Add New → Upload Plugin.
+   - Activate the plugin.
+
+3) DATABASE MIGRATION
+   - On first load, migrations will run automatically (creates/upgrades tables and columns).
+   - Visit the plugin admin pages once to confirm (Dashboard / Tournaments).
+
+4) TOURNAMENTS
+   - Weekly/Monthly/Yearly rows are created automatically; past periods get closed.
+   - Admin → Bonus Hunt → ensure status/periods look correct.
+
+5) MENUS (Role-based)
+   - Appearance → Menus → Manage Locations:
+     • BHG Admin/Moderator Menu
+     • BHG Logged-in User Menu
+     • BHG Guest Menu
+   - Add the shortcode [bhg_menu] to a page or template to render the proper menu per user/role.
+
+6) SOCIAL LOGIN REDIRECT
+   - If using Nextend Social Login, shortcode/buttons will respect redirect back to the intended page.
+   - Core login also respects redirect_to / bhg_redirect.
+
+7) WINNER & EMAILS
+   - When saving a hunt with a Final Balance, the winner is computed and emails are sent (winner + participants).
+   - Set a From email under plugin settings for cleaner headers; otherwise admin email is used.
+
+8) AFFILIATE SITES
+   - Add Affiliate Websites in the plugin admin.
+   - On user profile, tick per-site affiliate flags (bhg_affiliate_website_{{ID}}).
+   - On hunt creation/edit, select Affiliate Site to drive per-hunt affiliate dot on the leaderboard.
+
+9) COMMON ISSUES
+   - Parse errors typically come from partial file copies. Always replace the entire plugin folder/ZIP.
+   - If emails don’t send, check site’s mail transport or install a mailer plugin (SMTP).
+
+10) SUPPORT CHECKLIST
+   - Create a test hunt (active), submit guesses, sort/paginate leaderboard.
+   - Close a hunt by setting Final Balance → verify winner & emails.
+   - Switch leaderboard tabs (Overall/Monthly/Yearly/All-Time).
+   - Verify role-based menus render correctly for admin/user/guest.

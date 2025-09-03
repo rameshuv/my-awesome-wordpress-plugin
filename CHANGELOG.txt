@@ -1,0 +1,30 @@
+Bonus Hunt Guesser — Consolidated Build
+Date: 2025-09-03
+
+## Stage-1 (Hotfix & Hardening)
+- Always run DB migrations on init via bhg_check_tables() → fixes missing tournament columns.
+- Fixed syntax error in Translations page inputs; ensured hidden action field set.
+- Leaderboard: removed duplicate ORDER BY logic, added safe whitelist + consistent $order_by_sql.
+
+## Stage-2 (Tournament consistency & guess cutoff)
+- ensure_current_tournaments(): auto-create/update weekly/monthly/yearly periods (active) and close past ones.
+- Guess submission handlers block edits if the hunt is closed.
+- Leaderboard: clickable sortable headers (Position/User/Guess) with ASC/DESC; safe SQL mapping.
+- Admin Tournaments view: current + historical periods table.
+
+## Stage-3 (Smart login redirect, role menus, leaderboard tabs)
+- Smart login redirect (core & Nextend): honors redirect_to and bhg_redirect.
+- Role-based menus: registers BHG Admin/Moderator, Logged-in User, and Guest menus; [bhg_menu] shortcode renders appropriate menu.
+- Leaderboard tabs: Overall / Monthly / Yearly / All-Time scopes wired via active tournaments/latest hunt fallback.
+
+## Stage-4 (Winner calc, emails, ads targeting)
+- Winner computation on hunt save when final_balance is set: stores winner_user_id & winner_diff; closes hunt.
+- Email notifications: winner + all participants; respects email_from setting (fallback admin email).
+- Ad targeting: filters ads by visible_to (all | logged_in | guests | affiliates | non_affiliates).
+
+## Stage-5 (Affiliate multi-site UX polish)
+- Hunt form: Affiliate Site dropdown saved to affiliate_site_id.
+- User profile: Affiliate Websites section with per-site flags (bhg_affiliate_website_{ID}).
+- Frontend dot: consistent per-hunt/per-site affiliate status display.
+
+Compatibility: PHP 7.4, WordPress 6.3.5, MySQL 5.5.5

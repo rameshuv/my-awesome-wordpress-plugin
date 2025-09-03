@@ -165,9 +165,6 @@ spl_autoload_register(function ($class) {
 
 // Include helper functions
 require_once BHG_PLUGIN_DIR . 'includes/helpers.php';
-// Load Ads renderer
-require_once BHG_PLUGIN_DIR . 'includes/class-bhg-ads.php';
-
 
 // Activation hook: create tables and set default options
 function bhg_activate_plugin($network_wide) {
@@ -240,7 +237,6 @@ new BHG_Front_Menus();
     if (class_exists('BHG_Utils')) {
         BHG_Utils::init_hooks();
     }
-    if (class_exists('BHG_Ads')) { BHG_Ads::init(); }
     
     // Register form handlers
     add_action('admin_post_bhg_save_bonus_hunt', 'bhg_handle_bonus_hunt_save');
