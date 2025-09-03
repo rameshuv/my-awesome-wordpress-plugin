@@ -1,3 +1,4 @@
+// Deprecated: Do not include. Replaced by includes/class-bhg-db.php
 <?php
 if (!defined('ABSPATH')) { exit; }
 

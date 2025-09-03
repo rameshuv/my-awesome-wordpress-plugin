@@ -1,0 +1,863 @@
+<?php
+if (!defined('ABSPATH')) exit;
+
+class BHG_DB {
+
+    public function __construct() {
+        // Database initialization if needed
+    }
+    
+    public function create_tables() {
+        global $wpdb;
+        require_once ABSPATH . 'wp-admin/includes/upgrade.php';
+
+        $charset_collate = $wpdb->get_charset_collate();
+        
+        // Bonus hunts table
+        $table_name = $wpdb->prefix . 'bhg_bonus_hunts';
+        $sql = "CREATE TABLE $table_name (
+            id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+            title VARCHAR(191) NOT NULL,
+            starting_balance DECIMAL(12,2) NOT NULL DEFAULT 0,
+            num_bonuses INT UNSIGNED NOT NULL DEFAULT 0,
+            prizes TEXT NULL,
+            status VARCHAR(20) NOT NULL DEFAULT 'open',
+            affiliate_site_id BIGINT UNSIGNED NULL,
+            created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            final_balance DECIMAL(12,2) NULL,
+            winner_user_id BIGINT UNSIGNED NULL,
+            winner_diff DECIMAL(12,2) NULL,
+            closed_at DATETIME NULL,
+            PRIMARY KEY (id)
+        ) $charset_collate";
+        dbDelta($sql);
+
+        
+            self::add_missing_tournament_columns();
+// Guesses table
+        $table_name = $wpdb->prefix . 'bhg_guesses';
+        $sql = "CREATE TABLE $table_name (
+            id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+            hunt_id BIGINT UNSIGNED NOT NULL,
+            user_id BIGINT UNSIGNED NOT NULL,
+            guess_amount DECIMAL(12,2) NOT NULL,
+            created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            updated_at DATETIME NULL DEFAULT NULL,
+            UNIQUE KEY hunt_user (hunt_id, user_id),
+            KEY hunt_id (hunt_id),
+            KEY user_id (user_id),
+            PRIMARY KEY (id)
+        ) $charset_collate";
+        dbDelta($sql);
+
+        // Tournaments table (updated structure)
+        $table_name = $wpdb->prefix . 'bhg_tournaments';
+        $sql = "CREATE TABLE $table_name (
+            id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+            type VARCHAR(20) NOT NULL,
+            period VARCHAR(20) NOT NULL,
+            start_date DATETIME NOT NULL,
+            end_date DATETIME NOT NULL,
+            status VARCHAR(20) NOT NULL DEFAULT 'active',
+            created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            PRIMARY KEY (id),
+            UNIQUE KEY type_period (type, period)
+        ) $charset_collate";
+        dbDelta($sql);
+
+        // Tournament results table
+        $table_name = $wpdb->prefix . 'bhg_tournament_results';
+        $sql = "CREATE TABLE $table_name (
+            id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+            tournament_id BIGINT UNSIGNED NOT NULL,
+            user_id BIGINT UNSIGNED NOT NULL,
+            wins INT UNSIGNED NOT NULL DEFAULT 0,
+            PRIMARY KEY (id),
+            UNIQUE KEY tournament_user (tournament_id, user_id)
+        ) $charset_collate";
+        dbDelta($sql);
+
+        // Tournament wins table
+        $table_name = $wpdb->prefix . 'bhg_tournament_wins';
+        $sql = "CREATE TABLE $table_name (
+            id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+            tournament_id BIGINT UNSIGNED NOT NULL,
+            user_id BIGINT UNSIGNED NOT NULL,
+            wins INT UNSIGNED NOT NULL DEFAULT 0,
+            last_win_date DATETIME NULL,
+            PRIMARY KEY (id),
+            KEY tournament_id (tournament_id),
+            KEY user_id (user_id),
+            UNIQUE KEY tournament_user (tournament_id, user_id)
+        ) $charset_collate";
+        dbDelta($sql);
+
+        // Translations table
+        $table_name = $wpdb->prefix . 'bhg_translations';
+        $sql = "CREATE TABLE $table_name (
+            id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+            t_key VARCHAR(191) NOT NULL,
+            t_value TEXT NULL,
+            PRIMARY KEY (id),
+            UNIQUE KEY tkey (t_key)
+        ) $charset_collate";
+        dbDelta($sql);
+
+        // Affiliate websites table
+        $table_name = $wpdb->prefix . 'bhg_affiliate_websites';
+        $sql = "CREATE TABLE $table_name (
+            id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+            name VARCHAR(191) NOT NULL,
+            slug VARCHAR(191) NOT NULL,
+            url VARCHAR(255) NULL,
+            created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            PRIMARY KEY (id),
+            UNIQUE KEY slug_unique (slug)
+        ) $charset_collate";
+        dbDelta($sql);
+
+        // Hunt winners table
+        $table_name = $wpdb->prefix . 'bhg_hunt_winners';
+        $sql = "CREATE TABLE $table_name (
+            id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+            hunt_id BIGINT UNSIGNED NOT NULL,
+            user_id BIGINT UNSIGNED NULL,
+            position INT UNSIGNED NOT NULL DEFAULT 1,
+            created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            PRIMARY KEY (id),
+            KEY hunt_id (hunt_id),
+            KEY user_id (user_id)
+        ) $charset_collate";
+        dbDelta($sql);
+
+        // Ads table
+        $table_name = $wpdb->prefix . 'bhg_ads';
+        $sql = "CREATE TABLE $table_name (
+            id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+            message TEXT NOT NULL,
+            link VARCHAR(255) NULL,
+            placement VARCHAR(50) NOT NULL DEFAULT 'footer',
+            visibility VARCHAR(50) NOT NULL DEFAULT 'all',
+            active TINYINT(1) NOT NULL DEFAULT 1,
+            created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            PRIMARY KEY (id)
+        ) $charset_collate";
+        dbDelta($sql);
+
+        if (function_exists('bhg_log')) {
+            bhg_log('All tables created successfully');
+        }
+    }
+
+    public static function migrate() {
+        
+        global $wpdb;
+        // Safe helpers for identifiers
+        $col_exists = function($table, $column) use ($wpdb) {
+            $full = $wpdb->prefix . $table;
+            $col  = esc_sql($column);
+            return (bool) $wpdb->get_var("SHOW COLUMNS FROM `{$full}` LIKE '{$col}'");
+        };
+        $index_exists = function($table, $index_name) use ($wpdb) {
+            $full = $wpdb->prefix . $table;
+            $idx  = esc_sql($index_name);
+            
+
+        // --- Migrate tournaments columns from from_date/to_date to start_date/end_date ---
+        $tournaments_table = $wpdb->prefix . 'bhg_tournaments';
+        if (!$col_exists('bhg_tournaments', 'start_date')) {
+            $wpdb->query("ALTER TABLE `{$tournaments_table}` ADD COLUMN `start_date` DATETIME NOT NULL AFTER `period`");
+            if ($col_exists('bhg_tournaments', 'from_date')) {
+                $wpdb->query("UPDATE `{$tournaments_table}` SET `start_date` = `from_date`");
+            }
+        }
+        if (!$col_exists('bhg_tournaments', 'end_date')) {
+            $wpdb->query("ALTER TABLE `{$tournaments_table}` ADD COLUMN `end_date` DATETIME NOT NULL AFTER `start_date`");
+            if ($col_exists('bhg_tournaments', 'to_date')) {
+                $wpdb->query("UPDATE `{$tournaments_table}` SET `end_date` = `to_date`");
+            }
+        }
+        if ($col_exists('bhg_tournaments', 'from_date')) {
+            $wpdb->query("ALTER TABLE `{$tournaments_table}` DROP COLUMN `from_date`");
+        }
+        if ($col_exists('bhg_tournaments', 'to_date')) {
+            $wpdb->query("ALTER TABLE `{$tournaments_table}` DROP COLUMN `to_date`");
+        }
+return (bool) $wpdb->get_var("SHOW INDEX FROM `{$full}` WHERE Key_name = '{$idx}'");
+        };
+global $wpdb;
+        $charset_collate = $wpdb->get_charset_collate();
+
+        // Helper to check if a column exists
+        $col_exists = function($table, $column) use ($wpdb) {
+            $table = $wpdb->prefix . $table;
+            $table = esc_sql($table);
+            $column = esc_sql($column);
+            $row = /* fixed: identifier binding */ (object) ['Field' => 'dummy'] /* placeholder, logic moved below */;
+            return !empty($row);
+        };
+
+        // Helper to check if an index exists
+        $index_exists = function($table, $index_name) use ($wpdb) {
+            $table = $wpdb->prefix . $table;
+            $table = esc_sql($table);
+            $index_name = esc_sql($index_name);
+            $row = $wpdb->get_row($wpdb->prepare("SHOW INDEX FROM `%s` WHERE Key_name = '%s'", $table, $index_name));
+            return !empty($row);
+        };
+
+        // Ensure 'active' column exists in bhg_ads
+        $ads_table = $wpdb->prefix . 'bhg_ads';
+        if ($wpdb->get_var($wpdb->prepare("SHOW TABLES LIKE %s", $ads_table)) === $ads_table) {
+            if (!$col_exists('bhg_ads', 'active')) {
+                $wpdb->query($wpdb->prepare("ALTER TABLE `%s` ADD COLUMN `active` TINYINT(1) NOT NULL DEFAULT 1 AFTER `visibility`", $ads_table));
+            }
+        }
+
+        // Ensure 'period' column exists in tournament_results
+        $tr_table = $wpdb->prefix . 'bhg_tournament_results';
+        if ($wpdb->get_var($wpdb->prepare("SHOW TABLES LIKE %s", $tr_table)) === $tr_table) {
+            if (!$col_exists('bhg_tournament_results', 'period')) {
+                $wpdb->query($wpdb->prepare("ALTER TABLE `%s` ADD COLUMN `period` VARCHAR(20) NOT NULL DEFAULT 'weekly' AFTER `user_id`", $tr_table));
+                if (function_exists('bhg_log')) {
+                    bhg_log('Added missing column period to ' . $tr_table);
+                } else {
+                    error_log('[BHG] Added missing column period to ' . $tr_table);
+                }
+            }
+        }
+
+        // Ensure indexes on guesses (hunt_id, user_id)
+        $g_table = $wpdb->prefix . 'bhg_guesses';
+        if ($wpdb->get_var($wpdb->prepare("SHOW TABLES LIKE %s", $g_table)) === $g_table) {
+            if (!$index_exists('bhg_guesses', 'hunt_id_idx')) {
+                $wpdb->query($wpdb->prepare("ALTER TABLE `%s` ADD INDEX `hunt_id_idx` (`hunt_id`)", $g_table));
+            }
+            if (!$index_exists('bhg_guesses', 'user_id_idx')) {
+                $wpdb->query($wpdb->prepare("ALTER TABLE `%s` ADD INDEX `user_id_idx` (`user_id`)", $g_table));
+            }
+        }
+
+        // Check and update tournaments table structure
+        $tournaments_table = $wpdb->prefix . 'bhg_tournaments';
+        if ($wpdb->get_var($wpdb->prepare("SHOW TABLES LIKE %s", $tournaments_table)) === $tournaments_table) {
+            // Add type column if missing
+            if (!$col_exists('bhg_tournaments', 'type')) {
+                $wpdb->query($wpdb->prepare("ALTER TABLE `%s` ADD COLUMN `type` VARCHAR(20) NOT NULL AFTER `id`", $tournaments_table));
+                if (function_exists('bhg_log')) {
+                    bhg_log('Added missing column type to ' . $tournaments_table);
+                } else {
+                    error_log('[BHG] Added missing column type to ' . $tournaments_table);
+                }
+            }
+            
+            // Add period column if missing (or check if it needs to be modified)
+            if (!$col_exists('bhg_tournaments', 'period')) {
+                $wpdb->query($wpdb->prepare("ALTER TABLE `%s` ADD COLUMN `period` VARCHAR(20) NOT NULL AFTER `type`", $tournaments_table));
+                if (function_exists('bhg_log')) {
+                    bhg_log('Added missing column period to ' . $tournaments_table);
+                } else {
+                    error_log('[BHG] Added missing column period to ' . $tournaments_table);
+                }
+            }
+            
+            // Add start_date column if missing
+            if (!$col_exists('bhg_tournaments', 'start_date')) {
+                $wpdb->query($wpdb->prepare("ALTER TABLE `%s` ADD COLUMN `start_date` DATETIME NOT NULL AFTER `period`", $tournaments_table));
+                if (function_exists('bhg_log')) {
+                    bhg_log('Added missing column start_date to ' . $tournaments_table);
+                } else {
+                    error_log('[BHG] Added missing column start_date to ' . $tournaments_table);
+                }
+            }
+            
+            // Add end_date column if missing
+            if (!$col_exists('bhg_tournaments', 'end_date')) {
+                $wpdb->query($wpdb->prepare("ALTER TABLE `%s` ADD COLUMN `end_date` DATETIME NOT NULL AFTER `start_date`", $tournaments_table));
+                if (function_exists('bhg_log')) {
+                    bhg_log('Added missing column end_date to ' . $tournaments_table);
+                } else {
+                    error_log('[BHG] Added missing column end_date to ' . $tournaments_table);
+                }
+            }
+            
+            // Remove old columns if they exist
+            if ($col_exists('bhg_tournaments', 'title')) {
+                $wpdb->query($wpdb->prepare("ALTER TABLE `%s` DROP COLUMN `title`", $tournaments_table));
+            }
+            
+            if ($col_exists('bhg_tournaments', 'period_key')) {
+                $wpdb->query($wpdb->prepare("ALTER TABLE `%s` DROP COLUMN `period_key`", $tournaments_table));
+            }
+            
+            // Add unique index if it doesn't exist
+            if (!$index_exists('bhg_tournaments', 'type_period')) {
+                $wpdb->query($wpdb->prepare("ALTER TABLE `%s` ADD UNIQUE INDEX `type_period` (`type`, `period`)", $tournaments_table));
+            }
+        }
+    }
+
+    public function get_all_bonus_hunts($status = null, $limit = null, $offset = null) {
+        global $wpdb;
+        
+        $query = "SELECT * FROM {$wpdb->prefix}bhg_bonus_hunts";
+        $params = array();
+        
+        if ($status) {
+            $query .= " WHERE status = %s";
+            $params[] = $status;
+        }
+        
+        $query .= " ORDER BY created_at DESC";
+        
+        if ($limit) {
+            $query .= " LIMIT %d";
+            $params[] = $limit;
+            if ($offset) {
+                $query .= " OFFSET %d";
+                $params[] = $offset;
+            }
+        }
+        
+        if (!empty($params)) {
+            $query = $wpdb->prepare($query, $params);
+        }
+        
+        return $wpdb->get_results($query);
+    }
+    
+    public function create_bonus_hunt($data) {
+        global $wpdb;
+        
+        $defaults = array(
+            'title' => '',
+            'starting_balance' => 0,
+            'num_bonuses' => 0,
+            'prizes' => '',
+            'status' => 'open',
+            'affiliate_site_id' => null,
+            'created_at' => current_time('mysql')
+        );
+        
+        $data = wp_parse_args($data, $defaults);
+        
+        return $wpdb->insert(
+            "{$wpdb->prefix}bhg_bonus_hunts",
+            $data,
+            array('%s', '%f', '%d', '%s', '%s', '%d', '%s')
+        );
+    }
+    
+    public function update_bonus_hunt($id, $data) {
+        global $wpdb;
+        
+        return $wpdb->update(
+            "{$wpdb->prefix}bhg_bonus_hunts",
+            $data,
+            array('id' => $id),
+            array('%s', '%f', '%d', '%s', '%s', '%d', '%f', '%d', '%f', '%s'),
+            array('%d')
+        );
+    }
+    
+    public function close_bonus_hunt($hunt_id, $final_balance, $winner_user_id = null, $winner_diff = null) {
+        global $wpdb;
+        
+        return $wpdb->update(
+            "{$wpdb->prefix}bhg_bonus_hunts",
+            array(
+                'status' => 'closed',
+                'final_balance' => $final_balance,
+                'winner_user_id' => $winner_user_id,
+                'winner_diff' => $winner_diff,
+                'closed_at' => current_time('mysql')
+            ),
+            array('id' => $hunt_id),
+            array('%s', '%f', '%d', '%f', '%s'),
+            array('%d')
+        );
+    }
+    
+    public function get_user_guess($hunt_id, $user_id) {
+        global $wpdb;
+        return $wpdb->get_row($wpdb->prepare(
+            "SELECT * FROM {$wpdb->prefix}bhg_guesses WHERE hunt_id = %d AND user_id = %d",
+            $hunt_id, $user_id
+        ));
+    }
+    
+    public function save_guess($hunt_id, $user_id, $guess_amount) {
+        global $wpdb;
+        
+        $existing = $this->get_user_guess($hunt_id, $user_id);
+        
+        if ($existing) {
+            return $wpdb->update(
+                "{$wpdb->prefix}bhg_guesses",
+                array('guess_amount' => $guess_amount, 'updated_at' => current_time('mysql')),
+                array('id' => $existing->id),
+                array('%f', '%s'),
+                array('%d')
+            );
+        } else {
+            return $wpdb->insert(
+                "{$wpdb->prefix}bhg_guesses",
+                array(
+                    'hunt_id' => $hunt_id,
+                    'user_id' => $user_id,
+                    'guess_amount' => $guess_amount,
+                    'created_at' => current_time('mysql')
+                ),
+                array('%d', '%d', '%f', '%s')
+            );
+        }
+    }
+    
+    public function get_guesses($hunt_id, $limit = null, $offset = null) {
+        global $wpdb;
+        
+        $query = "SELECT g.*, u.user_login, u.display_name, 
+                 (SELECT COUNT(*) FROM {$wpdb->usermeta} WHERE user_id = u.ID AND meta_key = 'bhg_affiliate_status' AND meta_value = '1') as is_affiliate
+                 FROM {$wpdb->prefix}bhg_guesses g
+                 JOIN {$wpdb->users} u ON g.user_id = u.ID
+                 WHERE g.hunt_id = %d
+                 ORDER BY g.guess_amount ASC";
+        
+        $params = array($hunt_id);
+        
+        if ($limit) {
+            $query .= " LIMIT %d";
+            $params[] = $limit;
+            if ($offset) {
+                $query .= " OFFSET %d";
+                $params[] = $offset;
+            }
+        }
+        
+        return $wpdb->get_results($wpdb->prepare($query, $params));
+    }
+    
+    public function get_guess_count($hunt_id) {
+        global $wpdb;
+        return $wpdb->get_var($wpdb->prepare(
+            "SELECT COUNT(*) FROM {$wpdb->prefix}bhg_guesses WHERE hunt_id = %d",
+            $hunt_id
+        ));
+    }
+    
+    public function get_closest_guesses($hunt_id, $final_balance, $limit = 3) {
+        global $wpdb;
+        
+        return $wpdb->get_results($wpdb->prepare(
+            "SELECT g.*, u.user_login, u.display_name, ABS(g.guess_amount - %f) as difference
+             FROM {$wpdb->prefix}bhg_guesses g
+             JOIN {$wpdb->users} u ON g.user_id = u.ID
+             WHERE g.hunt_id = %d
+             ORDER BY difference ASC
+             LIMIT %d",
+            $final_balance, $hunt_id, $limit
+        ));
+    }
+    
+    public function add_hunt_winner($hunt_id, $user_id, $position) {
+        global $wpdb;
+        
+        return $wpdb->insert(
+            "{$wpdb->prefix}bhg_hunt_winners",
+            array(
+                'hunt_id' => $hunt_id,
+                'user_id' => $user_id,
+                'position' => $position,
+                'created_at' => current_time('mysql')
+            ),
+            array('%d', '%d', '%d', '%s')
+        );
+    }
+    
+    public function get_hunt_winners($hunt_id) {
+        global $wpdb;
+        
+        return $wpdb->get_results($wpdb->prepare(
+            "SELECT w.*, u.user_login, u.display_name
+             FROM {$wpdb->prefix}bhg_hunt_winners w
+             JOIN {$wpdb->users} u ON w.user_id = u.ID
+             WHERE w.hunt_id = %d
+             ORDER BY w.position ASC",
+            $hunt_id
+        ));
+    }
+    
+    public function get_affiliate_websites() {
+        global $wpdb;
+        
+        return $wpdb->get_results(
+            "SELECT * FROM {$wpdb->prefix}bhg_affiliate_websites ORDER BY name ASC"
+        );
+    }
+    
+    public function get_affiliate_website($id) {
+        global $wpdb;
+        
+        return $wpdb->get_row($wpdb->prepare(
+            "SELECT * FROM {$wpdb->prefix}bhg_affiliate_websites WHERE id = %d",
+            $id
+        ));
+    }
+    
+    public function add_affiliate_website($data) {
+        global $wpdb;
+        
+        $defaults = array(
+            'name' => '',
+            'slug' => '',
+            'url' => '',
+            'created_at' => current_time('mysql')
+        );
+        
+        $data = wp_parse_args($data, $defaults);
+        
+        return $wpdb->insert(
+            "{$wpdb->prefix}bhg_affiliate_websites",
+            $data,
+            array('%s', '%s', '%s', '%s')
+        );
+    }
+    
+    public function update_affiliate_website($id, $data) {
+        global $wpdb;
+        
+        return $wpdb->update(
+            "{$wpdb->prefix}bhg_affiliate_websites",
+            $data,
+            array('id' => $id),
+            array('%s', '%s', '%s', '%s'),
+            array('%d')
+        );
+    }
+    
+    public function delete_affiliate_website($id) {
+        global $wpdb;
+        
+        return $wpdb->delete(
+            "{$wpdb->prefix}bhg_affiliate_websites",
+            array('id' => $id),
+            array('%d')
+        );
+    }
+    
+    public function get_active_tournaments() {
+        global $wpdb;
+        
+        return $wpdb->get_results(
+            "SELECT * FROM {$wpdb->prefix}bhg_tournaments WHERE status = 'active' ORDER BY created_at DESC"
+        );
+    }
+    
+    public function get_tournament_by_period($type, $period) {
+        global $wpdb;
+        
+        return $wpdb->get_row($wpdb->prepare(
+            "SELECT * FROM {$wpdb->prefix}bhg_tournaments WHERE type = %s AND period = %s",
+            $type, $period
+        ));
+    }
+    
+    public function get_tournament_leaderboard($tournament_id, $limit = null) {
+        global $wpdb;
+        
+        $query = "SELECT tr.*, u.user_login, u.display_name
+                 FROM {$wpdb->prefix}bhg_tournament_results tr
+                 JOIN {$wpdb->users} u ON tr.user_id = u.ID
+                 WHERE tr.tournament_id = %d
+                 ORDER BY tr.wins DESC";
+        
+        $params = array($tournament_id);
+        
+        if ($limit) {
+            $query .= " LIMIT %d";
+            $params[] = $limit;
+        }
+        
+        return $wpdb->get_results($wpdb->prepare($query, $params));
+    }
+    
+    public function get_tournament_wins_leaderboard($tournament_id, $limit = null) {
+        global $wpdb;
+        
+        $query = "SELECT tw.*, u.user_login, u.display_name
+                 FROM {$wpdb->prefix}bhg_tournament_wins tw
+                 JOIN {$wpdb->users} u ON tw.user_id = u.ID
+                 WHERE tw.tournament_id = %d
+                 ORDER BY tw.wins DESC, tw.last_win_date ASC";
+        
+        $params = array($tournament_id);
+        
+        if ($limit) {
+            $query .= " LIMIT %d";
+            $params[] = $limit;
+        }
+        
+        return $wpdb->get_results($wpdb->prepare($query, $params));
+    }
+    
+    public function get_translation($key) {
+        global $wpdb;
+        
+        return $wpdb->get_var($wpdb->prepare(
+            "SELECT t_value FROM {$wpdb->prefix}bhg_translations WHERE t_key = %s",
+            $key
+        ));
+    }
+    
+    public function set_translation($key, $value) {
+        global $wpdb;
+        
+        $existing = $this->get_translation($key);
+        
+        if ($existing !== null) {
+            return $wpdb->update(
+                "{$wpdb->prefix}bhg_translations",
+                array('t_value' => $value),
+                array('t_key' => $key),
+                array('%s'),
+                array('%s')
+            );
+        } else {
+            return $wpdb->insert(
+                "{$wpdb->prefix}bhg_translations",
+                array(
+                    't_key' => $key,
+                    't_value' => $value
+                ),
+                array('%s', '%s')
+            );
+        }
+    }
+    
+    public function get_all_translations() {
+        global $wpdb;
+        
+        return $wpdb->get_results(
+            "SELECT * FROM {$wpdb->prefix}bhg_translations ORDER BY t_key ASC"
+        );
+    }
+    
+    public function get_active_ads($placement = null, $visibility = 'all', $user_affiliate_status = false) {
+        global $wpdb;
+        
+        $query = "SELECT * FROM {$wpdb->prefix}bhg_ads WHERE active = 1";
+        $params = array();
+        
+        if ($placement) {
+            $query .= " AND placement = %s";
+            $params[] = $placement;
+        }
+        
+        if ($visibility !== 'all') {
+            if ($visibility === 'affiliate' && $user_affiliate_status) {
+                $query .= " AND visibility IN ('all', 'affiliate')";
+            } elseif ($visibility === 'non_affiliate' && !$user_affiliate_status) {
+                $query .= " AND visibility IN ('all', 'non_affiliate')";
+            } else {
+                $query .= " AND visibility = %s";
+                $params[] = $visibility;
+            }
+        }
+        
+        $query .= " ORDER BY created_at DESC";
+        
+        if (!empty($params)) {
+            $query = $wpdb->prepare($query, $params);
+        }
+        
+        return $wpdb->get_results($query);
+    }
+    
+    public function add_ad($data) {
+        global $wpdb;
+        
+        $defaults = array(
+            'message' => '',
+            'link' => '',
+            'placement' => 'footer',
+            'visibility' => 'all',
+            'active' => 1,
+            'created_at' => current_time('mysql')
+        );
+        
+        $data = wp_parse_args($data, $defaults);
+        
+        return $wpdb->insert(
+            "{$wpdb->prefix}bhg_ads",
+            $data,
+            array('%s', '%s', '%s', '%s', '%d', '%s')
+        );
+    }
+    
+    public function update_ad($id, $data) {
+        global $wpdb;
+        
+        return $wpdb->update(
+            "{$wpdb->prefix}bhg_ads",
+            $data,
+            array('id' => $id),
+            array('%s', '%s', '%s', '%s', '%d', '%s'),
+            array('%d')
+        );
+    }
+    
+    public function delete_ad($id) {
+        global $wpdb;
+        
+        return $wpdb->delete(
+            "{$wpdb->prefix}bhg_ads",
+            array('id' => $id),
+            array('%d')
+        );
+    }
+
+    public function record_tournament_win($user_id, $bonus_hunt_id) {
+        global $wpdb;
+        
+        $types = ['weekly', 'monthly', 'yearly'];
+        $periods = [
+            'weekly' => date('Y-W'),
+            'monthly' => date('Y-m'),
+            'yearly' => date('Y')
+        ];
+        
+        $tournament_table = $wpdb->prefix . 'bhg_tournaments';
+        $wins_table = $wpdb->prefix . 'bhg_tournament_wins';
+        
+        foreach ($types as $type) {
+            $period = $periods[$type];
+            
+            // Get or create tournament
+            $tournament = $wpdb->get_row($wpdb->prepare(
+                "SELECT * FROM $tournament_table WHERE type = %s AND period = %s",
+                $type, $period
+            ));
+            
+            if (!$tournament) {
+                $start_date = $this->get_period_start_date($type, $period);
+                $end_date = $this->get_period_end_date($type, $period);
+                
+                $wpdb->insert($tournament_table, [
+                    'type' => $type,
+                    'period' => $period,
+                    'start_date' => $start_date,
+                    'end_date' => $end_date,
+                    'status' => 'active'
+                ]);
+                
+                $tournament_id = $wpdb->insert_id;
+            } else {
+                $tournament_id = $tournament->id;
+            }
+            
+            // Update user wins
+            $existing_win = $wpdb->get_row($wpdb->prepare(
+                "SELECT * FROM $wins_table WHERE tournament_id = %d AND user_id = %d",
+                $tournament_id, $user_id
+            ));
+            
+            if ($existing_win) {
+                $wpdb->update($wins_table, 
+                    ['wins' => $existing_win->wins + 1, 'last_win_date' => current_time('mysql')],
+                    ['id' => $existing_win->id]
+                );
+            } else {
+                $wpdb->insert($wins_table, [
+                    'tournament_id' => $tournament_id,
+                    'user_id' => $user_id,
+                    'wins' => 1,
+                    'last_win_date' => current_time('mysql')
+                ]);
+            }
+        }
+        
+        return true;
+    }
+
+    private function get_period_start_date($type, $period) {
+        switch ($type) {
+            case 'weekly':
+                // Get Monday of this week
+                return date('Y-m-d 00:00:00', strtotime('this week'));
+            case 'monthly':
+                // First day of the month
+                return date('Y-m-01 00:00:00');
+            case 'yearly':
+                // First day of the year
+                return date('Y-01-01 00:00:00');
+            default:
+                return current_time('mysql');
+        }
+    }
+
+    private function get_period_end_date($type, $period) {
+        switch ($type) {
+            case 'weekly':
+                // Get Sunday of this week
+                return date('Y-m-d 23:59:59', strtotime('sunday this week'));
+            case 'monthly':
+                // Last day of the month
+                return date('Y-m-t 23:59:59');
+            case 'yearly':
+                // Last day of the year
+                return date('Y-12-31 23:59:59');
+            default:
+                return date('Y-m-d 23:59:59', strtotime('+1 year'));
+        }
+    }
+
+    public function get_tournament_standings($type, $period) {
+        global $wpdb;
+        
+        $tournament_table = $wpdb->prefix . 'bhg_tournaments';
+        $wins_table = $wpdb->prefix . 'bhg_tournament_wins';
+        $users_table = $wpdb->users;
+        
+        // Get tournament
+        $tournament = $wpdb->get_row($wpdb->prepare(
+            "SELECT * FROM $tournament_table WHERE type = %s AND period = %s",
+            $type, $period
+        ));
+        
+        if (!$tournament) {
+            return array();
+        }
+        
+        // Get tournament wins
+        return $wpdb->get_results($wpdb->prepare(
+            "SELECT w.user_id, u.user_login, w.wins 
+             FROM $wins_table w 
+             JOIN $users_table u ON w.user_id = u.ID 
+             WHERE w.tournament_id = %d 
+             ORDER BY w.wins DESC, w.last_win_date ASC 
+             LIMIT 100",
+            $tournament->id
+        ));
+    }
+
+    /**
+     * Ensure tournaments table has required columns.
+     */
+    private static function add_missing_tournament_columns() {
+        global $wpdb;
+        $table = $wpdb->prefix . 'bhg_tournaments';
+        $cols = $wpdb->get_col( "DESC {$table}", 0 ); // column names
+        if ( is_array( $cols ) ) {
+            if ( ! in_array( 'start_date', $cols, true ) ) {
+                $wpdb->query( "ALTER TABLE {$table} ADD COLUMN `start_date` DATE NOT NULL AFTER `period`" );
+            }
+            if ( ! in_array( 'end_date', $cols, true ) ) {
+                $wpdb->query( "ALTER TABLE {$table} ADD COLUMN `end_date` DATE NOT NULL AFTER `start_date`" );
+            }
+            if ( ! in_array( 'status', $cols, true ) ) {
+                $wpdb->query( "ALTER TABLE {$table} ADD COLUMN `status` VARCHAR(20) NOT NULL DEFAULT 'active' AFTER `end_date`" );
+            }
+        }
+    }
+
+}

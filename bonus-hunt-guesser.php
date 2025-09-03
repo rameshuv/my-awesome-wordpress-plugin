@@ -11,6 +11,9 @@
  * Requires at least: 5.5.5
  * License: GPLv2 or later
  */
+// Ensure canonical DB class is loaded
+require_once __DIR__ . '/includes/class-bhg-db.php';
+
 
 // Prevent direct access
 if (!defined('ABSPATH')) {
@@ -26,7 +29,7 @@ define('BHG_PLUGIN_URL', plugin_dir_url(__FILE__));
 define('BHG_TABLE_PREFIX', 'bhg_');
 
 // Simple BHG_DB class for activation
-class BHG_DB {
+class BHG_DB_OLD {
     private $table_prefix;
 
     public function __construct() {
@@ -119,8 +122,11 @@ class BHG_DB {
 
 // Table creation function
 function bhg_create_tables() {
-    $db = new BHG_DB();
-    $db->create_tables();
+        if (class_exists('BHG_DB')) {
+            (new BHG_DB())->create_tables();
+            BHG_DB::migrate();
+            return;
+        }
 }
 
 // Check and create tables if needed
