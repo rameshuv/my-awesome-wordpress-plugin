@@ -7,12 +7,13 @@ if (!current_user_can('manage_options')) {
 }
 
 global $wpdb;
-$rows = $wpdb->get_results(\"SELECT * FROM {$wpdb->prefix}bhg_affiliate_websites ORDER BY name ASC\");
+$table = $wpdb->prefix . 'bhg_affiliate_websites';
+$rows = $wpdb->get_results("SELECT * FROM $table ORDER BY name ASC");
 $edit = null;
 
 if (!empty($_GET['edit']) && is_numeric($_GET['edit'])) {
     $edit_id = intval($_GET['edit']);
-    $edit = $wpdb->get_results("SELECT * FROM `" . $edit_id . "`");
+    $edit = $wpdb->get_row($wpdb->prepare("SELECT * FROM $table WHERE id = %d", $edit_id));
 }
 ?>
 <div class="wrap bhg-wrap">

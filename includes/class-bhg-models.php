@@ -46,14 +46,14 @@ class BHG_Models {
     }
   }
   
-  public static function upsert_guess($hunt_id, $user_id, $guess){
+  public static function upsert_guess_value($hunt_id, $user_id, $guess_value){
     global $wpdb; 
     $t = BHG_DB::table('guesses');
     
     // Validate inputs
     $hunt_id = intval($hunt_id);
     $user_id = intval($user_id);
-    $guess = floatval($guess);
+    $guess_value = floatval($guess_value);
     
     $exists = $wpdb->get_var($wpdb->prepare(
       "SELECT id FROM $t WHERE hunt_id = %d AND user_id = %d", 
@@ -64,7 +64,7 @@ class BHG_Models {
     $row = [
       'hunt_id' => $hunt_id, 
       'user_id' => $user_id, 
-      'guess' => $guess, 
+      'guess_value' => $guess_value, 
       'updated_at' => current_time('mysql')
     ];
     
@@ -78,15 +78,15 @@ class BHG_Models {
     }
   }
   
-  public static function guesses($hunt_id, $orderby='guess', $order='ASC', $paged=1, $per_page=20){
+  public static function guesses($hunt_id, $orderby='guess_value', $order='ASC', $paged=1, $per_page=20){
     global $wpdb; 
     $t = BHG_DB::table('guesses');
     $users_table = $wpdb->prefix . 'users';
     
     // Validate and sanitize inputs
     $hunt_id = intval($hunt_id);
-    $allowed = ['guess', 'user_id', 'user_login'];
-    $orderby = in_array($orderby, $allowed, true) ? $orderby : 'guess';
+    $allowed = ['guess_value', 'user_id', 'user_login'];
+    $orderby = in_array($orderby, $allowed, true) ? $orderby : 'guess_value';
     $order = strtoupper($order) === 'DESC' ? 'DESC' : 'ASC';
     $paged = max(1, intval($paged));
     $per_page = max(1, intval($per_page));
@@ -127,7 +127,7 @@ class BHG_Models {
     
     $t = BHG_DB::table('guesses');
     $rows = $wpdb->get_results($wpdb->prepare(
-      "SELECT user_id, guess FROM $t WHERE hunt_id = %d", 
+      "SELECT user_id, guess_value FROM $t WHERE hunt_id = %d", 
       $hunt_id
     ));
     
@@ -136,7 +136,7 @@ class BHG_Models {
     $best_diff = null;
     
     foreach ($rows as $r){
-      $diff = abs($final_balance - floatval($r->guess));
+      $diff = abs($final_balance - floatval($r->guess_value));
       if ($best_diff === null || $diff < $best_diff){
         $best_diff = $diff; 
         $winner = intval($r->user_id);

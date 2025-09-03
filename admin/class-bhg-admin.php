@@ -2,6 +2,8 @@
 if (!defined('ABSPATH')) exit;
 
 class BHG_Admin {
+    /* STAGE-4 EMAIL LOCALIZATION */
+
 
     public function __construct(){
         add_action('admin_menu', [$this, 'menu']);
@@ -247,6 +249,68 @@ class BHG_Admin {
     }
     
     private function ensure_current_tournaments() {
+        // Stage-2: ensure tournaments use start_date/end_date consistently
+        // start_date and end_date columns must always be set when creating tournaments.
+        
+        /* STAGE-2 TOURNAMENT DATES */
+        // Any logic computing $start_date and $end_date must store them with the tournament row.
+        // For weekly/monthly/yearly, we compute period string and derive dates.
+        $compute_dates = function($type) {
+            $now = current_time('timestamp');
+            if ($type === 'weekly') {
+                // ISO week
+                $y = (int) date('o', $now);
+                $W = (int) date('W', $now);
+                $dto = new DateTime();
+                $dto->setISODate($y, $W);
+                $start = $dto->format('Y-m-d');
+                $dto->modify('+6 days');
+                $end = $dto->format('Y-m-d');
+                return array('period'=> sprintf('%04d-%02d', $y, $W), 'start_date'=>$start, 'end_date'=>$end);
+            } elseif ($type === 'monthly') {
+                $y = (int) date('Y', $now);
+                $m = (int) date('m', $now);
+                $start = sprintf('%04d-%02d-01', $y, $m);
+                $end = date('Y-m-t', $now); // last day of month
+                return array('period'=> sprintf('%04d-%02d', $y, $m), 'start_date'=>$start, 'end_date'=>$end);
+            } else { // yearly
+                $y = (int) date('Y', $now);
+                $start = sprintf('%04d-01-01', $y);
+                $end = sprintf('%04d-12-31', $y);
+                return array('period'=> sprintf('%04d', $y), 'start_date'=>$start, 'end_date'=>$end);
+            }
+        };
+
+        $types = array('weekly','monthly','yearly');
+        global $wpdb;
+        $table = $wpdb->prefix . 'bhg_tournaments';
+        foreach ($types as $t) {
+            $d = $compute_dates($t);
+            // Check existence by unique (type, period)
+            $exists = $wpdb->get_var( $wpdb->prepare(
+                "SELECT id FROM {$table} WHERE type=%s AND period=%s",
+                $t, $d['period']
+            ));
+            if (!$exists) {
+                $wpdb->insert($table, array(
+                    'type'       => $t,
+                    'period'     => $d['period'],
+                    'start_date' => $d['start_date'],
+                    'end_date'   => $d['end_date'],
+                    'status'     => 'active',
+                    'created_at' => current_time('mysql', 1),
+                    'updated_at' => current_time('mysql', 1),
+                ), array('%s','%s','%s','%s','%s','%s','%s'));
+            } else {
+                // Ensure dates are up to date in case earlier rows were missing them
+                $wpdb->update($table, array(
+                    'start_date' => $d['start_date'],
+                    'end_date'   => $d['end_date'],
+                    'updated_at' => current_time('mysql', 1),
+                ), array('id'=>$exists), array('%s','%s','%s'), array('%d'));
+            }
+        }
+    
         global $wpdb;
         
         $types = ['weekly', 'monthly', 'yearly'];
@@ -360,6 +424,11 @@ class BHG_Admin {
     }
 
     public function save_hunt(){
+        /* STAGE-3 AFFILIATE SITE VALIDATE */
+        if (isset($_POST['affiliate_site_id'])) {
+            $_POST['affiliate_site_id'] = (int) $_POST['affiliate_site_id'];
+        }
+        
         if (!current_user_can('manage_options')) {
             wp_die(__('Unauthorized', 'bonus-hunt-guesser'));
         }
@@ -413,6 +482,9 @@ class BHG_Admin {
     }
 
     public function close_hunt(){
+        // STAGE-4: Build localized email content for winners/results
+        $fmt_amount = function($v){ return $this->bhg_i18n_amount($v); };
+
         if (!current_user_can('manage_options')) {
             wp_die(__('Unauthorized', 'bonus-hunt-guesser'));
         }
@@ -435,6 +507,22 @@ class BHG_Admin {
 
         $guesses = $wpdb->get_results($wpdb->prepare("SELECT * FROM `".$wpdb->prefix."bhg_guesses` WHERE hunt_id=%d", (int)$id));
         $winner_user_id = null;
+
+        // STAGE-4: compose winner email
+        if (!empty($winner_user_id)) {
+            $user_info = get_userdata($winner_user_id);
+            if ($user_info && !empty($user_info->user_email)) {
+                $subject = sprintf( __('%s - Winner Announcement', 'bonus-hunt-guesser'), get_bloginfo('name') );
+                $message = sprintf(
+                    __('Congratulations %1$s! You won the Bonus Hunt. Final balance: €%2$s (closest guess).', 'bonus-hunt-guesser'),
+                    esc_html($user_info->display_name),
+                    esc_html( $fmt_amount( isset($final_balance) ? $final_balance : 0 ) )
+                );
+                // Allow simple line breaks
+                $message = nl2br($message);
+                wp_mail( $user_info->user_email, $subject, $message );
+            }
+        }
         $winner_diff = null;
 
         foreach ($guesses as $g){
@@ -443,6 +531,22 @@ class BHG_Admin {
             if ($winner_diff === null || $diff < $winner_diff){
                 $winner_diff = $diff;
                 $winner_user_id = intval($g->user_id);
+
+        // STAGE-4: compose winner email
+        if (!empty($winner_user_id)) {
+            $user_info = get_userdata($winner_user_id);
+            if ($user_info && !empty($user_info->user_email)) {
+                $subject = sprintf( __('%s - Winner Announcement', 'bonus-hunt-guesser'), get_bloginfo('name') );
+                $message = sprintf(
+                    __('Congratulations %1$s! You won the Bonus Hunt. Final balance: €%2$s (closest guess).', 'bonus-hunt-guesser'),
+                    esc_html($user_info->display_name),
+                    esc_html( $fmt_amount( isset($final_balance) ? $final_balance : 0 ) )
+                );
+                // Allow simple line breaks
+                $message = nl2br($message);
+                wp_mail( $user_info->user_email, $subject, $message );
+            }
+        }
             }
         }
 
@@ -455,6 +559,22 @@ class BHG_Admin {
             'winner_diff' => $winner_diff,
             'closed_at' => $closed_at,
         ], ['id' => $id], ['%s', '%f', '%d', '%f', '%s'], ['%d']);
+
+        // STAGE-4: compose winner email
+        if (!empty($winner_user_id)) {
+            $user_info = get_userdata($winner_user_id);
+            if ($user_info && !empty($user_info->user_email)) {
+                $subject = sprintf( __('%s - Winner Announcement', 'bonus-hunt-guesser'), get_bloginfo('name') );
+                $message = sprintf(
+                    __('Congratulations %1$s! You won the Bonus Hunt. Final balance: €%2$s (closest guess).', 'bonus-hunt-guesser'),
+                    esc_html($user_info->display_name),
+                    esc_html( $fmt_amount( isset($final_balance) ? $final_balance : 0 ) )
+                );
+                // Allow simple line breaks
+                $message = nl2br($message);
+                wp_mail( $user_info->user_email, $subject, $message );
+            }
+        }
 
         if (false === $result) {
             wp_die(__('Error closing bonus hunt', 'bonus-hunt-guesser'));
@@ -479,6 +599,22 @@ class BHG_Admin {
             $winner_user_id ? get_the_author_meta('user_login', $winner_user_id) : __('N/A','bonus-hunt-guesser')
         );
 
+        // STAGE-4: compose winner email
+        if (!empty($winner_user_id)) {
+            $user_info = get_userdata($winner_user_id);
+            if ($user_info && !empty($user_info->user_email)) {
+                $subject = sprintf( __('%s - Winner Announcement', 'bonus-hunt-guesser'), get_bloginfo('name') );
+                $message = sprintf(
+                    __('Congratulations %1$s! You won the Bonus Hunt. Final balance: €%2$s (closest guess).', 'bonus-hunt-guesser'),
+                    esc_html($user_info->display_name),
+                    esc_html( $fmt_amount( isset($final_balance) ? $final_balance : 0 ) )
+                );
+                // Allow simple line breaks
+                $message = nl2br($message);
+                wp_mail( $user_info->user_email, $subject, $message );
+            }
+        }
+
         foreach ($user_ids as $uid){
             $u = get_userdata($uid);
             if ($u && $u->user_email){
@@ -488,6 +624,22 @@ class BHG_Admin {
 
         if ($winner_user_id){
             $u = get_userdata($winner_user_id);
+
+        // STAGE-4: compose winner email
+        if (!empty($winner_user_id)) {
+            $user_info = get_userdata($winner_user_id);
+            if ($user_info && !empty($user_info->user_email)) {
+                $subject = sprintf( __('%s - Winner Announcement', 'bonus-hunt-guesser'), get_bloginfo('name') );
+                $message = sprintf(
+                    __('Congratulations %1$s! You won the Bonus Hunt. Final balance: €%2$s (closest guess).', 'bonus-hunt-guesser'),
+                    esc_html($user_info->display_name),
+                    esc_html( $fmt_amount( isset($final_balance) ? $final_balance : 0 ) )
+                );
+                // Allow simple line breaks
+                $message = nl2br($message);
+                wp_mail( $user_info->user_email, $subject, $message );
+            }
+        }
             if ($u && $u->user_email){
                 $subject_w = function_exists('bhg_t') ? bhg_t('email_congrats_subject', 'Congratulations! You won the Bonus Hunt') : 'Congratulations! You won the Bonus Hunt';
                 $body_w = sprintf(
@@ -503,6 +655,22 @@ class BHG_Admin {
 
             try {
                 $this->update_tournament_results((int)$id, (int)$winner_user_id, $closed_at);
+
+        // STAGE-4: compose winner email
+        if (!empty($winner_user_id)) {
+            $user_info = get_userdata($winner_user_id);
+            if ($user_info && !empty($user_info->user_email)) {
+                $subject = sprintf( __('%s - Winner Announcement', 'bonus-hunt-guesser'), get_bloginfo('name') );
+                $message = sprintf(
+                    __('Congratulations %1$s! You won the Bonus Hunt. Final balance: €%2$s (closest guess).', 'bonus-hunt-guesser'),
+                    esc_html($user_info->display_name),
+                    esc_html( $fmt_amount( isset($final_balance) ? $final_balance : 0 ) )
+                );
+                // Allow simple line breaks
+                $message = nl2br($message);
+                wp_mail( $user_info->user_email, $subject, $message );
+            }
+        }
             } catch (Throwable $e) {
                 if (defined('WP_DEBUG') && WP_DEBUG) {
                     error_log('[BHG] Tournament update (close_hunt) error: ' . $e->getMessage());
@@ -704,7 +872,39 @@ class BHG_Admin {
 
     private function update_tournament_results($hunt_id, $winner_user_id, $closed_at = null) {
         global $wpdb;
+
+        // STAGE-4: compose winner email
+        if (!empty($winner_user_id)) {
+            $user_info = get_userdata($winner_user_id);
+            if ($user_info && !empty($user_info->user_email)) {
+                $subject = sprintf( __('%s - Winner Announcement', 'bonus-hunt-guesser'), get_bloginfo('name') );
+                $message = sprintf(
+                    __('Congratulations %1$s! You won the Bonus Hunt. Final balance: €%2$s (closest guess).', 'bonus-hunt-guesser'),
+                    esc_html($user_info->display_name),
+                    esc_html( $fmt_amount( isset($final_balance) ? $final_balance : 0 ) )
+                );
+                // Allow simple line breaks
+                $message = nl2br($message);
+                wp_mail( $user_info->user_email, $subject, $message );
+            }
+        }
         if (!$winner_user_id) return;
+
+        // STAGE-4: compose winner email
+        if (!empty($winner_user_id)) {
+            $user_info = get_userdata($winner_user_id);
+            if ($user_info && !empty($user_info->user_email)) {
+                $subject = sprintf( __('%s - Winner Announcement', 'bonus-hunt-guesser'), get_bloginfo('name') );
+                $message = sprintf(
+                    __('Congratulations %1$s! You won the Bonus Hunt. Final balance: €%2$s (closest guess).', 'bonus-hunt-guesser'),
+                    esc_html($user_info->display_name),
+                    esc_html( $fmt_amount( isset($final_balance) ? $final_balance : 0 ) )
+                );
+                // Allow simple line breaks
+                $message = nl2br($message);
+                wp_mail( $user_info->user_email, $subject, $message );
+            }
+        }
 
         $hunts_table = $wpdb->prefix . 'bhg_bonus_hunts';
         if ($closed_at) {
@@ -752,11 +952,47 @@ class BHG_Admin {
                      ON DUPLICATE KEY UPDATE wins = wins + 1",
                     $tid, (int)$winner_user_id
                 ));
+
+        // STAGE-4: compose winner email
+        if (!empty($winner_user_id)) {
+            $user_info = get_userdata($winner_user_id);
+            if ($user_info && !empty($user_info->user_email)) {
+                $subject = sprintf( __('%s - Winner Announcement', 'bonus-hunt-guesser'), get_bloginfo('name') );
+                $message = sprintf(
+                    __('Congratulations %1$s! You won the Bonus Hunt. Final balance: €%2$s (closest guess).', 'bonus-hunt-guesser'),
+                    esc_html($user_info->display_name),
+                    esc_html( $fmt_amount( isset($final_balance) ? $final_balance : 0 ) )
+                );
+                // Allow simple line breaks
+                $message = nl2br($message);
+                wp_mail( $user_info->user_email, $subject, $message );
+            }
+        }
             }
         }
     }
 
     public function submit_guess(){
+        // Stage-1: server-side validation and open-status check
+        $hunt_id = isset($_POST['hunt_id']) ? (int) $_POST['hunt_id'] : 0;
+        $guess_raw = isset($_POST['guess']) ? $_POST['guess'] : (isset($_POST['guess_value']) ? $_POST['guess_value'] : '');
+        $guess_num = is_numeric($guess_raw) ? (float) $guess_raw : null;
+
+        // Load settings for min/max
+        $settings = is_callable(['BHG_Utils','get_settings']) ? BHG_Utils::get_settings() : get_option('bhg_plugin_settings', []);
+        $min = isset($settings['min_guess_amount']) ? (float) $settings['min_guess_amount'] : 0.0;
+        $max = isset($settings['max_guess_amount']) ? (float) $settings['max_guess_amount'] : 100000.0;
+
+        if ($guess_num === null || $guess_num < $min || $guess_num > $max) {
+            wp_die( esc_html__('Invalid guess amount.', 'bonus-hunt-guesser') );
+        }
+
+        global $wpdb;
+        $hunt = $wpdb->get_row( $wpdb->prepare("SELECT status FROM {$wpdb->prefix}bhg_bonus_hunts WHERE id=%d", $hunt_id) );
+        if ( ! $hunt || strtolower($hunt->status) !== 'open' ) {
+            wp_die( esc_html__('This bonus hunt is closed for guesses.', 'bonus-hunt-guesser') );
+        }
+    
         if (!is_user_logged_in()) wp_die(__('You must be logged in','bonus-hunt-guesser'));
         if (empty($_POST['bhg_nonce']) || !wp_verify_nonce($_POST['bhg_nonce'], 'bhg_submit_guess')) wp_die(__('Invalid nonce','bonus-hunt-guesser'));
         

@@ -47,6 +47,14 @@ $rows = $wpdb->get_results("SELECT * FROM `" . $table . "`");
 ?>
 <div class="wrap bhg-wrap">
     <h1><?php esc_html_e('Translations', 'bonus-hunt-guesser'); ?></h1>
+<p class="description"><em><?php esc_html_e('Use this page to override any text string shown by the Bonus Hunt Guesser plugin. Changes are stored in the database and applied site-wide.', 'bonus-hunt-guesser'); ?></em></p>
+<ul class="ul-disc">
+    <li><?php esc_html_e('Click a key to edit its value. Leave blank to fall back to the default text.', 'bonus-hunt-guesser'); ?></li>
+    <li><?php esc_html_e('Export/Import your translations when moving between environments.', 'bonus-hunt-guesser'); ?></li>
+    <li><?php esc_html_e('Examples of keys: email_winner_subject, email_winner_message, leaderboard_title.', 'bonus-hunt-guesser'); ?></li>
+</ul>
+<!-- STAGE-5 TRANSLATIONS HELP -->
+
     
     <?php if (isset($message)): ?>
         <div class="notice notice-success is-dismissible">
@@ -61,14 +69,14 @@ $rows = $wpdb->get_results("SELECT * FROM `" . $table . "`");
     <?php endif; ?>
     
     <form method="post" action="">
-        <input type="hidden" name="bhg_save_translation" value="1" />
+        <input type="hidden" name="bhg_save_translation" value="<?php esc_attr_e('1','bonus-hunt-guesser'); ?>" />
         <?php wp_nonce_field('bhg_save_translation_action', 'bhg_nonce'); ?>
         <table class="form-table">
             <tr>
                 <th><label for="t_key"><?php esc_html_e('Key', 'bonus-hunt-guesser'); ?></label></th>
                 <td>
                     <input type="text" name="t_key" id="t_key" class="regular-text" required 
-                           value="<?php echo isset($_POST['t_key']) ? esc_attr($_POST['t_key']) : ''; ?>">
+                           value="<?php esc_attr_e('<?php echo isset($_POST['t_key']) ? esc_attr($_POST['t_key']) : ''; ?>','bonus-hunt-guesser'); ?>">
                 </td>
             </tr>
             <tr>

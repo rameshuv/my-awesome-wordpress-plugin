@@ -42,3 +42,15 @@ class BHG_Front_Menus {
         return $out;
     }
 }
+
+
+/* STAGE-5 MENU HELP */
+if (is_admin()) {
+    add_action('admin_notices', function(){
+        if (isset($_GET['page']) && strpos($_GET['page'],'bhg')!==false) {
+            echo '<div class="notice notice-info"><p>';
+            esc_html_e('Reminder: Assign your BHG menus (Admin/Moderator, Logged-in, Guest) under Appearance → Menus → Manage Locations. Use shortcode [bhg_nav] to display.', 'bonus-hunt-guesser');
+            echo '</p></div>';
+        }
+    });
+}

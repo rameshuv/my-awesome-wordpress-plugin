@@ -134,3 +134,15 @@ $users = get_users([
     color: white;
 }
 </style>
+        <!-- STAGE-3 AFFILIATE SITES -->
+        <h3><?php esc_html_e('Affiliate Websites','bonus-hunt-guesser'); ?></h3>
+        <?php
+        global $wpdb;
+        $sites = $wpdb->get_results("SELECT id,name FROM {$wpdb->prefix}bhg_affiliate_websites ORDER BY name ASC");
+        foreach ($sites as $s) {
+            $key = 'bhg_affiliate_website_' . $s->id;
+            $val = get_user_meta($user->ID,$key,true);
+            echo '<p>'.esc_html($s->name).': '.($val?'<span style="color:green;">●</span>':'<span style="color:red;">●</span>').'</p>';
+        }
+        ?>
+        

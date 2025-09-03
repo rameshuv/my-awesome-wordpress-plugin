@@ -3,7 +3,7 @@
  * Plugin Name: Bonus Hunt Guesser
  * Plugin URI: https://yourdomain.com/
  * Description: Comprehensive bonus hunt management system with tournaments, leaderboards, and user guessing functionality
- * Version: 8.0.04
+ * Version: 8.0.07
  * Author: Bonus Hunt Guesser Development Team
  * Text Domain: bonus-hunt-guesser
  * Domain Path: /languages
@@ -21,7 +21,7 @@ if (!defined('ABSPATH')) {
 }
 
 // Define plugin constants
-define('BHG_VERSION', '8.0.03');
+define('BHG_VERSION','8.0.07');
 define('BHG_MIN_WP', '6.3.5');
 define('BHG_PLUGIN_FILE', __FILE__);
 define('BHG_PLUGIN_DIR', plugin_dir_path(__FILE__));
@@ -387,6 +387,13 @@ function bhg_handle_guess_submission() {
     $hunt_id = intval($_POST['hunt_id']);
     $guess = floatval($_POST['guess']);
     
+    
+    // Ensure hunt is open
+    global $wpdb;
+    $hunt_status = $wpdb->get_var($wpdb->prepare("SELECT status FROM {$wpdb->prefix}bhg_bonus_hunts WHERE id=%d", $hunt_id));
+    if ($hunt_status !== 'open') {
+        wp_die(__('This hunt is closed. You cannot submit or change a guess.', 'bonus-hunt-guesser'));
+    }
     // Check if user already has a guess for this hunt
     $existing_guess = $wpdb->get_var($wpdb->prepare(
         "SELECT id FROM {$table_name} WHERE user_id = %d AND hunt_id = %d",

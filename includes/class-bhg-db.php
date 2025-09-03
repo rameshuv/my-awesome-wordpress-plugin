@@ -25,6 +25,7 @@ class BHG_DB {
             winner_diff DECIMAL(12,2) NULL,
             closed_at DATETIME NULL,
             created_at DATETIME NOT NULL DEFAULT '0000-00-00 00:00:00',
+            updated_at DATETIME NOT NULL DEFAULT '0000-00-00 00:00:00',
             PRIMARY KEY (id),
             KEY winner_user_idx (winner_user_id),
             KEY status_idx (status),
@@ -39,7 +40,7 @@ class BHG_DB {
             user_id BIGINT UNSIGNED NOT NULL,
             guess_value DECIMAL(12,2) NOT NULL,
             created_at DATETIME NOT NULL DEFAULT '0000-00-00 00:00:00',
-            updated_at DATETIME NOT NULL DEFAULT '0000-00-00 00:00:00',
+updated_at DATETIME NOT NULL DEFAULT '0000-00-00 00:00:00',
             PRIMARY KEY (id),
             KEY hunt_id_idx (hunt_id),
             KEY user_id_idx (user_id)
@@ -56,6 +57,7 @@ class BHG_DB {
             active TINYINT(1) NOT NULL DEFAULT 1,
             target_pages TEXT NULL,
             created_at DATETIME NOT NULL DEFAULT '0000-00-00 00:00:00',
+            updated_at DATETIME NOT NULL DEFAULT '0000-00-00 00:00:00',
             PRIMARY KEY (id)
         ) $charset_collate;";
         dbDelta($sql);
@@ -69,6 +71,7 @@ class BHG_DB {
             end_date DATETIME NOT NULL,
             status VARCHAR(20) NOT NULL DEFAULT 'active',
             created_at DATETIME NOT NULL DEFAULT '0000-00-00 00:00:00',
+            updated_at DATETIME NOT NULL DEFAULT '0000-00-00 00:00:00',
             PRIMARY KEY (id),
             UNIQUE KEY type_period (type, period)
         ) $charset_collate;";
@@ -138,6 +141,7 @@ dbDelta($sql);
             slug VARCHAR(191) NOT NULL,
             url VARCHAR(255) NULL,
             created_at DATETIME NOT NULL DEFAULT '0000-00-00 00:00:00',
+            updated_at DATETIME NOT NULL DEFAULT '0000-00-00 00:00:00',
             PRIMARY KEY (id),
             UNIQUE KEY slug_unique (slug)
         ) $charset_collate;";
@@ -151,6 +155,7 @@ dbDelta($sql);
             position INT UNSIGNED NOT NULL DEFAULT 0,
             diff_value DECIMAL(12,2) NOT NULL DEFAULT 0,
             created_at DATETIME NOT NULL DEFAULT '0000-00-00 00:00:00',
+            updated_at DATETIME NOT NULL DEFAULT '0000-00-00 00:00:00',
             PRIMARY KEY (id),
             KEY hunt_idx (hunt_id),
             KEY user_idx (user_id)
@@ -197,6 +202,11 @@ dbDelta($sql);
 
         // Tournaments migration
         if ($table_exists('bhg_tournaments')) {
+            $tbl = $wpdb->prefix . 'bhg_tournaments';
+            if (!$col_exists('bhg_tournaments', 'updated_at')) {
+                $wpdb->query("ALTER TABLE `{$tbl}` ADD COLUMN `updated_at` DATETIME NOT NULL DEFAULT '0000-00-00 00:00:00' AFTER `created_at`");
+            }
+    
             $tbl = $wpdb->prefix . 'bhg_tournaments';
             if (!$col_exists('bhg_tournaments', 'start_date')) {
                 $wpdb->query("ALTER TABLE `{$tbl}` ADD COLUMN `start_date` DATETIME NOT NULL AFTER `period`");

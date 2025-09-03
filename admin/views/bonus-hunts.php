@@ -61,14 +61,18 @@ if (!empty($_GET['edit'])) {
                     <tr>
                         <th><?php esc_html_e('Affiliate Site', 'bonus-hunt-guesser'); ?></th>
                         <td>
-                            <select name="affiliate_site_id">
-                                <option value=""><?php esc_html_e('None', 'bonus-hunt-guesser'); ?></option>
-                                <?php foreach ($affs as $a): ?>
-                                    <option value="<?php echo intval($a->id); ?>" <?php selected(($edit->affiliate_site_id ?? '') == $a->id); ?>>
-                                        <?php echo esc_html($a->name); ?>
-                                    </option>
-                                <?php endforeach; ?>
-                            </select>
+                            <!-- STAGE-3 AFFILIATE DROPDOWN -->
+<select name="affiliate_site_id" required>
+<?php if (!empty($bhg_sites)) : ?>
+    <?php foreach ($bhg_sites as $s) : ?>
+        <option value="<?php echo (int)$s->id; ?>" <?php selected( (int)$current_affiliate_site_id, (int)$s->id ); ?>>
+            <?php echo esc_html($s->name); ?>
+        </option>
+    <?php endforeach; ?>
+<?php else: ?>
+    <option value="0"><?php esc_html_e('No affiliate websites found', 'bonus-hunt-guesser'); ?></option>
+<?php endif; ?>
+</select>
                         </td>
                     </tr>
                     <tr>
