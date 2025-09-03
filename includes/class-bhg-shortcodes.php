@@ -11,6 +11,9 @@ class BHG_Shortcodes {
         add_shortcode('bhg_guess_form',    [$this, 'guess_form_shortcode']);
         add_shortcode('bhg_leaderboard',   [$this, 'leaderboard_shortcode']);
         add_shortcode('bhg_tournaments',   [$this, 'tournaments_shortcode']);
+        add_shortcode('bhg_winner_notifications',   [$this, 'winner_notifications_shortcode']);
+        add_shortcode('bhg_user_guesses',   [$this, 'user_guesses_shortcode']);
+        add_shortcode('bhg_user_profile',   [$this, 'user_profile_shortcode']);
     }
 
     /** [bhg_active_hunt] */
@@ -206,4 +209,92 @@ class BHG_Shortcodes {
         echo '</tbody></table>';
         return ob_get_clean();
     }
+
+
+/** [bhg_user_profile] - minimal */
+public function user_profile_shortcode($atts) {
+    if (!is_user_logged_in()) {
+        $login = wp_login_url(get_permalink());
+        return '<p>' . esc_html__('Please log in to view your profile.', 'bonus-hunt-guesser') . '</p>'
+             . '<p><a class="button" href="' . esc_url($login) . '">' . esc_html__('Log in', 'bonus-hunt-guesser') . '</a></p>';
+    }
+    $user = wp_get_current_user();
+    $is_aff = get_user_meta($user->ID, 'bhg_affiliate_status', true) ? esc_html__('Yes','bonus-hunt-guesser') : esc_html__('No','bonus-hunt-guesser');
+    $html  = '<div class="bhg-user-profile">';
+    $html .= '<p><strong>' . esc_html__('Display Name:', 'bonus-hunt-guesser') . '</strong> ' . esc_html($user->display_name) . '</p>';
+    $html .= '<p><strong>' . esc_html__('Username:', 'bonus-hunt-guesser') . '</strong> ' . esc_html($user->user_login) . '</p>';
+    $html .= '<p><strong>' . esc_html__('Email:', 'bonus-hunt-guesser') . '</strong> ' . esc_html($user->user_email) . '</p>';
+    $html .= '<p><strong>' . esc_html__('Affiliate:', 'bonus-hunt-guesser') . '</strong> ' . $is_aff . '</p>';
+    $html .= '</div>';
+    return $html;
+}
+
+
+/** [bhg_user_guesses] - minimal */
+public function user_guesses_shortcode($atts) {
+    if (!is_user_logged_in()) {
+        return '<p>' . esc_html__('Log in to see your guesses.', 'bonus-hunt-guesser') . '</p>';
+    }
+    $user_id = get_current_user_id();
+    global $wpdb;
+    $g = $wpdb->prefix . 'bhg_guesses';
+    $h = $wpdb->prefix . 'bhg_bonus_hunts';
+    $rows = $wpdb->get_results($wpdb->prepare(
+        "SELECT g.guess_value, g.created_at, h.title, h.status
+         FROM {$g} g
+         LEFT JOIN {$h} h ON h.id = g.hunt_id
+         WHERE g.user_id=%d
+         ORDER BY g.created_at DESC
+         LIMIT 20",
+         $user_id
+    ));
+    if (empty($rows)) {
+        return '<p>' . esc_html__('You have not submitted any guesses yet.', 'bonus-hunt-guesser') . '</p>';
+    }
+    ob_start();
+    echo '<table class="bhg-user-guesses"><thead><tr>';
+    echo '<th>' . esc_html__('Hunt', 'bonus-hunt-guesser') . '</th>';
+    echo '<th>' . esc_html__('Guess', 'bonus-hunt-guesser') . '</th>';
+    echo '<th>' . esc_html__('Status', 'bonus-hunt-guesser') . '</th>';
+    echo '<th>' . esc_html__('Submitted', 'bonus-hunt-guesser') . '</th>';
+    echo '</tr></thead><tbody>';
+    foreach ($rows as $r) {
+        echo '<tr>';
+        echo '<td>' . esc_html($r->title ?: __('(deleted)', 'bonus-hunt-guesser')) . '</td>';
+        echo '<td>' . esc_html(number_format_i18n((float)$r->guess_value, 2)) . '</td>';
+        echo '<td>' . esc_html($r->status ?: '') . '</td>';
+        echo '<td>' . esc_html(mysql2date(get_option('date_format') . ' ' . get_option('time_format'), $r->created_at)) . '</td>';
+        echo '</tr>';
+    }
+    echo '</tbody></table>';
+    return ob_get_clean();
+}
+
+
+/** [bhg_winner_notifications] - minimal */
+public function winner_notifications_shortcode($atts) {
+    global $wpdb;
+    $h = $wpdb->prefix . 'bhg_bonus_hunts';
+    $row = $wpdb->get_row("SELECT * FROM {$h} WHERE status='closed' AND winner_user_id IS NOT NULL ORDER BY closed_at DESC LIMIT 1");
+    if (!$row) {
+        return '<p>' . esc_html__('No winner announcements yet.', 'bonus-hunt-guesser') . '</p>';
+    }
+    $winner_name = $row->winner_user_id ? get_the_author_meta('display_name', (int)$row->winner_user_id) : '';
+    $html  = '<div class="bhg-winner-notice">';
+    $html .= '<p><strong>' . esc_html__('Latest Winner', 'bonus-hunt-guesser') . ':</strong> '
+          . esc_html($row->title) . ' — ' . esc_html($winner_name) . '</p>';
+    $html .= '<p><strong>' . esc_html__('Final Balance', 'bonus-hunt-guesser') . ':</strong> '
+          . esc_html(number_format_i18n((float)$row->final_balance, 2)) . '</p>';
+    if (!empty($row->winner_diff)) {
+        $html .= '<p><strong>' . esc_html__('Difference', 'bonus-hunt-guesser') . ':</strong> '
+              . esc_html(number_format_i18n((float)$row->winner_diff, 2)) . '</p>';
+    }
+    if (!empty($row->closed_at)) {
+        $html .= '<p><strong>' . esc_html__('Closed', 'bonus-hunt-guesser') . ':</strong> '
+              . esc_html(mysql2date(get_option('date_format') . ' ' . get_option('time_format'), $row->closed_at)) . '</p>';
+    }
+    $html .= '</div>';
+    return $html;
+}
+
 }

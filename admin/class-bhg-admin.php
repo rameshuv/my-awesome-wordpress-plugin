@@ -182,7 +182,7 @@ class BHG_Admin {
         
         $current_period = $this->get_current_period($type);
         $table_name = $wpdb->prefix . 'bhg_tournaments';
-        $wins_table = $wpdb->prefix . 'bhg_tournament_wins';
+        $wins_table = $wpdb->prefix . 'bhg_tournament_results';
         $users_table = $wpdb->prefix . 'users';
         
         // Get current tournament
