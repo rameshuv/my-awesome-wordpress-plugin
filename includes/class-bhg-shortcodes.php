@@ -43,7 +43,11 @@ class BHG_Shortcodes {
         $hunt_id = (int)$atts['hunt_id'];
 
         if (!is_user_logged_in()) {
-            $redirect = esc_url(add_query_arg([], home_url(add_query_arg([]))));
+            $scheme = is_ssl() ? 'https://' : 'http://';
+            $host = $_SERVER['HTTP_HOST'] ?? parse_url(home_url('/'), PHP_URL_HOST);
+            $uri  = $_SERVER['REQUEST_URI'] ?? '/';
+            $current_url = $scheme . $host . $uri;
+            $redirect = esc_url_raw($current_url);
             return '<p>' . esc_html__('Please log in to submit your guess.', 'bonus-hunt-guesser') . '</p>'
                  . '<p><a class="button" href="' . esc_url(wp_login_url($redirect)) . '">' . esc_html__('Log in', 'bonus-hunt-guesser') . '</a></p>';
         }
@@ -125,9 +129,10 @@ class BHG_Shortcodes {
         }
 
         $rows = $wpdb->get_results($wpdb->prepare(
-            "SELECT g.*, u.user_login
+            "SELECT g.*, u.user_login, h.affiliate_site_id
              FROM {$g} g
              LEFT JOIN {$u} u ON u.ID = g.user_id
+             LEFT JOIN {$wpdb->prefix}bhg_bonus_hunts h ON h.id = g.hunt_id
              WHERE g.hunt_id=%d
              ORDER BY {$orderby} {$order}
              LIMIT %d OFFSET %d",
@@ -144,7 +149,11 @@ class BHG_Shortcodes {
 
         $pos = $offset + 1;
         foreach ($rows as $r) {
-            $aff = get_user_meta((int)$r->user_id, 'bhg_affiliate_status', true) ? 'green' : 'red';
+            $site_id = isset($r->affiliate_site_id) ? (int)$r->affiliate_site_id : 0;
+            $is_aff  = $site_id > 0
+                ? (int)get_user_meta((int)$r->user_id, "bhg_affiliate_website_{$site_id}", true)
+                : (int)get_user_meta((int)$r->user_id, 'bhg_affiliate_status', true);
+            $aff = $is_aff ? 'green' : 'red';
             echo '<tr>';
             echo '<td>' . (int)$pos++ . '</td>';
             echo '<td>' . esc_html($r->user_login or ('user#' . (int)$r->user_id)) . ' <span class="bhg-aff-dot bhg-aff-' . esc_attr($aff) . '" aria-hidden="true"></span></td>';

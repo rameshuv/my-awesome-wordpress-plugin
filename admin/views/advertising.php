@@ -13,7 +13,7 @@ $edit = null;
 
 if (!empty($_GET['edit'])) {
     $edit_id = intval($_GET['edit']);
-    $edit = $wpdb->get_results("SELECT * FROM `" . $edit_id . "`");
+$edit = $wpdb->get_row($wpdb->prepare("SELECT * FROM $table WHERE id = %d", $edit_id));
 }
 
 // Handle form submission with nonce verification

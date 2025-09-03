@@ -151,6 +151,7 @@ spl_autoload_register(function ($class) {
         'BHG_Utils' => 'includes/class-bhg-utils.php',
         'BHG_Menus' => 'includes/class-bhg-menus.php',
         'BHG_Models' => 'includes/class-bhg-models.php',
+        'BHG_Front_Menus' => 'includes/class-bhg-front-menus.php',
         'BHG_Demo' => 'admin/class-bhg-demo.php',
     ];
     
@@ -221,6 +222,7 @@ function bhg_init_plugin() {
     
     if (class_exists('BHG_Shortcodes')) {
         new BHG_Shortcodes();
+new BHG_Front_Menus();
     }
     
     // Initialize menus using the singleton pattern
@@ -517,7 +519,18 @@ function bhg_build_ads_query($table, $placement = 'footer') {
         1
     );
 
-    return $wpdb->get_results($query);
+    $rows = $wpdb->get_results($query);
+    if (function_exists('get_queried_object_id')) {
+        $pid = (int)get_queried_object_id();
+        if ($pid && is_array($rows)) {
+            $rows = array_filter($rows, function($r) use ($pid) {
+                if (empty($r->target_pages)) return true;
+                $ids = array_filter(array_map('intval', array_map('trim', explode(',', $r->target_pages))));
+                return in_array($pid, $ids, true);
+            });
+        }
+    }
+    return $rows;
 }
 
 // AJAX handler for loading leaderboard data

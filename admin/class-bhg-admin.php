@@ -616,10 +616,11 @@ class BHG_Admin {
             'link' => esc_url_raw($_POST['link'] ?? ''),
             'placement' => sanitize_text_field($_POST['placement'] ?? 'footer'),
             'visibility' => sanitize_text_field($_POST['visibility'] ?? 'all'),
+            'target_pages' => sanitize_text_field($_POST['target_pages'] ?? ''),
             'active' => isset($_POST['active']) ? 1 : 0,
         ];
         
-        $format = ['%s', '%s', '%s', '%s', '%d'];
+        $format = ['%s', '%s', '%s', '%s', '%s', '%d'];
         
         if (!empty($_POST['id'])) {
             $id = intval($_POST['id']);

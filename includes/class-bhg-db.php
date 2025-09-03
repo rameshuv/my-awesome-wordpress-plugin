@@ -54,6 +54,7 @@ class BHG_DB {
             placement VARCHAR(50) NOT NULL DEFAULT 'footer',
             visibility VARCHAR(50) NOT NULL DEFAULT 'all',
             active TINYINT(1) NOT NULL DEFAULT 1,
+            target_pages TEXT NULL,
             created_at DATETIME NOT NULL DEFAULT '0000-00-00 00:00:00',
             PRIMARY KEY (id)
         ) $charset_collate;";
