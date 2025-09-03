@@ -294,7 +294,7 @@ class BHG_Shortcodes {
         ob_start(); 
         ?>
         <div class="bhg-active-hunt">
-            <h3><?php echo $title; ?></h3>
+            <h3><?php echo esc_html( isset( $title ) ? $title : '' ); ?></h3>
             <p><?php 
                 printf(
                     esc_html__('Starting Balance: €%s | Bonuses: %d', 'bonus-hunt-guesser'), 
@@ -305,7 +305,7 @@ class BHG_Shortcodes {
             <?php if ($prizes): ?>
                 <div class="bhg-prizes">
                     <strong><?php esc_html_e('Prizes:', 'bonus-hunt-guesser'); ?></strong>
-                    <div><?php echo $prizes; ?></div>
+                    <div><?php echo wp_kses_post( isset( $prizes ) ? $prizes : '' ); ?></div>
                 </div>
             <?php endif; ?>
         </div>
@@ -356,7 +356,7 @@ class BHG_Shortcodes {
                     <tr>
                         <td><?php echo esc_html($r->user_login); ?></td>
                         <td>
-                            <span class="bhg-affiliate-status <?php echo $is_affiliate ? 'affiliate-yes' : 'affiliate-no'; ?>">
+                            <span class="bhg-affiliate-status <?php echo esc_attr( $is_affiliate ? 'affiliate-yes' : 'affiliate-no' ); ?>">
                                 ●
                             </span>
                         </td>
@@ -628,7 +628,7 @@ class BHG_Shortcodes {
                         <td><?php echo esc_html($guess->display_name ?: $guess->user_login); ?></td>
                         <td>€<?php echo esc_html(number_format($guess->guess_amount, 2)); ?></td>
                         <td>
-                            <span class="bhg-affiliate-status <?php echo $is_affiliate ? 'affiliate-yes' : 'affiliate-no'; ?>">
+                            <span class="bhg-affiliate-status <?php echo esc_attr( $is_affiliate ? 'affiliate-yes' : 'affiliate-no' ); ?>">
                                 ●
                             </span>
                         </td>

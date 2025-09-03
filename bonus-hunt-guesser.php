@@ -86,6 +86,20 @@ class BHG_DB {
         ) $charset_collate;";
         dbDelta($sql);
         
+        // Tournaments table
+        $table_name = $this->table_prefix . 'tournaments';
+        $sql = "CREATE TABLE $table_name (
+            id mediumint(9) NOT NULL AUTO_INCREMENT,
+            type varchar(20) NOT NULL,
+            period varchar(20) NOT NULL,
+            created_at datetime NOT NULL,
+            updated_at datetime NOT NULL,
+            status varchar(20) DEFAULT 'active',
+            PRIMARY KEY  (id),
+            UNIQUE KEY type_period (type, period)
+        ) $charset_collate;";
+        dbDelta($sql);
+        
         error_log('[BHG] All tables created successfully');
     }
     
@@ -100,6 +114,20 @@ class BHG_DB {
         
         // Add future migration logic here
         update_option('bhg_db_version', '1.0');
+    }
+}
+
+// Table creation function
+function bhg_create_tables() {
+    $db = new BHG_DB();
+    $db->create_tables();
+}
+
+// Check and create tables if needed
+function bhg_check_tables() {
+    if (!get_option('bhg_tables_created')) {
+        bhg_create_tables();
+        update_option('bhg_tables_created', true);
     }
 }
 
@@ -137,8 +165,7 @@ function bhg_activate_plugin($network_wide) {
         return;
     }
     
-    $db = new BHG_DB();
-    $db->create_tables();
+    bhg_create_tables();
     
     // Set default options
     add_option('bhg_version', BHG_VERSION);
@@ -156,6 +183,9 @@ function bhg_activate_plugin($network_wide) {
         bhg_seed_demo_if_empty();
     }
     update_option('bhg_demo_notice', 1);
+    
+    // Set tables created flag
+    update_option('bhg_tables_created', true);
     
     // Flush rewrite rules after database changes
     flush_rewrite_rules();
@@ -207,6 +237,9 @@ function bhg_init_plugin() {
     add_action('admin_post_nopriv_bhg_submit_guess', 'bhg_handle_guess_submission_unauth');
     add_action('admin_post_bhg_save_settings', 'bhg_handle_settings_save');
 }
+
+// Early table check on init
+add_action('init', 'bhg_check_tables', 0);
 
 // Form handler for settings save
 function bhg_handle_settings_save() {

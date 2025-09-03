@@ -7,7 +7,7 @@ class BHG_DB {
         // Database initialization if needed
     }
     
-    public function install() {
+    public function create_tables() {
         global $wpdb;
         require_once ABSPATH . 'wp-admin/includes/upgrade.php';
 
@@ -32,7 +32,9 @@ class BHG_DB {
         ) $charset_collate";
         dbDelta($sql);
 
-        // Guesses table
+        
+            self::add_missing_tournament_columns();
+// Guesses table
         $table_name = $wpdb->prefix . 'bhg_guesses';
         $sql = "CREATE TABLE $table_name (
             id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
@@ -802,4 +804,25 @@ class BHG_DB {
             $tournament->id
         ));
     }
+
+    /**
+     * Ensure tournaments table has required columns.
+     */
+    private static function add_missing_tournament_columns() {
+        global $wpdb;
+        $table = $wpdb->prefix . 'bhg_tournaments';
+        $cols = $wpdb->get_col( "DESC {$table}", 0 ); // column names
+        if ( is_array( $cols ) ) {
+            if ( ! in_array( 'start_date', $cols, true ) ) {
+                $wpdb->query( "ALTER TABLE {$table} ADD COLUMN `start_date` DATE NOT NULL AFTER `period`" );
+            }
+            if ( ! in_array( 'end_date', $cols, true ) ) {
+                $wpdb->query( "ALTER TABLE {$table} ADD COLUMN `end_date` DATE NOT NULL AFTER `start_date`" );
+            }
+            if ( ! in_array( 'status', $cols, true ) ) {
+                $wpdb->query( "ALTER TABLE {$table} ADD COLUMN `status` VARCHAR(20) NOT NULL DEFAULT 'active' AFTER `end_date`" );
+            }
+        }
+    }
+
 }
