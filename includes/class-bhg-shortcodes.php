@@ -25,7 +25,8 @@ class BHG_Shortcodes {
     public function __construct() {
         add_shortcode('bhg_active_hunt',   [$this, 'active_hunt_shortcode']);
         add_shortcode('bhg_guess_form',    [$this, 'guess_form_shortcode']);
-        add_shortcode('bhg_leaderboard',   [$this, 'leaderboard_shortcode']);
+        add_shortcode('bhg_leaderboard', [$this,'leaderboard_shortcode']);
+        add_shortcode('bhg_leaderboard_history', [$this, 'leaderboard_history_shortcode']);
         add_shortcode('bhg_tournaments',   [$this, 'tournaments_shortcode']);
         add_shortcode('bhg_winner_notifications',   [$this, 'winner_notifications_shortcode']);
         add_shortcode('bhg_user_guesses',   [$this, 'user_guesses_shortcode']);
@@ -33,7 +34,23 @@ class BHG_Shortcodes {
         add_shortcode('bhg_best_guessers',   [$this, 'best_guessers_shortcode']);
     }
 
-    /** [bhg_active_hunt] — show ALL open hunts (not just one) */
+    
+
+    /** Build a sortable header link preserving current params */
+    private function bhg_build_sort_link($label, $key, $current_orderby, $current_order) {
+        $params = $_GET;
+        $params = is_array($params) ? $params : [];
+        $params['orderby'] = $key;
+        $params['order'] = ($current_orderby === $key && strtoupper($current_order) === 'ASC') ? 'DESC' : 'ASC';
+        $url = add_query_arg(array_map('rawurlencode', $params), remove_query_arg('paged'));
+        $arrow = '';
+        if ($current_orderby === $key) {
+            $arrow = strtoupper($current_order) === 'ASC' ? ' ▲' : ' ▼';
+        }
+        return '<a href="' . esc_url($url) . '">' . esc_html($label . $arrow) . '</a>';
+    }
+    
+/** [bhg_active_hunt] — show ALL open hunts (not just one) */
     public function active_hunt_shortcode($atts) {
         global $wpdb;
         $hunts = $wpdb->get_results("SELECT * FROM {$wpdb->prefix}bhg_bonus_hunts WHERE status='open' ORDER BY created_at DESC");
@@ -56,7 +73,7 @@ class BHG_Shortcodes {
             echo '</div>';
         }
         echo '</div>';
-        return ob_get_clean();
+return ob_get_clean();
     }
 
     /** [bhg_guess_form hunt_id=""] */
@@ -65,13 +82,27 @@ class BHG_Shortcodes {
         $hunt_id = (int)$atts['hunt_id'];
 
         if (!is_user_logged_in()) {
+            
+            // Stage-3: Nextend Social Login UI with smart redirect
             $scheme = is_ssl() ? 'https://' : 'http://';
-            $host = $_SERVER['HTTP_HOST'] ?? parse_url(home_url('/'), PHP_URL_HOST);
-            $uri  = $_SERVER['REQUEST_URI'] ?? '/';
+            $host   = isset($_SERVER['HTTP_HOST']) ? sanitize_text_field(wp_unslash($_SERVER['HTTP_HOST'])) : parse_url(home_url('/'), PHP_URL_HOST);
+            $uri    = isset($_SERVER['REQUEST_URI']) ? esc_url_raw(wp_unslash($_SERVER['REQUEST_URI'])) : '/';
             $current_url = $scheme . $host . $uri;
-            $redirect = esc_url_raw($current_url);
-            return '<p>' . esc_html__('Please log in to submit your guess.', 'bonus-hunt-guesser') . '</p>'
-                 . '<p><a class="button button-primary" href="' . esc_url(wp_login_url($redirect)) . '">' . esc_html__('Log in', 'bonus-hunt-guesser') . '</a></p>';
+            $login_redirect = add_query_arg('bhg_redirect', rawurlencode($current_url), wp_login_url());
+
+            echo '<div class="bhg-login-card" style="border:1px solid #e2e8f0;border-radius:8px;padding:16px;margin:12px 0;">';
+            echo '<p style="margin-top:0;">' . esc_html__('Please log in to submit your guess.', 'bonus-hunt-guesser') . '</p>';
+
+            // Render Nextend buttons if available
+            if (shortcode_exists('nextend_social_login')) {
+                echo do_shortcode('[nextend_social_login redirect="' . esc_url($login_redirect) . '"]');
+            }
+
+            // Fallback login link
+            echo '<p><a class="button button-primary" href="' . esc_url($login_redirect) . '">' . esc_html__('Log in', 'bonus-hunt-guesser') . '</a></p>';
+            echo '</div>';
+
+            return '';
         }
 
         global $wpdb;
@@ -127,6 +158,14 @@ class BHG_Shortcodes {
 
     /** [bhg_leaderboard] */
     public function leaderboard_shortcode($atts) {
+
+        // Stage-1: sanitize query args
+        $orderby = isset($_GET['orderby']) ? sanitize_key($_GET['orderby']) : 'guess_value';
+        $order   = isset($_GET['order']) ? strtoupper(sanitize_key($_GET['order'])) : 'ASC';
+        if (!in_array($orderby, ['guess_value','user_login','position'], true)) { $orderby = 'guess_value'; }
+        if ($order !== 'ASC' && $order !== 'DESC') { $order = 'ASC'; }
+        $paged   = isset($_GET['paged']) ? max(1, intval($_GET['paged'])) : 1;
+    
         /* STAGE-3 AFFILIATE INDICATOR */
         // Determine per-hunt affiliate site context
         $hunt_id_ctx = isset($atts['hunt_id']) ? intval($atts['hunt_id']) : 0;
@@ -367,7 +406,13 @@ class BHG_Shortcodes {
     public function winner_notifications_shortcode($atts) {
         global $wpdb;
         $rows = $wpdb->get_results("SELECT title, final_balance, winner_diff, closed_at FROM {$wpdb->prefix}bhg_bonus_hunts WHERE status='closed' AND winner_user_id IS NOT NULL ORDER BY closed_at DESC, id DESC LIMIT 5");
-        if (!$rows) return '<p>' . esc_html__('No closed hunts yet.', 'bonus-hunt-guesser') . '</p>';
+        
+        /* STAGE-2 POSITION SORT */
+        if ($orderby === 'position') {
+            $rows = is_array($rows) ? array_values($rows) : [];
+            if (strtoupper($order) === 'DESC') { $rows = array_reverse($rows); }
+        }
+if (!$rows) return '<p>' . esc_html__('No closed hunts yet.', 'bonus-hunt-guesser') . '</p>';
         ob_start();
         echo '<div class="bhg-winner-notifications">';
         foreach ($rows as $row) {
@@ -497,5 +542,27 @@ class BHG_Shortcodes {
         return ob_get_clean();
     }
     
-}
 
+    /** [bhg_leaderboard_history] — Stage-2 */
+    public function leaderboard_history_shortcode($atts){
+        global $wpdb;
+        $hunts = $wpdb->get_results("SELECT id,title FROM {$wpdb->prefix}bhg_bonus_hunts WHERE status='closed' ORDER BY closed_at DESC LIMIT 20");
+        if (!$hunts) return '<p>'.esc_html__('No past hunts.','bonus-hunt-guesser').'</p>';
+        $selected = isset($_GET['hunt_id']) ? intval($_GET['hunt_id']) : 0;
+        ob_start();
+        echo '<form method="get"><label>'.esc_html__('Choose past hunt:','bonus-hunt-guesser').'</label> ';
+        echo '<select name="hunt_id" onchange="this.form.submit()">';
+        echo '<option value="0">'.esc_html__('Select','bonus-hunt-guesser').'</option>';
+        foreach ($hunts as $h){
+            $sel = $selected===$h->id ? 'selected' : '';
+            echo '<option value="'.intval($h->id).'" '.$sel.'>'.esc_html($h->title).'</option>';
+        }
+        echo '</select></form>';
+        if ($selected){
+            // Reuse leaderboard shortcode output with hunt_id context
+            echo do_shortcode('[bhg_leaderboard hunt_id="'.$selected.'"]');
+        }
+        return ob_get_clean();
+    }
+    
+}
