@@ -278,7 +278,7 @@ class BHG_Admin {
                     'start_date' => $start_date,
                     'end_date' => $end_date,
                     'status' => 'active'
-                ], ['%s', '%s', '%s', '%s', '%s']);
+                ], ['%s', '%s', '%s', '%s', '%s', '%s']);
             }
         }
     }
@@ -433,7 +433,7 @@ class BHG_Admin {
             exit;
         }
 
-        $guesses = $wpdb->get_results("SELECT * FROM `" . $id . "`");
+        $guesses = $wpdb->get_results($wpdb->prepare("SELECT * FROM `".$wpdb->prefix."bhg_guesses` WHERE hunt_id=%d", (int)$id));
         $winner_user_id = null;
         $winner_diff = null;
 
@@ -467,7 +467,7 @@ class BHG_Admin {
         if ($from) $headers[] = "From: " . $from;
 
         $user_ids = $wpdb->get_col($wpdb->prepare("SELECT DISTINCT user_id FROM $g_table WHERE hunt_id=%d", $id));
-        $hunt = $wpdb->get_results("SELECT * FROM `" . $id . "`");
+        $hunt = $wpdb->get_row($wpdb->prepare("SELECT * FROM `".$wpdb->prefix."bhg_bonus_hunts` WHERE id=%d", (int)$id));
 
         $subject_all = sprintf(__('Results: %s closed', 'bonus-hunt-guesser'), $hunt ? esc_html($hunt->title) : __('Bonus Hunt', 'bonus-hunt-guesser'));
         $body_all = sprintf(
@@ -653,16 +653,17 @@ class BHG_Admin {
         $closed = $wpdb->get_results("SELECT id, winner_user_id, closed_at FROM $h_table WHERE status='closed' AND winner_user_id IS NOT NULL AND closed_at IS NOT NULL");
 
         $ensure_tournament = function($period, $period_key, $title = null) use ($wpdb, $t_table){
-            $id = $wpdb->get_var($wpdb->prepare("SELECT id FROM $t_table WHERE period=%s AND period_key=%s", $period, $period_key));
+            $id = $wpdb->get_var($wpdb->prepare("SELECT id FROM $t_table WHERE type=%s AND period=%s", $period, $period_key));
             if ($id) return (int)$id;
             if ($title === null) $title = ucfirst($period) . ' ' . $period_key;
             $result = $wpdb->insert($t_table, [
-                'title' => $title,
-                'period' => $period,
-                'period_key' => $period_key,
+                'type' => $period,
+                'period' => $period_key,
+                'start_date' => current_time('mysql'),
+                'end_date' => current_time('mysql'),
                 'status' => 'active',
                 'created_at' => current_time('mysql'),
-            ], ['%s', '%s', '%s', '%s', '%s']);
+            ], ['%s', '%s', '%s', '%s', '%s', '%s']);
             if (false === $result) {
                 return 0;
             }
@@ -722,16 +723,17 @@ class BHG_Admin {
         $results_table = $wpdb->prefix . 'bhg_tournament_results';
 
         $ensure_tournament = function($period, $period_key, $title = null) use ($wpdb, $tournaments_table){
-            $id = $wpdb->get_var($wpdb->prepare("SELECT id FROM $tournaments_table WHERE period=%s AND period_key=%s", $period, $period_key));
+            $id = $wpdb->get_var($wpdb->prepare("SELECT id FROM $tournaments_table WHERE type=%s AND period=%s", $period, $period_key));
             if ($id) return (int)$id;
             if ($title === null) $title = ucfirst($period) . ' ' . $period_key;
             $result = $wpdb->insert($tournaments_table, [
-                'title' => $title,
-                'period' => $period,
-                'period_key' => $period_key,
+                'type' => $period,
+                'period' => $period_key,
+                'start_date' => current_time('mysql'),
+                'end_date' => current_time('mysql'),
                 'status' => 'active',
                 'created_at' => current_time('mysql')
-            ], ['%s', '%s', '%s', '%s', '%s']);
+            ], ['%s', '%s', '%s', '%s', '%s', '%s']);
             if (false === $result) {
                 return 0;
             }

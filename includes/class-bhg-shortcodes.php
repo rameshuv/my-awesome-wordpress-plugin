@@ -102,9 +102,16 @@ class BHG_Shortcodes {
         global $wpdb;
         $g = $wpdb->prefix . 'bhg_guesses';
         $u = $wpdb->users;
-        $allowed = ['guess', 'user_login', 'position'];
-        $orderby = in_array($a['orderby'], $allowed, true) ? $a['orderby'] : 'guess';
+        $allowed = ['guess','user_login','position'];
         $order   = (strtoupper($a['order']) === 'DESC') ? 'DESC' : 'ASC';
+        // Map friendly names to actual columns
+        $map = [
+            'guess'      => 'g.guess_value',
+            'user_login' => 'u.user_login',
+            'position'   => 'g.id' // position is display-only; order by id as a stable proxy
+        ];
+        $orderby_key = in_array($a['orderby'], array_keys($map), true) ? $a['orderby'] : 'guess';
+        $orderby = $map[$orderby_key];
         $page    = max(1, (int)$a['page']);
         $per     = max(1, (int)$a['per_page']);
         $offset  = ($page - 1) * $per;
