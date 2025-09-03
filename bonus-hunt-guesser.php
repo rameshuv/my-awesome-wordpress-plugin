@@ -8,7 +8,7 @@
  * Text Domain: bonus-hunt-guesser
  * Domain Path: /languages
  * Requires PHP: 7.4
- * Requires at least: 5.5.5
+ * Requires at least: 6.3.5
  * License: GPLv2 or later
  */
 // Ensure canonical DB class is loaded
@@ -22,7 +22,7 @@ if (!defined('ABSPATH')) {
 
 // Define plugin constants
 define('BHG_VERSION', '8.0.03');
-define('BHG_MIN_WP', '5.5.5');
+define('BHG_MIN_WP', '6.3.5');
 define('BHG_PLUGIN_FILE', __FILE__);
 define('BHG_PLUGIN_DIR', plugin_dir_path(__FILE__));
 define('BHG_PLUGIN_URL', plugin_dir_url(__FILE__));
@@ -520,7 +520,7 @@ function bhg_build_ads_query($table, $placement = 'footer') {
     );
 
     $rows = $wpdb->get_results($query);
-    if (function_exists('get_queried_object_id')) {
+    if ( did_action('wp') && function_exists('get_queried_object_id') ) {
         $pid = (int)get_queried_object_id();
         if ($pid && is_array($rows)) {
             $rows = array_filter($rows, function($r) use ($pid) {
