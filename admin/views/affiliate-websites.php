@@ -7,8 +7,7 @@ if (!current_user_can('manage_options')) {
 }
 
 global $wpdb;
-$table = $wpdb->prefix . 'bhg_affiliate_websites';
-$rows = $wpdb->get_results("SELECT * FROM $table ORDER BY name ASC");
+$rows = $wpdb->get_results(\"SELECT * FROM {$wpdb->prefix}bhg_affiliate_websites ORDER BY name ASC\");
 $edit = null;
 
 if (!empty($_GET['edit']) && is_numeric($_GET['edit'])) {

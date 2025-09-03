@@ -3,7 +3,7 @@
  * Plugin Name: Bonus Hunt Guesser
  * Plugin URI: https://yourdomain.com/
  * Description: Comprehensive bonus hunt management system with tournaments, leaderboards, and user guessing functionality
- * Version: 8.0.03
+ * Version: 8.0.04
  * Author: Bonus Hunt Guesser Development Team
  * Text Domain: bonus-hunt-guesser
  * Domain Path: /languages
