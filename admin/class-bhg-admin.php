@@ -1,7 +1,97 @@
 <?php
 if (!defined('ABSPATH')) exit;
 
-class BHG_Admin {
+class BHG_Admin { 
+public function add_affiliate_websites_menu() {
+    if (!current_user_can('manage_options')) return;
+    // Avoid duplicate submenu
+    global $submenu;
+    $parent_slug = 'bonus-hunt-guesser';
+    $slug = 'bhg-affiliate-websites';
+    $exists = false;
+    if (is_array($submenu) && isset($submenu[$parent_slug])) {
+        foreach ($submenu[$parent_slug] as $item) {
+            if (!empty($item[2]) && $item[2] === $slug) { $exists = true; break; }
+        }
+    }
+    if (!$exists) {
+        add_submenu_page(
+            $parent_slug,
+            __('Affiliate Websites', 'bonus-hunt-guesser'),
+            __('Affiliate Websites', 'bonus-hunt-guesser'),
+            'manage_options',
+            $slug,
+            function(){ include plugin_dir_path(__FILE__) . 'views/affiliate-websites.php'; }
+        );
+    }
+}
+ 
+public function save_user_affiliate_admin() {
+    if (!is_admin()) return;
+    if (!isset($_POST['bhg_user_aff_form'])) return;
+    if (!isset($_POST['bhg_nonce']) || !wp_verify_nonce($_POST['bhg_nonce'], 'bhg_save_user_affiliate')) {
+        wp_die(esc_html__('Security check failed.', 'bonus-hunt-guesser'));
+    }
+    if (!current_user_can('manage_options')) {
+        wp_die(esc_html__('Insufficient permissions.', 'bonus-hunt-guesser'));
+    }
+    $user_id = isset($_POST['user_id']) ? absint($_POST['user_id']) : 0;
+    if (!$user_id) wp_die(esc_html__('Invalid user.', 'bonus-hunt-guesser'));
+    $is_aff = isset($_POST['bhg_is_affiliate']) ? '1' : '0';
+    update_user_meta($user_id, 'bhg_is_affiliate', $is_aff);
+    $site_ids = isset($_POST['bhg_affiliate_sites']) ? (array) $_POST['bhg_affiliate_sites'] : array();
+    bhg_set_user_affiliate_sites($user_id, $site_ids);
+    wp_redirect(add_query_arg('updated','1', wp_get_referer() ?: admin_url('users.php')));
+    exit;
+}
+ 
+public function handle_guess_submission() {
+    if (!is_user_logged_in()) {
+        wp_die(esc_html__('You must be logged in to submit a guess.', 'bonus-hunt-guesser'));
+    }
+    if (!isset($_POST['bhg_nonce']) || !wp_verify_nonce($_POST['bhg_nonce'], 'bhg_submit_guess')) {
+        wp_die(esc_html__('Security check failed.', 'bonus-hunt-guesser'));
+    }
+    $user_id = get_current_user_id();
+    $hunt_id = isset($_POST['hunt_id']) ? absint($_POST['hunt_id']) : 0;
+    $guess   = isset($_POST['guess']) ? bhg_validate_guess_value($_POST['guess']) : 0;
+    if (!$hunt_id) {
+        wp_die(esc_html__('Invalid hunt.', 'bonus-hunt-guesser'));
+    }
+    global $wpdb;
+    $hunts = $wpdb->get_row($wpdb->prepare("SELECT id, status FROM {$wpdb->prefix}bhg_hunts WHERE id=%d", $hunt_id));
+    if (!$hunts || $hunts->status !== 'open') {
+        wp_die(esc_html__('This hunt is closed for new guesses.', 'bonus-hunt-guesser'));
+    }
+    $existing = $wpdb->get_var($wpdb->prepare(
+        "SELECT COUNT(*) FROM {$wpdb->prefix}bhg_guesses WHERE hunt_id=%d AND user_id=%d",
+        $hunt_id, $user_id
+    ));
+    if ($existing) {
+        $wpdb->update(
+            "{$wpdb->prefix}bhg_guesses",
+            array('guess' => $guess, 'updated_at' => current_time('mysql', 1)),
+            array('hunt_id' => $hunt_id, 'user_id' => $user_id),
+            array('%f','%s'),
+            array('%d','%d')
+        );
+    } else {
+        $wpdb->insert(
+            "{$wpdb->prefix}bhg_guesses",
+            array(
+                'hunt_id' => $hunt_id,
+                'user_id' => $user_id,
+                'guess' => $guess,
+                'created_at' => current_time('mysql', 1),
+                'updated_at' => current_time('mysql', 1),
+            ),
+            array('%d','%d','%f','%s','%s')
+        );
+    }
+    wp_redirect(add_query_arg('bhg_msg','guess_saved', wp_get_referer() ?: home_url('/')));
+    exit;
+}
+
     /* STAGE-4 EMAIL LOCALIZATION */
 
 

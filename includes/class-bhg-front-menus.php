@@ -54,3 +54,39 @@ if (is_admin()) {
         }
     });
 }
+
+
+// Render the correct menu location based on role/login
+if (!function_exists('bhg_render_role_menu')) {
+    function bhg_render_role_menu($args = array()) {
+        if (current_user_can('manage_options') || current_user_can('moderate_comments')) {
+            $loc = 'bhg_menu_admin';
+        } elseif (is_user_logged_in()) {
+            $loc = 'bhg_menu_user';
+        } else {
+            $loc = 'bhg_menu_guest';
+        }
+        $defaults = array(
+            'theme_location' => $loc,
+            'container'      => 'nav',
+            'container_class'=> 'bhg-menu',
+            'fallback_cb'    => false,
+            'echo'           => false,
+        );
+        $args = wp_parse_args($args, $defaults);
+        $menu = wp_nav_menu($args);
+        if (!$menu) {
+            // Fallback message is escaped
+            $menu = '<nav class="bhg-menu"><ul><li>' . esc_html__('Menu not assigned.', 'bonus-hunt-guesser') . '</li></ul></nav>';
+        }
+        return $menu;
+    }
+}
+
+// Shortcode: [bhg_menu]
+if (!function_exists('bhg_menu_shortcode')) {
+    function bhg_menu_shortcode($atts) {
+        return bhg_render_role_menu();
+    }
+    add_shortcode('bhg_menu', 'bhg_menu_shortcode');
+}

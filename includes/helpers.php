@@ -102,3 +102,48 @@ function bhg_get_user_display_name($user_id) {
 
     return $display_name;
 }
+
+
+if (!function_exists('bhg_is_user_affiliate')) {
+    function bhg_is_user_affiliate($user_id) {
+        $val = get_user_meta($user_id, 'bhg_is_affiliate', true);
+        return $val === '1' || $val === 1 || $val === true || $val === 'yes';
+    }
+}
+if (!function_exists('bhg_get_user_affiliate_sites')) {
+    function bhg_get_user_affiliate_sites($user_id) {
+        $ids = get_user_meta($user_id, 'bhg_affiliate_sites', true);
+        if (is_array($ids)) return array_map('absint', $ids);
+        if (is_string($ids) && strlen($ids)) {
+            return array_map('absint', array_filter(array_map('trim', explode(',', $ids))));
+        }
+        return array();
+    }
+}
+if (!function_exists('bhg_set_user_affiliate_sites')) {
+    function bhg_set_user_affiliate_sites($user_id, $site_ids) {
+        $clean = array();
+        if (is_array($site_ids)) {
+            foreach ($site_ids as $sid) { $sid = absint($sid); if ($sid) $clean[] = $sid; }
+        }
+        update_user_meta($user_id, 'bhg_affiliate_sites', $clean);
+    }
+}
+
+
+if (!function_exists('bhg_is_user_affiliate_for_site')) {
+    function bhg_is_user_affiliate_for_site($user_id, $site_id) {
+        if (!$site_id) return bhg_is_user_affiliate($user_id);
+        $sites = bhg_get_user_affiliate_sites($user_id);
+        return in_array(absint($site_id), array_map('absint', (array)$sites), true);
+    }
+}
+
+if (!function_exists('bhg_render_affiliate_dot')) {
+    function bhg_render_affiliate_dot($user_id, $hunt_affiliate_site_id = 0){
+        $is_aff = bhg_is_user_affiliate_for_site($user_id, $hunt_affiliate_site_id);
+        $cls   = $is_aff ? 'bhg-aff-green' : 'bhg-aff-red';
+        $label = $is_aff ? esc_attr__('Affiliate', 'bonus-hunt-guesser') : esc_attr__('Non-affiliate', 'bonus-hunt-guesser');
+        return '<span class="bhg-aff-dot ' . esc_attr($cls) . '" aria-label="' . $label . '"></span>';
+    }
+}

@@ -146,3 +146,50 @@ $users = get_users([
         }
         ?>
         
+
+<?php
+if (!defined('ABSPATH')) exit;
+global $wpdb;
+
+$table_sites = $wpdb->prefix . 'bhg_affiliate_websites';
+$sites = $wpdb->get_results("SELECT id, name FROM {$table_sites} ORDER BY name ASC");
+
+$current_user_id = isset($_GET['user_id']) ? absint($_GET['user_id']) : 0;
+if ($current_user_id) {
+    $is_aff = bhg_is_user_affiliate($current_user_id);
+    $assigned = bhg_get_user_affiliate_sites($current_user_id);
+?>
+<div class="wrap">
+  <h2><?php echo esc_html__('Affiliate Settings', 'bonus-hunt-guesser'); ?></h2>
+  <form method="post">
+    <?php wp_nonce_field('bhg_save_user_affiliate', 'bhg_nonce'); ?>
+    <input type="hidden" name="bhg_user_aff_form" value="1">
+    <input type="hidden" name="user_id" value="<?php echo (int)$current_user_id; ?>">
+    <table class="form-table">
+      <tr>
+        <th scope="row"><?php echo esc_html__('Is Affiliate', 'bonus-hunt-guesser'); ?></th>
+        <td>
+          <label>
+            <input type="checkbox" name="bhg_is_affiliate" value="1" <?php checked($is_aff); ?> />
+            <?php echo esc_html__('Mark this user as affiliate', 'bonus-hunt-guesser'); ?>
+          </label>
+        </td>
+      </tr>
+      <tr>
+        <th scope="row"><?php echo esc_html__('Affiliate Websites', 'bonus-hunt-guesser'); ?></th>
+        <td>
+          <select name="bhg_affiliate_sites[]" multiple style="min-width:280px; height:140px;">
+            <?php if ($sites) foreach ($sites as $s): ?>
+            <option value="<?php echo (int)$s->id; ?>" <?php selected(in_array((int)$s->id, $assigned, true)); ?>>
+              <?php echo esc_html($s->name); ?>
+            </option>
+            <?php endforeach; ?>
+          </select>
+          <p class="description"><?php echo esc_html__('Hold Ctrl/Cmd to select multiple sites.', 'bonus-hunt-guesser'); ?></p>
+        </td>
+      </tr>
+    </table>
+    <?php submit_button(__('Save Affiliate Settings', 'bonus-hunt-guesser')); ?>
+  </form>
+</div>
+<?php } ?>

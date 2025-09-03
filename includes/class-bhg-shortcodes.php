@@ -527,3 +527,35 @@ return ob_get_clean();
     
 }
 
+
+// Helpers for safe order & pagination
+if (!function_exists('bhg_get_sanitized_order')) {
+    function bhg_get_sanitized_order() {
+        $allowed_orderby = array('position','username','guess','created_at');
+        $allowed_order   = array('asc','desc');
+        $orderby = isset($_GET['orderby']) ? strtolower(sanitize_key($_GET['orderby'])) : 'created_at';
+        $order   = isset($_GET['order'])   ? strtolower(sanitize_key($_GET['order']))   : 'desc';
+        if (!in_array($orderby, $allowed_orderby, true)) { $orderby = 'created_at'; }
+        if (!in_array($order,   $allowed_order,   true)) { $order   = 'desc'; }
+        return array($orderby, $order);
+    }
+}
+if (!function_exists('bhg_get_pagination')) {
+    function bhg_get_pagination() {
+        $limit  = isset($_GET['limit']) ? (int) $_GET['limit'] : 25;
+        if ($limit < 1) $limit = 25; if ($limit > 100) $limit = 100;
+        $page   = isset($_GET['page']) ? (int) $_GET['page'] : 1;
+        if ($page < 1) $page = 1;
+        $offset = ($page - 1) * $limit;
+        return array($limit, $offset);
+    }
+}
+
+if (!function_exists('bhg_validate_guess_value')) {
+    function bhg_validate_guess_value($guess) {
+        $g = is_numeric($guess) ? floatval($guess) : -1;
+        if ($g < 0) $g = 0;
+        if ($g > 100000) $g = 100000;
+        return $g;
+    }
+}

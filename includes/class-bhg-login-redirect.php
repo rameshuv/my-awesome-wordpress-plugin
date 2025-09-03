@@ -1,21 +1,34 @@
 <?php
-if (!defined('ABSPATH')) exit;
+if (!defined('ABSPATH')) { exit; }
 
-/**
- * BHG Smart Login Redirect (filter-based; no direct wp_redirect during output)
- */
+if (!class_exists('BHG_Login_Redirect')) {
 class BHG_Login_Redirect {
-    public static function init() {
-        add_filter('login_redirect', [__CLASS__, 'filter_login_redirect'], 10, 3);
+    public function __construct() {
+        add_filter('login_redirect', array($this, 'core_login_redirect'), 10, 3);
+
+        // Nextend Social Login compatibility if plugin active
+        if (function_exists('NextendSocialLogin')) {
+            add_filter('nsl_login_redirect', array($this, 'nextend_redirect'), 10, 3);
+        }
     }
 
-    public static function filter_login_redirect($redirect_to, $requested, $user) {
-        // Respect ?bhg_redirect=<url> (encoded) if present on login page or request chain
-        if (isset($_REQUEST['bhg_redirect'])) {
-            $url = wp_validate_redirect(urldecode($_REQUEST['bhg_redirect']), $redirect_to ?: home_url('/'));
-            return $url;
+    public function core_login_redirect($redirect_to, $requested, $user) {
+        if (!empty($_REQUEST['redirect_to'])) {
+            return esc_url_raw($_REQUEST['redirect_to']);
         }
+        // Fall back to referer if safe
+        $ref = wp_get_referer();
+        if ($ref) { return esc_url_raw($ref); }
         return $redirect_to ?: home_url('/');
     }
-}
-BHG_Login_Redirect::init();
+
+    public function nextend_redirect($redirect_to, $user, $provider) {
+        if (!empty($_REQUEST['redirect_to'])) {
+            return esc_url_raw($_REQUEST['redirect_to']);
+        }
+        $ref = wp_get_referer();
+        if ($ref) { return esc_url_raw($ref); }
+        return $redirect_to ?: home_url('/');
+    }
+}}
+new BHG_Login_Redirect();

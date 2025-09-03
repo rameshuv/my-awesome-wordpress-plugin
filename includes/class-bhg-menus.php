@@ -1,3 +1,9 @@
+
+
+if (!defined('BHG_MENUS_INITIALIZED')) {
+    define('BHG_MENUS_INITIALIZED', true);
+}
+
 <?php
 if (!defined('ABSPATH')) exit;
 
@@ -104,4 +110,41 @@ class BHG_Menus {
     public function render_settings() { $this->view('settings'); }
     public function render_database() { $this->view('database'); }
     public function render_tools() { $this->view('tools'); }
+}
+
+if (!function_exists('bhg_setup_menus_once')) {
+    function bhg_setup_menus_once() {
+        if (get_option('bhg_menus_initialized')) return;
+        // If your code programmatically creates menus, do it here one time.
+        // ...
+        update_option('bhg_menus_initialized', 1, true);
+    }
+    add_action('init', 'bhg_setup_menus_once', 20);
+}
+
+
+// Register plugin-specific menu locations (role-based). Guard to avoid duplicates.
+if (!function_exists('bhg_register_menus')) {
+    function bhg_register_menus() {
+        static $done = false;
+        if ($done) return;
+        $done = true;
+        register_nav_menus(array(
+            'bhg_menu_admin' => __('BHG Menu — Admin/Moderators', 'bonus-hunt-guesser'),
+            'bhg_menu_user'  => __('BHG Menu — Logged-in Users', 'bonus-hunt-guesser'),
+            'bhg_menu_guest' => __('BHG Menu — Guests', 'bonus-hunt-guesser'),
+        ));
+    }
+    add_action('init', 'bhg_register_menus', 5);
+}
+
+// One-time init hook to ensure we don't recreate menus on every load.
+if (!function_exists('bhg_setup_menus_once')) {
+    function bhg_setup_menus_once() {
+        if (get_option('bhg_menus_initialized')) return;
+        // If you need to programmatically create default menus, do here once.
+        // We intentionally do nothing to avoid duplicates; just mark as initialized.
+        update_option('bhg_menus_initialized', 1, true);
+    }
+    add_action('init', 'bhg_setup_menus_once', 20);
 }
