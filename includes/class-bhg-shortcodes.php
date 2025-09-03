@@ -82,7 +82,7 @@ class BHG_Shortcodes {
         );
         
         if (!$active_hunt) {
-            return '<div class="bhg-leaderboard"><p>' . __('No active bonus hunt found.', 'bonus-hunt-guesser') . '</p></div>';
+            return '<div class="bhg-leaderboard"><p>' . esc_html__('No active bonus hunt found.', 'bonus-hunt-guesser') . '</p></div>';
         }
         
         // Get guesses for active hunt
@@ -99,18 +99,18 @@ class BHG_Shortcodes {
         ));
         
         if (!$guesses) {
-            return '<div class="bhg-leaderboard"><p>' . __('No guesses yet for this bonus hunt.', 'bonus-hunt-guesser') . '</p></div>';
+            return '<div class="bhg-leaderboard"><p>' . esc_html__('No guesses yet for this bonus hunt.', 'bonus-hunt-guesser') . '</p></div>';
         }
         
         ob_start();
         echo '<div class="bhg-leaderboard">';
-        echo '<h3>' . esc_html($active_hunt->title) . ' ' . __('Leaderboard', 'bonus-hunt-guesser') . '</h3>';
+        echo '<h3>' . esc_html($active_hunt->title) . ' ' . esc_html__('Leaderboard', 'bonus-hunt-guesser') . '</h3>';
         echo '<table class="bhg-leaderboard-table">';
         echo '<thead><tr>
-                <th>' . __('Position', 'bonus-hunt-guesser') . '</th>
-                <th>' . __('Username', 'bonus-hunt-guesser') . '</th>
-                <th>' . __('Guess', 'bonus-hunt-guesser') . '</th>
-                <th>' . __('Affiliate', 'bonus-hunt-guesser') . '</th>
+                <th>' . esc_html__('Position', 'bonus-hunt-guesser') . '</th>
+                <th>' . esc_html__('Username', 'bonus-hunt-guesser') . '</th>
+                <th>' . esc_html__('Guess', 'bonus-hunt-guesser') . '</th>
+                <th>' . esc_html__('Affiliate', 'bonus-hunt-guesser') . '</th>
               </tr></thead>';
         echo '<tbody>';
         
@@ -120,9 +120,9 @@ class BHG_Shortcodes {
             $is_affiliate = !empty($guess->affiliate_status) && $guess->affiliate_status == 1;
             
             echo '<tr>
-                    <td>' . $position . '</td>
+                    <td>' . (int)$position . '</td>
                     <td>' . esc_html($username) . '</td>
-                    <td>' . number_format($guess->guess, 2) . '</td>
+                    <td>' . esc_html(number_format($guess->guess, 2)) . '</td>
                     <td><span class="affiliate-status ' . ($is_affiliate ? 'affiliate-yes' : 'affiliate-no') . '"></span></td>
                   </tr>';
             $position++;
@@ -152,23 +152,23 @@ class BHG_Shortcodes {
         }
         
         if (!$hunt) {
-            return '<div class="bhg-bonus-hunt"><p>' . __('No bonus hunt found.', 'bonus-hunt-guesser') . '</p></div>';
+            return '<div class="bhg-bonus-hunt"><p>' . esc_html__('No bonus hunt found.', 'bonus-hunt-guesser') . '</p></div>';
         }
         
         ob_start();
         echo '<div class="bhg-bonus-hunt">';
         echo '<h3>' . esc_html($hunt->title) . '</h3>';
         echo '<div class="bhg-hunt-details">
-                <p><strong>' . __('Starting Balance:', 'bonus-hunt-guesser') . '</strong> ' . number_format($hunt->starting_balance, 2) . '</p>
-                <p><strong>' . __('Number of Bonuses:', 'bonus-hunt-guesser') . '</strong> ' . $hunt->num_bonuses . '</p>
-                <p><strong>' . __('Status:', 'bonus-hunt-guesser') . '</strong> ' . ucfirst($hunt->status) . '</p>';
+                <p><strong>' . esc_html__('Starting Balance:', 'bonus-hunt-guesser') . '</strong> ' . esc_html(number_format($hunt->starting_balance, 2)) . '</p>
+                <p><strong>' . esc_html__('Number of Bonuses:', 'bonus-hunt-guesser') . '</strong> ' . (int)$hunt->num_bonuses . '</p>
+                <p><strong>' . esc_html__('Status:', 'bonus-hunt-guesser') . '</strong> ' . esc_html(ucfirst($hunt->status)) . '</p>';
         
         if ($hunt->final_balance) {
-            echo '<p><strong>' . __('Final Balance:', 'bonus-hunt-guesser') . '</strong> ' . number_format($hunt->final_balance, 2) . '</p>';
+            echo '<p><strong>' . esc_html__('Final Balance:', 'bonus-hunt-guesser') . '</strong> ' . esc_html(number_format($hunt->final_balance, 2)) . '</p>';
         }
         
         if ($hunt->prizes) {
-            echo '<p><strong>' . __('Prizes:', 'bonus-hunt-guesser') . '</strong> ' . nl2br(esc_html($hunt->prizes)) . '</p>';
+            echo '<p><strong>' . esc_html__('Prizes:', 'bonus-hunt-guesser') . '</strong> ' . nl2br(esc_html($hunt->prizes)) . '</p>';
         }
         
         echo '</div>';
@@ -184,7 +184,7 @@ class BHG_Shortcodes {
             $login_url = wp_login_url(get_permalink());
             return '<div class="bhg-guess-form"><p>' . 
                 sprintf(
-                    __('You must be <a href="%s">logged in</a> to submit a guess.', 'bonus-hunt-guesser'),
+                    esc_html__('You must be <a href="%s">logged in</a> to submit a guess.', 'bonus-hunt-guesser'),
                     esc_url($login_url)
                 ) . '</p></div>';
         }
@@ -203,7 +203,7 @@ class BHG_Shortcodes {
         }
         
         if (!$hunt || $hunt->status !== 'active') {
-            return '<div class="bhg-guess-form"><p>' . __('No active bonus hunt available for guessing.', 'bonus-hunt-guesser') . '</p></div>';
+            return '<div class="bhg-guess-form"><p>' . esc_html__('No active bonus hunt available for guessing.', 'bonus-hunt-guesser') . '</p></div>';
         }
         
         $user_id = get_current_user_id();
@@ -215,29 +215,29 @@ class BHG_Shortcodes {
         ));
         
         $settings = get_option('bhg_plugin_settings', []);
-        $min_guess = isset($settings['min_guess_amount']) ? $settings['min_guess_amount'] : 0;
-        $max_guess = isset($settings['max_guess_amount']) ? $settings['max_guess_amount'] : 100000;
+        $min_guess = isset($settings['min_guess_amount']) ? (float)$settings['min_guess_amount'] : 0;
+        $max_guess = isset($settings['max_guess_amount']) ? (float)$settings['max_guess_amount'] : 100000;
         
         ob_start();
         echo '<div class="bhg-guess-form">';
-        echo '<h3>' . __('Submit Your Guess', 'bonus-hunt-guesser') . '</h3>';
-        echo '<p>' . sprintf(__('Guess the final balance for %s. Current starting balance: %s', 'bonus-hunt-guesser'), 
+        echo '<h3>' . esc_html__('Submit Your Guess', 'bonus-hunt-guesser') . '</h3>';
+        echo '<p>' . sprintf(esc_html__('Guess the final balance for %s. Current starting balance: %s', 'bonus-hunt-guesser'), 
                 esc_html($hunt->title), 
-                number_format($hunt->starting_balance, 2)) . '</p>';
+                esc_html(number_format($hunt->starting_balance, 2))) . '</p>';
         
-        echo '<form method="post" action="' . admin_url('admin-post.php') . '">';
+        echo '<form method="post" action="' . esc_url(admin_url('admin-post.php')) . '">';
         echo '<input type="hidden" name="action" value="bhg_submit_guess">';
-        echo '<input type="hidden" name="hunt_id" value="' . $hunt->id . '">';
+        echo '<input type="hidden" name="hunt_id" value="' . (int)$hunt->id . '">';
         wp_nonce_field('bhg_guess_nonce', '_wpnonce');
         
         echo '<div class="form-group">
-                <label for="bhg_guess">' . __('Your Guess:', 'bonus-hunt-guesser') . '</label>
-                <input type="number" id="bhg_guess" name="guess" value="' . ($existing_guess ? $existing_guess : '') . '" 
-                       min="' . $min_guess . '" max="' . $max_guess . '" step="0.01" required>
+                <label for="bhg_guess">' . esc_html__('Your Guess:', 'bonus-hunt-guesser') . '</label>
+                <input type="number" id="bhg_guess" name="guess" value="' . ($existing_guess ? esc_attr($existing_guess) : '') . '" 
+                       min="' . esc_attr($min_guess) . '" max="' . esc_attr($max_guess) . '" step="0.01" required>
               </div>';
         
         echo '<button type="submit" class="bhg-submit-guess">' . 
-             ($existing_guess ? __('Update Guess', 'bonus-hunt-guesser') : __('Submit Guess', 'bonus-hunt-guesser')) . 
+             ($existing_guess ? esc_html__('Update Guess', 'bonus-hunt-guesser') : esc_html__('Submit Guess', 'bonus-hunt-guesser')) . 
              '</button>';
         echo '</form>';
         echo '</div>';
@@ -255,19 +255,19 @@ class BHG_Shortcodes {
         ));
         
         if (!$tournaments) {
-            return '<div class="bhg-tournaments"><p>' . __('No tournaments found.', 'bonus-hunt-guesser') . '</p></div>';
+            return '<div class="bhg-tournaments"><p>' . esc_html__('No tournaments found.', 'bonus-hunt-guesser') . '</p></div>';
         }
         
         ob_start();
         echo '<div class="bhg-tournaments">';
-        echo '<h3>' . ucfirst($period) . ' ' . __('Tournaments', 'bonus-hunt-guesser') . '</h3>';
+        echo '<h3>' . esc_html(ucfirst($period)) . ' ' . esc_html__('Tournaments', 'bonus-hunt-guesser') . '</h3>';
         echo '<ul class="bhg-tournament-list">';
         
         foreach ($tournaments as $tournament) {
             echo '<li>
                     <h4>' . esc_html($tournament->title) . '</h4>
-                    <p>' . __('Period Key:', 'bonus-hunt-guesser') . ' ' . esc_html($tournament->period_key) . '</p>
-                    <p>' . __('Status:', 'bonus-hunt-guesser') . ' ' . esc_html($tournament->status) . '</p>
+                    <p>' . esc_html__('Period Key:', 'bonus-hunt-guesser') . ' ' . esc_html($tournament->period_key) . '</p>
+                    <p>' . esc_html__('Status:', 'bonus-hunt-guesser') . ' ' . esc_html($tournament->status) . '</p>
                   </li>';
         }
         
@@ -580,7 +580,7 @@ class BHG_Shortcodes {
                 </div>
                 <div class="bhg-detail-row">
                     <span class="bhg-label"><?php esc_html_e('Number of Bonuses:', 'bonus-hunt-guesser'); ?></span>
-                    <span class="bhg-value"><?php echo esc_html($hunt->num_bonuses); ?></span>
+                    <span class="bhg-value"><?php echo (int)$hunt->num_bonuses; ?></span>
                 </div>
             </div>
         </div>
@@ -700,7 +700,7 @@ class BHG_Shortcodes {
     public function ajax_submit_guess() {
         // Verify nonce
         if (!wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['nonce'])), 'bhg_nonce')) {
-            wp_die(esc_html__('Security check failed', 'bonus-hunt-guesser'));
+            wp_send_json_error(esc_html__('Security check failed', 'bonus-hunt-guesser'));
         }
         
         // Check if user is logged in

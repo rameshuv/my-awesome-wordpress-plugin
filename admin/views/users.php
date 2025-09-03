@@ -17,8 +17,8 @@ $affiliate_websites = $wpdb->get_results("SELECT id, name FROM {$wpdb->prefix}bh
 // Process form submission with proper security checks
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['bhg_update_users'])) {
     // Verify nonce
-    if (!isset($_POST['_wpnonce_bhg_update_users']) || 
-        !wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['_wpnonce_bhg_update_users'])), 'bhg_update_users_nonce')) {
+    if (!isset($_POST['bhg_users_nonce']) || 
+        !wp_verify_nonce(sanitize_text_field(wp_unslash($_POST['bhg_users_nonce'])), 'bhg_save_users')) {
         wp_die(esc_html__('Security check failed.', 'bonus-hunt-guesser'));
     }
     
@@ -38,6 +38,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['bhg_update_users'])) 
                 $is_affiliate = isset($affiliate_data[$website_id]) ? 1 : 0;
                 update_user_meta($user_id, "bhg_affiliate_website_{$website_id}", $is_affiliate);
             }
+            
+            // Update general affiliate status (for backward compatibility)
+            $any_affiliate = false;
+            foreach ($affiliate_websites as $website) {
+                if (isset($affiliate_data[$website->id])) {
+                    $any_affiliate = true;
+                    break;
+                }
+            }
+            update_user_meta($user_id, "bhg_affiliate_status", $any_affiliate ? 1 : 0);
         }
     }
     
@@ -53,9 +63,8 @@ $users = get_users([
 <div class="wrap bhg-wrap">
     <h1><?php esc_html_e('Users & Affiliate Status', 'bonus-hunt-guesser'); ?></h1>
     
-    <form method="post" action="<?php echo esc_url(admin_url('admin-post.php')); ?>">
-        <input type="hidden" name="action" value="bhg_update_users">
-        <?php wp_nonce_field('bhg_update_users_nonce', '_wpnonce_bhg_update_users'); ?>
+    <form method="post" action="">
+        <?php wp_nonce_field('bhg_save_users', 'bhg_users_nonce'); ?>
         <input type="hidden" name="bhg_update_users" value="1" />
         
         <table class="widefat fixed striped">
@@ -72,10 +81,13 @@ $users = get_users([
                         <small><?php esc_html_e('Affiliate', 'bonus-hunt-guesser'); ?></small>
                     </th>
                     <?php endforeach; ?>
+                    <th><?php esc_html_e('Global Affiliate Status', 'bonus-hunt-guesser'); ?></th>
                 </tr>
             </thead>
             <tbody>
-            <?php foreach ($users as $u): ?>
+            <?php foreach ($users as $u): 
+                $global_affiliate_status = get_user_meta($u->ID, "bhg_affiliate_status", true);
+            ?>
                 <tr>
                     <td><?php echo intval($u->ID); ?></td>
                     <td><?php echo esc_html($u->user_login); ?></td>
@@ -89,6 +101,11 @@ $users = get_users([
                                <?php checked((bool) $is_affiliate); ?> />
                     </td>
                     <?php endforeach; ?>
+                    <td>
+                        <span class="affiliate-status-indicator <?php echo $global_affiliate_status ? 'affiliate-yes' : 'affiliate-no'; ?>">
+                            <?php echo $global_affiliate_status ? '✓' : '✗'; ?>
+                        </span>
+                    </td>
                 </tr>
             <?php endforeach; ?>
             </tbody>
@@ -97,3 +114,23 @@ $users = get_users([
         <?php submit_button(__('Save Changes', 'bonus-hunt-guesser')); ?>
     </form>
 </div>
+
+<style>
+.affiliate-status-indicator {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    text-align: center;
+    line-height: 20px;
+    font-weight: bold;
+}
+.affiliate-yes {
+    background-color: #46b450;
+    color: white;
+}
+.affiliate-no {
+    background-color: #dc3232;
+    color: white;
+}
+</style>

@@ -153,45 +153,51 @@ class BHG_DB {
 
         // Helper to check if a column exists
         $col_exists = function($table, $column) use ($wpdb) {
+            $table = $wpdb->prefix . $table;
             $table = esc_sql($table);
             $column = esc_sql($column);
-            $row = $wpdb->get_row("SHOW COLUMNS FROM `{$table}` LIKE '{$column}'");
+            $row = $wpdb->get_row($wpdb->prepare("SHOW COLUMNS FROM `%s` LIKE '%s'", $table, $column));
             return !empty($row);
         };
 
         // Helper to check if an index exists
         $index_exists = function($table, $index_name) use ($wpdb) {
+            $table = $wpdb->prefix . $table;
             $table = esc_sql($table);
             $index_name = esc_sql($index_name);
-            $row = $wpdb->get_row("SHOW INDEX FROM `{$table}` WHERE Key_name = '{$index_name}'");
+            $row = $wpdb->get_row($wpdb->prepare("SHOW INDEX FROM `%s` WHERE Key_name = '%s'", $table, $index_name));
             return !empty($row);
         };
 
         // Ensure 'active' column exists in bhg_ads
         $ads_table = $wpdb->prefix . 'bhg_ads';
         if ($wpdb->get_var($wpdb->prepare("SHOW TABLES LIKE %s", $ads_table)) === $ads_table) {
-            if (!$col_exists($ads_table, 'active')) {
-                $wpdb->query("ALTER TABLE `{$ads_table}` ADD COLUMN `active` TINYINT(1) NOT NULL DEFAULT 1 AFTER `visibility`");
+            if (!$col_exists('bhg_ads', 'active')) {
+                $wpdb->query($wpdb->prepare("ALTER TABLE `%s` ADD COLUMN `active` TINYINT(1) NOT NULL DEFAULT 1 AFTER `visibility`", $ads_table));
             }
         }
 
         // Ensure 'period' column exists in tournament_results
         $tr_table = $wpdb->prefix . 'bhg_tournament_results';
         if ($wpdb->get_var($wpdb->prepare("SHOW TABLES LIKE %s", $tr_table)) === $tr_table) {
-            if (!$col_exists($tr_table, 'period')) {
-                $wpdb->query("ALTER TABLE `{$tr_table}` ADD COLUMN `period` VARCHAR(20) NOT NULL DEFAULT 'weekly' AFTER `user_id`");
-                error_log('[BHG] Added missing column period to ' . $tr_table);
+            if (!$col_exists('bhg_tournament_results', 'period')) {
+                $wpdb->query($wpdb->prepare("ALTER TABLE `%s` ADD COLUMN `period` VARCHAR(20) NOT NULL DEFAULT 'weekly' AFTER `user_id`", $tr_table));
+                if (function_exists('bhg_log')) {
+                    bhg_log('Added missing column period to ' . $tr_table);
+                } else {
+                    error_log('[BHG] Added missing column period to ' . $tr_table);
+                }
             }
         }
 
         // Ensure indexes on guesses (hunt_id, user_id)
         $g_table = $wpdb->prefix . 'bhg_guesses';
         if ($wpdb->get_var($wpdb->prepare("SHOW TABLES LIKE %s", $g_table)) === $g_table) {
-            if (!$index_exists($g_table, 'hunt_id_idx')) {
-                $wpdb->query("ALTER TABLE `{$g_table}` ADD INDEX `hunt_id_idx` (`hunt_id`)");
+            if (!$index_exists('bhg_guesses', 'hunt_id_idx')) {
+                $wpdb->query($wpdb->prepare("ALTER TABLE `%s` ADD INDEX `hunt_id_idx` (`hunt_id`)", $g_table));
             }
-            if (!$index_exists($g_table, 'user_id_idx')) {
-                $wpdb->query("ALTER TABLE `{$g_table}` ADD INDEX `user_id_idx` (`user_id`)");
+            if (!$index_exists('bhg_guesses', 'user_id_idx')) {
+                $wpdb->query($wpdb->prepare("ALTER TABLE `%s` ADD INDEX `user_id_idx` (`user_id`)", $g_table));
             }
         }
 
@@ -199,41 +205,57 @@ class BHG_DB {
         $tournaments_table = $wpdb->prefix . 'bhg_tournaments';
         if ($wpdb->get_var($wpdb->prepare("SHOW TABLES LIKE %s", $tournaments_table)) === $tournaments_table) {
             // Add type column if missing
-            if (!$col_exists($tournaments_table, 'type')) {
-                $wpdb->query("ALTER TABLE `{$tournaments_table}` ADD COLUMN `type` VARCHAR(20) NOT NULL AFTER `id`");
-                error_log('[BHG] Added missing column type to ' . $tournaments_table);
+            if (!$col_exists('bhg_tournaments', 'type')) {
+                $wpdb->query($wpdb->prepare("ALTER TABLE `%s` ADD COLUMN `type` VARCHAR(20) NOT NULL AFTER `id`", $tournaments_table));
+                if (function_exists('bhg_log')) {
+                    bhg_log('Added missing column type to ' . $tournaments_table);
+                } else {
+                    error_log('[BHG] Added missing column type to ' . $tournaments_table);
+                }
             }
             
             // Add period column if missing (or check if it needs to be modified)
-            if (!$col_exists($tournaments_table, 'period')) {
-                $wpdb->query("ALTER TABLE `{$tournaments_table}` ADD COLUMN `period` VARCHAR(20) NOT NULL AFTER `type`");
-                error_log('[BHG] Added missing column period to ' . $tournaments_table);
+            if (!$col_exists('bhg_tournaments', 'period')) {
+                $wpdb->query($wpdb->prepare("ALTER TABLE `%s` ADD COLUMN `period` VARCHAR(20) NOT NULL AFTER `type`", $tournaments_table));
+                if (function_exists('bhg_log')) {
+                    bhg_log('Added missing column period to ' . $tournaments_table);
+                } else {
+                    error_log('[BHG] Added missing column period to ' . $tournaments_table);
+                }
             }
             
             // Add start_date column if missing
-            if (!$col_exists($tournaments_table, 'start_date')) {
-                $wpdb->query("ALTER TABLE `{$tournaments_table}` ADD COLUMN `start_date` DATETIME NOT NULL AFTER `period`");
-                error_log('[BHG] Added missing column start_date to ' . $tournaments_table);
+            if (!$col_exists('bhg_tournaments', 'start_date')) {
+                $wpdb->query($wpdb->prepare("ALTER TABLE `%s` ADD COLUMN `start_date` DATETIME NOT NULL AFTER `period`", $tournaments_table));
+                if (function_exists('bhg_log')) {
+                    bhg_log('Added missing column start_date to ' . $tournaments_table);
+                } else {
+                    error_log('[BHG] Added missing column start_date to ' . $tournaments_table);
+                }
             }
             
             // Add end_date column if missing
-            if (!$col_exists($tournaments_table, 'end_date')) {
-                $wpdb->query("ALTER TABLE `{$tournaments_table}` ADD COLUMN `end_date` DATETIME NOT NULL AFTER `start_date`");
-                error_log('[BHG] Added missing column end_date to ' . $tournaments_table);
+            if (!$col_exists('bhg_tournaments', 'end_date')) {
+                $wpdb->query($wpdb->prepare("ALTER TABLE `%s` ADD COLUMN `end_date` DATETIME NOT NULL AFTER `start_date`", $tournaments_table));
+                if (function_exists('bhg_log')) {
+                    bhg_log('Added missing column end_date to ' . $tournaments_table);
+                } else {
+                    error_log('[BHG] Added missing column end_date to ' . $tournaments_table);
+                }
             }
             
             // Remove old columns if they exist
-            if ($col_exists($tournaments_table, 'title')) {
-                $wpdb->query("ALTER TABLE `{$tournaments_table}` DROP COLUMN `title`");
+            if ($col_exists('bhg_tournaments', 'title')) {
+                $wpdb->query($wpdb->prepare("ALTER TABLE `%s` DROP COLUMN `title`", $tournaments_table));
             }
             
-            if ($col_exists($tournaments_table, 'period_key')) {
-                $wpdb->query("ALTER TABLE `{$tournaments_table}` DROP COLUMN `period_key`");
+            if ($col_exists('bhg_tournaments', 'period_key')) {
+                $wpdb->query($wpdb->prepare("ALTER TABLE `%s` DROP COLUMN `period_key`", $tournaments_table));
             }
             
             // Add unique index if it doesn't exist
-            if (!$index_exists($tournaments_table, 'type_period')) {
-                $wpdb->query("ALTER TABLE `{$tournaments_table}` ADD UNIQUE INDEX `type_period` (`type`, `period`)");
+            if (!$index_exists('bhg_tournaments', 'type_period')) {
+                $wpdb->query($wpdb->prepare("ALTER TABLE `%s` ADD UNIQUE INDEX `type_period` (`type`, `period`)", $tournaments_table));
             }
         }
     }

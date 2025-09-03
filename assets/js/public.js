@@ -26,9 +26,11 @@ jQuery(document).ready(function($) {
         initAffiliateIndicators();
     }
 
-    // Validate the guess submission form
+    // Validate and submit the guess form
     function validateGuessForm() {
         $('#bhg-guess-form').on('submit', function(e) {
+            e.preventDefault();
+            
             var form = $(this);
             var guessInput = form.find('#bhg-guess-amount');
             var guessValue = parseFloat(guessInput.val());
@@ -60,12 +62,40 @@ jQuery(document).ready(function($) {
 
             // Prevent form submission if validation fails
             if (!isValid) {
-                e.preventDefault();
                 return false;
             }
 
             // Show loading indicator
             form.find('.bhg-submit-btn').prop('disabled', true).addClass('loading');
+
+            // AJAX request to submit guess
+            $.ajax({
+                url: bhg_ajax_url,
+                type: 'POST',
+                data: {
+                    action: 'submit_bhg_guess',
+                    nonce: bhg_nonce,
+                    guess_amount: guessValue
+                },
+                success: function(response) {
+                    if (response.success) {
+                        // Show success message and reload page
+                        showSuccess(errorContainer, bhg_public_ajax.i18n.guess_submitted);
+                        setTimeout(function() {
+                            location.reload();
+                        }, 2000);
+                    } else {
+                        // Show error message
+                        showError(errorContainer, response.data);
+                        form.find('.bhg-submit-btn').prop('disabled', false).removeClass('loading');
+                    }
+                },
+                error: function() {
+                    // Show generic error message
+                    showError(errorContainer, bhg_public_ajax.i18n.ajax_error);
+                    form.find('.bhg-submit-btn').prop('disabled', false).removeClass('loading');
+                }
+            });
         });
     }
 
