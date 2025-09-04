@@ -119,6 +119,15 @@
           echo '<td>' . esc_html($ad->placement) . '</td>';
           echo '<td>' . esc_html($ad->visibility) . '</td>';
           echo '<td>' . ((int)$ad->active ? '✓' : '—') . '</td>';
+          // Actions: Edit & Remove
+          $edit_url = esc_url( admin_url('admin.php?page=bhg-ads&edit='.(int)$ad->id) );
+          $remove_form = '<form method="post" action="'.esc_url(admin_url('admin-post.php')).'" style="display:inline;">'
+                       . wp_nonce_field('bhg_delete_ad','bhg_delete_ad_nonce', true, false)
+                       . '<input type="hidden" name="action" value="bhg_delete_ad" />'
+                       . '<input type="hidden" name="id" value="'.(int)$ad->id.'" />'
+                       . '<button type="submit" class="button-link delete-link" onclick="return confirm(\'' . esc_js(__('Remove this ad?', 'bonus-hunt-guesser')) . '\');">'.esc_html__('Remove','bonus-hunt-guesser').'</button>'
+                       . '</form>';
+          echo '<td><a class="button-link" href="'.$edit_url.'">'.esc_html__('Edit','bonus-hunt-guesser').'</a> | ' . $remove_form . '</td>';
           echo '</tr>';
       }
       echo '</tbody></table>';

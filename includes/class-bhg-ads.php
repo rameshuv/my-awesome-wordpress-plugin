@@ -6,6 +6,7 @@ class BHG_Ads {
     /** Initialize front-end hooks for ads */
     public static function init() {
         add_action('wp_footer', ['BHG_Ads', 'render_footer']);
+        add_shortcode('bhg_ad', ['BHG_Ads', 'shortcode']);
     }
 
 
@@ -106,5 +107,21 @@ class BHG_Ads {
             echo '</div>';
         }
     }
+
+    /** Shortcode: [bhg_ad id="123"] renders a single ad row regardless of placement. */
+    public static function shortcode($atts = []) {
+        $a = shortcode_atts(['id' => 0], $atts, 'bhg_ad');
+        $id = isset($a['id']) ? (int)$a['id'] : 0;
+        if ($id <= 0) return '';
+        global $wpdb;
+        $table = $wpdb->prefix . 'bhg_ads';
+        $row = $wpdb->get_row($wpdb->prepare("SELECT id, message, placement, visibility, target_pages, active FROM `$table` WHERE id=%d", $id));
+        if (!$row) return '';
+        if ((int)$row->active !== 1) return ''; // respect active flag
+        if (!self::visibility_ok($row->visibility)) return '';
+        if (!self::page_target_ok($row->target_pages)) return '';
+        return self::render_ad_row($row);
+    }
+
 }
 

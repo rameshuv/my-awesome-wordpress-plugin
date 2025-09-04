@@ -14,7 +14,8 @@ class BHG_Admin {
         add_action('admin_post_bhg_save_affiliate',  [$this, 'save_affiliate']);
         add_action('admin_post_bhg_delete_affiliate',[$this, 'delete_affiliate']);
         add_action('admin_post_bhg_save_ad',         [$this, 'save_ad']);
-        add_action('admin_post_bhg_reset_demo',      [$this, 'handle_reset_demo']);
+                add_action('admin_post_bhg_delete_ad',  [$this, 'delete_ad']);
+add_action('admin_post_bhg_reset_demo',      [$this, 'handle_reset_demo']);
         add_action('admin_post_bhg_submit_guess',    [$this, 'submit_guess']);
         add_action('admin_post_bhg_save_tournament', [$this, 'handle_save_tournament']);
         add_action('admin_post_bhg_delete_tournament', [$this, 'handle_delete_tournament']);
@@ -503,4 +504,22 @@ class BHG_Admin {
         wp_safe_redirect(admin_url('admin.php?page=bhg-tournaments&deleted=1'));
         exit;
     }
+    /* =======================
+     * Ads - delete
+     * ======================= */
+    public function delete_ad() {
+        $this->require_caps();
+        if (empty($_POST['bhg_delete_ad_nonce']) || !wp_verify_nonce($_POST['bhg_delete_ad_nonce'], 'bhg_delete_ad')) {
+            wp_die(esc_html__('Security check failed', 'bonus-hunt-guesser'));
+        }
+        global $wpdb;
+        $table = $this->table('bhg_ads');
+        $id = isset($_POST['id']) ? (int)$_POST['id'] : 0;
+        if ($id > 0) {
+            $wpdb->delete($table, ['id'=>$id], ['%d']);
+        }
+        wp_safe_redirect(admin_url('admin.php?page=bhg-ads&deleted=1'));
+        exit;
+    }
+
 }
