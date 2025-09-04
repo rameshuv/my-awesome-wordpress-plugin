@@ -40,7 +40,7 @@ class BHG_DB {
             user_id BIGINT UNSIGNED NOT NULL,
             guess_value DECIMAL(12,2) NOT NULL,
             created_at DATETIME NOT NULL DEFAULT '0000-00-00 00:00:00',
-updated_at DATETIME NOT NULL DEFAULT '0000-00-00 00:00:00',
+            updated_at DATETIME NOT NULL DEFAULT '0000-00-00 00:00:00',
             PRIMARY KEY (id),
             KEY hunt_id_idx (hunt_id),
             KEY user_id_idx (user_id)
@@ -77,7 +77,7 @@ updated_at DATETIME NOT NULL DEFAULT '0000-00-00 00:00:00',
         ) $charset_collate;";
         dbDelta($sql);
 
-        // --- Tournament wins (used by tournaments admin UI) ---
+        // --- Tournament wins (legacy/for admin UI) ---
         $sql = "CREATE TABLE {$wpdb->prefix}bhg_tournament_wins (
             id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
             tournament_id BIGINT UNSIGNED NOT NULL,
@@ -91,44 +91,26 @@ updated_at DATETIME NOT NULL DEFAULT '0000-00-00 00:00:00',
         ) $charset_collate;";
         dbDelta($sql);
 
-// --- Tournament results (used by admin ON DUPLICATE KEY UPDATE) ---
-$sql = "CREATE TABLE {$wpdb->prefix}bhg_tournament_results (
-    id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
-    tournament_id BIGINT UNSIGNED NOT NULL,
-    user_id BIGINT UNSIGNED NOT NULL,
-    wins INT UNSIGNED NOT NULL DEFAULT 0,
-    last_win_date DATETIME NULL,
-    PRIMARY KEY (id),
-    UNIQUE KEY tu_unique (tournament_id, user_id),
-    KEY tournament_idx (tournament_id),
-    KEY user_idx (user_id),
-    KEY wins_idx (wins)
-) $charset_collate;";
-dbDelta($sql);
-
-
-        
-        // --- Tournament results ---
+        // --- Tournament results (consolidated) ---
         $sql = "CREATE TABLE {$wpdb->prefix}bhg_tournament_results (
             id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
             tournament_id BIGINT UNSIGNED NOT NULL,
             user_id BIGINT UNSIGNED NOT NULL,
             wins INT UNSIGNED NOT NULL DEFAULT 0,
+            last_win_date DATETIME NULL,
             PRIMARY KEY (id),
-            UNIQUE KEY tournament_user (tournament_id, user_id),
+            UNIQUE KEY tu_unique (tournament_id, user_id),
             KEY tournament_idx (tournament_id),
-            KEY user_idx (user_id)
+            KEY user_idx (user_id),
+            KEY wins_idx (wins)
         ) $charset_collate;";
         dbDelta($sql);
 
-// --- Translations ---
+        // --- Translations ---
         $sql = "CREATE TABLE {$wpdb->prefix}bhg_translations (
             id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
             `key` VARCHAR(191) NOT NULL,
             `value` TEXT NULL,
-            -- legacy aliases kept for back-compat (not required by current code)
-            t_key VARCHAR(191) NULL,
-            t_value TEXT NULL,
             PRIMARY KEY (id),
             UNIQUE KEY tkey (`key`)
         ) $charset_collate;";
@@ -200,21 +182,18 @@ dbDelta($sql);
             }
         }
 
-        // Tournaments migration
+        // Tournaments migration (columns + unique)
         if ($table_exists('bhg_tournaments')) {
             $tbl = $wpdb->prefix . 'bhg_tournaments';
             if (!$col_exists('bhg_tournaments', 'updated_at')) {
                 $wpdb->query("ALTER TABLE `{$tbl}` ADD COLUMN `updated_at` DATETIME NOT NULL DEFAULT '0000-00-00 00:00:00' AFTER `created_at`");
             }
-    
-            $tbl = $wpdb->prefix . 'bhg_tournaments';
             if (!$col_exists('bhg_tournaments', 'start_date')) {
                 $wpdb->query("ALTER TABLE `{$tbl}` ADD COLUMN `start_date` DATETIME NOT NULL AFTER `period`");
             }
             if (!$col_exists('bhg_tournaments', 'end_date')) {
                 $wpdb->query("ALTER TABLE `{$tbl}` ADD COLUMN `end_date` DATETIME NOT NULL AFTER `start_date`");
             }
-            // Drop any legacy columns if they exist
             if ($col_exists('bhg_tournaments', 'from_date')) {
                 $wpdb->query("ALTER TABLE `{$tbl}` DROP COLUMN `from_date`");
             }
@@ -253,17 +232,15 @@ dbDelta($sql);
             if (!$index_exists('bhg_bonus_hunts', 'status_idx')) {
                 $wpdb->query("ALTER TABLE `{$tbl}` ADD INDEX `status_idx` (`status`)");
             }
-if (!$col_exists('bhg_bonus_hunts', 'affiliate_site_id')) {
-    $wpdb->query("ALTER TABLE `{$tbl}` ADD COLUMN `affiliate_site_id` BIGINT UNSIGNED NULL AFTER `status`");
-}
-if (!$index_exists('bhg_bonus_hunts', 'affiliate_site_idx')) {
-    $wpdb->query("ALTER TABLE `{$tbl}` ADD INDEX `affiliate_site_idx` (`affiliate_site_id`)");
-}
+            if (!$col_exists('bhg_bonus_hunts', 'affiliate_site_id')) {
+                $wpdb->query("ALTER TABLE `{$tbl}` ADD COLUMN `affiliate_site_id` BIGINT UNSIGNED NULL AFTER `status`");
+            }
+            if (!$index_exists('bhg_bonus_hunts', 'affiliate_site_idx')) {
+                $wpdb->query("ALTER TABLE `{$tbl}` ADD INDEX `affiliate_site_idx` (`affiliate_site_id`)");
+            }
         }
 
-        
-        
-        // Ensure tournament_results table exists
+        // Ensure tournament_results table exists (with last_win_date); backfill from wins if present
         if (!$table_exists('bhg_tournament_results')) {
             require_once ABSPATH . 'wp-admin/includes/upgrade.php';
             $sql = "CREATE TABLE {$wpdb->prefix}bhg_tournament_results (
@@ -271,14 +248,22 @@ if (!$index_exists('bhg_bonus_hunts', 'affiliate_site_idx')) {
                 tournament_id BIGINT UNSIGNED NOT NULL,
                 user_id BIGINT UNSIGNED NOT NULL,
                 wins INT UNSIGNED NOT NULL DEFAULT 0,
+                last_win_date DATETIME NULL,
                 PRIMARY KEY (id),
-                UNIQUE KEY tournament_user (tournament_id, user_id),
+                UNIQUE KEY tu_unique (tournament_id, user_id),
                 KEY tournament_idx (tournament_id),
-                KEY user_idx (user_id)
+                KEY user_idx (user_id),
+                KEY wins_idx (wins)
             ) $charset_collate;";
             dbDelta($sql);
         }
-// Translations: ensure expected column names
+        if ($table_exists('bhg_tournament_wins')) {
+            $wpdb->query("INSERT INTO `{$wpdb->prefix}bhg_tournament_results` (tournament_id, user_id, wins, last_win_date)
+                          SELECT tournament_id, user_id, wins, last_win_date FROM `{$wpdb->prefix}bhg_tournament_wins`
+                          ON DUPLICATE KEY UPDATE wins = VALUES(wins), last_win_date = VALUES(last_win_date)");
+        }
+
+        // Translations: ensure expected column names
         if ($table_exists('bhg_translations')) {
             $tbl = $wpdb->prefix . 'bhg_translations';
             if (!$col_exists('bhg_translations', 'key')) {
@@ -290,47 +275,6 @@ if (!$index_exists('bhg_bonus_hunts', 'affiliate_site_idx')) {
             if (!$index_exists('bhg_translations', 'tkey')) {
                 $wpdb->query("ALTER TABLE `{$tbl}` ADD UNIQUE INDEX `tkey` (`key`)");
             }
-        }
-// Ensure tournament wins table exists
-        if (!$table_exists('bhg_tournament_wins')) {
-            require_once ABSPATH . 'wp-admin/includes/upgrade.php';
-            $sql = "CREATE TABLE {$wpdb->prefix}bhg_tournament_wins (
-                id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
-                tournament_id BIGINT UNSIGNED NOT NULL,
-                user_id BIGINT UNSIGNED NOT NULL,
-                wins INT UNSIGNED NOT NULL DEFAULT 0,
-                last_win_date DATETIME NULL,
-                PRIMARY KEY (id),
-                KEY tournament_idx (tournament_id),
-                KEY user_idx (user_id),
-                KEY wins_idx (wins)
-            ) $charset_collate;";
-            dbDelta($sql);
-
-// Ensure tournament_results table exists
-if (!$table_exists('bhg_tournament_results')) {
-    require_once ABSPATH . 'wp-admin/includes/upgrade.php';
-    $sql = "CREATE TABLE {$wpdb->prefix}bhg_tournament_results (
-        id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
-        tournament_id BIGINT UNSIGNED NOT NULL,
-        user_id BIGINT UNSIGNED NOT NULL,
-        wins INT UNSIGNED NOT NULL DEFAULT 0,
-        last_win_date DATETIME NULL,
-        PRIMARY KEY (id),
-        UNIQUE KEY tu_unique (tournament_id, user_id),
-        KEY tournament_idx (tournament_id),
-        KEY user_idx (user_id),
-        KEY wins_idx (wins)
-    ) $charset_collate;";
-    dbDelta($sql);
-    // Optional backfill if old wins table exists
-    if ($table_exists('bhg_tournament_wins')) {
-        $wpdb->query("INSERT INTO `{$wpdb->prefix}bhg_tournament_results` (tournament_id, user_id, wins, last_win_date)
-                      SELECT tournament_id, user_id, wins, last_win_date FROM `{$wpdb->prefix}bhg_tournament_wins`
-                      ON DUPLICATE KEY UPDATE wins = VALUES(wins), last_win_date = VALUES(last_win_date)");
-    }
-}
-
         }
     }
 

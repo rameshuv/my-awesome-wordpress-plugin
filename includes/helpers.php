@@ -147,3 +147,237 @@ if (!function_exists('bhg_render_affiliate_dot')) {
         return '<span class="bhg-aff-dot ' . esc_attr($cls) . '" aria-label="' . $label . '"></span>';
     }
 }
+
+
+function bhg_render_ads($placement = 'footer', $hunt_id = 0) {
+    global $wpdb;
+    $tbl = $wpdb->prefix . 'bhg_ads';
+    $placement = sanitize_text_field($placement);
+    $rows = $wpdb->get_results($wpdb->prepare("SELECT * FROM {$tbl} WHERE active=1 AND placement=%s ORDER BY id DESC", $placement));
+    $hunt_site_id = 0;
+    if ($hunt_id) {
+        $hunt_site_id = (int) $wpdb->get_var(
+            $wpdb->prepare("SELECT affiliate_site_id FROM {$wpdb->prefix}bhg_bonus_hunts WHERE id=%d", $hunt_id)
+        );
+    }
+    if (!$rows) return '';
+
+    $out = '<div class="bhg-ads bhg-ads-' . esc_attr($placement) . '">';
+    foreach ($rows as $r) {
+        $vis = $r->visibility ?: 'all';
+        $show = false;
+        if ($vis === 'all') $show = true;
+        elseif ($vis === 'guests' && !is_user_logged_in()) $show = true;
+        elseif ($vis === 'logged_in' && is_user_logged_in()) $show = true;
+        elseif ($vis === 'affiliate' && is_user_logged_in()) {
+            $uid = get_current_user_id();
+            $show = $hunt_site_id > 0
+                ? bhg_is_user_affiliate_for_site($uid, $hunt_site_id)
+                : (bool) get_user_meta($uid, 'bhg_affiliate_status', true);
+        }
+        if (!$show) continue;
+        $msg  = wp_kses_post($r->message);
+        $link = $r->link ? esc_url($r->link) : '';
+        $out .= '<div class="bhg-ad" style="margin:10px 0;padding:10px;border:1px solid #e2e8f0;border-radius:6px;">';
+        if ($link) { $out .= '<a href="' . $link . '">'; }
+        $out .= $msg;
+        if ($link) { $out .= '</a>'; }
+        $out .= '</div>';
+    }
+    $out .= '</div>';
+    return $out;
+}
+
+// Demo reset and seed data
+if (!function_exists('bhg_reset_demo_and_seed')) {
+    function bhg_reset_demo_and_seed() {
+        global $wpdb;
+
+        $p = $wpdb->prefix;
+
+        // Ensure tables exist before touching
+        $tables = array(
+            "{$p}bhg_guesses",
+            "{$p}bhg_bonus_hunts",
+            "{$p}bhg_tournaments",
+            "{$p}bhg_tournament_results",
+            "{$p}bhg_hunt_winners",
+            "{$p}bhg_ads",
+            "{$p}bhg_translations",
+            "{$p}bhg_affiliate_websites",
+        );
+
+        // Soft delete (DELETE) to preserve schema even if user lacks TRIGGER/TRUNCATE
+        foreach ($tables as $tbl) {
+            // Skip translations/affiliates if table missing
+            $exists = $wpdb->get_var( $wpdb->prepare("SHOW TABLES LIKE %s", $tbl) );
+            if ($exists !== $tbl) continue;
+            if (strpos($tbl, 'bhg_translations') !== false || strpos($tbl, 'bhg_affiliate_websites') !== false) {
+                // keep existing; we'll upsert below
+                continue;
+            }
+            $wpdb->query("DELETE FROM `{$tbl}`");
+        }
+
+        // Seed affiliate websites (idempotent upsert by slug)
+        $aff_tbl = "{$p}bhg_affiliate_websites";
+        if ($wpdb->get_var($wpdb->prepare("SHOW TABLES LIKE %s", $aff_tbl)) === $aff_tbl) {
+            $affs = array(
+                array('name'=>'Main Site','slug'=>'main-site','url'=>home_url('/')),
+                array('name'=>'Casino Hub','slug'=>'casino-hub','url'=>home_url('/casino')),
+            );
+            foreach ($affs as $a) {
+                $id = $wpdb->get_var($wpdb->prepare("SELECT id FROM `{$aff_tbl}` WHERE slug=%s", $a['slug']));
+                if ($id) {
+                    $wpdb->update($aff_tbl, $a, array('id'=>(int)$id), array('%s','%s','%s'), array('%d'));
+                } else {
+                    $wpdb->insert($aff_tbl, $a, array('%s','%s','%s'));
+                }
+            }
+        }
+
+        // Seed hunts
+        $hunts_tbl = "{$p}bhg_bonus_hunts";
+        if ($wpdb->get_var($wpdb->prepare("SHOW TABLES LIKE %s", $hunts_tbl)) === $hunts_tbl) {
+            $now = current_time('mysql', 1);
+            // Open hunt
+            $wpdb->insert($hunts_tbl, array(
+                'title' => __('Bonus Hunt – Demo Open', 'bonus-hunt-guesser'),
+                'starting_balance' => 2000.00,
+                'num_bonuses' => 10,
+                'prizes' => __('Gift card + swag', 'bonus-hunt-guesser'),
+                'status' => 'open',
+                'affiliate_site_id' => (int) $wpdb->get_var("SELECT id FROM {$p}bhg_affiliate_websites ORDER BY id ASC LIMIT 1"),
+                'created_at' => $now,
+                'updated_at' => $now,
+            ), array('%s','%f','%d','%s','%s','%d','%s','%s'));
+            $open_id = (int) $wpdb->insert_id;
+
+            // Closed hunt with winner
+            $wpdb->insert($hunts_tbl, array(
+                'title' => __('Bonus Hunt – Demo Closed', 'bonus-hunt-guesser'),
+                'starting_balance' => 1500.00,
+                'num_bonuses' => 8,
+                'prizes' => __('T-shirt', 'bonus-hunt-guesser'),
+                'status' => 'closed',
+                'final_balance' => 1875.50,
+                'winner_user_id' => 1,
+                'winner_diff' => 12.50,
+                'closed_at' => gmdate('Y-m-d H:i:s', time() - 86400),
+                'created_at' => $now,
+                'updated_at' => $now,
+            ), array('%s','%f','%d','%s','%s','%f','%d','%f','%s','%s','%s'));
+            $closed_id = (int) $wpdb->insert_id;
+
+            // Seed guesses for open hunt
+            $g_tbl = "{$p}bhg_guesses";
+            $users = $wpdb->get_col("SELECT ID FROM {$wpdb->users} ORDER BY ID ASC LIMIT 5");
+            if (empty($users)) { $users = array(1); }
+            $val = 2100.00;
+            foreach ($users as $uid) {
+                $wpdb->insert($g_tbl, array(
+                    'hunt_id' => $open_id,
+                    'user_id' => (int)$uid,
+                    'guess_value' => $val,
+                    'created_at' => $now,
+                    'updated_at' => $now,
+                ), array('%d','%d','%f','%s','%s'));
+                $val += 23.45;
+            }
+        }
+
+        // Tournaments + results based on closed hunts
+        $t_tbl = "{$p}bhg_tournaments";
+        $r_tbl = "{$p}bhg_tournament_results";
+        if ($wpdb->get_var($wpdb->prepare("SHOW TABLES LIKE %s", $t_tbl)) === $t_tbl) {
+            // Wipe results only
+            if ($wpdb->get_var($wpdb->prepare("SHOW TABLES LIKE %s", $r_tbl)) === $r_tbl) {
+                $wpdb->query("DELETE FROM `{$r_tbl}`");
+            }
+            $closed = $wpdb->get_results("SELECT winner_user_id, closed_at FROM {$hunts_tbl} WHERE status='closed' AND winner_user_id IS NOT NULL");
+            foreach ($closed as $row) {
+                $ts = $row->closed_at ? strtotime($row->closed_at) : time();
+                $isoYear = date('o', $ts);
+                $week = str_pad(date('W', $ts), 2, '0', STR_PAD_LEFT);
+                $weekKey = $isoYear . '-W' . $week;
+                $monthKey = date('Y-m', $ts);
+                $yearKey = date('Y', $ts);
+
+                $ensure = function($type, $period) use ($wpdb, $t_tbl) {
+                    $id = $wpdb->get_var($wpdb->prepare("SELECT id FROM {$t_tbl} WHERE type=%s AND period=%s", $type, $period));
+                    if ($id) return (int)$id;
+                    $now = current_time('mysql', 1);
+                    $start = $now; $end = $now;
+                    if ($type === 'weekly') {
+                        $start = date('Y-m-d', strtotime($period . '-1'));
+                        $end   = date('Y-m-d', strtotime($period . '-7'));
+                    } elseif ($type === 'monthly') {
+                        $start = $period . '-01';
+                        $end   = date('Y-m-t', strtotime($start));
+                    } elseif ($type === 'yearly') {
+                        $start = $period . '-01-01';
+                        $end   = $period . '-12-31';
+                    }
+                    $wpdb->insert($t_tbl, array(
+                        'type'=>$type,'period'=>$period,'start_date'=>$start,'end_date'=>$end,'status'=>'active',
+                        'created_at'=>$now,'updated_at'=>$now
+                    ), array('%s','%s','%s','%s','%s','%s','%s'));
+                    return (int)$wpdb->insert_id;
+                };
+
+                $uids = (int)$row->winner_user_id;
+                foreach (array(
+                    $ensure('weekly', $weekKey),
+                    $ensure('monthly', $monthKey),
+                    $ensure('yearly', $yearKey)
+                ) as $tid) {
+                    if ($tid && $wpdb->get_var($wpdb->prepare("SHOW TABLES LIKE %s", $r_tbl)) === $r_tbl) {
+                        $wpdb->query($wpdb->prepare(
+                            "INSERT INTO {$r_tbl} (tournament_id, user_id, wins) VALUES (%d, %d, 1)
+                             ON DUPLICATE KEY UPDATE wins = wins + 1",
+                            $tid, $uids
+                        ));
+                    }
+                }
+            }
+        }
+
+        // Seed translations (upsert)
+        $tr_tbl = "{$p}bhg_translations";
+        if ($wpdb->get_var($wpdb->prepare("SHOW TABLES LIKE %s", $tr_tbl)) === $tr_tbl) {
+            $pairs = array(
+                'email_results_title' => 'The Bonus Hunt has been closed!',
+                'email_final_balance' => 'Final Balance',
+                'email_winner' => 'Winner',
+                'email_congrats_subject' => 'Congratulations! You won the Bonus Hunt',
+                'email_congrats_body' => 'You had the closest guess. Great job!',
+                'email_hunt' => 'Hunt',
+            );
+            foreach ($pairs as $k=>$v) {
+                $exists = $wpdb->get_var($wpdb->prepare("SELECT id FROM {$tr_tbl} WHERE `key`=%s", $k));
+                if ($exists) {
+                    $wpdb->update($tr_tbl, array('value'=>$v), array('id'=>$exists), array('%s'), array('%d'));
+                } else {
+                    $wpdb->insert($tr_tbl, array('key'=>$k, 'value'=>$v), array('%s','%s'));
+                }
+            }
+        }
+
+        // Seed ads
+        $ads_tbl = "{$p}bhg_ads";
+        if ($wpdb->get_var($wpdb->prepare("SHOW TABLES LIKE %s", $ads_tbl)) === $ads_tbl) {
+            $now = current_time('mysql', 1);
+            $wpdb->insert($ads_tbl, array(
+                'message' => '<strong>Play responsibly.</strong> <a href="'.esc_url(home_url('/promo')).'">See promo</a>',
+                'placement' => 'footer',
+                'visibility' => 'all',
+                'active' => 1,
+                'target_pages' => '',
+                'created_at' => $now,
+                'updated_at' => $now,
+            ), array('%s','%s','%s','%d','%s','%s','%s'));
+        }
+
+        return true;
+    }
+}
