@@ -148,7 +148,55 @@ class BHG_DB {
         if (method_exists(__CLASS__, 'add_missing_tournament_columns')) {
             self::add_missing_tournament_columns();
         }
-    }
+    
+        // --- Ensure missing columns exist (safe to run repeatedly) ---
+        try {
+            // Winners count on hunts (per-hunt configurable)
+            $hunts = $wpdb->prefix . 'bhg_bonus_hunts';
+            $col = $wpdb->get_var($wpdb->prepare(
+                "SELECT COLUMN_NAME FROM information_schema.COLUMNS WHERE TABLE_SCHEMA=%s AND TABLE_NAME=%s AND COLUMN_NAME='winners_count'",
+                DB_NAME, $hunts
+            ));
+            if (!$col) {
+                $wpdb->query("ALTER TABLE `$hunts` ADD COLUMN winners_count INT UNSIGNED NOT NULL DEFAULT 3 AFTER affiliate_site_id");
+            }
+
+            // Tournaments title/description (per customer spec)
+            $tour = $wpdb->prefix . 'bhg_tournaments';
+            $col = $wpdb->get_var($wpdb->prepare(
+                "SELECT COLUMN_NAME FROM information_schema.COLUMNS WHERE TABLE_SCHEMA=%s AND TABLE_NAME=%s AND COLUMN_NAME='title'",
+                DB_NAME, $tour
+            ));
+            if (!$col) {
+                $wpdb->query("ALTER TABLE `$tour` ADD COLUMN title VARCHAR(190) NOT NULL AFTER id");
+            }
+            $col = $wpdb->get_var($wpdb->prepare(
+                "SELECT COLUMN_NAME FROM information_schema.COLUMNS WHERE TABLE_SCHEMA=%s AND TABLE_NAME=%s AND COLUMN_NAME='description'",
+                DB_NAME, $tour
+            ));
+            if (!$col) {
+                $wpdb->query("ALTER TABLE `$tour` ADD COLUMN description TEXT NULL AFTER title");
+            }
+
+            // Also ensure start_date and end_date exist (earlier logs showed missing columns)
+            $col = $wpdb->get_var($wpdb->prepare(
+                "SELECT COLUMN_NAME FROM information_schema.COLUMNS WHERE TABLE_SCHEMA=%s AND TABLE_NAME=%s AND COLUMN_NAME='start_date'",
+                DB_NAME, $tour
+            ));
+            if (!$col) {
+                $wpdb->query("ALTER TABLE `$tour` ADD COLUMN start_date DATETIME NULL AFTER period");
+            }
+            $col = $wpdb->get_var($wpdb->prepare(
+                "SELECT COLUMN_NAME FROM information_schema.COLUMNS WHERE TABLE_SCHEMA=%s AND TABLE_NAME=%s AND COLUMN_NAME='end_date'",
+                DB_NAME, $tour
+            ));
+            if (!$col) {
+                $wpdb->query("ALTER TABLE `$tour` ADD COLUMN end_date DATETIME NULL AFTER start_date");
+            }
+        } catch (\Throwable $e) {
+            if (function_exists('error_log')) error_log('[BHG] Schema ensure error: ' . $e->getMessage());
+        }
+}
 
     /** One-time migrations / backfills. Safe to call on every load. */
     public static function migrate() {

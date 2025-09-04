@@ -22,11 +22,11 @@ $rows = $wpdb->get_results($wpdb->prepare(
       <th><?php esc_html_e('Difference','bonus-hunt-guesser'); ?></th>
     </tr></thead>
     <tbody>
-    <?php $pos=1; foreach($rows as $r): $isWinner=$pos <= (int)$hunt->winners_count; ?>
+    <?php $pos=1; foreach($rows as $r): $wcount = (int)$hunt->winners_count; if ($wcount < 1) $wcount = 3; $isWinner = $pos <= $wcount; ?>
       <tr <?php if($isWinner) echo 'style="background:#d1fae5;"'; ?>>
         <td><?php echo (int)$pos; ?></td>
         <td><?php echo esc_html($r->display_name); ?></td>
-        <td><?php echo esc_html(number_format_i18n((float)$r->guess_value,2)); ?></td>
+        <td><?php echo esc_html(number_format_i18n((float)$r->guess,2)); ?></td>
         <td><?php echo esc_html(number_format_i18n((float)$r->diff,2)); ?></td>
       </tr>
     <?php $pos++; endforeach; ?>

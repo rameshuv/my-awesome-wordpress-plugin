@@ -1,136 +1,114 @@
-<?php if (!defined('ABSPATH')) exit; ?>
+<?php
+if (!defined('ABSPATH')) exit;
+if (!current_user_can('manage_options')) {
+    wp_die(esc_html__('You do not have sufficient permissions to access this page.', 'bonus-hunt-guesser'));
+}
+
+global $wpdb;
+$table = $wpdb->prefix . 'bhg_ads';
+
+// Delete action
+if (isset($_GET['action'], $_GET['id']) && $_GET['action']==='delete' && isset($_GET['_wpnonce'])) {
+    if (wp_verify_nonce($_GET['_wpnonce'], 'bhg_delete_ad') && current_user_can('manage_options')) {
+        $wpdb->delete($table, ['id'=>(int)$_GET['id']], ['%d']);
+        wp_redirect(remove_query_arg(['action','id','_wpnonce']));
+        exit;
+    }
+}
+
+// Fetch ads
+$ads = $wpdb->get_results("SELECT * FROM `$table` ORDER BY id DESC");
+?>
 <div class="wrap">
-  <h1><?php echo esc_html__('Advertising', 'bonus-hunt-guesser'); ?></h1>
+  <h1 class="wp-heading-inline"><?php echo esc_html__('Advertising', 'bonus-hunt-guesser'); ?></h1>
 
-  <?php if (isset($_GET['updated'])): ?>
-    <div class="notice notice-success is-dismissible">
-      <p><?php echo esc_html__('Saved.', 'bonus-hunt-guesser'); ?></p>
-    </div>
-  <?php endif; ?>
+  <h2 style="margin-top:1em"><?php echo esc_html__('Existing Ads', 'bonus-hunt-guesser'); ?></h2>
+  <table class="widefat striped">
+    <thead>
+      <tr>
+        <th><?php echo esc_html__('ID', 'bonus-hunt-guesser'); ?></th>
+        <th><?php echo esc_html__('Title/Message', 'bonus-hunt-guesser'); ?></th>
+        <th><?php echo esc_html__('Placement', 'bonus-hunt-guesser'); ?></th>
+        <th><?php echo esc_html__('Visibility', 'bonus-hunt-guesser'); ?></th>
+        <th><?php echo esc_html__('Actions', 'bonus-hunt-guesser'); ?></th>
+      </tr>
+    </thead>
+    <tbody>
+      <?php if (empty($ads)) : ?>
+        <tr><td colspan="5"><?php echo esc_html__('No ads yet.', 'bonus-hunt-guesser'); ?></td></tr>
+      <?php else : foreach ($ads as $ad) : ?>
+        <tr>
+          <td><?php echo (int)$ad->id; ?></td>
+          <td><?php echo isset($ad->title)? esc_html($ad->title) : wp_kses_post(wp_trim_words($ad->message, 12)); ?></td>
+          <td><?php echo esc_html(isset($ad->placement)? $ad->placement : 'none'); ?></td>
+          <td><?php echo esc_html(isset($ad->visibility)? $ad->visibility : 'all'); ?></td>
+          <td>
+            <a class="button" href="<?php echo esc_url(add_query_arg(['edit'=> (int)$ad->id])); ?>"><?php echo esc_html__('Edit', 'bonus-hunt-guesser'); ?></a>
+            <a class="button-link-delete" href="<?php echo esc_url(wp_nonce_url(add_query_arg(['action'=>'delete','id'=>(int)$ad->id]), 'bhg_delete_ad')); ?>" onclick="return confirm('Delete this ad?');"><?php echo esc_html__('Remove', 'bonus-hunt-guesser'); ?></a>
+          </td>
+        </tr>
+      <?php endforeach; endif; ?>
+    </tbody>
+  </table>
 
-  <form method="post" action="<?php echo esc_url( admin_url('admin-post.php') ); ?>">
-    <input type="hidden" name="action" value="bhg_save_ad" />
-    <?php wp_nonce_field('bhg_save_ad', 'bhg_save_ad_nonce'); ?>
+  <h2 style="margin-top:2em"><?php echo isset($_GET['edit']) ? esc_html__('Edit Ad', 'bonus-hunt-guesser') : esc_html__('Add Ad', 'bonus-hunt-guesser'); ?></h2>
+  <?php
+    $ad = null;
+    if (isset($_GET['edit'])) {
+        $ad = $wpdb->get_row($wpdb->prepare("SELECT * FROM `$table` WHERE id = %d", (int)$_GET['edit']));
+    }
+  ?>
+  <form method="post" action="<?php echo esc_url(admin_url('admin-post.php')); ?>" style="max-width:800px">
+    <?php wp_nonce_field('bhg_save_ad'); ?>
+    <input type="hidden" name="action" value="bhg_save_ad">
+    <?php if ($ad) : ?>
+      <input type="hidden" name="id" value="<?php echo (int)$ad->id; ?>">
+    <?php endif; ?>
 
     <table class="form-table" role="presentation">
       <tbody>
         <tr>
-          <th scope="row">
-            <label for="bhg_ad_message"><?php echo esc_html__('Message (HTML allowed)', 'bonus-hunt-guesser'); ?></label>
-          </th>
-          <td>
-            <textarea class="large-text" id="bhg_ad_message" name="message" rows="6" 
-              style="border:1px solid #cbd5e1;border-radius:6px;"><?php echo isset($editing_ad) ? wp_kses_post($editing_ad->message) : ''; ?></textarea>
-            <p class="description">
-              <?php echo esc_html__('You can include links, bold text, etc.', 'bonus-hunt-guesser'); ?>
-            </p>
-          </td>
+          <th scope="row"><label for="bhg_ad_title"><?php echo esc_html__('Title', 'bonus-hunt-guesser'); ?></label></th>
+          <td><input class="regular-text" id="bhg_ad_title" name="title" value="<?php echo esc_attr($ad ? ($ad->title ?? '') : ''); ?>"></td>
         </tr>
-
         <tr>
-          <th scope="row">
-            <label for="bhg_ad_placement"><?php echo esc_html__('Placement', 'bonus-hunt-guesser'); ?></label>
-          </th>
+          <th scope="row"><label for="bhg_ad_message"><?php echo esc_html__('Message', 'bonus-hunt-guesser'); ?></label></th>
+          <td><textarea class="large-text" rows="3" id="bhg_ad_message" name="message"><?php echo esc_textarea($ad ? ($ad->message ?? '') : ''); ?></textarea></td>
+        </tr>
+        <tr>
+          <th scope="row"><label for="bhg_ad_link"><?php echo esc_html__('Link URL (optional)', 'bonus-hunt-guesser'); ?></label></th>
+          <td><input class="regular-text" id="bhg_ad_link" name="link" value="<?php echo esc_attr($ad ? ($ad->link ?? '') : ''); ?>"></td>
+        </tr>
+        <tr>
+          <th scope="row"><label for="bhg_ad_place"><?php echo esc_html__('Placement', 'bonus-hunt-guesser'); ?></label></th>
           <td>
-            <select id="bhg_ad_placement" name="placement">
+            <select id="bhg_ad_place" name="placement">
               <?php
-              $placement = isset($editing_ad) ? sanitize_text_field($editing_ad->placement) : 'footer';
+                $opts = ['none','footer','bottom','sidebar','shortcode'];
+                $sel  = $ad ? ($ad->placement ?? 'none') : 'none';
+                foreach ($opts as $o) {
+                    echo '<option value="'.esc_attr($o).'" '.selected($sel, $o, false).'>'.esc_html(ucfirst($o)).'</option>';
+                }
               ?>
-              <option value="footer" <?php selected($placement, 'footer'); ?>>
-                <?php echo esc_html__('Footer', 'bonus-hunt-guesser'); ?>
-              </option>
-              <option value="below_content" <?php selected($placement, 'below_content'); ?>>
-                <?php echo esc_html__('Below Content', 'bonus-hunt-guesser'); ?>
-              </option>
             </select>
           </td>
         </tr>
-
         <tr>
-          <th scope="row">
-            <label for="bhg_ad_visibility"><?php echo esc_html__('Visibility', 'bonus-hunt-guesser'); ?></label>
-          </th>
+          <th scope="row"><label for="bhg_ad_vis"><?php echo esc_html__('Visible To', 'bonus-hunt-guesser'); ?></label></th>
           <td>
-            <?php $vis = isset($editing_ad) ? sanitize_text_field($editing_ad->visibility) : 'all'; ?>
-            <select id="bhg_ad_visibility" name="visibility">
-              <option value="all" <?php selected($vis, 'all'); ?>><?php echo esc_html__('All visitors', 'bonus-hunt-guesser'); ?></option>
-              <option value="guest" <?php selected($vis, 'guest'); ?>><?php echo esc_html__('Guests only', 'bonus-hunt-guesser'); ?></option>
-              <option value="logged_in" <?php selected($vis, 'logged_in'); ?>><?php echo esc_html__('Logged-in only', 'bonus-hunt-guesser'); ?></option>
-              <option value="affiliate" <?php selected($vis, 'affiliate'); ?>><?php echo esc_html__('Affiliates only', 'bonus-hunt-guesser'); ?></option>
-              <option value="non_affiliate" <?php selected($vis, 'non_affiliate'); ?>><?php echo esc_html__('Non-affiliates only', 'bonus-hunt-guesser'); ?></option>
+            <select id="bhg_ad_vis" name="visibility">
+              <?php
+                $opts = ['all','guests','logged','affiliates','non_affiliates'];
+                $sel  = $ad ? ($ad->visibility ?? 'all') : 'all';
+                foreach ($opts as $o) {
+                    echo '<option value="'.esc_attr($o).'" '.selected($sel, $o, false).'>'.esc_html(ucfirst(str_replace('_',' ', $o))).'</option>';
+                }
+              ?>
             </select>
-          </td>
-        </tr>
-
-        <tr>
-          <th scope="row">
-            <label for="bhg_ad_target_pages"><?php echo esc_html__('Target pages (comma-separated slugs)', 'bonus-hunt-guesser'); ?></label>
-          </th>
-          <td>
-            <input type="text" id="bhg_ad_target_pages" name="target_pages" class="regular-text"
-              value="<?php echo isset($editing_ad) ? esc_attr($editing_ad->target_pages) : ''; ?>">
-            <p class="description"><?php echo esc_html__('Leave empty to show everywhere.', 'bonus-hunt-guesser'); ?></p>
-          </td>
-        </tr>
-
-        <tr>
-          <th scope="row"><?php echo esc_html__('Active', 'bonus-hunt-guesser'); ?></th>
-          <td>
-            <label>
-              <input type="checkbox" name="active" value="1" 
-                <?php checked(isset($editing_ad) ? (int)$editing_ad->active : 1, 1); ?>>
-              <?php echo esc_html__('Enable this ad', 'bonus-hunt-guesser'); ?>
-            </label>
           </td>
         </tr>
       </tbody>
     </table>
-
-    <?php if (!empty($editing_ad->id)): ?>
-      <input type="hidden" name="id" value="<?php echo (int)$editing_ad->id; ?>">
-    <?php endif; ?>
-
-    <p>
-      <button type="submit" class="button button-primary" style="padding:.6rem 1.1rem;">
-        <?php echo esc_html__('Save Ad', 'bonus-hunt-guesser'); ?>
-      </button>
-      <a class="button" style="margin-left:8px;" href="<?php echo esc_url(admin_url('admin.php?page=bhg-ads')); ?>">
-        <?php echo esc_html__('Cancel', 'bonus-hunt-guesser'); ?>
-      </a>
-    </p>
+    <?php submit_button($ad ? __('Update Ad', 'bonus-hunt-guesser') : __('Create Ad', 'bonus-hunt-guesser')); ?>
   </form>
-
-  <hr>
-
-  <?php
-  // List existing ads (simple)
-  global $wpdb;
-  $ads = $wpdb->get_results("SELECT * FROM {$wpdb->prefix}bhg_ads ORDER BY id DESC");
-  if (!$ads) {
-      echo '<p>' . esc_html__('No ads yet.', 'bonus-hunt-guesser') . '</p>';
-  } else {
-      echo '<table class="wp-list-table widefat fixed striped"><thead><tr>';
-      echo '<th>#</th><th>' . esc_html__('Message', 'bonus-hunt-guesser') . '</th><th>' . esc_html__('Placement', 'bonus-hunt-guesser') . '</th><th>' . esc_html__('Visibility', 'bonus-hunt-guesser') . '</th><th>' . esc_html__('Active', 'bonus-hunt-guesser') . '</th>';
-      echo '</tr></thead><tbody>';
-      foreach ($ads as $ad) {
-          echo '<tr>';
-          echo '<td>' . (int)$ad->id . '</td>';
-          echo '<td>' . wp_kses_post($ad->message) . '</td>';
-          echo '<td>' . esc_html($ad->placement) . '</td>';
-          echo '<td>' . esc_html($ad->visibility) . '</td>';
-          echo '<td>' . ((int)$ad->active ? '✓' : '—') . '</td>';
-          // Actions: Edit & Remove
-          $edit_url = esc_url( admin_url('admin.php?page=bhg-ads&edit='.(int)$ad->id) );
-          $remove_form = '<form method="post" action="'.esc_url(admin_url('admin-post.php')).'" style="display:inline;">'
-                       . wp_nonce_field('bhg_delete_ad','bhg_delete_ad_nonce', true, false)
-                       . '<input type="hidden" name="action" value="bhg_delete_ad" />'
-                       . '<input type="hidden" name="id" value="'.(int)$ad->id.'" />'
-                       . '<button type="submit" class="button-link delete-link" onclick="return confirm(\'' . esc_js(__('Remove this ad?', 'bonus-hunt-guesser')) . '\');">'.esc_html__('Remove','bonus-hunt-guesser').'</button>'
-                       . '</form>';
-          echo '<td><a class="button-link" href="'.$edit_url.'">'.esc_html__('Edit','bonus-hunt-guesser').'</a> | ' . $remove_form . '</td>';
-          echo '</tr>';
-      }
-      echo '</tbody></table>';
-  }
-  ?>
 </div>
