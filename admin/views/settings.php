@@ -68,8 +68,14 @@ if (!empty($error)) {
                         <option value="monthly" <?php selected($current_settings['default_tournament_period'], 'monthly'); ?>>
                             <?php _e('Monthly', 'bonus-hunt-guesser'); ?>
                         </option>
+                        <option value="quarterly" <?php selected($current_settings['default_tournament_period'], 'quarterly'); ?>>
+                            <?php _e('Quarterly', 'bonus-hunt-guesser'); ?>
+                        </option>
                         <option value="yearly" <?php selected($current_settings['default_tournament_period'], 'yearly'); ?>>
                             <?php _e('Yearly', 'bonus-hunt-guesser'); ?>
+                        </option>
+                        <option value="alltime" <?php selected($current_settings['default_tournament_period'], 'alltime'); ?>>
+                            <?php _e('All-Time', 'bonus-hunt-guesser'); ?>
                         </option>
                     </select>
                     <p class="description">

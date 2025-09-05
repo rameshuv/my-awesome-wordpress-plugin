@@ -338,7 +338,7 @@ function bhg_handle_settings_save() {
 
     if ( isset( $_POST['bhg_default_tournament_period'] ) ) {
         $period = sanitize_text_field( $_POST['bhg_default_tournament_period'] );
-        if ( in_array( $period, array( 'weekly', 'monthly', 'yearly' ) ) ) {
+        if ( in_array( $period, array( 'weekly', 'monthly', 'quarterly', 'yearly', 'alltime' ) ) ) {
             $settings['default_tournament_period'] = $period;
         }
     }
