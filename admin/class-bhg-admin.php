@@ -266,8 +266,8 @@ class BHG_Admin {
 						$winner_names[] = $wu->user_login;
 					}
 				}
-				$winner_first = $winner_names ? $winner_names[0] : '—';
-				$winner_list  = $winner_names ? implode(', ', $winner_names) : '—';
+                                $winner_first = $winner_names ? $winner_names[0] : esc_html__( '—', 'bonus-hunt-guesser' );
+                                $winner_list  = $winner_names ? implode( ', ', $winner_names ) : esc_html__( '—', 'bonus-hunt-guesser' );
 
 				foreach ($rows as $r) {
 					$u = get_userdata((int) $r->user_id);

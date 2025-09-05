@@ -336,7 +336,7 @@ echo '<a' . $class . ' href="' . esc_url( add_query_arg( array( 'page' => $p ), 
 					   }
 					   echo '<td>' . $guess_cell . '</td>';
 					   echo '<td>';
-					   echo isset( $row->final_balance ) ? esc_html( number_format_i18n( (float) $row->final_balance, 2 ) ) : '&mdash;';
+                                           echo isset( $row->final_balance ) ? esc_html( number_format_i18n( (float) $row->final_balance, 2 ) ) : esc_html__( '&mdash;', 'bonus-hunt-guesser' );
 					   echo '</td>';
 					   echo '</tr>';
 			   }
@@ -422,12 +422,12 @@ echo '<a' . $class . ' href="' . esc_url( add_query_arg( array( 'page' => $p ), 
 					   echo '<td>' . esc_html( $row->title ) . '</td>';
 					   echo '<td>' . esc_html( number_format_i18n( (float) $row->starting_balance, 2 ) ) . '</td>';
 					   echo '<td>';
-					   echo isset( $row->final_balance ) ? esc_html( number_format_i18n( (float) $row->final_balance, 2 ) ) : '&mdash;';
-					   echo '</td>';
-					   echo '<td>' . esc_html( $row->status ) . '</td>';
-					   if ( $show_aff ) {
-							   echo '<td>' . esc_html( $row->aff_name ? $row->aff_name : '—' ) . '</td>';
-					   }
+                                           echo isset( $row->final_balance ) ? esc_html( number_format_i18n( (float) $row->final_balance, 2 ) ) : esc_html__( '&mdash;', 'bonus-hunt-guesser' );
+                                           echo '</td>';
+                                           echo '<td>' . esc_html( $row->status ) . '</td>';
+                                           if ( $show_aff ) {
+                                                           echo '<td>' . ( $row->aff_name ? esc_html( $row->aff_name ) : esc_html__( '—', 'bonus-hunt-guesser' ) ) . '</td>';
+                                           }
 					   echo '</tr>';
 			   }
 			   echo '</tbody></table>';
@@ -606,7 +606,7 @@ echo '<td>' . esc_html( $row->user_login ?: sprintf(
                                        (int) $row->user_id
                                ) ) . '</td>';
 echo '<td>' . (int)$row->wins . '</td>';
-echo '<td>' . esc_html($row->last_win_date ? mysql2date(get_option('date_format'), $row->last_win_date) : '—') . '</td>';
+echo '<td>' . ( $row->last_win_date ? esc_html( mysql2date( get_option( 'date_format' ), $row->last_win_date ) ) : esc_html__( '—', 'bonus-hunt-guesser' ) ) . '</td>';
 				echo '</tr>';
 			}
 			echo '</tbody></table>';
@@ -766,7 +766,7 @@ echo '<td><a href="' . $detail_url . '">' . esc_html__('Show details','bonus-hun
 				foreach ( $winners as $w ) {
 					$u  = get_userdata( (int) $w->user_id );
 					$nm = $u ? $u->user_login : sprintf( __( 'User #%d', 'bonus-hunt-guesser' ), (int) $w->user_id );
-					echo '<li>' . esc_html( $nm ) . ' — ' . esc_html( number_format_i18n( (float) $w->guess, 2 ) ) . ' (' . esc_html( number_format_i18n( (float) $w->diff, 2 ) ) . ')</li>';
+                                        echo '<li>' . esc_html( $nm ) . ' ' . esc_html__( '—', 'bonus-hunt-guesser' ) . ' ' . esc_html( number_format_i18n( (float) $w->guess, 2 ) ) . ' (' . esc_html( number_format_i18n( (float) $w->diff, 2 ) ) . ')</li>';
 				}
 				echo '</ul>';
 			}
