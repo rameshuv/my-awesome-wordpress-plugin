@@ -569,47 +569,36 @@ function bhg_should_show_ad( $visibility ) {
  * @return array List of ad rows.
  */
 function bhg_build_ads_query( $table, $placement = 'footer' ) {
-	global $wpdb;
+        global $wpdb;
 
-	// Validate table variable (only allow alphanumeric and underscore)
-	if (!is_string($table) || !preg_match('/^[A-Za-z0-9_]+$/', $table)) {
-		return array();
-	}
+        $allowed_tables = array( $wpdb->prefix . 'bhg_ads' );
+        if ( ! in_array( $table, $allowed_tables, true ) ) {
+                return array();
+        }
 
-	// Build safe table name with prefix if required
-	$safe_table = esc_sql($table);
-	if (strpos($safe_table, $wpdb->prefix) !== 0) {
-		if (strpos($safe_table, BHG_TABLE_PREFIX) === 0 || strpos($safe_table, 'bhg_') === 0) {
-			$safe_table = $safe_table;
-		} else {
-			$safe_table = $wpdb->prefix . $safe_table;
-		}
-	}
+        $query = $wpdb->prepare(
+                "SELECT * FROM `{$table}` WHERE placement = %s AND active = %d",
+                $placement,
+                1
+        );
 
-	// Ensure final safe table name still matches allowed characters
-	if (!preg_match('/^[A-Za-z0-9_]+$/', str_replace($wpdb->prefix, '', $safe_table))) {
-		return array();
-	}
-
-	// Use prepare for the placement value
-	$query = $wpdb->prepare(
-		"SELECT * FROM `{$safe_table}` WHERE placement = %s AND active = %d",
-		$placement,
-		1
-	);
-
-	$rows = $wpdb->get_results($query);
-	if ( did_action('wp') && function_exists('get_queried_object_id') ) {
-		$pid = (int)get_queried_object_id();
-		if ($pid && is_array($rows)) {
-			$rows = array_filter($rows, function($r) use ($pid) {
-				if (empty($r->target_pages)) return true;
-				$ids = array_filter(array_map('intval', array_map('trim', explode(',', $r->target_pages))));
-				return in_array($pid, $ids, true);
-			});
-		}
-	}
-	return $rows;
+        $rows = $wpdb->get_results( $query );
+        if ( did_action( 'wp' ) && function_exists( 'get_queried_object_id' ) ) {
+                $pid = (int) get_queried_object_id();
+                if ( $pid && is_array( $rows ) ) {
+                        $rows = array_filter(
+                                $rows,
+                                function( $r ) use ( $pid ) {
+                                        if ( empty( $r->target_pages ) ) {
+                                                return true;
+                                        }
+                                        $ids = array_filter( array_map( 'intval', array_map( 'trim', explode( ',', $r->target_pages ) ) ) );
+                                        return in_array( $pid, $ids, true );
+                                }
+                        );
+                }
+        }
+        return $rows;
 }
 
 // AJAX handler for loading leaderboard data
