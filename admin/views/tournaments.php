@@ -23,7 +23,7 @@ $labels = [
 	'monthly'   => __( 'Monthly', 'bonus-hunt-guesser' ),
 	'quarterly' => __( 'Quarterly', 'bonus-hunt-guesser' ),
 	'yearly'    => __( 'Yearly', 'bonus-hunt-guesser' ),
-	'alltime'   => __( 'Alltime', 'bonus-hunt-guesser' ),
+        'alltime'   => __( 'All Time', 'bonus-hunt-guesser' ),
 ];
 ?>
 <div class="wrap">

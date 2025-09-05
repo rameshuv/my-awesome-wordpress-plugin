@@ -372,45 +372,78 @@ class BHG_Admin {
 	 * Save a tournament record.
 	 */
 	public function handle_save_tournament() {
-		if ( ! current_user_can( 'manage_options' ) ) {
-			wp_safe_redirect( add_query_arg( 'bhg_msg', 'noaccess', admin_url( 'admin.php?page=bhg-tournaments' ) ) );
-			exit;
-		}
-		if ( ! check_admin_referer( 'bhg_tournament_save_action' ) ) {
-			wp_safe_redirect( add_query_arg( 'bhg_msg', 'nonce', admin_url( 'admin.php?page=bhg-tournaments' ) ) );
-			exit;
-		}
-		global $wpdb;
-		$t  = $wpdb->prefix . 'bhg_tournaments';
-		$id = isset( $_POST['id'] ) ? absint( wp_unslash( $_POST['id'] ) ) : 0;
-		$data = [
-			'title'       => isset( $_POST['title'] ) ? sanitize_text_field( wp_unslash( $_POST['title'] ) ) : '',
-			'description' => isset( $_POST['description'] ) ? wp_kses_post( wp_unslash( $_POST['description'] ) ) : '',
-			'type'        => isset( $_POST['type'] ) ? sanitize_text_field( wp_unslash( $_POST['type'] ) ) : 'weekly',
-			'start_date'  => isset( $_POST['start_date'] ) ? sanitize_text_field( wp_unslash( $_POST['start_date'] ) ) : null,
-			'end_date'    => isset( $_POST['end_date'] ) ? sanitize_text_field( wp_unslash( $_POST['end_date'] ) ) : null,
-			'status'      => isset( $_POST['status'] ) ? sanitize_text_field( wp_unslash( $_POST['status'] ) ) : 'active',
-			'updated_at'  => current_time( 'mysql' ),
-		];
-		try {
-			$format = [ '%s', '%s', '%s', '%s', '%s', '%s', '%s' ];
-			if ( $id > 0 ) {
-				$wpdb->update( $t, $data, [ 'id' => $id ], $format, [ '%d' ] );
-			} else {
-				$data['created_at'] = current_time( 'mysql' );
-				$format[]           = '%s';
-				$wpdb->insert( $t, $data, $format );
-			}
-			wp_safe_redirect( add_query_arg( 'bhg_msg', 't_saved', admin_url( 'admin.php?page=bhg-tournaments' ) ) );
-			exit;
-		} catch ( Throwable $e ) {
-			if ( function_exists( 'error_log' ) ) {
-				error_log( '[BHG] tournament save error: ' . $e->getMessage() );
-			}
-			wp_safe_redirect( add_query_arg( 'bhg_msg', 't_error', admin_url( 'admin.php?page=bhg-tournaments' ) ) );
-			exit;
-		}
-	}
+                if ( ! current_user_can( 'manage_options' ) ) {
+                        wp_safe_redirect( add_query_arg( 'bhg_msg', 'noaccess', admin_url( 'admin.php?page=bhg-tournaments' ) ) );
+                        exit;
+                }
+
+                check_admin_referer( 'bhg_tournament_save_action' );
+
+                global $wpdb;
+                $t  = $wpdb->prefix . 'bhg_tournaments';
+                $id = isset( $_POST['id'] ) ? absint( wp_unslash( $_POST['id'] ) ) : 0;
+
+                $allowed_types  = [ 'weekly', 'monthly', 'quarterly', 'yearly', 'alltime' ];
+                $allowed_status = [ 'active', 'archived' ];
+
+                $title       = isset( $_POST['title'] ) ? sanitize_text_field( wp_unslash( $_POST['title'] ) ) : '';
+                $description = isset( $_POST['description'] ) ? wp_kses_post( wp_unslash( $_POST['description'] ) ) : '';
+
+                $type = isset( $_POST['type'] ) ? sanitize_text_field( wp_unslash( $_POST['type'] ) ) : 'weekly';
+                if ( ! in_array( $type, $allowed_types, true ) ) {
+                        $type = 'weekly';
+                }
+
+                $start_date = isset( $_POST['start_date'] ) && $_POST['start_date'] !== ''
+                        ? sanitize_text_field( wp_unslash( $_POST['start_date'] ) )
+                        : null;
+                $end_date   = isset( $_POST['end_date'] ) && $_POST['end_date'] !== ''
+                        ? sanitize_text_field( wp_unslash( $_POST['end_date'] ) )
+                        : null;
+
+                $status = isset( $_POST['status'] ) ? sanitize_text_field( wp_unslash( $_POST['status'] ) ) : 'active';
+                if ( ! in_array( $status, $allowed_status, true ) ) {
+                        $status = 'active';
+                }
+
+                $data = [
+                        'title'       => $title,
+                        'description' => $description,
+                        'type'        => $type,
+                        'start_date'  => $start_date,
+                        'end_date'    => $end_date,
+                        'status'      => $status,
+                        'updated_at'  => current_time( 'mysql' ),
+                ];
+
+                try {
+                        $format = [ '%s', '%s', '%s', '%s', '%s', '%s', '%s' ];
+
+                        if ( $id > 0 ) {
+                                $exists = (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$t} WHERE id = %d", $id ) );
+                                if ( $exists ) {
+                                        $wpdb->update( $t, $data, [ 'id' => $id ], $format, [ '%d' ] );
+                                } else {
+                                        $id = 0; // record no longer exists, insert new
+                                }
+                        }
+
+                        if ( 0 === $id ) {
+                                $data['created_at'] = current_time( 'mysql' );
+                                $format[]           = '%s';
+                                $wpdb->insert( $t, $data, $format );
+                        }
+
+                        wp_safe_redirect( add_query_arg( 'bhg_msg', 't_saved', admin_url( 'admin.php?page=bhg-tournaments' ) ) );
+                        exit;
+                } catch ( Throwable $e ) {
+                        if ( function_exists( 'error_log' ) ) {
+                                error_log( '[BHG] tournament save error: ' . $e->getMessage() );
+                        }
+                        wp_safe_redirect( add_query_arg( 'bhg_msg', 't_error', admin_url( 'admin.php?page=bhg-tournaments' ) ) );
+                        exit;
+                }
+        }
 
 	/**
 	 * Save or update an affiliate record.
