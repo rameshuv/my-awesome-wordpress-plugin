@@ -104,12 +104,12 @@ if ( ! function_exists( 'bhg_parse_amount' ) ) {
 require_once __DIR__ . '/includes/class-bhg-db.php';
 
 // Define plugin constants
-define('BHG_VERSION','8.0.08');
-define('BHG_MIN_WP', '6.3.5');
-define('BHG_PLUGIN_FILE', __FILE__);
-define('BHG_PLUGIN_DIR', plugin_dir_path(__FILE__));
-define('BHG_PLUGIN_URL', plugin_dir_url(__FILE__));
-define('BHG_TABLE_PREFIX', 'bhg_');
+define( 'BHG_VERSION', '8.0.08' );
+define( 'BHG_MIN_WP', '6.3.5' );
+define( 'BHG_PLUGIN_FILE', __FILE__ );
+define( 'BHG_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
+define( 'BHG_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
+define( 'BHG_TABLE_PREFIX', 'bhg_' );
 
 
 // Table creation function
@@ -119,8 +119,8 @@ define('BHG_TABLE_PREFIX', 'bhg_');
  * @return void
  */
 function bhg_create_tables() {
-        if (class_exists('BHG_DB')) {
-            (new BHG_DB())->create_tables();
+        if ( class_exists( 'BHG_DB' ) ) {
+            ( new BHG_DB() )->create_tables();
             BHG_DB::migrate();
             return;
         }
@@ -133,15 +133,15 @@ function bhg_create_tables() {
  * @return void
  */
 function bhg_check_tables() {
-    if (!get_option('bhg_tables_created')) {
+    if ( ! get_option( 'bhg_tables_created' ) ) {
         bhg_create_tables();
-        update_option('bhg_tables_created', true);
+        update_option( 'bhg_tables_created', true );
     }
 }
 
 // Autoloader for plugin classes
-spl_autoload_register(function ($class) {
-    if (strpos($class, 'BHG_') !== 0) {
+spl_autoload_register( function ( $class ) {
+    if ( strpos( $class, 'BHG_' ) !== 0 ) {
         return;
     }
     
@@ -156,13 +156,13 @@ spl_autoload_register(function ($class) {
         'BHG_Demo' => 'admin/class-bhg-demo.php',
     ];
     
-    if (isset($class_map[$class])) {
-        $file_path = BHG_PLUGIN_DIR . $class_map[$class];
-        if (file_exists($file_path)) {
+    if ( isset( $class_map[ $class ] ) ) {
+        $file_path = BHG_PLUGIN_DIR . $class_map[ $class ];
+        if ( file_exists( $file_path ) ) {
             require_once $file_path;
         }
     }
-});
+} );
 
 // Include helper functions
 require_once BHG_PLUGIN_DIR . 'includes/helpers.php';
@@ -175,7 +175,7 @@ require_once BHG_PLUGIN_DIR . 'includes/helpers.php';
  * @return void
  */
 function bhg_activate_plugin( $network_wide ) {
-    if (!current_user_can('activate_plugins')) {
+    if ( ! current_user_can( 'activate_plugins' ) ) {
         return;
     }
 
@@ -186,34 +186,34 @@ function bhg_activate_plugin( $network_wide ) {
     }
 
     // Set default options
-    add_option('bhg_version', BHG_VERSION);
-    add_option('bhg_plugin_settings', [
+    add_option( 'bhg_version', BHG_VERSION );
+    add_option( 'bhg_plugin_settings', [
         'allow_guess_changes' => 'yes',
         'default_tournament_period' => 'monthly',
         'min_guess_amount' => 0,
         'max_guess_amount' => 100000,
         'ads_enabled' => 1,
-        'email_from' => get_bloginfo('admin_email'),
+        'email_from' => get_bloginfo( 'admin_email' ),
     ]);
     
     // Seed demo data if empty
-    if (function_exists('bhg_seed_demo_if_empty')) {
+    if ( function_exists( 'bhg_seed_demo_if_empty' ) ) {
         bhg_seed_demo_if_empty();
     }
-    update_option('bhg_demo_notice', 1);
+    update_option( 'bhg_demo_notice', 1 );
     
     // Set tables created flag
-    update_option('bhg_tables_created', true);
+    update_option( 'bhg_tables_created', true );
     
     // Flush rewrite rules after database changes
     flush_rewrite_rules();
 }
-register_activation_hook(__FILE__, 'bhg_activate_plugin');
+register_activation_hook( __FILE__, 'bhg_activate_plugin' );
 
-// Deactivation hook (no destructive actions)
-register_deactivation_hook(__FILE__, function() {
+// Deactivation hook ( no destructive actions )
+register_deactivation_hook( __FILE__, function () {
     // Keep data intact by default
-});
+} );
 
 // Frontend asset loader
 add_action( 'wp_enqueue_scripts', 'bhg_enqueue_public_assets' );
@@ -263,7 +263,7 @@ function bhg_enqueue_public_assets() {
 }
 
 // Initialize plugin
-add_action('plugins_loaded', 'bhg_init_plugin');
+add_action( 'plugins_loaded', 'bhg_init_plugin' );
 /**
  * Initialize plugin components.
  *
@@ -271,43 +271,47 @@ add_action('plugins_loaded', 'bhg_init_plugin');
  */
 function bhg_init_plugin() {
     // Load text domain
-    load_plugin_textdomain('bonus-hunt-guesser', false, dirname(plugin_basename(__FILE__)) . '/languages/');
-    
+    load_plugin_textdomain( 'bonus-hunt-guesser', false, dirname( plugin_basename( __FILE__ ) ) . '/languages/' );
+
     // Initialize components
-    if (is_admin()) {
-        if (class_exists('BHG_Admin')) {
+    if ( is_admin() ) {
+        if ( class_exists( 'BHG_Admin' ) ) {
             new BHG_Admin();
         }
-        if (class_exists('BHG_Demo')) {
+        if ( class_exists( 'BHG_Demo' ) ) {
             new BHG_Demo();
         }
     }
-    
-    if (class_exists('BHG_Shortcodes')) {
+
+    if ( class_exists( 'BHG_Shortcodes' ) ) {
         new BHG_Shortcodes();
     }
-    if (class_exists('BHG_Front_Menus')) {
+    if ( class_exists( 'BHG_Front_Menus' ) ) {
         new BHG_Front_Menus();
     }
-    
-    if (class_exists('BHG_DB')) {
+
+    if ( class_exists( 'BHG_DB' ) ) {
         BHG_DB::migrate();
     }
-    
-    if (class_exists('BHG_Utils')) {
+
+    if ( class_exists( 'BHG_Utils' ) ) {
         BHG_Utils::init_hooks();
     }
-    
+
     // Register form handlers
-    add_action('admin_post_bhg_submit_guess', 'bhg_handle_submit_guess');
-    add_action('admin_post_nopriv_bhg_submit_guess', function(){ $ref = wp_get_referer(); wp_safe_redirect( wp_login_url( $ref ? $ref : home_url() ) ); exit; });
-    add_action('wp_ajax_submit_bhg_guess', 'bhg_handle_submit_guess');
-    add_action('wp_ajax_nopriv_submit_bhg_guess', 'bhg_handle_submit_guess');
-    add_action('admin_post_bhg_save_settings', 'bhg_handle_settings_save');
+    add_action( 'admin_post_bhg_submit_guess', 'bhg_handle_submit_guess' );
+    add_action( 'admin_post_nopriv_bhg_submit_guess', function () {
+        $ref = wp_get_referer();
+        wp_safe_redirect( wp_login_url( $ref ? $ref : home_url() ) );
+        exit;
+    } );
+    add_action( 'wp_ajax_submit_bhg_guess', 'bhg_handle_submit_guess' );
+    add_action( 'wp_ajax_nopriv_submit_bhg_guess', 'bhg_handle_submit_guess' );
+    add_action( 'admin_post_bhg_save_settings', 'bhg_handle_settings_save' );
 }
 
 // Early table check on init
-add_action('init', 'bhg_check_tables', 0);
+add_action( 'init', 'bhg_check_tables', 0 );
 
 // Form handler for settings save
 /**
@@ -317,69 +321,69 @@ add_action('init', 'bhg_check_tables', 0);
  */
 function bhg_handle_settings_save() {
     // Check user capabilities
-    if (!current_user_can('manage_options')) {
-        wp_die(esc_html__('You do not have sufficient permissions to perform this action.', 'bonus-hunt-guesser'));
+    if ( ! current_user_can( 'manage_options' ) ) {
+        wp_die( esc_html__( 'You do not have sufficient permissions to perform this action.', 'bonus-hunt-guesser' ) );
     }
-    
+
     // Verify nonce
-    if (!isset($_POST['bhg_settings_nonce']) || !wp_verify_nonce($_POST['bhg_settings_nonce'], 'bhg_save_settings_nonce')) {
+    if ( ! isset( $_POST['bhg_settings_nonce'] ) || ! wp_verify_nonce( $_POST['bhg_settings_nonce'], 'bhg_save_settings_nonce' ) ) {
         wp_safe_redirect( esc_url_raw( admin_url( 'admin.php?page=bhg_settings&error=nonce_failed' ) ) );
         exit;
     }
-    
+
     // Sanitize and validate data
     $settings = array();
-    
-    if (isset($_POST['bhg_default_tournament_period'])) {
-        $period = sanitize_text_field($_POST['bhg_default_tournament_period']);
-        if (in_array($period, array('weekly', 'monthly', 'yearly'))) {
+
+    if ( isset( $_POST['bhg_default_tournament_period'] ) ) {
+        $period = sanitize_text_field( $_POST['bhg_default_tournament_period'] );
+        if ( in_array( $period, array( 'weekly', 'monthly', 'yearly' ) ) ) {
             $settings['default_tournament_period'] = $period;
         }
     }
-    
-    if (isset($_POST['bhg_max_guess_amount'])) {
-        $max = floatval($_POST['bhg_max_guess_amount']);
-        if ($max >= 0) {
+
+    if ( isset( $_POST['bhg_max_guess_amount'] ) ) {
+        $max = floatval( $_POST['bhg_max_guess_amount'] );
+        if ( $max >= 0 ) {
             $settings['max_guess_amount'] = $max;
         }
     }
-    
-    if (isset($_POST['bhg_min_guess_amount'])) {
-        $min = floatval($_POST['bhg_min_guess_amount']);
-        if ($min >= 0) {
+
+    if ( isset( $_POST['bhg_min_guess_amount'] ) ) {
+        $min = floatval( $_POST['bhg_min_guess_amount'] );
+        if ( $min >= 0 ) {
             $settings['min_guess_amount'] = $min;
         }
     }
-    
+
     // Validate that min is not greater than max
-    if (isset($settings['min_guess_amount']) && isset($settings['max_guess_amount']) && 
-        $settings['min_guess_amount'] > $settings['max_guess_amount']) {
+    if ( isset( $settings['min_guess_amount'] ) && isset( $settings['max_guess_amount'] ) &&
+        $settings['min_guess_amount'] > $settings['max_guess_amount'] ) {
         wp_safe_redirect( esc_url_raw( admin_url( 'admin.php?page=bhg_settings&error=invalid_data' ) ) );
         exit;
     }
-    
-    if (isset($_POST['bhg_allow_guess_changes'])) {
-        $allow = sanitize_text_field($_POST['bhg_allow_guess_changes']);
-        if (in_array($allow, array('yes', 'no'))) {
+
+    if ( isset( $_POST['bhg_allow_guess_changes'] ) ) {
+        $allow = sanitize_text_field( $_POST['bhg_allow_guess_changes'] );
+        if ( in_array( $allow, array( 'yes', 'no' ) ) ) {
             $settings['allow_guess_changes'] = $allow;
         }
     }
-    
-    if (isset($_POST['bhg_ads_enabled'])) {
-        $ads_enabled = sanitize_text_field($_POST['bhg_ads_enabled']);
+
+    if ( isset( $_POST['bhg_ads_enabled'] ) ) {
+        $ads_enabled           = sanitize_text_field( $_POST['bhg_ads_enabled'] );
         $settings['ads_enabled'] = $ads_enabled === '1' ? 1 : 0;
     }
-    
-    if (isset($_POST['bhg_email_from'])) {
-        $email_from = sanitize_email($_POST['bhg_email_from']);
-        if ($email_from) {
+
+    if ( isset( $_POST['bhg_email_from'] ) ) {
+        $email_from = sanitize_email( $_POST['bhg_email_from'] );
+        if ( $email_from ) {
             $settings['email_from'] = $email_from;
         }
     }
-    
+
     // Save settings
-    update_option('bhg_plugin_settings', $settings);
-    
+    update_option( 'bhg_plugin_settings', $settings );
+
     // Redirect back to settings page
     wp_safe_redirect( esc_url_raw( admin_url( 'admin.php?page=bhg_settings&message=saved' ) ) );
     exit;
