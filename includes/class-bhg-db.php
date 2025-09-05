@@ -163,7 +163,7 @@ class BHG_DB {
                 'created_at'   => "ALTER TABLE `{$ads_table}` ADD COLUMN created_at DATETIME NULL",
                 'updated_at'   => "ALTER TABLE `{$ads_table}` ADD COLUMN updated_at DATETIME NULL",
             ];
-            forEach ($aneed as $c => $alter) {
+            foreach ($aneed as $c => $alter) {
                 $exists = $wpdb->get_var($wpdb->prepare(
                     "SELECT COLUMN_NAME FROM information_schema.COLUMNS WHERE TABLE_SCHEMA=%s AND TABLE_NAME=%s AND COLUMN_NAME=%s",
                     DB_NAME, $ads_table, $c
