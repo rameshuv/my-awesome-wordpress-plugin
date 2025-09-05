@@ -501,7 +501,8 @@ function bhg_handle_submit_guess() {
             'user_id'    => $user_id,
             'guess'      => $guess,
             'created_at' => current_time( 'mysql' ),
-        ]
+        ],
+        [ '%d', '%d', '%f', '%s' ]
     );
 
     if ( wp_doing_ajax() ) {
