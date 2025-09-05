@@ -42,19 +42,35 @@ $base_url = remove_query_arg(['paged']);
       <tr>
         <th><a href="<?php echo esc_url(add_query_arg(['orderby'=>'user_login','order'=> $order==='ASC'?'desc':'asc'], $base_url)); ?>"><?php echo esc_html__('Username', 'bonus-hunt-guesser'); ?></a></th>
         <th><a href="<?php echo esc_url(add_query_arg(['orderby'=>'display_name','order'=> $order==='ASC'?'desc':'asc'], $base_url)); ?>"><?php echo esc_html__('Name', 'bonus-hunt-guesser'); ?></a></th>
+        <th><?php echo esc_html__('Real Name', 'bonus-hunt-guesser'); ?></th>
         <th><a href="<?php echo esc_url(add_query_arg(['orderby'=>'user_email','order'=> $order==='ASC'?'desc':'asc'], $base_url)); ?>"><?php echo esc_html__('Email', 'bonus-hunt-guesser'); ?></a></th>
+        <th><?php echo esc_html__('Affiliate', 'bonus-hunt-guesser'); ?></th>
         <th><?php echo esc_html__('Actions', 'bonus-hunt-guesser'); ?></th>
       </tr>
     </thead>
     <tbody>
       <?php if (empty($users)) : ?>
-        <tr><td colspan="4"><?php echo esc_html__('No users found.', 'bonus-hunt-guesser'); ?></td></tr>
-      <?php else : foreach ($users as $u) : ?>
+        <tr><td colspan="6"><?php echo esc_html__('No users found.', 'bonus-hunt-guesser'); ?></td></tr>
+      <?php else : foreach ($users as $u) :
+          $form_id    = 'bhg-user-' . (int) $u->ID;
+          $real_name  = get_user_meta($u->ID, 'bhg_real_name', true);
+          $is_aff     = get_user_meta($u->ID, 'bhg_is_affiliate', true);
+      ?>
         <tr>
           <td><?php echo esc_html($u->user_login); ?></td>
           <td><?php echo esc_html($u->display_name); ?></td>
+          <td><input type="text" name="bhg_real_name" form="<?php echo esc_attr($form_id); ?>" value="<?php echo esc_attr($real_name); ?>" /></td>
           <td><?php echo esc_html($u->user_email); ?></td>
-          <td><a class="button" href="<?php echo esc_url(admin_url('user-edit.php?user_id='.(int)$u->ID)); ?>"><?php echo esc_html__('View / Edit', 'bonus-hunt-guesser'); ?></a></td>
+          <td style="text-align:center;"><input type="checkbox" name="bhg_is_affiliate" value="1" form="<?php echo esc_attr($form_id); ?>" <?php checked( $is_aff, 1 ); ?> /></td>
+          <td>
+            <form id="<?php echo esc_attr($form_id); ?>" method="post" action="<?php echo esc_url(admin_url('admin-post.php')); ?>">
+              <input type="hidden" name="action" value="bhg_save_user_meta" />
+              <input type="hidden" name="user_id" value="<?php echo (int) $u->ID; ?>" />
+              <?php wp_nonce_field('bhg_save_user_meta'); ?>
+              <button type="submit" class="button button-primary"><?php echo esc_html__('Save', 'bonus-hunt-guesser'); ?></button>
+            </form>
+            <a class="button" href="<?php echo esc_url(admin_url('user-edit.php?user_id='.(int)$u->ID)); ?>"><?php echo esc_html__('View / Edit', 'bonus-hunt-guesser'); ?></a>
+          </td>
         </tr>
       <?php endforeach; endif; ?>
     </tbody>
