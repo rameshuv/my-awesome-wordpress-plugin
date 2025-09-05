@@ -195,7 +195,7 @@ class BHG_Shortcodes {
             $site_id = isset($r->affiliate_site_id) ? (int)$r->affiliate_site_id : 0;
             $is_aff  = $site_id > 0
                 ? (int)get_user_meta((int)$r->user_id, 'bhg_affiliate_website_' . $site_id, true)
-                : (int)get_user_meta((int)$r->user_id, 'bhg_affiliate_status', true);
+                : (int)get_user_meta((int)$r->user_id, 'bhg_is_affiliate', true);
             $aff = $is_aff ? 'green' : 'red';
             $user_label = $r->user_login ? $r->user_login : ('user#' . (int)$r->user_id);
 
@@ -439,7 +439,7 @@ class BHG_Shortcodes {
     public function user_profile_shortcode($atts) {
         if (!is_user_logged_in()) return '<p>' . esc_html__('Please log in to view this content.', 'bonus-hunt-guesser') . '</p>';
         $user_id = get_current_user_id();
-        $is_affiliate = (int)get_user_meta($user_id, 'bhg_affiliate_status', true);
+        $is_affiliate = (int)get_user_meta($user_id, 'bhg_is_affiliate', true);
         $badge = $is_affiliate ? '<span class="bhg-aff-green" aria-hidden="true"></span>' : '<span class="bhg-aff-red" aria-hidden="true"></span>';
         return '<div class="bhg-user-profile">' . $badge . ' ' . esc_html(wp_get_current_user()->display_name) . '</div>';
     }
