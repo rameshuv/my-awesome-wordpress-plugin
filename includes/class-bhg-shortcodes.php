@@ -182,6 +182,13 @@ class BHG_Shortcodes {
             $hunt_id, $per, $offset
         ));
 
+        wp_enqueue_style(
+            'bhg-shortcodes',
+            BHG_PLUGIN_URL . 'assets/css/bhg-shortcodes.css',
+            array(),
+            defined( 'BHG_VERSION' ) ? BHG_VERSION : null
+        );
+
         ob_start();
         echo '<table class="bhg-leaderboard">';
         echo '<thead><tr>';
@@ -206,7 +213,6 @@ class BHG_Shortcodes {
             echo '</tr>';
         }
         echo '</tbody></table>';
-        echo '<style>.bhg-aff-dot{display:inline-block;width:10px;height:10px;border-radius:50%;vertical-align:middle;margin-left:6px}.bhg-aff-green{background:#1f9d55}.bhg-aff-red{background:#e3342f}</style>';
 
         $pages = (int) ceil( $total / $per );
         if ( $pages > 1 ) {
@@ -441,6 +447,12 @@ class BHG_Shortcodes {
     /** Minimal profile view: affiliate status badge */
     public function user_profile_shortcode($atts) {
         if (!is_user_logged_in()) return '<p>' . esc_html__('Please log in to view this content.', 'bonus-hunt-guesser') . '</p>';
+        wp_enqueue_style(
+            'bhg-shortcodes',
+            BHG_PLUGIN_URL . 'assets/css/bhg-shortcodes.css',
+            array(),
+            defined( 'BHG_VERSION' ) ? BHG_VERSION : null
+        );
         $user_id = get_current_user_id();
         $is_affiliate = (int)get_user_meta($user_id, 'bhg_is_affiliate', true);
         $badge = $is_affiliate ? '<span class="bhg-aff-green" aria-hidden="true"></span>' : '<span class="bhg-aff-red" aria-hidden="true"></span>';
@@ -521,6 +533,20 @@ class BHG_Shortcodes {
         $hunts_tbl = $wpdb->prefix . 'bhg_bonus_hunts';
         $hunts = $wpdb->get_results( "SELECT id, title FROM {$hunts_tbl} WHERE status='closed' ORDER BY created_at DESC LIMIT 50" );
 
+        wp_enqueue_style(
+            'bhg-shortcodes',
+            BHG_PLUGIN_URL . 'assets/css/bhg-shortcodes.css',
+            array(),
+            defined( 'BHG_VERSION' ) ? BHG_VERSION : null
+        );
+        wp_enqueue_script(
+            'bhg-shortcodes-js',
+            BHG_PLUGIN_URL . 'assets/js/bhg-shortcodes.js',
+            array(),
+            defined( 'BHG_VERSION' ) ? BHG_VERSION : null,
+            true
+        );
+
         ob_start();
         echo '<ul class="bhg-tabs">';
         $first = true;
@@ -565,9 +591,6 @@ class BHG_Shortcodes {
             echo '</ul>';
             echo '</div>';
         }
-
-        echo '<style>.bhg-tabs{list-style:none;margin:0;padding:0;display:flex;border-bottom:1px solid #e2e8f0}.bhg-tabs li{margin:0;padding:0}.bhg-tabs a{display:block;padding:8px 12px;text-decoration:none;border:1px solid #e2e8f0;border-bottom:none;margin-right:4px;background:#f7fafc;border-top-left-radius:4px;border-top-right-radius:4px}.bhg-tabs li.active a{background:#fff;font-weight:700}.bhg-tab-pane{display:none;border:1px solid #e2e8f0;padding:12px;border-top:none}.bhg-tab-pane.active{display:block}</style>';
-        echo '<script>document.addEventListener("DOMContentLoaded",function(){var t=document.querySelectorAll(".bhg-tabs a");t.forEach(function(e){e.addEventListener("click",function(t){t.preventDefault();var n=this.getAttribute("href").substring(1);document.querySelectorAll(".bhg-tabs li").forEach(function(e){e.classList.remove("active")});document.querySelectorAll(".bhg-tab-pane").forEach(function(e){e.classList.remove("active")});this.parentElement.classList.add("active");var e=document.getElementById(n);e&&e.classList.add("active")})})});</script>';
 
         return ob_get_clean();
     }
