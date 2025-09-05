@@ -414,7 +414,7 @@ function bhg_render_ads( $placement = 'footer', $hunt_id = 0 ) {
 		if ($vis === 'all') $show = true;
 		elseif ($vis === 'guests' && !is_user_logged_in()) $show = true;
 		elseif ($vis === 'logged_in' && is_user_logged_in()) $show = true;
-		elseif ($vis === 'affiliate' && is_user_logged_in()) {
+		elseif ($vis === 'affiliates' && is_user_logged_in()) {
 			$uid = get_current_user_id();
 			$show = $hunt_site_id > 0
 				? bhg_is_user_affiliate_for_site($uid, $hunt_site_id)
