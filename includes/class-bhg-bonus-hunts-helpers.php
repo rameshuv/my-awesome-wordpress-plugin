@@ -76,16 +76,25 @@ if (!function_exists('bhg_get_hunt_participants')) {
 		$t_g = $wpdb->prefix . 'bhg_guesses';
 		$offset = max(0, ((int)$paged - 1) * (int)$per_page);
 
-		$rows = $wpdb->get_results($wpdb->prepare(
-			"SELECT SQL_CALC_FOUND_ROWS id, user_id, guess, created_at
-			 FROM $t_g
-			 WHERE hunt_id = %d
-			 ORDER BY created_at DESC
-			 LIMIT %d OFFSET %d",
-			(int)$hunt_id, (int)$per_page, (int)$offset
-		));
-		$total = (int) $wpdb->get_var( "SELECT FOUND_ROWS()" );
-		return array('rows' => $rows, 'total' => $total);
+			$rows = $wpdb->get_results(
+				$wpdb->prepare(
+					"SELECT id, user_id, guess, created_at
+					 FROM $t_g
+					 WHERE hunt_id = %d
+					 ORDER BY created_at DESC
+					 LIMIT %d OFFSET %d",
+					(int) $hunt_id,
+					(int) $per_page,
+					(int) $offset
+				)
+			);
+			$total = (int) $wpdb->get_var(
+				$wpdb->prepare(
+					"SELECT COUNT(*) FROM $t_g WHERE hunt_id = %d",
+					(int) $hunt_id
+				)
+			);
+			return array( 'rows' => $rows, 'total' => $total );
 	}
 }
 
