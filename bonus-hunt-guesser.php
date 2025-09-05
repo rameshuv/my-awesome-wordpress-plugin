@@ -381,14 +381,6 @@ function bhg_handle_settings_save() {
     exit;
 }
 
-// Form handler for guess submission (frontend)
-/**
- * Proxy handler for guess submissions.
- *
- * @return void
- */
-function bhg_handle_guess_submission() { return bhg_handle_submit_guess(); }
-
 // Canonical guess submit handler
 /**
  * Process a guess submission from admin-post or AJAX.

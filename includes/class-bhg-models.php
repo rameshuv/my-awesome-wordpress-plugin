@@ -1,84 +1,16 @@
 <?php
 if ( ! defined( 'ABSPATH' ) ) { exit; }
 
+/**
+ * Data layer utilities for Bonus Hunt Guesser.
+ *
+ * This class previously handled guess submissions directly. Guess handling is
+ * now centralized through {@see bhg_handle_submit_guess()} in
+ * `bonus-hunt-guesser.php`. The methods related to form handling and request
+ * routing were removed to avoid duplication and ensure a single canonical
+ * implementation.
+ */
 class BHG_Models {
-    public function __construct() {
-        add_action('admin_post_bhg_submit_guess', array($this, 'submit_guess'));
-        add_action('admin_post_nopriv_bhg_submit_guess', array($this, 'reject_guest'));
-    }
-
-    public function reject_guest() {
-        wp_safe_redirect( wp_login_url() );
-        exit;
-    }
-
-    public function submit_guess() {
-        if (!is_user_logged_in()) { $this->reject_guest(); }
-        check_admin_referer('bhg_submit_guess', 'bhg_nonce');
-
-        $user_id = get_current_user_id();
-        $hunt_id = isset($_POST['hunt_id']) ? (int) $_POST['hunt_id'] : 0;
-        $guess   = isset($_POST['guess']) ? (float) $_POST['guess'] : 0;
-
-        if ($hunt_id <= 0) {
-            wp_die( esc_html__('Invalid hunt.', 'bonus-hunt-guesser') );
-        }
-
-        global $wpdb;
-        $hunts_tbl   = $wpdb->prefix . 'bhg_bonus_hunts';
-        $guesses_tbl = $wpdb->prefix . 'bhg_guesses';
-
-        // Ensure hunt is open
-        $status = $wpdb->get_var( $wpdb->prepare("SELECT status FROM {$hunts_tbl} WHERE id=%d", $hunt_id) );
-        if ($status !== 'open') {
-            wp_die( esc_html__('This hunt is closed.', 'bonus-hunt-guesser') );
-        }
-
-        // Bounds from Settings with safe defaults
-        $settings = get_option('bhg_plugin_settings', array());
-        $min = isset($settings['min_guess_amount']) ? (float) $settings['min_guess_amount'] : 0;
-        $max = isset($settings['max_guess_amount']) ? (float) $settings['max_guess_amount'] : 100000;
-        if ($min < 0) $min = 0;
-        if ($max < $min) $max = $min;
-
-        // Enforce server-side
-        if (!is_numeric($guess)) $guess = 0;
-        if ($guess < $min) $guess = $min;
-        if ($guess > $max) $guess = $max;
-
-        // Upsert (alter guess if already exists)
-        $existing_id = (int) $wpdb->get_var( $wpdb->prepare(
-            "SELECT id FROM {$guesses_tbl} WHERE user_id=%d AND hunt_id=%d", $user_id, $hunt_id
-        ));
-
-        $now = current_time('mysql');
-        if ($existing_id) {
-            $wpdb->update(
-                $guesses_tbl,
-                array('guess' => $guess, 'updated_at' => $now),
-                array('id' => $existing_id),
-                array('%f', '%s'),
-                array('%d')
-            );
-        } else {
-            $wpdb->insert(
-                $guesses_tbl,
-                array(
-                    'hunt_id'    => $hunt_id,
-                    'user_id'    => $user_id,
-                    'guess'      => $guess,
-                    'created_at' => $now,
-                    'updated_at' => $now,
-                ),
-                array('%d','%d','%f','%s','%s')
-            );
-        }
-
-        // Redirect back
-        $redirect = isset($_POST['_wp_http_referer']) ? esc_url_raw(wp_unslash($_POST['_wp_http_referer'])) : home_url('/');
-        wp_safe_redirect($redirect);
-        exit;
-    }
 
     /**
      * Close a bonus hunt and determine winners.
@@ -144,5 +76,3 @@ class BHG_Models {
         return array_map( 'intval', wp_list_pluck( $rows, 'user_id' ) );
     }
 }
-
-new BHG_Models();
