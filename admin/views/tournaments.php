@@ -67,10 +67,20 @@ $rows = $wpdb->get_results(
       <tr>
         <th><label for="bhg_t_type"><?php esc_html_e('Type','bonus-hunt-guesser'); ?></label></th>
         <td>
-          <?php $types = ['weekly','monthly','quarterly','yearly','alltime']; $cur = $row->type ?? 'weekly'; ?>
+          <?php
+          $types  = [ 'weekly', 'monthly', 'quarterly', 'yearly', 'alltime' ];
+          $cur    = $row->type ?? 'weekly';
+          $labels = [
+            'weekly'    => __( 'Weekly', 'bonus-hunt-guesser' ),
+            'monthly'   => __( 'Monthly', 'bonus-hunt-guesser' ),
+            'quarterly' => __( 'Quarterly', 'bonus-hunt-guesser' ),
+            'yearly'    => __( 'Yearly', 'bonus-hunt-guesser' ),
+            'alltime'   => __( 'Alltime', 'bonus-hunt-guesser' ),
+          ];
+          ?>
           <select id="bhg_t_type" name="type">
-            <?php foreach ($types as $t): ?>
-              <option value="<?php echo esc_attr($t); ?>" <?php selected($cur, $t); ?>><?php echo esc_html(ucfirst($t)); ?></option>
+            <?php foreach ( $types as $t ) : ?>
+              <option value="<?php echo esc_attr( $t ); ?>" <?php selected( $cur, $t ); ?>><?php echo esc_html( $labels[ $t ] ); ?></option>
             <?php endforeach; ?>
           </select>
         </td>
