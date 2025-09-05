@@ -28,7 +28,7 @@ $view = isset( $_GET['view'] ) ? sanitize_text_field( wp_unslash( $_GET['view'] 
 
 /** LIST VIEW */
 if ( 'list' === $view ) :
-        $current_page = max( 1, isset( $_GET['paged'] ) ? (int) $_GET['paged'] : 1 );
+        $current_page = max( 1, isset( $_GET['paged'] ) ? (int) wp_unslash( $_GET['paged'] ) : 1 );
         $per_page     = 30;
         $offset       = ( $current_page - 1 ) * $per_page;
 
@@ -47,7 +47,7 @@ if ( 'list' === $view ) :
   <h1 class="wp-heading-inline"><?php echo esc_html__('Bonus Hunts', 'bonus-hunt-guesser'); ?></h1>
   <a href="<?php echo esc_url(add_query_arg(['view'=>'add'])); ?>" class="page-title-action"><?php echo esc_html__('Add New', 'bonus-hunt-guesser'); ?></a>
 
-  <?php if ( isset( $_GET['closed'] ) && '1' === $_GET['closed'] ) : ?>
+  <?php if ( isset( $_GET['closed'] ) && '1' === sanitize_text_field( wp_unslash( $_GET['closed'] ) ) ) : ?>
 	<div class="notice notice-success is-dismissible"><p><?php echo esc_html__( 'Hunt closed successfully.', 'bonus-hunt-guesser' ); ?></p></div>
   <?php endif; ?>
 
@@ -110,7 +110,7 @@ if ( 'list' === $view ) :
 <?php
 /** CLOSE VIEW */
 if ( 'close' === $view ) :
-	$id   = isset( $_GET['id'] ) ? (int) $_GET['id'] : 0;
+        $id   = isset( $_GET['id'] ) ? (int) wp_unslash( $_GET['id'] ) : 0;
 	$hunt = $wpdb->get_row(
 		$wpdb->prepare( "SELECT * FROM {$hunts_table} WHERE id = %d", $id )
 	);
@@ -216,7 +216,7 @@ if ($view === 'add') : ?>
 <?php
 /** EDIT VIEW */
 if ($view === 'edit') :
-	$id    = isset($_GET['id']) ? (int) $_GET['id'] : 0;
+        $id    = isset( $_GET['id'] ) ? (int) wp_unslash( $_GET['id'] ) : 0;
 	$hunt  = $wpdb->get_row(
 		$wpdb->prepare( "SELECT * FROM {$hunts_table} WHERE id = %d", $id )
 	);
