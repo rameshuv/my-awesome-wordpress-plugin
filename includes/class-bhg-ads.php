@@ -66,9 +66,9 @@ class BHG_Ads {
 
     /** Render a single ad row to HTML */
     protected static function render_ad_row($row) {
-        $msg = isset($row->message) ? $row->message : '';
+        $msg = isset($row->content) ? $row->content : '';
         $msg = wp_kses_post($msg);
-        $link = isset($row->link) ? esc_url($row->link) : '';
+        $link = isset($row->link_url) ? esc_url($row->link_url) : '';
 
         if ($link) {
             $msg = '<a href="' . $link . '">' . $msg . '</a>';
@@ -82,7 +82,7 @@ class BHG_Ads {
         $table = $wpdb->prefix . 'bhg_ads';
         $placement = sanitize_text_field($placement);
         // Active ads ordered newest first
-        $sql = "SELECT id, message, link, placement, visibility, target_pages FROM {$table} WHERE active=1 AND placement=%s ORDER BY id DESC";
+        $sql = "SELECT id, content, link_url, placement, visible_to, target_pages FROM {$table} WHERE active=1 AND placement=%s ORDER BY id DESC";
         return $wpdb->get_results($wpdb->prepare($sql, $placement));
     }
 
@@ -96,7 +96,7 @@ class BHG_Ads {
 
         $out = [];
         foreach ($ads as $row) {
-            if (!self::visibility_ok($row->visibility)) continue;
+            if (!self::visibility_ok($row->visible_to)) continue;
             if (!self::page_target_ok($row->target_pages)) continue;
             $out[] = self::render_ad_row($row);
         }
@@ -115,10 +115,10 @@ class BHG_Ads {
         if ($id <= 0) return '';
         global $wpdb;
         $table = $wpdb->prefix . 'bhg_ads';
-        $row = $wpdb->get_row($wpdb->prepare("SELECT id, message, placement, visibility, target_pages, active FROM `$table` WHERE id=%d", $id));
+        $row = $wpdb->get_row($wpdb->prepare("SELECT id, content, placement, visible_to, target_pages, active, link_url FROM `$table` WHERE id=%d", $id));
         if (!$row) return '';
         if ((int)$row->active !== 1) return ''; // respect active flag
-        if (!self::visibility_ok($row->visibility)) return '';
+        if (!self::visibility_ok($row->visible_to)) return '';
         if (!self::page_target_ok($row->target_pages)) return '';
         return self::render_ad_row($row);
     }

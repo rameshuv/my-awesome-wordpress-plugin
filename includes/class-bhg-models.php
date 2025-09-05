@@ -18,7 +18,7 @@ class BHG_Models {
 
         $user_id = get_current_user_id();
         $hunt_id = isset($_POST['hunt_id']) ? (int) $_POST['hunt_id'] : 0;
-        $guess   = isset($_POST['guess_value']) ? (float) $_POST['guess_value'] : 0;
+        $guess   = isset($_POST['guess']) ? (float) $_POST['guess'] : 0;
 
         if ($hunt_id <= 0) {
             wp_die( esc_html__('Invalid hunt.', 'bonus-hunt-guesser') );
@@ -53,18 +53,22 @@ class BHG_Models {
 
         $now = current_time('mysql');
         if ($existing_id) {
-            $wpdb->update($guesses_tbl,
-                array('guess_value' => $guess, 'updated_at' => $now),
+            $wpdb->update(
+                $guesses_tbl,
+                array('guess' => $guess, 'updated_at' => $now),
                 array('id' => $existing_id)
             );
         } else {
-            $wpdb->insert($guesses_tbl, array(
-                'hunt_id'     => $hunt_id,
-                'user_id'     => $user_id,
-                'guess_value' => $guess,
-                'created_at'  => $now,
-                'updated_at'  => $now,
-            ));
+            $wpdb->insert(
+                $guesses_tbl,
+                array(
+                    'hunt_id'    => $hunt_id,
+                    'user_id'    => $user_id,
+                    'guess'      => $guess,
+                    'created_at' => $now,
+                    'updated_at' => $now,
+                )
+            );
         }
 
         // Redirect back

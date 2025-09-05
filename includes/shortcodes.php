@@ -129,7 +129,7 @@ add_shortcode('bhg_user_guesses', function($atts) {
                     <?php foreach ($rows as $r): ?>
                         <tr>
                             <td><?php echo esc_html($r->hunt_title ?: ('#' . $r->hunt_id)); ?></td>
-                            <td><?php echo esc_html(number_format_i18n($r->guess_value, 2)); ?></td>
+                            <td><?php echo esc_html(number_format_i18n($r->guess, 2)); ?></td>
                             <td><?php echo esc_html(ucfirst($r->hunt_status ?: 'open')); ?></td>
                             <td><?php echo esc_html(date_i18n(get_option('date_format') . ' ' . get_option('time_format'), strtotime($r->created_at))); ?></td>
                         </tr>

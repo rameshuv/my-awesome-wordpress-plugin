@@ -246,8 +246,8 @@ if (isset($_GET['message'])) {
                                     <?php wp_nonce_field('bhg_delete_bonus_hunt', 'bhg_nonce'); ?>
                                     <input type="hidden" name="bhg_action" value="delete_bonus_hunt">
                                     <input type="hidden" name="id" value="<?php echo esc_attr($hunt->id); ?>">
-                                    <button type="submit" class="button button-small button-danger" 
-                                            onclick="return confirm('<?php _e('Are you sure you want to delete this bonus hunt?', 'bonus-hunt-guesser'); ?>');">
+                                    <button type="submit" class="button button-small button-danger"
+                                            onclick="return confirm('<?php echo esc_js( __( 'Are you sure you want to delete this bonus hunt?', 'bonus-hunt-guesser' ) ); ?>');">
                                         <?php _e('Delete', 'bonus-hunt-guesser'); ?>
                                     </button>
                                 </form>
