@@ -19,7 +19,7 @@ $rows = $wpdb->get_results(
     $offset
   )
 );
-$total = (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM $t" ) );
+$total = (int) $wpdb->get_var( "SELECT COUNT(*) FROM $t" );
 $pages = max(1, (int) ceil($total / $per_page));
 
 ?>
