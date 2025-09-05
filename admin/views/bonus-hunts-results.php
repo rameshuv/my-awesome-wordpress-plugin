@@ -1,5 +1,5 @@
 <?php
-if (!defined('ABSPATH')) exit;
+if ( ! defined( 'ABSPATH' ) ) { exit; }
 if (!current_user_can('manage_options')) wp_die(__('Insufficient permissions','bonus-hunt-guesser'));
 global $wpdb;
 $hunt_id = isset($_GET['id']) ? (int)$_GET['id'] : 0;

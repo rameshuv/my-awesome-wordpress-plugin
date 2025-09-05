@@ -1,5 +1,5 @@
 <?php
-if (!defined('ABSPATH')) exit;
+if ( ! defined( 'ABSPATH' ) ) { exit; }
 
 function bhg_log($message) {
     if (!defined('WP_DEBUG') || !WP_DEBUG) return;

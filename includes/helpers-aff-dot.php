@@ -1,5 +1,5 @@
 <?php
-if (!defined('ABSPATH')) exit;
+if ( ! defined( 'ABSPATH' ) ) { exit; }
 
 // Renders green/red dot based on affiliate status for current hunt/site context
 if (!function_exists('bhg_render_affiliate_dot')) {
