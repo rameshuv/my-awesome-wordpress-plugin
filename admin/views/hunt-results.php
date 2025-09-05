@@ -5,6 +5,8 @@ if (!current_user_can('manage_options')) { wp_die(__('You do not have sufficient
 $hunt_id = isset($_GET['id']) ? (int) $_GET['id'] : 0;
 if (!$hunt_id) { wp_die(__('Missing hunt id', 'bonus-hunt-guesser')); }
 
+check_admin_referer('bhg_view_results_' . $hunt_id, 'bhg_nonce');
+
 if (!function_exists('bhg_get_hunt') || !function_exists('bhg_get_all_ranked_guesses')) {
     wp_die(__('Required helper functions are missing. Please include class-bhg-bonus-hunts.php helpers.', 'bonus-hunt-guesser'));
 }
