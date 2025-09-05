@@ -217,6 +217,17 @@ if ( ! function_exists( 'bhg_get_default_translations' ) ) {
                         'notice_no_guesses_found'     => 'No guesses found.',
                         'msg_no_ads_yet'              => 'No ads yet.',
                         'notice_no_winners_yet'       => 'No winners yet.',
+				// Shortcode labels for public views.
+				'sc_hunt'                     => 'Hunt',
+				'sc_guess'                    => 'Guess',
+				'sc_final'                    => 'Final',
+				'sc_title'                    => 'Title',
+				'sc_start_balance'            => 'Start Balance',
+				'sc_final_balance'            => 'Final Balance',
+				'sc_status'                   => 'Status',
+				'sc_affiliate'                => 'Affiliate',
+				'sc_position'                 => 'Position',
+				'sc_user'                     => 'User',
                 );
         }
 }
