@@ -179,9 +179,9 @@ class BHG_Shortcodes {
         ob_start();
         echo '<table class="bhg-leaderboard">';
         echo '<thead><tr>';
-        echo '<th>' . esc_html__('Position', 'bonus-hunt-guesser') . '</th>';
-        echo '<th>' . esc_html__('User', 'bonus-hunt-guesser') . '</th>';
-        echo '<th>' . esc_html__('Guess', 'bonus-hunt-guesser') . '</th>';
+        echo '<th class="sortable" data-column="position">' . esc_html__('Position', 'bonus-hunt-guesser') . '</th>';
+        echo '<th class="sortable" data-column="user">' . esc_html__('User', 'bonus-hunt-guesser') . '</th>';
+        echo '<th class="sortable" data-column="guess">' . esc_html__('Guess', 'bonus-hunt-guesser') . '</th>';
         echo '</tr></thead><tbody>';
 
         $pos = $offset + 1;
@@ -194,9 +194,9 @@ class BHG_Shortcodes {
             $user_label = $r->user_login ? $r->user_login : ('user#' . (int)$r->user_id);
 
             echo '<tr>';
-            echo '<td>' . (int)$pos++ . '</td>';
-            echo '<td>' . esc_html($user_label) . ' <span class="bhg-aff-dot bhg-aff-' . esc_attr($aff) . '" aria-hidden="true"></span></td>';
-            echo '<td>' . esc_html(number_format_i18n((float) $r->guess, 2)) . '</td>';
+            echo '<td data-column="position">' . (int)$pos++ . '</td>';
+            echo '<td data-column="user">' . esc_html($user_label) . ' <span class="bhg-aff-dot bhg-aff-' . esc_attr($aff) . '" aria-hidden="true"></span></td>';
+            echo '<td data-column="guess">' . esc_html(number_format_i18n((float) $r->guess, 2)) . '</td>';
             echo '</tr>';
         }
         echo '</tbody></table>';
