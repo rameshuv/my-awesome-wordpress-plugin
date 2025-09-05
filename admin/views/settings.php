@@ -17,16 +17,18 @@ $current_settings = get_option('bhg_plugin_settings', array(
 ));
 
 // Handle settings save via admin-post.php
-if (isset($_GET['message']) && $_GET['message'] === 'saved') {
-    echo '<div class="notice notice-success is-dismissible"><p>' . 
-         __('Settings saved successfully.', 'bonus-hunt-guesser') . 
+$message = isset($_GET['message']) ? sanitize_text_field(wp_unslash($_GET['message'])) : '';
+if ('saved' === $message) {
+    echo '<div class="notice notice-success is-dismissible"><p>' .
+         esc_html__('Settings saved successfully.', 'bonus-hunt-guesser') .
          '</p></div>';
 }
 
 // Handle error messages
-if (isset($_GET['error'])) {
+$error = isset($_GET['error']) ? sanitize_text_field(wp_unslash($_GET['error'])) : '';
+if (!empty($error)) {
     $error_message = '';
-    switch ($_GET['error']) {
+    switch ($error) {
         case 'nonce_failed':
             $error_message = __('Security check failed. Please try again.', 'bonus-hunt-guesser');
             break;
@@ -36,9 +38,9 @@ if (isset($_GET['error'])) {
         default:
             $error_message = __('An error occurred while saving settings.', 'bonus-hunt-guesser');
     }
-    
+
     if (!empty($error_message)) {
-        echo '<div class="notice notice-error is-dismissible"><p>' . $error_message . '</p></div>';
+        echo '<div class="notice notice-error is-dismissible"><p>' . esc_html($error_message) . '</p></div>';
     }
 }
 ?>
