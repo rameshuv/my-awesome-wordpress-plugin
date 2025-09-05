@@ -6,6 +6,11 @@ if (!current_user_can('manage_options')) {
 
 global $wpdb;
 $table = $wpdb->prefix . 'bhg_ads';
+$allowed_tables = [ $wpdb->prefix . 'bhg_ads' ];
+if ( ! in_array( $table, $allowed_tables, true ) ) {
+    wp_die( esc_html__( 'Invalid table.', 'bonus-hunt-guesser' ) );
+}
+$table  = esc_sql( $table );
 
 $action = isset( $_GET['action'] ) ? sanitize_key( $_GET['action'] ) : '';
 $ad_id  = isset( $_GET['id'] ) ? absint( $_GET['id'] ) : 0;
@@ -22,7 +27,7 @@ if ( 'delete' === $action && $ad_id && isset( $_GET['_wpnonce'] ) ) {
 
 // Fetch ads
 $ads = $wpdb->get_results(
-    $wpdb->prepare( 'SELECT * FROM %i ORDER BY id DESC', $table )
+    "SELECT * FROM {$table} ORDER BY id DESC"
 );
 ?>
 <div class="wrap">
@@ -64,7 +69,7 @@ $ads = $wpdb->get_results(
     $ad = null;
     if (isset($_GET['edit'])) {
         $ad = $wpdb->get_row(
-            $wpdb->prepare( 'SELECT * FROM %i WHERE id = %d', $table, (int) $_GET['edit'] )
+            $wpdb->prepare( "SELECT * FROM {$table} WHERE id = %d", (int) $_GET['edit'] )
         );
     }
   ?>
