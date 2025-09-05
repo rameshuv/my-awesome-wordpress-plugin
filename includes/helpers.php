@@ -86,18 +86,25 @@ function bhg_validate_guess($guess) {
     return ($guess >= $min_guess && $guess <= $max_guess);
 }
 
-// Helper function to get user display name with affiliate indicator
-function bhg_get_user_display_name($user_id) {
-    $user = get_userdata($user_id);
-    if (!$user) {
-        return __('Unknown User', 'bonus-hunt-guesser');
+/**
+ * Get a user's display name with affiliate indicator.
+ *
+ * Uses the `bhg_is_affiliate` user meta to determine affiliate status.
+ *
+ * @param int $user_id User ID.
+ * @return string Display name with optional affiliate indicator.
+ */
+function bhg_get_user_display_name( $user_id ) {
+    $user = get_userdata( $user_id );
+    if ( ! $user ) {
+        return __( 'Unknown User', 'bonus-hunt-guesser' );
     }
 
     $display_name = $user->display_name ?: $user->user_login;
-    $is_affiliate = get_user_meta($user_id, 'bhg_affiliate_status', true);
+    $is_affiliate = bhg_is_user_affiliate( $user_id );
 
-    if ($is_affiliate) {
-        $display_name .= ' <span class="bhg-affiliate-indicator" title="' . esc_attr__('Affiliate User', 'bonus-hunt-guesser') . '">★</span>';
+    if ( $is_affiliate ) {
+        $display_name .= ' <span class="bhg-affiliate-indicator" title="' . esc_attr__( 'Affiliate User', 'bonus-hunt-guesser' ) . '">★</span>';
     }
 
     return $display_name;
