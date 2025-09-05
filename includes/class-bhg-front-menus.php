@@ -9,24 +9,24 @@ class BHG_Front_Menus {
 
     public function register_locations() {
         register_nav_menus([
-            'bhg_admin_menu' => __('BHG Admin/Moderator Menu','bonus-hunt-guesser'),
-            'bhg_user_menu'  => __('BHG Logged-in User Menu','bonus-hunt-guesser'),
-            'bhg_guest_menu' => __('BHG Guest Menu','bonus-hunt-guesser'),
+            'bhg_menu_admin' => __('BHG Admin/Moderator Menu','bonus-hunt-guesser'),
+            'bhg_menu_user'  => __('BHG Logged-in User Menu','bonus-hunt-guesser'),
+            'bhg_menu_guest' => __('BHG Guest Menu','bonus-hunt-guesser'),
         ]);
     }
 
     /** [bhg_nav area="admin|user|guest"] */
     public function nav_shortcode($atts) {
         $a = shortcode_atts(['area' => 'guest'], $atts, 'bhg_nav');
-        $loc = 'bhg_guest_menu';
+        $loc = 'bhg_menu_guest';
         if ($a['area'] === 'admin' && current_user_can('edit_posts')) {
-            $loc = 'bhg_admin_menu';
+            $loc = 'bhg_menu_admin';
         } elseif ($a['area'] === 'user' && is_user_logged_in()) {
-            $loc = 'bhg_user_menu';
+            $loc = 'bhg_menu_user';
         } elseif ($a['area'] === 'guest' && !is_user_logged_in()) {
-            $loc = 'bhg_guest_menu';
+            $loc = 'bhg_menu_guest';
         } elseif (is_user_logged_in()) {
-            $loc = 'bhg_user_menu';
+            $loc = 'bhg_menu_user';
         }
 
         $out = wp_nav_menu([

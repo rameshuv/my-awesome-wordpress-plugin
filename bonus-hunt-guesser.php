@@ -396,12 +396,9 @@ function bhg_init_plugin() {
     
     if (class_exists('BHG_Shortcodes')) {
         new BHG_Shortcodes();
-new BHG_Front_Menus();
     }
-    
-    // Initialize menus using the singleton pattern
-    if (class_exists('BHG_Menus')) {
-        BHG_Menus::get_instance()->init();
+    if (class_exists('BHG_Front_Menus')) {
+        new BHG_Front_Menus();
     }
     
     if (class_exists('BHG_DB')) {
