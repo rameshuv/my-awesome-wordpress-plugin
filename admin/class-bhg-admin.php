@@ -15,6 +15,7 @@ class BHG_Admin {
         add_action('admin_post_bhg_save_affiliate',    [$this, 'handle_save_affiliate']);
         add_action('admin_post_bhg_delete_affiliate',  [$this, 'handle_delete_affiliate']);
         add_action('admin_post_bhg_save_settings',     [$this, 'handle_save_settings']);
+        add_action('admin_post_bhg_save_user_meta',    [$this, 'handle_save_user_meta']);
     }
 
     /** Register admin menus and pages */
@@ -236,6 +237,22 @@ public function handle_save_affiliate() {
             update_option('bhg_' . $k, $v, false);
         }
         wp_redirect(admin_url('admin.php?page=bhg-settings&updated=1'));
+        exit;
+    }
+
+    public function handle_save_user_meta() {
+        if (!current_user_can('manage_options')) {
+            wp_die(esc_html__('No permission', 'bonus-hunt-guesser'));
+        }
+        check_admin_referer('bhg_save_user_meta');
+        $user_id = isset($_POST['user_id']) ? (int) $_POST['user_id'] : 0;
+        if ($user_id) {
+            $real_name    = isset($_POST['bhg_real_name']) ? sanitize_text_field(wp_unslash($_POST['bhg_real_name'])) : '';
+            $is_affiliate = isset($_POST['bhg_is_affiliate']) ? 1 : 0;
+            update_user_meta($user_id, 'bhg_real_name', $real_name);
+            update_user_meta($user_id, 'bhg_is_affiliate', $is_affiliate);
+        }
+        wp_redirect(admin_url('admin.php?page=bhg-users'));
         exit;
     }
 
