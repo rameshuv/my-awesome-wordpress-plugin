@@ -9,13 +9,17 @@ $paged = max(1, isset($_GET['paged']) ? (int) $_GET['paged'] : 1);
 $per_page = 20;
 $offset = ($paged - 1) * $per_page;
 
-$rows = $wpdb->get_results($wpdb->prepare(
-  "SELECT SQL_CALC_FOUND_ROWS id, title, start_balance, final_balance, status, winners_limit, closed_at
-   FROM $t
-   ORDER BY id DESC
-   LIMIT %d OFFSET %d", $per_page, $offset
-));
-$total = (int) $wpdb->get_var("SELECT FOUND_ROWS()");
+$rows = $wpdb->get_results(
+  $wpdb->prepare(
+    "SELECT id, title, start_balance, final_balance, status, winners_limit, closed_at
+     FROM $t
+     ORDER BY id DESC
+     LIMIT %d OFFSET %d",
+    $per_page,
+    $offset
+  )
+);
+$total = (int) $wpdb->get_var( "SELECT COUNT(*) FROM $t" );
 $pages = max(1, (int) ceil($total / $per_page));
 
 ?>
