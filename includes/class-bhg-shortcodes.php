@@ -20,17 +20,17 @@ class BHG_Shortcodes {
 		add_shortcode( 'bhg_guess_form', array( $this, 'guess_form_shortcode' ) );
 		add_shortcode( 'bhg_leaderboard', array( $this, 'leaderboard_shortcode' ) );
 		add_shortcode( 'bhg_tournaments', array( $this, 'tournaments_shortcode' ) );
-                add_shortcode( 'bhg_winner_notifications', array( $this, 'winner_notifications_shortcode' ) );
-                add_shortcode( 'bhg_user_profile', array( $this, 'user_profile_shortcode' ) );
-                add_shortcode( 'bhg_best_guessers', array( $this, 'best_guessers_shortcode' ) );
-               add_shortcode( 'bhg_user_guesses', array( $this, 'user_guesses_shortcode' ) );
-               add_shortcode( 'bhg_hunts', array( $this, 'hunts_shortcode' ) );
-               add_shortcode( 'bhg_leaderboards', array( $this, 'leaderboards_shortcode' ) );
+				add_shortcode( 'bhg_winner_notifications', array( $this, 'winner_notifications_shortcode' ) );
+				add_shortcode( 'bhg_user_profile', array( $this, 'user_profile_shortcode' ) );
+				add_shortcode( 'bhg_best_guessers', array( $this, 'best_guessers_shortcode' ) );
+			   add_shortcode( 'bhg_user_guesses', array( $this, 'user_guesses_shortcode' ) );
+			   add_shortcode( 'bhg_hunts', array( $this, 'hunts_shortcode' ) );
+			   add_shortcode( 'bhg_leaderboards', array( $this, 'leaderboards_shortcode' ) );
 
-                // Legacy/alias tags if your site used alternatives.
-                add_shortcode( 'bonus_hunt_leaderboard', array( $this, 'leaderboard_shortcode' ) );
-                add_shortcode( 'bonus_hunt_login', array( $this, 'login_hint_shortcode' ) );
-                add_shortcode( 'bhg_active', array( $this, 'active_hunt_shortcode' ) );
+				// Legacy/alias tags if your site used alternatives.
+				add_shortcode( 'bonus_hunt_leaderboard', array( $this, 'leaderboard_shortcode' ) );
+				add_shortcode( 'bonus_hunt_login', array( $this, 'login_hint_shortcode' ) );
+				add_shortcode( 'bhg_active', array( $this, 'active_hunt_shortcode' ) );
 	}
 
 	/** Minimal login hint used by some themes */
@@ -228,285 +228,285 @@ class BHG_Shortcodes {
 			echo '</div>';
 		}
 
-               return ob_get_clean();
-       }
+			   return ob_get_clean();
+	   }
 
-       /**
-        * Display guesses submitted by a user.
-        *
-        * @param array $atts Shortcode attributes.
-        * @return string HTML output.
-        */
-       public function user_guesses_shortcode( $atts ) {
-               $a = shortcode_atts(
-                       array(
-                               'id'       => 0,
-                               'aff'      => 'yes',
-                               'website'  => 0,
-                               'status'   => '',
-                               'timeline' => '',
-                               'orderby'  => 'hunt',
-                               'order'    => 'DESC',
-                       ),
-                       $atts,
-                       'bhg_user_guesses'
-               );
+	   /**
+		* Display guesses submitted by a user.
+		*
+		* @param array $atts Shortcode attributes.
+		* @return string HTML output.
+		*/
+	   public function user_guesses_shortcode( $atts ) {
+			   $a = shortcode_atts(
+					   array(
+							   'id'       => 0,
+							   'aff'      => 'yes',
+							   'website'  => 0,
+							   'status'   => '',
+							   'timeline' => '',
+							   'orderby'  => 'hunt',
+							   'order'    => 'DESC',
+					   ),
+					   $atts,
+					   'bhg_user_guesses'
+			   );
 
-               global $wpdb;
+			   global $wpdb;
 
-               $user_id = (int) $a['id'];
-               if ( $user_id <= 0 ) {
-                       $user_id = get_current_user_id();
-               }
-               if ( $user_id <= 0 ) {
-                       return '<p>' . esc_html__( 'No user specified.', 'bonus-hunt-guesser' ) . '</p>';
-               }
+			   $user_id = (int) $a['id'];
+			   if ( $user_id <= 0 ) {
+					   $user_id = get_current_user_id();
+			   }
+			   if ( $user_id <= 0 ) {
+					   return '<p>' . esc_html__( 'No user specified.', 'bonus-hunt-guesser' ) . '</p>';
+			   }
 
-               $g = $wpdb->prefix . 'bhg_guesses';
-               $h = $wpdb->prefix . 'bhg_bonus_hunts';
+			   $g = $wpdb->prefix . 'bhg_guesses';
+			   $h = $wpdb->prefix . 'bhg_bonus_hunts';
 
-               $where  = array( 'g.user_id = %d' );
-               $params = array( $user_id );
+			   $where  = array( 'g.user_id = %d' );
+			   $params = array( $user_id );
 
-               if ( in_array( $a['status'], array( 'open', 'closed' ), true ) ) {
-                       $where[]  = 'h.status = %s';
-                       $params[] = $a['status'];
-               }
+			   if ( in_array( $a['status'], array( 'open', 'closed' ), true ) ) {
+					   $where[]  = 'h.status = %s';
+					   $params[] = $a['status'];
+			   }
 
-               $website = (int) $a['website'];
-               if ( $website > 0 ) {
-                       $where[]  = 'h.affiliate_site_id = %d';
-                       $params[] = $website;
-               }
+			   $website = (int) $a['website'];
+			   if ( $website > 0 ) {
+					   $where[]  = 'h.affiliate_site_id = %d';
+					   $params[] = $website;
+			   }
 
-               $order = strtoupper( $a['order'] ) === 'ASC' ? 'ASC' : 'DESC';
-               $orderby_map = array(
-                       'guess' => 'g.guess',
-                       'hunt'  => 'h.created_at',
-               );
-               $orderby_key = isset( $orderby_map[ $a['orderby'] ] ) ? $a['orderby'] : 'hunt';
-               $orderby     = $orderby_map[ $orderby_key ];
+			   $order = strtoupper( $a['order'] ) === 'ASC' ? 'ASC' : 'DESC';
+			   $orderby_map = array(
+					   'guess' => 'g.guess',
+					   'hunt'  => 'h.created_at',
+			   );
+			   $orderby_key = isset( $orderby_map[ $a['orderby'] ] ) ? $a['orderby'] : 'hunt';
+			   $orderby     = $orderby_map[ $orderby_key ];
 
-               $limit_sql = '';
-               if ( 'recent' === strtolower( $a['timeline'] ) ) {
-                       $limit_sql = ' LIMIT 10';
-               }
+			   $limit_sql = '';
+			   if ( 'recent' === strtolower( $a['timeline'] ) ) {
+					   $limit_sql = ' LIMIT 10';
+			   }
 
-               $sql = "SELECT g.guess, h.title, h.final_balance, h.affiliate_site_id
-                       FROM {$g} g INNER JOIN {$h} h ON h.id = g.hunt_id
-                       WHERE " . implode( ' AND ', $where ) . "
-                       ORDER BY {$orderby} {$order}{$limit_sql}";
+			   $sql = "SELECT g.guess, h.title, h.final_balance, h.affiliate_site_id
+					   FROM {$g} g INNER JOIN {$h} h ON h.id = g.hunt_id
+					   WHERE " . implode( ' AND ', $where ) . "
+					   ORDER BY {$orderby} {$order}{$limit_sql}";
 
-               $rows = $wpdb->get_results( $wpdb->prepare( $sql, $params ) );
-               if ( ! $rows ) {
-                       return '<p>' . esc_html__( 'No guesses found.', 'bonus-hunt-guesser' ) . '</p>';
-               }
+			   $rows = $wpdb->get_results( $wpdb->prepare( $sql, $params ) );
+			   if ( ! $rows ) {
+					   return '<p>' . esc_html__( 'No guesses found.', 'bonus-hunt-guesser' ) . '</p>';
+			   }
 
-               $show_aff = filter_var( $a['aff'], FILTER_VALIDATE_BOOLEAN );
+			   $show_aff = filter_var( $a['aff'], FILTER_VALIDATE_BOOLEAN );
 
-               ob_start();
-               echo '<table class="bhg-user-guesses"><thead><tr>';
-               echo '<th>' . esc_html__( 'Hunt', 'bonus-hunt-guesser' ) . '</th>';
-               echo '<th>' . esc_html__( 'Guess', 'bonus-hunt-guesser' ) . '</th>';
-               echo '<th>' . esc_html__( 'Final', 'bonus-hunt-guesser' ) . '</th>';
-               echo '</tr></thead><tbody>';
+			   ob_start();
+			   echo '<table class="bhg-user-guesses"><thead><tr>';
+			   echo '<th>' . esc_html__( 'Hunt', 'bonus-hunt-guesser' ) . '</th>';
+			   echo '<th>' . esc_html__( 'Guess', 'bonus-hunt-guesser' ) . '</th>';
+			   echo '<th>' . esc_html__( 'Final', 'bonus-hunt-guesser' ) . '</th>';
+			   echo '</tr></thead><tbody>';
 
-               foreach ( $rows as $row ) {
-                       echo '<tr>';
-                       echo '<td>' . esc_html( $row->title ) . '</td>';
-                       $guess_cell = esc_html( number_format_i18n( (float) $row->guess, 2 ) );
-                       if ( $show_aff ) {
-                               $guess_cell = bhg_render_affiliate_dot( $user_id, (int) $row->affiliate_site_id ) . $guess_cell;
-                       }
-                       echo '<td>' . $guess_cell . '</td>';
-                       echo '<td>';
-                       echo isset( $row->final_balance ) ? esc_html( number_format_i18n( (float) $row->final_balance, 2 ) ) : '&mdash;';
-                       echo '</td>';
-                       echo '</tr>';
-               }
-               echo '</tbody></table>';
-               return ob_get_clean();
-       }
+			   foreach ( $rows as $row ) {
+					   echo '<tr>';
+					   echo '<td>' . esc_html( $row->title ) . '</td>';
+					   $guess_cell = esc_html( number_format_i18n( (float) $row->guess, 2 ) );
+					   if ( $show_aff ) {
+							   $guess_cell = bhg_render_affiliate_dot( $user_id, (int) $row->affiliate_site_id ) . $guess_cell;
+					   }
+					   echo '<td>' . $guess_cell . '</td>';
+					   echo '<td>';
+					   echo isset( $row->final_balance ) ? esc_html( number_format_i18n( (float) $row->final_balance, 2 ) ) : '&mdash;';
+					   echo '</td>';
+					   echo '</tr>';
+			   }
+			   echo '</tbody></table>';
+			   return ob_get_clean();
+	   }
 
-       /**
-        * Display a list of bonus hunts.
-        *
-        * @param array $atts Shortcode attributes.
-        * @return string HTML output.
-        */
-       public function hunts_shortcode( $atts ) {
-               $a = shortcode_atts(
-                       array(
-                               'id'       => 0,
-                               'aff'      => 'no',
-                               'website'  => 0,
-                               'status'   => '',
-                               'timeline' => '',
-                       ),
-                       $atts,
-                       'bhg_hunts'
-               );
+	   /**
+		* Display a list of bonus hunts.
+		*
+		* @param array $atts Shortcode attributes.
+		* @return string HTML output.
+		*/
+	   public function hunts_shortcode( $atts ) {
+			   $a = shortcode_atts(
+					   array(
+							   'id'       => 0,
+							   'aff'      => 'no',
+							   'website'  => 0,
+							   'status'   => '',
+							   'timeline' => '',
+					   ),
+					   $atts,
+					   'bhg_hunts'
+			   );
 
-               global $wpdb;
-               $h = $wpdb->prefix . 'bhg_bonus_hunts';
-               $aff_table = $wpdb->prefix . 'bhg_affiliates';
+			   global $wpdb;
+			   $h = $wpdb->prefix . 'bhg_bonus_hunts';
+			   $aff_table = $wpdb->prefix . 'bhg_affiliates';
 
-               $where  = array();
-               $params = array();
+			   $where  = array();
+			   $params = array();
 
-               $id = (int) $a['id'];
-               if ( $id > 0 ) {
-                       $where[]  = 'h.id = %d';
-                       $params[] = $id;
-               }
+			   $id = (int) $a['id'];
+			   if ( $id > 0 ) {
+					   $where[]  = 'h.id = %d';
+					   $params[] = $id;
+			   }
 
-               if ( in_array( $a['status'], array( 'open', 'closed' ), true ) ) {
-                       $where[]  = 'h.status = %s';
-                       $params[] = $a['status'];
-               }
+			   if ( in_array( $a['status'], array( 'open', 'closed' ), true ) ) {
+					   $where[]  = 'h.status = %s';
+					   $params[] = $a['status'];
+			   }
 
-               $website = (int) $a['website'];
-               if ( $website > 0 ) {
-                       $where[]  = 'h.affiliate_site_id = %d';
-                       $params[] = $website;
-               }
+			   $website = (int) $a['website'];
+			   if ( $website > 0 ) {
+					   $where[]  = 'h.affiliate_site_id = %d';
+					   $params[] = $website;
+			   }
 
-               $sql = "SELECT h.id, h.title, h.starting_balance, h.final_balance, h.status, h.created_at, h.closed_at, a.name AS aff_name
-                       FROM {$h} h
-                       LEFT JOIN {$aff_table} a ON a.id = h.affiliate_site_id";
-               if ( $where ) {
-                       $sql .= ' WHERE ' . implode( ' AND ', $where );
-               }
-               $sql .= ' ORDER BY h.created_at DESC';
+			   $sql = "SELECT h.id, h.title, h.starting_balance, h.final_balance, h.status, h.created_at, h.closed_at, a.name AS aff_name
+					   FROM {$h} h
+					   LEFT JOIN {$aff_table} a ON a.id = h.affiliate_site_id";
+			   if ( $where ) {
+					   $sql .= ' WHERE ' . implode( ' AND ', $where );
+			   }
+			   $sql .= ' ORDER BY h.created_at DESC';
 
-               if ( 'recent' === strtolower( $a['timeline'] ) ) {
-                       $sql .= ' LIMIT 10';
-               }
+			   if ( 'recent' === strtolower( $a['timeline'] ) ) {
+					   $sql .= ' LIMIT 10';
+			   }
 
-               $rows = $params ? $wpdb->get_results( $wpdb->prepare( $sql, $params ) ) : $wpdb->get_results( $sql );
-               if ( ! $rows ) {
-                       return '<p>' . esc_html__( 'No hunts found.', 'bonus-hunt-guesser' ) . '</p>';
-               }
+			   $rows = $params ? $wpdb->get_results( $wpdb->prepare( $sql, $params ) ) : $wpdb->get_results( $sql );
+			   if ( ! $rows ) {
+					   return '<p>' . esc_html__( 'No hunts found.', 'bonus-hunt-guesser' ) . '</p>';
+			   }
 
-               $show_aff = filter_var( $a['aff'], FILTER_VALIDATE_BOOLEAN );
+			   $show_aff = filter_var( $a['aff'], FILTER_VALIDATE_BOOLEAN );
 
-               ob_start();
-               echo '<table class="bhg-hunts"><thead><tr>';
-               echo '<th>' . esc_html__( 'Title', 'bonus-hunt-guesser' ) . '</th>';
-               echo '<th>' . esc_html__( 'Start Balance', 'bonus-hunt-guesser' ) . '</th>';
-               echo '<th>' . esc_html__( 'Final Balance', 'bonus-hunt-guesser' ) . '</th>';
-               echo '<th>' . esc_html__( 'Status', 'bonus-hunt-guesser' ) . '</th>';
-               if ( $show_aff ) {
-                       echo '<th>' . esc_html__( 'Affiliate', 'bonus-hunt-guesser' ) . '</th>';
-               }
-               echo '</tr></thead><tbody>';
+			   ob_start();
+			   echo '<table class="bhg-hunts"><thead><tr>';
+			   echo '<th>' . esc_html__( 'Title', 'bonus-hunt-guesser' ) . '</th>';
+			   echo '<th>' . esc_html__( 'Start Balance', 'bonus-hunt-guesser' ) . '</th>';
+			   echo '<th>' . esc_html__( 'Final Balance', 'bonus-hunt-guesser' ) . '</th>';
+			   echo '<th>' . esc_html__( 'Status', 'bonus-hunt-guesser' ) . '</th>';
+			   if ( $show_aff ) {
+					   echo '<th>' . esc_html__( 'Affiliate', 'bonus-hunt-guesser' ) . '</th>';
+			   }
+			   echo '</tr></thead><tbody>';
 
-               foreach ( $rows as $row ) {
-                       echo '<tr>';
-                       echo '<td>' . esc_html( $row->title ) . '</td>';
-                       echo '<td>' . esc_html( number_format_i18n( (float) $row->starting_balance, 2 ) ) . '</td>';
-                       echo '<td>';
-                       echo isset( $row->final_balance ) ? esc_html( number_format_i18n( (float) $row->final_balance, 2 ) ) : '&mdash;';
-                       echo '</td>';
-                       echo '<td>' . esc_html( $row->status ) . '</td>';
-                       if ( $show_aff ) {
-                               echo '<td>' . esc_html( $row->aff_name ? $row->aff_name : '—' ) . '</td>';
-                       }
-                       echo '</tr>';
-               }
-               echo '</tbody></table>';
-               return ob_get_clean();
-       }
+			   foreach ( $rows as $row ) {
+					   echo '<tr>';
+					   echo '<td>' . esc_html( $row->title ) . '</td>';
+					   echo '<td>' . esc_html( number_format_i18n( (float) $row->starting_balance, 2 ) ) . '</td>';
+					   echo '<td>';
+					   echo isset( $row->final_balance ) ? esc_html( number_format_i18n( (float) $row->final_balance, 2 ) ) : '&mdash;';
+					   echo '</td>';
+					   echo '<td>' . esc_html( $row->status ) . '</td>';
+					   if ( $show_aff ) {
+							   echo '<td>' . esc_html( $row->aff_name ? $row->aff_name : '—' ) . '</td>';
+					   }
+					   echo '</tr>';
+			   }
+			   echo '</tbody></table>';
+			   return ob_get_clean();
+	   }
 
-       /**
-        * Display leaderboards for multiple hunts.
-        *
-        * @param array $atts Shortcode attributes.
-        * @return string HTML output.
-        */
-       public function leaderboards_shortcode( $atts ) {
-               $a = shortcode_atts(
-                       array(
-                               'id'       => 0,
-                               'aff'      => 'yes',
-                               'website'  => 0,
-                               'status'   => '',
-                               'timeline' => '',
-                       ),
-                       $atts,
-                       'bhg_leaderboards'
-               );
+	   /**
+		* Display leaderboards for multiple hunts.
+		*
+		* @param array $atts Shortcode attributes.
+		* @return string HTML output.
+		*/
+	   public function leaderboards_shortcode( $atts ) {
+			   $a = shortcode_atts(
+					   array(
+							   'id'       => 0,
+							   'aff'      => 'yes',
+							   'website'  => 0,
+							   'status'   => '',
+							   'timeline' => '',
+					   ),
+					   $atts,
+					   'bhg_leaderboards'
+			   );
 
-               global $wpdb;
-               $h = $wpdb->prefix . 'bhg_bonus_hunts';
+			   global $wpdb;
+			   $h = $wpdb->prefix . 'bhg_bonus_hunts';
 
-               $where  = array();
-               $params = array();
+			   $where  = array();
+			   $params = array();
 
-               $id = (int) $a['id'];
-               if ( $id > 0 ) {
-                       $where[]  = 'id = %d';
-                       $params[] = $id;
-               }
+			   $id = (int) $a['id'];
+			   if ( $id > 0 ) {
+					   $where[]  = 'id = %d';
+					   $params[] = $id;
+			   }
 
-               if ( in_array( $a['status'], array( 'open', 'closed' ), true ) ) {
-                       $where[]  = 'status = %s';
-                       $params[] = $a['status'];
-               }
+			   if ( in_array( $a['status'], array( 'open', 'closed' ), true ) ) {
+					   $where[]  = 'status = %s';
+					   $params[] = $a['status'];
+			   }
 
-               $website = (int) $a['website'];
-               if ( $website > 0 ) {
-                       $where[]  = 'affiliate_site_id = %d';
-                       $params[] = $website;
-               }
+			   $website = (int) $a['website'];
+			   if ( $website > 0 ) {
+					   $where[]  = 'affiliate_site_id = %d';
+					   $params[] = $website;
+			   }
 
-               $sql = "SELECT id, title FROM {$h}";
-               if ( $where ) {
-                       $sql .= ' WHERE ' . implode( ' AND ', $where );
-               }
-               $sql .= ' ORDER BY created_at DESC';
+			   $sql = "SELECT id, title FROM {$h}";
+			   if ( $where ) {
+					   $sql .= ' WHERE ' . implode( ' AND ', $where );
+			   }
+			   $sql .= ' ORDER BY created_at DESC';
 
-               if ( 'recent' === strtolower( $a['timeline'] ) ) {
-                       $sql .= ' LIMIT 5';
-               }
+			   if ( 'recent' === strtolower( $a['timeline'] ) ) {
+					   $sql .= ' LIMIT 5';
+			   }
 
-               $hunts = $params ? $wpdb->get_results( $wpdb->prepare( $sql, $params ) ) : $wpdb->get_results( $sql );
-               if ( ! $hunts ) {
-                       return '<p>' . esc_html__( 'No hunts found.', 'bonus-hunt-guesser' ) . '</p>';
-               }
+			   $hunts = $params ? $wpdb->get_results( $wpdb->prepare( $sql, $params ) ) : $wpdb->get_results( $sql );
+			   if ( ! $hunts ) {
+					   return '<p>' . esc_html__( 'No hunts found.', 'bonus-hunt-guesser' ) . '</p>';
+			   }
 
-               $show_aff = filter_var( $a['aff'], FILTER_VALIDATE_BOOLEAN );
+			   $show_aff = filter_var( $a['aff'], FILTER_VALIDATE_BOOLEAN );
 
-               ob_start();
-               foreach ( $hunts as $hunt ) {
-                       echo '<div class="bhg-leaderboard-wrap">';
-                       echo '<h3>' . esc_html( $hunt->title ) . '</h3>';
-                       $html = $this->leaderboard_shortcode( array( 'hunt_id' => (int) $hunt->id ) );
-                       if ( ! $show_aff ) {
-                               $html = preg_replace( '/<span class="bhg-aff-dot[^>]*><\/span>/', '', $html );
-                       }
-                       echo $html;
-                       echo '</div>';
-               }
-               return ob_get_clean();
-       }
+			   ob_start();
+			   foreach ( $hunts as $hunt ) {
+					   echo '<div class="bhg-leaderboard-wrap">';
+					   echo '<h3>' . esc_html( $hunt->title ) . '</h3>';
+					   $html = $this->leaderboard_shortcode( array( 'hunt_id' => (int) $hunt->id ) );
+					   if ( ! $show_aff ) {
+							   $html = preg_replace( '/<span class="bhg-aff-dot[^>]*><\/span>/', '', $html );
+					   }
+					   echo $html;
+					   echo '</div>';
+			   }
+			   return ob_get_clean();
+	   }
 
-       /**
-        * [bhg_tournaments] List tournaments or show details.
-        *
-        * Attributes:
-        * - status    (string) Filter by tournament status (active|closed).
-        * - tournament(int)    Specific tournament ID.
-        * - website   (int)    Affiliate website ID.
-        * - timeline  (string) Tournament type (weekly|monthly|yearly|quarterly|alltime).
-        *
-        * Details view is available via ?bhg_tournament_id=ID.
-        *
-        * @param array $atts Shortcode attributes.
-        * @return string HTML output.
-        */
-       public function tournaments_shortcode($atts) {
-               global $wpdb;
+	   /**
+		* [bhg_tournaments] List tournaments or show details.
+		*
+		* Attributes:
+		* - status    (string) Filter by tournament status (active|closed).
+		* - tournament(int)    Specific tournament ID.
+		* - website   (int)    Affiliate website ID.
+		* - timeline  (string) Tournament type (weekly|monthly|yearly|quarterly|alltime).
+		*
+		* Details view is available via ?bhg_tournament_id=ID.
+		*
+		* @param array $atts Shortcode attributes.
+		* @return string HTML output.
+		*/
+	   public function tournaments_shortcode($atts) {
+			   global $wpdb;
 
 		// If a specific tournament ID is requested, render details
 		$details_id = isset($_GET['bhg_tournament_id']) ? absint($_GET['bhg_tournament_id']) : 0;
@@ -588,81 +588,81 @@ class BHG_Shortcodes {
 			return ob_get_clean();
 		}
 
-               // Otherwise list tournaments with filters
-               $a = shortcode_atts(
-                       array(
-                               'status'    => 'active',
-                               'tournament'=> 0,
-                               'website'   => 0,
-                               'timeline'  => '',
-                       ),
-                       $atts,
-                       'bhg_tournaments'
-               );
+			   // Otherwise list tournaments with filters
+			   $a = shortcode_atts(
+					   array(
+							   'status'    => 'active',
+							   'tournament'=> 0,
+							   'website'   => 0,
+							   'timeline'  => '',
+					   ),
+					   $atts,
+					   'bhg_tournaments'
+			   );
 
-               $t          = $wpdb->prefix . 'bhg_tournaments';
-               $where      = array();
-               $args       = array();
-               $status     = isset( $_GET['bhg_status'] ) ? sanitize_key( $_GET['bhg_status'] ) : sanitize_key( $a['status'] );
-               $timeline   = isset( $_GET['bhg_timeline'] ) ? sanitize_key( $_GET['bhg_timeline'] ) : sanitize_key( $a['timeline'] );
-               $tournament = absint( $a['tournament'] );
-               $website    = absint( $a['website'] );
+			   $t          = $wpdb->prefix . 'bhg_tournaments';
+			   $where      = array();
+			   $args       = array();
+			   $status     = isset( $_GET['bhg_status'] ) ? sanitize_key( $_GET['bhg_status'] ) : sanitize_key( $a['status'] );
+			   $timeline   = isset( $_GET['bhg_timeline'] ) ? sanitize_key( $_GET['bhg_timeline'] ) : sanitize_key( $a['timeline'] );
+			   $tournament = absint( $a['tournament'] );
+			   $website    = absint( $a['website'] );
 
-               if ( $tournament > 0 ) {
-                       $where[] = 'id = %d';
-                       $args[]  = $tournament;
-               }
-               if ( in_array( $status, array( 'active', 'closed' ), true ) ) {
-                       $where[] = 'status = %s';
-                       $args[]  = $status;
-               }
-               if ( in_array( $timeline, array( 'weekly', 'monthly', 'yearly', 'quarterly', 'alltime' ), true ) ) {
-                       $where[] = 'type = %s';
-                       $args[]  = $timeline;
-               }
-               if ( $website > 0 ) {
-                       $where[] = 'affiliate_site_id = %d';
-                       $args[]  = $website;
-               }
+			   if ( $tournament > 0 ) {
+					   $where[] = 'id = %d';
+					   $args[]  = $tournament;
+			   }
+			   if ( in_array( $status, array( 'active', 'closed' ), true ) ) {
+					   $where[] = 'status = %s';
+					   $args[]  = $status;
+			   }
+			   if ( in_array( $timeline, array( 'weekly', 'monthly', 'yearly', 'quarterly', 'alltime' ), true ) ) {
+					   $where[] = 'type = %s';
+					   $args[]  = $timeline;
+			   }
+			   if ( $website > 0 ) {
+					   $where[] = 'affiliate_site_id = %d';
+					   $args[]  = $website;
+			   }
 
-               $sql = "SELECT * FROM {$t}";
-               if ( $where ) {
-                       $sql .= ' WHERE ' . implode( ' AND ', $where );
-               }
-               $sql .= ' ORDER BY start_date DESC, id DESC';
+			   $sql = "SELECT * FROM {$t}";
+			   if ( $where ) {
+					   $sql .= ' WHERE ' . implode( ' AND ', $where );
+			   }
+			   $sql .= ' ORDER BY start_date DESC, id DESC';
 
-               $rows = $args ? $wpdb->get_results( $wpdb->prepare( $sql, $args ) ) : $wpdb->get_results( $sql );
-               if (!$rows) {
-                       return '<p>' . esc_html__('No tournaments found.', 'bonus-hunt-guesser') . '</p>';
-               }
-                $current_url = (isset($_SERVER['REQUEST_URI']) ? esc_url_raw(wp_unslash($_SERVER['REQUEST_URI'])) : home_url('/'));
+			   $rows = $args ? $wpdb->get_results( $wpdb->prepare( $sql, $args ) ) : $wpdb->get_results( $sql );
+			   if (!$rows) {
+					   return '<p>' . esc_html__('No tournaments found.', 'bonus-hunt-guesser') . '</p>';
+			   }
+				$current_url = (isset($_SERVER['REQUEST_URI']) ? esc_url_raw(wp_unslash($_SERVER['REQUEST_URI'])) : home_url('/'));
 
-                ob_start();
-                echo '<form method="get" class="bhg-tournament-filters" style="margin-bottom:10px;">';
-                foreach ( $_GET as $raw_key => $v ) {
-                        $key = sanitize_key( $raw_key );
-                        if ( $key === 'bhg_timeline' || $key === 'bhg_status' || $key === 'bhg_tournament_id' ) {
-                                continue;
-                        }
-                        echo '<input type="hidden" name="' . esc_attr( $key ) . '" value="' . esc_attr( is_array( $v ) ? reset( $v ) : $v ) . '">';
-                }
-                echo '<label style="margin-right:8px;">' . esc_html__( 'Timeline:', 'bonus-hunt-guesser' ) . ' ';
-                echo '<select name="bhg_timeline">';
-                $timelines = array( 'all' => __( 'All', 'bonus-hunt-guesser' ), 'weekly' => __( 'Weekly', 'bonus-hunt-guesser' ), 'monthly' => __( 'Monthly', 'bonus-hunt-guesser' ), 'yearly' => __( 'Yearly', 'bonus-hunt-guesser' ), 'quarterly' => __( 'Quarterly', 'bonus-hunt-guesser' ), 'alltime' => __( 'All-Time', 'bonus-hunt-guesser' ) );
-                $timeline_key = isset( $_GET['bhg_timeline'] ) ? sanitize_key( $_GET['bhg_timeline'] ) : $timeline;
-                foreach ( $timelines as $key => $label ) {
-                        echo '<option value="' . esc_attr( $key ) . '"' . selected( $timeline_key, $key, false ) . '>' . esc_html( $label ) . '</option>';
-                }
-                echo '</select></label>';
+				ob_start();
+				echo '<form method="get" class="bhg-tournament-filters" style="margin-bottom:10px;">';
+				foreach ( $_GET as $raw_key => $v ) {
+						$key = sanitize_key( $raw_key );
+						if ( $key === 'bhg_timeline' || $key === 'bhg_status' || $key === 'bhg_tournament_id' ) {
+								continue;
+						}
+						echo '<input type="hidden" name="' . esc_attr( $key ) . '" value="' . esc_attr( is_array( $v ) ? reset( $v ) : $v ) . '">';
+				}
+				echo '<label style="margin-right:8px;">' . esc_html__( 'Timeline:', 'bonus-hunt-guesser' ) . ' ';
+				echo '<select name="bhg_timeline">';
+				$timelines = array( 'all' => __( 'All', 'bonus-hunt-guesser' ), 'weekly' => __( 'Weekly', 'bonus-hunt-guesser' ), 'monthly' => __( 'Monthly', 'bonus-hunt-guesser' ), 'yearly' => __( 'Yearly', 'bonus-hunt-guesser' ), 'quarterly' => __( 'Quarterly', 'bonus-hunt-guesser' ), 'alltime' => __( 'All-Time', 'bonus-hunt-guesser' ) );
+				$timeline_key = isset( $_GET['bhg_timeline'] ) ? sanitize_key( $_GET['bhg_timeline'] ) : $timeline;
+				foreach ( $timelines as $key => $label ) {
+						echo '<option value="' . esc_attr( $key ) . '"' . selected( $timeline_key, $key, false ) . '>' . esc_html( $label ) . '</option>';
+				}
+				echo '</select></label>';
 
-                echo '<label>' . esc_html__( 'Status:', 'bonus-hunt-guesser' ) . ' ';
-                echo '<select name="bhg_status">';
-                $statuses = array( 'active' => __( 'Active', 'bonus-hunt-guesser' ), 'closed' => __( 'Closed', 'bonus-hunt-guesser' ), 'all' => __( 'All', 'bonus-hunt-guesser' ) );
-                $status_key = isset( $_GET['bhg_status'] ) ? sanitize_key( $_GET['bhg_status'] ) : $status;
-                foreach ( $statuses as $key => $label ) {
-                        echo '<option value="' . esc_attr( $key ) . '"' . selected( $status_key, $key, false ) . '>' . esc_html( $label ) . '</option>';
-                }
-                echo '</select></label> ';
+				echo '<label>' . esc_html__( 'Status:', 'bonus-hunt-guesser' ) . ' ';
+				echo '<select name="bhg_status">';
+				$statuses = array( 'active' => __( 'Active', 'bonus-hunt-guesser' ), 'closed' => __( 'Closed', 'bonus-hunt-guesser' ), 'all' => __( 'All', 'bonus-hunt-guesser' ) );
+				$status_key = isset( $_GET['bhg_status'] ) ? sanitize_key( $_GET['bhg_status'] ) : $status;
+				foreach ( $statuses as $key => $label ) {
+						echo '<option value="' . esc_attr( $key ) . '"' . selected( $status_key, $key, false ) . '>' . esc_html( $label ) . '</option>';
+				}
+				echo '</select></label> ';
 
 		echo '<button class="button" type="submit" style="margin-left:8px;">'.esc_html__('Filter','bonus-hunt-guesser').'</button>';
 		echo '</form>';

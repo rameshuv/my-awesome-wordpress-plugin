@@ -29,12 +29,12 @@ class BHG_DB {
 		$charset_collate = $wpdb->get_charset_collate();
 
 		$hunts_table   = $wpdb->prefix . 'bhg_bonus_hunts';
-                $guesses_table = $wpdb->prefix . 'bhg_guesses';
-                $tours_table   = $wpdb->prefix . 'bhg_tournaments';
-                $tres_table    = $wpdb->prefix . 'bhg_tournament_results';
-                $ads_table     = $wpdb->prefix . 'bhg_ads';
-                $trans_table   = $wpdb->prefix . 'bhg_translations';
-                $aff_table     = $wpdb->prefix . 'bhg_affiliates';
+				$guesses_table = $wpdb->prefix . 'bhg_guesses';
+				$tours_table   = $wpdb->prefix . 'bhg_tournaments';
+				$tres_table    = $wpdb->prefix . 'bhg_tournament_results';
+				$ads_table     = $wpdb->prefix . 'bhg_ads';
+				$trans_table   = $wpdb->prefix . 'bhg_translations';
+				$aff_table     = $wpdb->prefix . 'bhg_affiliates';
 
 		$sql = [];
 
@@ -68,36 +68,36 @@ class BHG_DB {
 			KEY user_id (user_id)
 		) {$charset_collate};";
 
-                // Tournaments
-                $sql[] = "CREATE TABLE {$tours_table} (
-                        id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
-                        title VARCHAR(190) NOT NULL,
-                        description TEXT NULL,
-                        type VARCHAR(20) NOT NULL,
-                        start_date DATE NULL,
-                        end_date DATE NULL,
-                        status VARCHAR(20) NOT NULL DEFAULT 'active',
-                        created_at DATETIME NULL,
-                        updated_at DATETIME NULL,
-                        PRIMARY KEY  (id),
-                        KEY type (type),
-                        KEY status (status)
-                ) {$charset_collate};";
+				// Tournaments
+				$sql[] = "CREATE TABLE {$tours_table} (
+						id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+						title VARCHAR(190) NOT NULL,
+						description TEXT NULL,
+						type VARCHAR(20) NOT NULL,
+						start_date DATE NULL,
+						end_date DATE NULL,
+						status VARCHAR(20) NOT NULL DEFAULT 'active',
+						created_at DATETIME NULL,
+						updated_at DATETIME NULL,
+						PRIMARY KEY  (id),
+						KEY type (type),
+						KEY status (status)
+				) {$charset_collate};";
 
-                // Tournament Results
-                $sql[] = "CREATE TABLE {$tres_table} (
-                        id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
-                        tournament_id BIGINT UNSIGNED NOT NULL,
-                        user_id BIGINT UNSIGNED NOT NULL,
-                        wins INT UNSIGNED NOT NULL DEFAULT 0,
-                        last_win_date DATETIME NULL,
-                        PRIMARY KEY  (id),
-                        KEY tournament_id (tournament_id),
-                        KEY user_id (user_id)
-                ) {$charset_collate};";
+				// Tournament Results
+				$sql[] = "CREATE TABLE {$tres_table} (
+						id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+						tournament_id BIGINT UNSIGNED NOT NULL,
+						user_id BIGINT UNSIGNED NOT NULL,
+						wins INT UNSIGNED NOT NULL DEFAULT 0,
+						last_win_date DATETIME NULL,
+						PRIMARY KEY  (id),
+						KEY tournament_id (tournament_id),
+						KEY user_id (user_id)
+				) {$charset_collate};";
 
-                // Ads
-                $sql[] = "CREATE TABLE {$ads_table} (
+				// Ads
+				$sql[] = "CREATE TABLE {$ads_table} (
 			id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
 			title VARCHAR(190) NOT NULL,
 			content TEXT NULL,
@@ -165,35 +165,35 @@ class BHG_DB {
 				'end_date'    => "ALTER TABLE `{$tours_table}` ADD COLUMN end_date DATE NULL",
 				'status'      => "ALTER TABLE `{$tours_table}` ADD COLUMN status VARCHAR(20) NOT NULL DEFAULT 'active'",
 			];
-                        foreach ( $tneed as $c => $alter ) {
-                                if ( ! $this->column_exists( $tours_table, $c ) ) {
-                                        $wpdb->query( $alter );
-                                }
-                        }
+						foreach ( $tneed as $c => $alter ) {
+								if ( ! $this->column_exists( $tours_table, $c ) ) {
+										$wpdb->query( $alter );
+								}
+						}
 
-                        // Tournament results columns
-                        $trrneed = [
-                                'tournament_id' => "ALTER TABLE `{$tres_table}` ADD COLUMN tournament_id BIGINT UNSIGNED NOT NULL",
-                                'user_id'       => "ALTER TABLE `{$tres_table}` ADD COLUMN user_id BIGINT UNSIGNED NOT NULL",
-                                'wins'          => "ALTER TABLE `{$tres_table}` ADD COLUMN wins INT UNSIGNED NOT NULL DEFAULT 0",
-                                'last_win_date' => "ALTER TABLE `{$tres_table}` ADD COLUMN last_win_date DATETIME NULL",
-                        ];
-                        foreach ( $trrneed as $c => $alter ) {
-                                if ( ! $this->column_exists( $tres_table, $c ) ) {
-                                        $wpdb->query( $alter );
-                                }
-                        }
-                        if ( ! $this->index_exists( $tres_table, 'tournament_id' ) ) {
-                                $wpdb->query( "ALTER TABLE `{$tres_table}` ADD KEY tournament_id (tournament_id)" );
-                        }
-                        if ( ! $this->index_exists( $tres_table, 'user_id' ) ) {
-                                $wpdb->query( "ALTER TABLE `{$tres_table}` ADD KEY user_id (user_id)" );
-                        }
+						// Tournament results columns
+						$trrneed = [
+								'tournament_id' => "ALTER TABLE `{$tres_table}` ADD COLUMN tournament_id BIGINT UNSIGNED NOT NULL",
+								'user_id'       => "ALTER TABLE `{$tres_table}` ADD COLUMN user_id BIGINT UNSIGNED NOT NULL",
+								'wins'          => "ALTER TABLE `{$tres_table}` ADD COLUMN wins INT UNSIGNED NOT NULL DEFAULT 0",
+								'last_win_date' => "ALTER TABLE `{$tres_table}` ADD COLUMN last_win_date DATETIME NULL",
+						];
+						foreach ( $trrneed as $c => $alter ) {
+								if ( ! $this->column_exists( $tres_table, $c ) ) {
+										$wpdb->query( $alter );
+								}
+						}
+						if ( ! $this->index_exists( $tres_table, 'tournament_id' ) ) {
+								$wpdb->query( "ALTER TABLE `{$tres_table}` ADD KEY tournament_id (tournament_id)" );
+						}
+						if ( ! $this->index_exists( $tres_table, 'user_id' ) ) {
+								$wpdb->query( "ALTER TABLE `{$tres_table}` ADD KEY user_id (user_id)" );
+						}
 
-                        // Ads columns
-                        $aneed = [
-                                'title'        => "ALTER TABLE `{$ads_table}` ADD COLUMN title VARCHAR(190) NOT NULL",
-                                'content'      => "ALTER TABLE `{$ads_table}` ADD COLUMN content TEXT NULL",
+						// Ads columns
+						$aneed = [
+								'title'        => "ALTER TABLE `{$ads_table}` ADD COLUMN title VARCHAR(190) NOT NULL",
+								'content'      => "ALTER TABLE `{$ads_table}` ADD COLUMN content TEXT NULL",
 				'link_url'     => "ALTER TABLE `{$ads_table}` ADD COLUMN link_url VARCHAR(255) NULL",
 				'placement'    => "ALTER TABLE `{$ads_table}` ADD COLUMN placement VARCHAR(50) NOT NULL DEFAULT 'none'",
 				'visible_to'   => "ALTER TABLE `{$ads_table}` ADD COLUMN visible_to VARCHAR(30) NOT NULL DEFAULT 'all'",
