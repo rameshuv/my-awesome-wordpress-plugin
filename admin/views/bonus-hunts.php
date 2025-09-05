@@ -27,31 +27,31 @@ $guesses_table = esc_sql( $guesses_table );
 $view = isset( $_GET['view'] ) ? sanitize_text_field( wp_unslash( $_GET['view'] ) ) : 'list';
 
 if ( 'edit' === $view ) {
-        require __DIR__ . '/bonus-hunts-edit.php';
-        return;
+		require __DIR__ . '/bonus-hunts-edit.php';
+		return;
 }
 
 /** LIST VIEW */
 if ( 'list' === $view ) :
-        $current_page = max( 1, isset( $_GET['paged'] ) ? (int) wp_unslash( $_GET['paged'] ) : 1 );
-        $per_page     = 30;
-        $offset       = ( $current_page - 1 ) * $per_page;
+		$current_page = max( 1, isset( $_GET['paged'] ) ? (int) wp_unslash( $_GET['paged'] ) : 1 );
+		$per_page     = 30;
+		$offset       = ( $current_page - 1 ) * $per_page;
 
-        $hunts = $wpdb->get_results(
-                $wpdb->prepare(
-                        "SELECT * FROM {$hunts_table} ORDER BY id DESC LIMIT %d OFFSET %d",
-                        $per_page,
-                        $offset
-                )
-        );
+		$hunts = $wpdb->get_results(
+				$wpdb->prepare(
+						"SELECT * FROM {$hunts_table} ORDER BY id DESC LIMIT %d OFFSET %d",
+						$per_page,
+						$offset
+				)
+		);
 
-        $status_labels = [
-                'open'   => __( 'Open', 'bonus-hunt-guesser' ),
-                'closed' => __( 'Closed', 'bonus-hunt-guesser' ),
-        ];
+		$status_labels = [
+				'open'   => __( 'Open', 'bonus-hunt-guesser' ),
+				'closed' => __( 'Closed', 'bonus-hunt-guesser' ),
+		];
 
-        $total    = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$hunts_table}" );
-        $base_url = remove_query_arg( [ 'paged' ] );
+		$total    = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$hunts_table}" );
+		$base_url = remove_query_arg( [ 'paged' ] );
 ?>
 <div class="wrap">
   <h1 class="wp-heading-inline"><?php echo esc_html__('Bonus Hunts', 'bonus-hunt-guesser'); ?></h1>
@@ -81,38 +81,38 @@ if ( 'list' === $view ) :
 		  <td><?php echo (int) $h->id; ?></td>
 		  <td><a href="<?php echo esc_url( add_query_arg( [ 'view' => 'edit', 'id' => (int) $h->id ] ) ); ?>"><?php echo esc_html( $h->title ); ?></a></td>
 		  <td><?php echo esc_html( number_format_i18n( (float) $h->starting_balance, 2 ) ); ?></td>
-                  <td><?php echo null !== $h->final_balance ? esc_html( number_format_i18n( (float) $h->final_balance, 2 ) ) : esc_html__( '—', 'bonus-hunt-guesser' ); ?></td>
+				  <td><?php echo null !== $h->final_balance ? esc_html( number_format_i18n( (float) $h->final_balance, 2 ) ) : esc_html__( '—', 'bonus-hunt-guesser' ); ?></td>
 		  <td><?php echo (int) ( $h->winners_count ?? 3 ); ?></td>
-                  <td><?php echo esc_html( $status_labels[ $h->status ] ?? $h->status ); ?></td>
+				  <td><?php echo esc_html( $status_labels[ $h->status ] ?? $h->status ); ?></td>
 		  <td>
 			<a class="button" href="<?php echo esc_url( add_query_arg( [ 'view' => 'edit', 'id' => (int) $h->id ] ) ); ?>"><?php echo esc_html__( 'Edit', 'bonus-hunt-guesser' ); ?></a>
-                        <?php if ( 'open' === $h->status ) : ?>
-                          <a class="button" href="<?php echo esc_url( add_query_arg( [ 'view' => 'close', 'id' => (int) $h->id ] ) ); ?>"><?php echo esc_html__( 'Close Hunt', 'bonus-hunt-guesser' ); ?></a>
-                        <?php elseif ( 'closed' === $h->status && null !== $h->final_balance ) : ?>
-                          <a class="button button-primary" href="<?php echo esc_url( admin_url( 'admin.php?page=bhg-bonus-hunts-results&id=' . (int) $h->id ) ); ?>"><?php echo esc_html__( 'Results', 'bonus-hunt-guesser' ); ?></a>
-                        <?php endif; ?>
+						<?php if ( 'open' === $h->status ) : ?>
+						  <a class="button" href="<?php echo esc_url( add_query_arg( [ 'view' => 'close', 'id' => (int) $h->id ] ) ); ?>"><?php echo esc_html__( 'Close Hunt', 'bonus-hunt-guesser' ); ?></a>
+						<?php elseif ( 'closed' === $h->status && null !== $h->final_balance ) : ?>
+						  <a class="button button-primary" href="<?php echo esc_url( admin_url( 'admin.php?page=bhg-bonus-hunts-results&id=' . (int) $h->id ) ); ?>"><?php echo esc_html__( 'Results', 'bonus-hunt-guesser' ); ?></a>
+						<?php endif; ?>
 		  </td>
 		</tr>
-          <?php endforeach; endif; ?>
-        </tbody>
+		  <?php endforeach; endif; ?>
+		</tbody>
   </table>
 
   <?php
-        $total_pages = (int) ceil( $total / $per_page );
-        if ( $total_pages > 1 ) {
-                echo '<div class="tablenav"><div class="tablenav-pages">';
-                echo paginate_links(
-                        [
-                                'base'      => add_query_arg( 'paged', '%#%', $base_url ),
-                                'format'    => '',
-                                'prev_text' => '&laquo;',
-                                'next_text' => '&raquo;',
-                                'total'     => $total_pages,
-                                'current'   => $current_page,
-                        ]
-                );
-                echo '</div></div>';
-        }
+		$total_pages = (int) ceil( $total / $per_page );
+		if ( $total_pages > 1 ) {
+				echo '<div class="tablenav"><div class="tablenav-pages">';
+				echo paginate_links(
+						[
+								'base'      => add_query_arg( 'paged', '%#%', $base_url ),
+								'format'    => '',
+								'prev_text' => '&laquo;',
+								'next_text' => '&raquo;',
+								'total'     => $total_pages,
+								'current'   => $current_page,
+						]
+				);
+				echo '</div></div>';
+		}
   ?>
 </div>
 <?php endif; ?>
@@ -120,7 +120,7 @@ if ( 'list' === $view ) :
 <?php
 /** CLOSE VIEW */
 if ( 'close' === $view ) :
-        $id   = isset( $_GET['id'] ) ? (int) wp_unslash( $_GET['id'] ) : 0;
+		$id   = isset( $_GET['id'] ) ? (int) wp_unslash( $_GET['id'] ) : 0;
 	$hunt = $wpdb->get_row(
 		$wpdb->prepare( "SELECT * FROM {$hunts_table} WHERE id = %d", $id )
 	);

@@ -207,16 +207,16 @@ if ( ! function_exists( 'bhg_get_default_translations' ) ) {
 			'label_user_number'           => 'User #%d',
 			'label_diff'                  => 'diff',
 			'notice_login_view_content'   => 'Please log in to view this content.',
-                        'label_latest_hunts'          => 'Latest Hunts',
-                        'label_bonushunt'             => 'Bonushunt',
-                        'label_all_winners'           => 'All Winners',
-                        'label_closed_at'             => 'Closed At',
-                        'label_hunt'                  => 'Hunt',
-                        'label_title'                 => 'Title',
-                        'notice_no_user_specified'    => 'No user specified.',
-                        'notice_no_guesses_found'     => 'No guesses found.',
-                        'msg_no_ads_yet'              => 'No ads yet.',
-                        'notice_no_winners_yet'       => 'No winners yet.',
+						'label_latest_hunts'          => 'Latest Hunts',
+						'label_bonushunt'             => 'Bonushunt',
+						'label_all_winners'           => 'All Winners',
+						'label_closed_at'             => 'Closed At',
+						'label_hunt'                  => 'Hunt',
+						'label_title'                 => 'Title',
+						'notice_no_user_specified'    => 'No user specified.',
+						'notice_no_guesses_found'     => 'No guesses found.',
+						'msg_no_ads_yet'              => 'No ads yet.',
+						'notice_no_winners_yet'       => 'No winners yet.',
 				// Shortcode labels for public views.
 				'sc_hunt'                     => 'Hunt',
 				'sc_guess'                    => 'Guess',
@@ -228,8 +228,8 @@ if ( ! function_exists( 'bhg_get_default_translations' ) ) {
 				'sc_affiliate'                => 'Affiliate',
 				'sc_position'                 => 'Position',
 				'sc_user'                     => 'User',
-                );
-        }
+				);
+		}
 }
 
 if ( ! function_exists( 'bhg_seed_default_translations_if_empty' ) ) {
@@ -517,12 +517,12 @@ if ( ! function_exists( 'bhg_reset_demo_and_seed' ) ) {
 				'num_bonuses' => 10,
 				'prizes' => __('Gift card + swag', 'bonus-hunt-guesser'),
 				'status' => 'open',
-                               'affiliate_site_id' => (int) $wpdb->get_var(
-                                       $wpdb->prepare(
-                                               "SELECT id FROM {$p}bhg_affiliate_websites ORDER BY id ASC LIMIT %d",
-                                               1
-                                       )
-                               ),
+							   'affiliate_site_id' => (int) $wpdb->get_var(
+									   $wpdb->prepare(
+											   "SELECT id FROM {$p}bhg_affiliate_websites ORDER BY id ASC LIMIT %d",
+											   1
+									   )
+							   ),
 				'created_at' => $now,
 				'updated_at' => $now,
 			), array('%s','%f','%d','%s','%s','%d','%s','%s'));
@@ -569,12 +569,12 @@ if ( ! function_exists( 'bhg_reset_demo_and_seed' ) ) {
 			if ($wpdb->get_var($wpdb->prepare("SHOW TABLES LIKE %s", $r_tbl)) === $r_tbl) {
 				$wpdb->query( "DELETE FROM `{$r_tbl}`" );
 			}
-                       $closed = $wpdb->get_results(
-                               $wpdb->prepare(
-                                       "SELECT winner_user_id, closed_at FROM {$hunts_tbl} WHERE status=%s AND winner_user_id IS NOT NULL",
-                                       'closed'
-                               )
-                       );
+					   $closed = $wpdb->get_results(
+							   $wpdb->prepare(
+									   "SELECT winner_user_id, closed_at FROM {$hunts_tbl} WHERE status=%s AND winner_user_id IS NOT NULL",
+									   'closed'
+							   )
+					   );
 			foreach ($closed as $row) {
 				$ts = $row->closed_at ? strtotime($row->closed_at) : time();
 				$isoYear = date('o', $ts);

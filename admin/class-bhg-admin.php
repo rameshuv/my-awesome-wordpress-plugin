@@ -49,20 +49,20 @@ class BHG_Admin {
 		add_submenu_page($slug, __('Translations', 'bonus-hunt-guesser'),__('Translations', 'bonus-hunt-guesser'),$cap, 'bhg-translations',            [$this, 'translations']);
 		add_submenu_page($slug, __('Database', 'bonus-hunt-guesser'),    __('Database', 'bonus-hunt-guesser'),    $cap, 'bhg-database',                [$this, 'database']);
 		add_submenu_page($slug, __('Settings', 'bonus-hunt-guesser'),    __('Settings', 'bonus-hunt-guesser'),    $cap, 'bhg-settings',                [$this, 'settings']);
-                add_submenu_page(
-                        $slug,
-                        __('BHG Tools', 'bonus-hunt-guesser'),
-                        __('BHG Tools', 'bonus-hunt-guesser'),
-                        $cap,
-                        'bhg-tools',
-                        [$this, 'bhg_tools_page']
-                );
+				add_submenu_page(
+						$slug,
+						__('BHG Tools', 'bonus-hunt-guesser'),
+						__('BHG Tools', 'bonus-hunt-guesser'),
+						$cap,
+						'bhg-tools',
+						[$this, 'bhg_tools_page']
+				);
 
-                // WordPress automatically adds a submenu item that duplicates the
-                // top-level "Bonus Hunt" menu. Remove that default item so the first
-                // submenu is the custom "Dashboard" page.
-                remove_submenu_page( $slug, $slug );
-        }
+				// WordPress automatically adds a submenu item that duplicates the
+				// top-level "Bonus Hunt" menu. Remove that default item so the first
+				// submenu is the custom "Dashboard" page.
+				remove_submenu_page( $slug, $slug );
+		}
 
 	/** Enqueue admin assets on BHG screens. */
 	public function assets( $hook ) {
@@ -265,8 +265,8 @@ class BHG_Admin {
 						$winner_names[] = $wu->user_login;
 					}
 				}
-                                $winner_first = $winner_names ? $winner_names[0] : esc_html__( '—', 'bonus-hunt-guesser' );
-                                $winner_list  = $winner_names ? implode( ', ', $winner_names ) : esc_html__( '—', 'bonus-hunt-guesser' );
+								$winner_first = $winner_names ? $winner_names[0] : esc_html__( '—', 'bonus-hunt-guesser' );
+								$winner_list  = $winner_names ? implode( ', ', $winner_names ) : esc_html__( '—', 'bonus-hunt-guesser' );
 
 				foreach ($rows as $r) {
 					$u = get_userdata((int) $r->user_id);
@@ -341,7 +341,7 @@ class BHG_Admin {
 		$place    = isset( $_POST['placement'] ) ? sanitize_text_field( wp_unslash( $_POST['placement'] ) ) : 'none';
 		$visible  = isset( $_POST['visible_to'] ) ? sanitize_text_field( wp_unslash( $_POST['visible_to'] ) ) : 'all';
 		$targets  = isset( $_POST['target_pages'] ) ? sanitize_text_field( wp_unslash( $_POST['target_pages'] ) ) : '';
-               $active   = isset( $_POST['active'] ) ? absint( wp_unslash( $_POST['active'] ) ) : 0;
+			   $active   = isset( $_POST['active'] ) ? absint( wp_unslash( $_POST['active'] ) ) : 0;
 
 		$data = [
 			'title'        => $title,
@@ -487,7 +487,7 @@ class BHG_Admin {
 		$user_id = isset( $_POST['user_id'] ) ? absint( wp_unslash( $_POST['user_id'] ) ) : 0;
 		if ( $user_id ) {
 			$real_name    = isset( $_POST['bhg_real_name'] ) ? sanitize_text_field( wp_unslash( $_POST['bhg_real_name'] ) ) : '';
-                       $is_affiliate = isset( $_POST['bhg_is_affiliate'] ) ? absint( wp_unslash( $_POST['bhg_is_affiliate'] ) ) : 0;
+					   $is_affiliate = isset( $_POST['bhg_is_affiliate'] ) ? absint( wp_unslash( $_POST['bhg_is_affiliate'] ) ) : 0;
 			update_user_meta( $user_id, 'bhg_real_name', $real_name );
 			update_user_meta( $user_id, 'bhg_is_affiliate', $is_affiliate );
 		}
