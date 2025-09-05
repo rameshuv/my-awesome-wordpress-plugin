@@ -12,24 +12,13 @@ class BHG_DB {
         $tours_table = $wpdb->prefix . 'bhg_tournaments';
 
         // Drop legacy "period" column and related index if they exist.
-        $has_period = $wpdb->get_var($wpdb->prepare(
-            "SELECT COLUMN_NAME FROM information_schema.COLUMNS WHERE TABLE_SCHEMA=%s AND TABLE_NAME=%s AND COLUMN_NAME='period'",
-            DB_NAME,
-            $tours_table
-        ));
-
-        if ($has_period) {
+        if ( $db->column_exists( $tours_table, 'period' ) ) {
             // Remove unique index first if present.
-            $has_index = $wpdb->get_var($wpdb->prepare(
-                "SELECT INDEX_NAME FROM information_schema.STATISTICS WHERE TABLE_SCHEMA=%s AND TABLE_NAME=%s AND INDEX_NAME='type_period'",
-                DB_NAME,
-                $tours_table
-            ));
-            if ($has_index) {
-                $wpdb->query("ALTER TABLE `{$tours_table}` DROP INDEX type_period");
+            if ( $db->index_exists( $tours_table, 'type_period' ) ) {
+                $wpdb->query( "ALTER TABLE `{$tours_table}` DROP INDEX type_period" );
             }
 
-            $wpdb->query("ALTER TABLE `{$tours_table}` DROP COLUMN period");
+            $wpdb->query( "ALTER TABLE `{$tours_table}` DROP COLUMN period" );
         }
     }
 
@@ -148,12 +137,10 @@ class BHG_DB {
                 'final_balance'    => "ALTER TABLE `{$hunts_table}` ADD COLUMN final_balance DECIMAL(12,2) NULL",
                 'status'           => "ALTER TABLE `{$hunts_table}` ADD COLUMN status VARCHAR(20) NOT NULL DEFAULT 'open'",
             ];
-            foreach ($need as $c => $alter) {
-                $exists = $wpdb->get_var($wpdb->prepare(
-                    "SELECT COLUMN_NAME FROM information_schema.COLUMNS WHERE TABLE_SCHEMA=%s AND TABLE_NAME=%s AND COLUMN_NAME=%s",
-                    DB_NAME, $hunts_table, $c
-                ));
-                if ( ! $exists ) { $wpdb->query( $alter ); }
+            foreach ( $need as $c => $alter ) {
+                if ( ! $this->column_exists( $hunts_table, $c ) ) {
+                    $wpdb->query( $alter );
+                }
             }
 
             // Tournaments: make sure common columns exist
@@ -165,12 +152,10 @@ class BHG_DB {
                 'end_date'    => "ALTER TABLE `{$tours_table}` ADD COLUMN end_date DATE NULL",
                 'status'      => "ALTER TABLE `{$tours_table}` ADD COLUMN status VARCHAR(20) NOT NULL DEFAULT 'active'",
             ];
-            foreach ($tneed as $c => $alter) {
-                $exists = $wpdb->get_var($wpdb->prepare(
-                    "SELECT COLUMN_NAME FROM information_schema.COLUMNS WHERE TABLE_SCHEMA=%s AND TABLE_NAME=%s AND COLUMN_NAME=%s",
-                    DB_NAME, $tours_table, $c
-                ));
-                if ( ! $exists ) { $wpdb->query( $alter ); }
+            foreach ( $tneed as $c => $alter ) {
+                if ( ! $this->column_exists( $tours_table, $c ) ) {
+                    $wpdb->query( $alter );
+                }
             }
 
             // Ads columns
@@ -185,12 +170,10 @@ class BHG_DB {
                 'created_at'   => "ALTER TABLE `{$ads_table}` ADD COLUMN created_at DATETIME NULL",
                 'updated_at'   => "ALTER TABLE `{$ads_table}` ADD COLUMN updated_at DATETIME NULL",
             ];
-            foreach ($aneed as $c => $alter) {
-                $exists = $wpdb->get_var($wpdb->prepare(
-                    "SELECT COLUMN_NAME FROM information_schema.COLUMNS WHERE TABLE_SCHEMA=%s AND TABLE_NAME=%s AND COLUMN_NAME=%s",
-                    DB_NAME, $ads_table, $c
-                ));
-                if ( ! $exists ) { $wpdb->query( $alter ); }
+            foreach ( $aneed as $c => $alter ) {
+                if ( ! $this->column_exists( $ads_table, $c ) ) {
+                    $wpdb->query( $alter );
+                }
             }
 
             // Translations columns
@@ -201,19 +184,15 @@ class BHG_DB {
                 'created_at' => "ALTER TABLE `{$trans_table}` ADD COLUMN created_at DATETIME NULL",
                 'updated_at' => "ALTER TABLE `{$trans_table}` ADD COLUMN updated_at DATETIME NULL",
             ];
-            foreach ($trneed as $c => $alter) {
-                $exists = $wpdb->get_var($wpdb->prepare(
-                    "SELECT COLUMN_NAME FROM information_schema.COLUMNS WHERE TABLE_SCHEMA=%s AND TABLE_NAME=%s AND COLUMN_NAME=%s",
-                    DB_NAME, $trans_table, $c
-                ));
-                if ( ! $exists ) { $wpdb->query( $alter ); }
+            foreach ( $trneed as $c => $alter ) {
+                if ( ! $this->column_exists( $trans_table, $c ) ) {
+                    $wpdb->query( $alter );
+                }
             }
             // Ensure unique index
-            $has = $wpdb->get_var($wpdb->prepare(
-                "SELECT INDEX_NAME FROM information_schema.STATISTICS WHERE TABLE_SCHEMA=%s AND TABLE_NAME=%s AND INDEX_NAME='tkey_locale'",
-                DB_NAME, $trans_table
-            ));
-            if ( ! $has ) { $wpdb->query( "ALTER TABLE `{$trans_table}` ADD UNIQUE KEY tkey_locale (tkey, locale)" ); }
+            if ( ! $this->index_exists( $trans_table, 'tkey_locale' ) ) {
+                $wpdb->query( "ALTER TABLE `{$trans_table}` ADD UNIQUE KEY tkey_locale (tkey, locale)" );
+            }
 
             // Affiliates columns / unique index
             $afneed = [
@@ -223,21 +202,77 @@ class BHG_DB {
                 'created_at' => "ALTER TABLE `{$aff_table}` ADD COLUMN created_at DATETIME NULL",
                 'updated_at' => "ALTER TABLE `{$aff_table}` ADD COLUMN updated_at DATETIME NULL",
             ];
-            foreach ($afneed as $c => $alter) {
-                $exists = $wpdb->get_var($wpdb->prepare(
-                    "SELECT COLUMN_NAME FROM information_schema.COLUMNS WHERE TABLE_SCHEMA=%s AND TABLE_NAME=%s AND COLUMN_NAME=%s",
-                    DB_NAME, $aff_table, $c
-                ));
-                if ( ! $exists ) { $wpdb->query( $alter ); }
+            foreach ( $afneed as $c => $alter ) {
+                if ( ! $this->column_exists( $aff_table, $c ) ) {
+                    $wpdb->query( $alter );
+                }
             }
-            $uniq = $wpdb->get_var($wpdb->prepare(
-                "SELECT INDEX_NAME FROM information_schema.STATISTICS WHERE TABLE_SCHEMA=%s AND TABLE_NAME=%s AND INDEX_NAME='name_unique'",
-                DB_NAME, $aff_table
-            ));
-            if ( ! $uniq ) { $wpdb->query( "ALTER TABLE `{$aff_table}` ADD UNIQUE KEY name_unique (name)" ); }
+            if ( ! $this->index_exists( $aff_table, 'name_unique' ) ) {
+                $wpdb->query( "ALTER TABLE `{$aff_table}` ADD UNIQUE KEY name_unique (name)" );
+            }
 
         } catch (Throwable $e) {
             if (function_exists('error_log')) error_log('[BHG] Schema ensure error: ' . $e->getMessage());
         }
+    }
+
+    /**
+     * Check if a column exists, falling back when information_schema is not accessible.
+     *
+     * @param string $table  Table name.
+     * @param string $column Column to check.
+     * @return bool
+     */
+    private function column_exists( $table, $column ) {
+        global $wpdb;
+
+        $table  = esc_sql( $table );
+        $column = esc_sql( $column );
+
+        $wpdb->last_error = '';
+        $sql    = $wpdb->prepare(
+            "SELECT COLUMN_NAME FROM information_schema.COLUMNS WHERE TABLE_SCHEMA=%s AND TABLE_NAME=%s AND COLUMN_NAME=%s",
+            DB_NAME,
+            $table,
+            $column
+        );
+        $exists = $wpdb->get_var( $sql );
+
+        if ( $wpdb->last_error ) {
+            $wpdb->last_error = '';
+            $exists           = $wpdb->get_var( $wpdb->prepare( "SHOW COLUMNS FROM `{$table}` LIKE %s", $column ) );
+        }
+
+        return ! empty( $exists );
+    }
+
+    /**
+     * Check if an index exists, falling back when information_schema is not accessible.
+     *
+     * @param string $table Table name.
+     * @param string $index Index to check.
+     * @return bool
+     */
+    private function index_exists( $table, $index ) {
+        global $wpdb;
+
+        $table = esc_sql( $table );
+        $index = esc_sql( $index );
+
+        $wpdb->last_error = '';
+        $sql    = $wpdb->prepare(
+            "SELECT INDEX_NAME FROM information_schema.STATISTICS WHERE TABLE_SCHEMA=%s AND TABLE_NAME=%s AND INDEX_NAME=%s",
+            DB_NAME,
+            $table,
+            $index
+        );
+        $exists = $wpdb->get_var( $sql );
+
+        if ( $wpdb->last_error ) {
+            $wpdb->last_error = '';
+            $exists           = $wpdb->get_var( $wpdb->prepare( "SHOW INDEX FROM `{$table}` WHERE Key_name=%s", $index ) );
+        }
+
+        return ! empty( $exists );
     }
 }
