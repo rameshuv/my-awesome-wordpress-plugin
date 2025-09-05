@@ -17,7 +17,7 @@ $view = isset( $_GET['view'] ) ? sanitize_text_field( $_GET['view'] ) : 'list';
 
 /** LIST VIEW */
 if ( 'list' === $view ) :
-    $hunts = $wpdb->get_results( "SELECT * FROM `$hunts_table` ORDER BY id DESC" );
+    $hunts = $wpdb->get_results( $wpdb->prepare( "SELECT * FROM `$hunts_table` ORDER BY id DESC" ) );
 ?>
 <div class="wrap">
   <h1 class="wp-heading-inline"><?php echo esc_html__('Bonus Hunts', 'bonus-hunt-guesser'); ?></h1>
@@ -126,7 +126,7 @@ if ($view === 'add') : ?>
         <tr>
           <th scope="row"><label for="bhg_affiliate"><?php echo esc_html__('Affiliate Site', 'bonus-hunt-guesser'); ?></label></th>
           <td>
-            <?php $affs = $wpdb->get_results( "SELECT id, name FROM `{$wpdb->prefix}bhg_affiliates` ORDER BY name ASC" ); $sel = isset($hunt->affiliate_site_id)? (int)$hunt->affiliate_site_id : 0; ?>
+            <?php $affs = $wpdb->get_results( $wpdb->prepare( "SELECT id, name FROM `{$wpdb->prefix}bhg_affiliates` ORDER BY name ASC" ) ); $sel = isset( $hunt->affiliate_site_id ) ? (int) $hunt->affiliate_site_id : 0; ?>
             <select id="bhg_affiliate" name="affiliate_site_id">
               <option value="0"><?php echo esc_html__('None', 'bonus-hunt-guesser'); ?></option>
               <?php foreach ($affs as $a): ?>
@@ -199,7 +199,7 @@ if ($view === 'edit') :
         <tr>
           <th scope="row"><label for="bhg_affiliate"><?php echo esc_html__('Affiliate Site', 'bonus-hunt-guesser'); ?></label></th>
           <td>
-            <?php $affs = $wpdb->get_results( "SELECT id, name FROM `{$wpdb->prefix}bhg_affiliates` ORDER BY name ASC" ); $sel = isset($hunt->affiliate_site_id)? (int)$hunt->affiliate_site_id : 0; ?>
+            <?php $affs = $wpdb->get_results( $wpdb->prepare( "SELECT id, name FROM `{$wpdb->prefix}bhg_affiliates` ORDER BY name ASC" ) ); $sel = isset( $hunt->affiliate_site_id ) ? (int) $hunt->affiliate_site_id : 0; ?>
             <select id="bhg_affiliate" name="affiliate_site_id">
               <option value="0"><?php echo esc_html__('None', 'bonus-hunt-guesser'); ?></option>
               <?php foreach ($affs as $a): ?>

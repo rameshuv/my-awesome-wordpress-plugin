@@ -44,7 +44,7 @@ function bhg_database_cleanup() {
     
     foreach ( $tables as $table ) {
         if ( $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $table ) ) === $table ) {
-            $wpdb->query( "TRUNCATE TABLE {$table}" );
+            $wpdb->query( $wpdb->prepare( "TRUNCATE TABLE {$table}" ) );
         }
     }
     
@@ -69,7 +69,7 @@ function bhg_database_optimize() {
     
     foreach ( $tables as $table ) {
         if ( $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $table ) ) === $table ) {
-            $wpdb->query( "OPTIMIZE TABLE {$table}" );
+            $wpdb->query( $wpdb->prepare( "OPTIMIZE TABLE {$table}" ) );
         }
     }
 }
@@ -147,7 +147,7 @@ function bhg_insert_demo_data() {
             foreach ( $tables as $table ) {
                 $table_name = $wpdb->prefix . $table;
                 $exists     = $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $table_name ) ) === $table_name;
-                $row_count  = $exists ? (int) $wpdb->get_var( "SELECT COUNT(*) FROM `{$table_name}`" ) : 0;
+                $row_count  = $exists ? (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM `{$table_name}`" ) ) : 0;
                 
                 echo '<tr>';
                 echo '<td>' . esc_html($table_name) . '</td>';

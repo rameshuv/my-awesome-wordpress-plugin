@@ -11,7 +11,7 @@ $edit_id = isset($_GET['edit']) ? (int) $_GET['edit'] : 0;
 $row = $edit_id ? $wpdb->get_row($wpdb->prepare("SELECT * FROM `$table` WHERE id=%d", $edit_id)) : null;
 
 // List
-$rows = $wpdb->get_results( "SELECT * FROM `$table` ORDER BY id DESC" );
+$rows = $wpdb->get_results( $wpdb->prepare( "SELECT * FROM `$table` ORDER BY id DESC" ) );
 ?>
 <div class="wrap">
   <h1 class="wp-heading-inline"><?php echo esc_html__('Affiliates', 'bonus-hunt-guesser'); ?></h1>

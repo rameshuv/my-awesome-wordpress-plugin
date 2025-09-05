@@ -20,7 +20,7 @@ if ( 'delete' === $action && $ad_id && isset( $_GET['_wpnonce'] ) ) {
 }
 
 // Fetch ads
-$ads = $wpdb->get_results( "SELECT * FROM `$table` ORDER BY id DESC" );
+$ads = $wpdb->get_results( $wpdb->prepare( "SELECT * FROM `$table` ORDER BY id DESC" ) );
 ?>
 <div class="wrap">
   <h1 class="wp-heading-inline"><?php echo esc_html__('Advertising', 'bonus-hunt-guesser'); ?></h1>
