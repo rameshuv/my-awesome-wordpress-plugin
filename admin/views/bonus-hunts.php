@@ -27,7 +27,7 @@ if ( 'list' === $view ) :
     <div class="notice notice-success is-dismissible"><p><?php echo esc_html__( 'Hunt closed successfully.', 'bonus-hunt-guesser' ); ?></p></div>
   <?php endif; ?>
 
-  <table class="widefat striped" style="margin-top:1em">
+  <table class="widefat striped bhg-margin-top-small">
     <thead>
       <tr>
         <th><?php echo esc_html__('ID', 'bonus-hunt-guesser'); ?></th>
@@ -76,7 +76,7 @@ if ( 'close' === $view ) :
 ?>
 <div class="wrap">
   <h1 class="wp-heading-inline"><?php echo esc_html__( 'Close Bonus Hunt', 'bonus-hunt-guesser' ); ?> — <?php echo esc_html( $hunt->title ); ?></h1>
-  <form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" style="max-width:400px;margin-top:1em">
+  <form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" class="bhg-max-width-400 bhg-margin-top-small">
     <?php wp_nonce_field( 'bhg_close_hunt' ); ?>
     <input type="hidden" name="action" value="bhg_close_hunt" />
     <input type="hidden" name="hunt_id" value="<?php echo (int) $hunt->id; ?>" />
@@ -101,7 +101,7 @@ endif;
 if ($view === 'add') : ?>
 <div class="wrap">
   <h1 class="wp-heading-inline"><?php echo esc_html__('Add New Bonus Hunt', 'bonus-hunt-guesser'); ?></h1>
-  <form method="post" action="<?php echo esc_url(admin_url('admin-post.php')); ?>" style="max-width:900px;margin-top:1em">
+  <form method="post" action="<?php echo esc_url(admin_url('admin-post.php')); ?>" class="bhg-max-width-900 bhg-margin-top-small">
     <?php wp_nonce_field('bhg_save_hunt'); ?>
     <input type="hidden" name="action" value="bhg_save_hunt" />
 
@@ -173,7 +173,7 @@ if ($view === 'edit') :
 <div class="wrap">
   <h1 class="wp-heading-inline"><?php echo esc_html__('Edit Bonus Hunt', 'bonus-hunt-guesser'); ?> — <?php echo esc_html($hunt->title); ?></h1>
 
-  <form method="post" action="<?php echo esc_url(admin_url('admin-post.php')); ?>" style="max-width:900px;margin-top:1em">
+  <form method="post" action="<?php echo esc_url(admin_url('admin-post.php')); ?>" class="bhg-max-width-900 bhg-margin-top-small">
     <?php wp_nonce_field('bhg_save_hunt'); ?>
     <input type="hidden" name="action" value="bhg_save_hunt" />
     <input type="hidden" name="id" value="<?php echo (int)$hunt->id; ?>" />
@@ -230,7 +230,7 @@ if ($view === 'edit') :
     <?php submit_button(__('Save Hunt', 'bonus-hunt-guesser')); ?>
   </form>
 
-  <h2 style="margin-top:2em"><?php echo esc_html__('Participants', 'bonus-hunt-guesser'); ?></h2>
+  <h2 class="bhg-margin-top-large"><?php echo esc_html__('Participants', 'bonus-hunt-guesser'); ?></h2>
   <table class="widefat striped">
     <thead>
       <tr>
@@ -253,7 +253,7 @@ if ($view === 'edit') :
           </td>
           <td><?php echo esc_html(number_format_i18n((float)($g->guess ?? 0), 2)); ?></td>
           <td>
-            <form method="post" action="<?php echo esc_url(admin_url('admin-post.php')); ?>" onsubmit="return confirm('<?php echo esc_js(__('Delete this guess?', 'bonus-hunt-guesser')); ?>');" style="display:inline">
+            <form method="post" action="<?php echo esc_url(admin_url('admin-post.php')); ?>" onsubmit="return confirm('<?php echo esc_js(__('Delete this guess?', 'bonus-hunt-guesser')); ?>');" class="bhg-inline-form">
               <?php wp_nonce_field('bhg_delete_guess'); ?>
               <input type="hidden" name="action" value="bhg_delete_guess">
               <input type="hidden" name="guess_id" value="<?php echo (int)$g->id; ?>">

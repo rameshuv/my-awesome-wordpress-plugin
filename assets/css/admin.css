@@ -23,3 +23,28 @@
 .bhg-winner-row {
     background-color: #d1fae5;
 }
+
+/* Utility classes */
+.bhg-margin-top-small {
+    margin-top: 1em;
+}
+
+.bhg-margin-top-large {
+    margin-top: 2em;
+}
+
+.bhg-max-width-400 {
+    max-width: 400px;
+}
+
+.bhg-max-width-900 {
+    max-width: 900px;
+}
+
+.bhg-inline-form {
+    display: inline;
+}
+
+.bhg-text-center {
+    text-align: center;
+}
