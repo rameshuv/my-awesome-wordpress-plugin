@@ -16,7 +16,7 @@ $rows = $wpdb->get_results(
 );
 ?>
 <div class="wrap">
-  <h1><?php echo esc_html__('Results for ','bonus-hunt-guesser').esc_html($hunt->title); ?></h1>
+  <h1><?php printf( esc_html__( 'Results for %s', 'bonus-hunt-guesser' ), esc_html( $hunt->title ) ); ?></h1>
   <table class="widefat striped">
 	<thead><tr>
 	  <th><?php esc_html_e('Position','bonus-hunt-guesser'); ?></th>
