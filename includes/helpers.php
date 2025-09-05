@@ -74,9 +74,9 @@ function bhg_format_currency($amount) {
 
 // Helper function to validate guess value
 function bhg_validate_guess($guess) {
-    $settings = get_option('bhg_settings', []);
-    $min_guess = $settings['min_guess'] ?? 0;
-    $max_guess = $settings['max_guess'] ?? 100000;
+    $settings = get_option('bhg_plugin_settings', []);
+    $min_guess = isset($settings['min_guess_amount']) ? (float)$settings['min_guess_amount'] : 0;
+    $max_guess = isset($settings['max_guess_amount']) ? (float)$settings['max_guess_amount'] : 100000;
 
     if (!is_numeric($guess)) {
         return false;
