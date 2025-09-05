@@ -52,7 +52,7 @@ function bhg_admin_cap() {
 
 // Smart login redirect back to referring page.
 add_filter( 'login_redirect', function( $redirect_to, $requested_redirect_to, $user ) {
-    $r = isset( $_REQUEST['bhg_redirect'] ) ? $_REQUEST['bhg_redirect'] : '';
+    $r = isset( $_REQUEST['bhg_redirect'] ) ? wp_unslash( $_REQUEST['bhg_redirect'] ) : '';
     if ( ! empty( $r ) ) {
         $safe     = esc_url_raw( $r );
         $home_host = wp_parse_url( home_url(), PHP_URL_HOST );
