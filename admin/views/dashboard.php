@@ -21,8 +21,8 @@ $hunts = bhg_get_latest_closed_hunts(3);
       </tr>
     </thead>
     <tbody>
-    <?php if ($hunts): foreach ($hunts as $h): 
-      $winners = function_exists('bhg_get_top_winners_for_hunt') ? bhg_get_top_winners_for_hunt($h->id, (int) $h->winners_limit) : array();
+      <?php if ($hunts): foreach ($hunts as $h):
+      $winners = function_exists('bhg_get_top_winners_for_hunt') ? bhg_get_top_winners_for_hunt($h->id, (int) $h->winners_count) : array();
     ?>
       <tr>
         <td><?php echo esc_html($h->title); ?></td>
@@ -47,7 +47,7 @@ $hunts = bhg_get_latest_closed_hunts(3);
             }
           ?>
         </td>
-        <td><?php echo esc_html(number_format_i18n((float)$h->start_balance, 2)); ?></td>
+        <td><?php echo esc_html(number_format_i18n((float)$h->starting_balance, 2)); ?></td>
         <td><?php echo ($h->final_balance !== null) ? esc_html(number_format_i18n((float)$h->final_balance, 2)) : '—'; ?></td>
         <td><?php echo $h->closed_at ? esc_html(date_i18n(get_option('date_format') . ' ' . get_option('time_format'), strtotime($h->closed_at))) : '—'; ?></td>
       </tr>

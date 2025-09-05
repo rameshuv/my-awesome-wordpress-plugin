@@ -278,7 +278,7 @@ if (!function_exists('bhg_reset_demo_and_seed')) {
                 $wpdb->insert($g_tbl, array(
                     'hunt_id' => $open_id,
                     'user_id' => (int)$uid,
-                    'guess_value' => $val,
+                    'guess' => $val,
                     'created_at' => $now,
                     'updated_at' => $now,
                 ), array('%d','%d','%f','%s','%s'));

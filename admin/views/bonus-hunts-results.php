@@ -7,10 +7,13 @@ $hunts = $wpdb->prefix.'bhg_bonus_hunts';
 $guesses = $wpdb->prefix.'bhg_guesses';
 $hunt = $wpdb->get_row($wpdb->prepare("SELECT * FROM `$hunts` WHERE id=%d",$hunt_id));
 if(!$hunt) { echo '<div class="wrap"><h1>'.esc_html__('Hunt not found','bonus-hunt-guesser').'</h1></div>'; return; }
-$rows = $wpdb->get_results($wpdb->prepare(
-    "SELECT g.*, u.display_name, ABS(g.guess_value - %f) as diff FROM `$guesses` g JOIN `$wpdb->users` u ON u.ID=g.user_id WHERE g.hunt_id=%d ORDER BY diff ASC, g.id ASC",
-    (float)$hunt->final_balance, $hunt_id
-));
+$rows = $wpdb->get_results(
+    $wpdb->prepare(
+        "SELECT g.*, u.display_name, ABS(g.guess - %f) as diff FROM `$guesses` g JOIN `$wpdb->users` u ON u.ID=g.user_id WHERE g.hunt_id=%d ORDER BY diff ASC, g.id ASC",
+        (float) $hunt->final_balance,
+        $hunt_id
+    )
+);
 ?>
 <div class="wrap">
   <h1><?php echo esc_html__('Results for ','bonus-hunt-guesser').esc_html($hunt->title); ?></h1>

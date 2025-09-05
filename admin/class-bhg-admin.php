@@ -43,6 +43,8 @@ class BHG_Admin {
         add_submenu_page($slug, __('Database', 'bonus-hunt-guesser'),    __('Database', 'bonus-hunt-guesser'),    $cap, 'bhg-database',                [$this, 'database']);
         add_submenu_page($slug, __('Settings', 'bonus-hunt-guesser'),    __('Settings', 'bonus-hunt-guesser'),    $cap, 'bhg-settings',                [$this, 'settings']);
         add_submenu_page($slug, __('BHG Tools', 'bonus-hunt-guesser'),   __('BHG Tools', 'bonus-hunt-guesser'),   $cap, 'bhg-tools',                   [$this, 'bhg_tools_page']);
+
+        remove_submenu_page($slug, $slug);
     }
 
     // -------------------- Views --------------------

@@ -92,7 +92,7 @@ class BHG_Shortcodes {
         $user_id = get_current_user_id();
         $table = $wpdb->prefix . 'bhg_guesses';
         $existing_id = $hunt_id > 0 ? (int)$wpdb->get_var($wpdb->prepare("SELECT id FROM {$table} WHERE user_id=%d AND hunt_id=%d", $user_id, $hunt_id)) : 0;
-        $existing_guess = $existing_id ? (float)$wpdb->get_var($wpdb->prepare("SELECT guess_value FROM {$table} WHERE id=%d", $existing_id)) : '';
+        $existing_guess = $existing_id ? (float) $wpdb->get_var($wpdb->prepare("SELECT guess FROM {$table} WHERE id=%d", $existing_id)) : '';
 
         $settings = get_option('bhg_plugin_settings');
         $min = isset($settings['min_guess_amount']) ? (float)$settings['min_guess_amount'] : 0;
@@ -119,7 +119,7 @@ class BHG_Shortcodes {
 
             <label for="bhg-guess" style="display:block;margin-top:10px;"><?php esc_html_e('Your guess (final balance):', 'bonus-hunt-guesser'); ?></label>
             <input type="number" step="0.01" min="<?php echo esc_attr($min); ?>" max="<?php echo esc_attr($max); ?>"
-                   id="bhg-guess" name="guess_value" value="<?php echo esc_attr($existing_guess); ?>" required>
+                   id="bhg-guess" name="guess" value="<?php echo esc_attr($existing_guess); ?>" required>
 
             <button type="submit" class="button button-primary" style="margin-top:20px;"><?php echo esc_html__('Submit Guess', 'bonus-hunt-guesser'); ?></button>
         </form>
@@ -151,7 +151,7 @@ class BHG_Shortcodes {
 
         $order = strtoupper($a['order']) === 'DESC' ? 'DESC' : 'ASC';
         $map = array(
-            'guess'      => 'g.guess_value',
+            'guess'      => 'g.guess',
             'user'       => 'u.user_login',
             'position'   => 'g.id', // stable proxy
         );
@@ -196,7 +196,7 @@ class BHG_Shortcodes {
             echo '<tr>';
             echo '<td>' . (int)$pos++ . '</td>';
             echo '<td>' . esc_html($user_label) . ' <span class="bhg-aff-dot bhg-aff-' . esc_attr($aff) . '" aria-hidden="true"></span></td>';
-            echo '<td>' . esc_html(number_format_i18n((float)$r->guess_value, 2)) . '</td>';
+            echo '<td>' . esc_html(number_format_i18n((float) $r->guess, 2)) . '</td>';
             echo '</tr>';
         }
         echo '</tbody></table>';
