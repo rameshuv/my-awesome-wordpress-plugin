@@ -28,11 +28,11 @@ jQuery(document).ready(function($) {
 
     // Validate and submit the guess form
     function validateGuessForm() {
-        $('#bhg-guess-form').on('submit', function(e) {
+        $('.bhg-guess-form').on('submit', function(e) {
             e.preventDefault();
             
             var form = $(this);
-            var guessInput = form.find('#bhg-guess-amount');
+            var guessInput = form.find('#bhg-guess');
             var guessValue = parseFloat(guessInput.val());
             var errorContainer = form.find('.bhg-error-message');
             var isValid = true;
@@ -196,7 +196,7 @@ jQuery(document).ready(function($) {
     // Handle login redirects
     function handleLoginRedirects() {
         // Store current URL for redirect after login
-        if ($('#bhg-guess-form').length && !bhg_public_ajax.is_logged_in) {
+        if ($('.bhg-guess-form').length && !bhg_public_ajax.is_logged_in) {
             sessionStorage.setItem('bhg_redirect_url', window.location.href);
         }
         
