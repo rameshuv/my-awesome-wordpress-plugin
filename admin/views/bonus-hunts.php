@@ -1,18 +1,23 @@
 <?php
-if (!defined('ABSPATH')) exit;
-if (!current_user_can('manage_options')) {
-    wp_die(esc_html__('You do not have sufficient permissions to access this page.', 'bonus-hunt-guesser'));
+if ( ! defined( 'ABSPATH' ) ) { exit; }
+
+/**
+ * Admin view for managing bonus hunts.
+ */
+
+if ( ! current_user_can( 'manage_options' ) ) {
+    wp_die( esc_html__( 'You do not have sufficient permissions to access this page.', 'bonus-hunt-guesser' ) );
 }
 
 global $wpdb;
 $hunts_table   = $wpdb->prefix . 'bhg_bonus_hunts';
 $guesses_table = $wpdb->prefix . 'bhg_guesses';
 
-$view = isset($_GET['view']) ? sanitize_text_field($_GET['view']) : 'list';
+$view = isset( $_GET['view'] ) ? sanitize_text_field( $_GET['view'] ) : 'list';
 
 /** LIST VIEW */
-if ($view === 'list') :
-    $hunts = $wpdb->get_results("SELECT * FROM `$hunts_table` ORDER BY id DESC");
+if ( 'list' === $view ) :
+    $hunts = $wpdb->get_results( "SELECT * FROM `$hunts_table` ORDER BY id DESC" );
 ?>
 <div class="wrap">
   <h1 class="wp-heading-inline"><?php echo esc_html__('Bonus Hunts', 'bonus-hunt-guesser'); ?></h1>
@@ -31,9 +36,9 @@ if ($view === 'list') :
       </tr>
     </thead>
     <tbody>
-      <?php if (empty($hunts)) : ?>
+      <?php if ( empty( $hunts ) ) : ?>
         <tr><td colspan="7"><?php echo esc_html__('No hunts found.', 'bonus-hunt-guesser'); ?></td></tr>
-      <?php else : foreach ($hunts as $h) : ?>
+      <?php else : foreach ( $hunts as $h ) : ?>
         <tr>
           <td><?php echo (int)$h->id; ?></td>
           <td><a href="<?php echo esc_url(add_query_arg(['view'=>'edit','id'=>(int)$h->id])); ?>"><?php echo esc_html($h->title); ?></a></td>

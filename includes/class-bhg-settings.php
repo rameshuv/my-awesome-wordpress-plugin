@@ -1,5 +1,5 @@
 <?php
-if (!defined('ABSPATH')) exit;
+if ( ! defined( 'ABSPATH' ) ) { exit; }
 class BHG_Settings {
     public static function render(){
         BHG_Utils::require_cap();

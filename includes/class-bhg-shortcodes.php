@@ -5,7 +5,7 @@
  * This file is self-contained and safe on PHP 7.4.
  * It registers the required shortcodes on `init` and avoids "public function outside class" parse errors.
  */
-if (!defined('ABSPATH')) exit;
+if ( ! defined( 'ABSPATH' ) ) { exit; }
 
 if (!class_exists('BHG_Shortcodes')) {
 

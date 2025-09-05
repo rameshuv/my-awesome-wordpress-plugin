@@ -1,4 +1,6 @@
-<?php if (!defined('ABSPATH')) exit; ?>
+<?php
+if ( ! defined( 'ABSPATH' ) ) { exit; }
+?>
 <div class="wrap">
   <h1><?php echo esc_html__('BHG Tools', 'bonus-hunt-guesser'); ?></h1>
 

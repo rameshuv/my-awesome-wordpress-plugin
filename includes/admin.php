@@ -1,5 +1,5 @@
 <?php
-if (!defined('ABSPATH')) exit;
+if ( ! defined( 'ABSPATH' ) ) { exit; }
 
 add_action('admin_post_bhg_save_hunt', function(){
   if (!current_user_can(bhg_admin_cap())) wp_die( esc_html__( 'Forbidden', 'bonus-hunt-guesser' ), 403 );
