@@ -2,21 +2,20 @@
 # This file is distributed under the GPLv2 or later.
 msgid ""
 msgstr ""
-"Project-Id-Version: Bonus Hunt Guesser 8.0.07\n"
+"Project-Id-Version: Bonus Hunt Guesser 8.0.08\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/my-awesome-wordpress-plugin\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2025-09-05T08:54:23+00:00\n"
+"POT-Creation-Date: 2025-09-05T11:12:05+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: bonus-hunt-guesser\n"
 
 #. Plugin Name of the plugin
 #: bonus-hunt-guesser.php
-#: admin/views/header.php:137
 msgid "Bonus Hunt Guesser"
 msgstr ""
 
@@ -35,115 +34,125 @@ msgstr ""
 msgid "Bonus Hunt Guesser Development Team"
 msgstr ""
 
-#: admin/class-bhg-admin.php:28
-#: admin/class-bhg-admin.php:29
+#: admin/class-bhg-admin.php:33
+#: admin/class-bhg-admin.php:34
 msgid "Bonus Hunt"
 msgstr ""
 
-#: admin/class-bhg-admin.php:37
+#: admin/class-bhg-admin.php:42
 msgid "Dashboard"
 msgstr ""
 
-#: admin/class-bhg-admin.php:38
+#: admin/class-bhg-admin.php:43
 #: admin/views/bonus-hunts.php:23
 #: admin/views/hunts-list.php:27
-#: includes/class-bhg-shortcodes.php:494
+#: includes/class-bhg-shortcodes.php:530
 msgid "Bonus Hunts"
 msgstr ""
 
-#: admin/class-bhg-admin.php:39
-#: admin/views/bonus-hunts.php:52
+#: admin/class-bhg-admin.php:44
+#: admin/views/bonus-hunts.php:58
 #: admin/views/hunts-list.php:56
 msgid "Results"
 msgstr ""
 
-#: admin/class-bhg-admin.php:40
+#: admin/class-bhg-admin.php:45
 #: admin/views/tournaments.php:15
 msgid "Tournaments"
 msgstr ""
 
-#: admin/class-bhg-admin.php:41
+#: admin/class-bhg-admin.php:46
 #: admin/views/users.php:33
 msgid "Users"
 msgstr ""
 
-#: admin/class-bhg-admin.php:42
-#: admin/class-bhg-admin.php:69
+#: admin/class-bhg-admin.php:47
+#: admin/class-bhg-admin.php:118
 #: admin/views/affiliate-websites.php:17
 msgid "Affiliates"
 msgstr ""
 
-#: admin/class-bhg-admin.php:43
-#: admin/views/advertising.php:23
+#: admin/class-bhg-admin.php:48
+#: admin/views/advertising.php:26
 msgid "Advertising"
 msgstr ""
 
-#: admin/class-bhg-admin.php:44
-#: admin/class-bhg-admin.php:75
-#: admin/views/translations.php:39
+#: admin/class-bhg-admin.php:49
+#: admin/class-bhg-admin.php:133
+#: admin/views/translations.php:46
 msgid "Translations"
 msgstr ""
 
-#: admin/class-bhg-admin.php:45
-#: admin/class-bhg-admin.php:80
+#: admin/class-bhg-admin.php:50
+#: admin/class-bhg-admin.php:141
 msgid "Database"
 msgstr ""
 
-#: admin/class-bhg-admin.php:46
-#: admin/class-bhg-admin.php:85
+#: admin/class-bhg-admin.php:51
+#: admin/class-bhg-admin.php:149
 msgid "Settings"
 msgstr ""
 
-#: admin/class-bhg-admin.php:47
-#: admin/class-bhg-admin.php:90
+#: admin/class-bhg-admin.php:52
+#: admin/class-bhg-admin.php:157
 #: admin/views/tools.php:5
 msgid "BHG Tools"
 msgstr ""
 
-#: admin/class-bhg-admin.php:69
+#: admin/class-bhg-admin.php:118
 msgid "Affiliate management UI not provided yet."
 msgstr ""
 
-#: admin/class-bhg-admin.php:75
+#: admin/class-bhg-admin.php:133
 msgid "No translations UI found."
 msgstr ""
 
-#: admin/class-bhg-admin.php:80
+#: admin/class-bhg-admin.php:141
 msgid "No database UI found."
 msgstr ""
 
-#: admin/class-bhg-admin.php:85
+#: admin/class-bhg-admin.php:149
 msgid "No settings UI found."
 msgstr ""
 
-#: admin/class-bhg-admin.php:90
+#: admin/class-bhg-admin.php:157
 msgid "No tools UI found."
 msgstr ""
 
-#: admin/class-bhg-admin.php:95
-#: admin/class-bhg-admin.php:105
-#: admin/class-bhg-admin.php:139
-#: admin/class-bhg-admin.php:207
-#: admin/class-bhg-admin.php:228
-#: admin/class-bhg-admin.php:239
-#: admin/class-bhg-admin.php:254
+#: admin/class-bhg-admin.php:167
+#: admin/class-bhg-admin.php:185
+#: admin/class-bhg-admin.php:291
+#: admin/class-bhg-admin.php:318
+#: admin/class-bhg-admin.php:406
+#: admin/class-bhg-admin.php:434
+#: admin/class-bhg-admin.php:450
+#: admin/class-bhg-admin.php:469
 msgid "No permission"
 msgstr ""
 
-#: admin/class-bhg-admin.php:274
+#: admin/class-bhg-admin.php:275
+#, php-format
+msgid "Results for %s"
+msgstr ""
+
+#: admin/class-bhg-admin.php:495
 msgid "Tournament saved."
 msgstr ""
 
-#: admin/class-bhg-admin.php:275
+#: admin/class-bhg-admin.php:496
 msgid "Could not save tournament. Check logs."
 msgstr ""
 
-#: admin/class-bhg-admin.php:276
+#: admin/class-bhg-admin.php:497
 msgid "Security check failed. Please retry."
 msgstr ""
 
-#: admin/class-bhg-admin.php:277
+#: admin/class-bhg-admin.php:498
 msgid "You do not have permission to do that."
+msgstr ""
+
+#: admin/class-bhg-admin.php:499
+msgid "Invalid final balance. Please enter a non-negative number."
 msgstr ""
 
 #: admin/class-bhg-demo.php:13
@@ -157,10 +166,9 @@ msgid "Reset & Reseed Demo"
 msgstr ""
 
 #: admin/class-bhg-users-table.php:24
-#: admin/views/advertising.php:29
+#: admin/views/advertising.php:32
 #: admin/views/affiliate-websites.php:23
-#: admin/views/bonus-hunts.php:29
-#: admin/views/header.php:210
+#: admin/views/bonus-hunts.php:33
 #: admin/views/hunts-list.php:31
 #: admin/views/tournaments.php:21
 msgid "ID"
@@ -168,7 +176,7 @@ msgstr ""
 
 #: admin/class-bhg-users-table.php:25
 #: admin/views/users.php:47
-#: includes/class-bhg-shortcodes.php:283
+#: includes/class-bhg-shortcodes.php:289
 msgid "Username"
 msgstr ""
 
@@ -186,9 +194,9 @@ msgid "Guesses"
 msgstr ""
 
 #: admin/class-bhg-users-table.php:29
-#: bonus-hunt-guesser.php:819
-#: includes/class-bhg-shortcodes.php:284
-#: includes/class-bhg-shortcodes.php:506
+#: bonus-hunt-guesser.php:709
+#: includes/class-bhg-shortcodes.php:290
+#: includes/class-bhg-shortcodes.php:542
 msgid "Wins"
 msgstr ""
 
@@ -197,10 +205,9 @@ msgid "Profile"
 msgstr ""
 
 #: admin/class-bhg-users-table.php:60
-#: admin/views/advertising.php:48
+#: admin/views/advertising.php:51
 #: admin/views/affiliate-websites.php:40
-#: admin/views/bonus-hunts.php:50
-#: admin/views/header.php:243
+#: admin/views/bonus-hunts.php:54
 #: admin/views/hunts-list.php:57
 #: admin/views/tournaments.php:42
 msgid "Edit"
@@ -215,8 +222,6 @@ msgstr ""
 #: admin/views/bonus-hunts.php:9
 #: admin/views/dashboard.php:8
 #: admin/views/database.php:5
-#: admin/views/header.php:8
-#: admin/views/hunt-results.php:3
 #: admin/views/hunts-edit.php:3
 #: admin/views/hunts-list.php:3
 #: admin/views/settings.php:8
@@ -226,36 +231,34 @@ msgstr ""
 msgid "You do not have sufficient permissions to access this page."
 msgstr ""
 
-#: admin/views/advertising.php:25
+#: admin/views/advertising.php:28
 msgid "Existing Ads"
 msgstr ""
 
-#: admin/views/advertising.php:30
+#: admin/views/advertising.php:33
 msgid "Title/Content"
 msgstr ""
 
-#: admin/views/advertising.php:31
-#: admin/views/advertising.php:85
+#: admin/views/advertising.php:34
+#: admin/views/advertising.php:88
 msgid "Placement"
 msgstr ""
 
-#: admin/views/advertising.php:32
-#: admin/views/advertising.php:99
+#: admin/views/advertising.php:35
+#: admin/views/advertising.php:102
 msgid "Visible To"
 msgstr ""
 
-#: admin/views/advertising.php:33
-#: admin/views/advertising.php:117
-#: admin/views/header.php:180
-#: includes/class-bhg-shortcodes.php:348
+#: admin/views/advertising.php:36
+#: admin/views/advertising.php:120
+#: includes/class-bhg-shortcodes.php:354
 msgid "Active"
 msgstr ""
 
-#: admin/views/advertising.php:34
+#: admin/views/advertising.php:37
 #: admin/views/affiliate-websites.php:27
-#: admin/views/bonus-hunts.php:35
-#: admin/views/bonus-hunts.php:202
-#: admin/views/header.php:217
+#: admin/views/bonus-hunts.php:39
+#: admin/views/bonus-hunts.php:239
 #: admin/views/hunts-edit.php:47
 #: admin/views/hunts-list.php:38
 #: admin/views/tournaments.php:27
@@ -263,67 +266,66 @@ msgstr ""
 msgid "Actions"
 msgstr ""
 
-#: admin/views/advertising.php:39
+#: admin/views/advertising.php:42
 msgid "No ads yet."
 msgstr ""
 
-#: admin/views/advertising.php:46
+#: admin/views/advertising.php:49
 #: admin/views/settings.php:120
 msgid "Yes"
 msgstr ""
 
-#: admin/views/advertising.php:46
+#: admin/views/advertising.php:49
 #: admin/views/settings.php:123
 msgid "No"
 msgstr ""
 
-#: admin/views/advertising.php:49
+#: admin/views/advertising.php:52
 msgid "Delete this ad?"
 msgstr ""
 
-#: admin/views/advertising.php:49
+#: admin/views/advertising.php:52
 #: admin/views/affiliate-websites.php:45
-#: admin/views/bonus-hunts.php:223
+#: admin/views/bonus-hunts.php:260
 #: admin/views/hunts-edit.php:64
 msgid "Remove"
 msgstr ""
 
-#: admin/views/advertising.php:56
+#: admin/views/advertising.php:59
 msgid "Edit Ad"
 msgstr ""
 
-#: admin/views/advertising.php:56
+#: admin/views/advertising.php:59
 msgid "Add Ad"
 msgstr ""
 
-#: admin/views/advertising.php:73
-#: admin/views/bonus-hunts.php:30
-#: admin/views/bonus-hunts.php:74
-#: admin/views/bonus-hunts.php:147
-#: admin/views/header.php:211
+#: admin/views/advertising.php:76
+#: admin/views/bonus-hunts.php:34
+#: admin/views/bonus-hunts.php:111
+#: admin/views/bonus-hunts.php:184
 #: admin/views/hunts-list.php:32
 #: admin/views/tournaments.php:22
 #: admin/views/tournaments.php:56
 msgid "Title"
 msgstr ""
 
-#: admin/views/advertising.php:77
+#: admin/views/advertising.php:80
 msgid "Content"
 msgstr ""
 
-#: admin/views/advertising.php:81
+#: admin/views/advertising.php:84
 msgid "Link URL (optional)"
 msgstr ""
 
-#: admin/views/advertising.php:113
+#: admin/views/advertising.php:116
 msgid "Target Page Slugs"
 msgstr ""
 
-#: admin/views/advertising.php:122
+#: admin/views/advertising.php:125
 msgid "Update Ad"
 msgstr ""
 
-#: admin/views/advertising.php:122
+#: admin/views/advertising.php:125
 msgid "Create Ad"
 msgstr ""
 
@@ -344,17 +346,15 @@ msgstr ""
 
 #: admin/views/affiliate-websites.php:26
 #: admin/views/affiliate-websites.php:68
-#: admin/views/bonus-hunts.php:34
-#: admin/views/bonus-hunts.php:106
-#: admin/views/bonus-hunts.php:183
+#: admin/views/bonus-hunts.php:38
+#: admin/views/bonus-hunts.php:143
+#: admin/views/bonus-hunts.php:220
 #: admin/views/database.php:129
-#: admin/views/header.php:177
-#: admin/views/header.php:215
 #: admin/views/hunts-list.php:35
 #: admin/views/tournaments.php:26
 #: admin/views/tournaments.php:83
-#: includes/class-bhg-shortcodes.php:272
-#: includes/class-bhg-shortcodes.php:363
+#: includes/class-bhg-shortcodes.php:278
+#: includes/class-bhg-shortcodes.php:369
 msgid "Status"
 msgstr ""
 
@@ -387,7 +387,6 @@ msgid "Insufficient permissions"
 msgstr ""
 
 #: admin/views/bonus-hunts-results.php:9
-#: admin/views/hunt-results.php:15
 #: admin/views/hunts-edit.php:24
 msgid "Hunt not found"
 msgstr ""
@@ -397,26 +396,24 @@ msgid "Results for "
 msgstr ""
 
 #: admin/views/bonus-hunts-results.php:22
-#: bonus-hunt-guesser.php:817
-#: includes/class-bhg-shortcodes.php:183
+#: bonus-hunt-guesser.php:707
+#: includes/class-bhg-shortcodes.php:188
 msgid "Position"
 msgstr ""
 
 #: admin/views/bonus-hunts-results.php:23
-#: admin/views/bonus-hunts.php:200
-#: admin/views/hunt-results.php:25
+#: admin/views/bonus-hunts.php:237
 #: admin/views/hunts-edit.php:44
-#: bonus-hunt-guesser.php:818
-#: includes/class-bhg-shortcodes.php:184
-#: includes/class-bhg-shortcodes.php:506
+#: bonus-hunt-guesser.php:708
+#: includes/class-bhg-shortcodes.php:189
+#: includes/class-bhg-shortcodes.php:542
 msgid "User"
 msgstr ""
 
 #: admin/views/bonus-hunts-results.php:24
-#: admin/views/bonus-hunts.php:201
-#: admin/views/hunt-results.php:26
+#: admin/views/bonus-hunts.php:238
 #: admin/views/hunts-edit.php:45
-#: includes/class-bhg-shortcodes.php:185
+#: includes/class-bhg-shortcodes.php:190
 msgid "Guess"
 msgstr ""
 
@@ -428,115 +425,129 @@ msgstr ""
 msgid "Add New"
 msgstr ""
 
-#: admin/views/bonus-hunts.php:31
+#: admin/views/bonus-hunts.php:27
+msgid "Hunt closed successfully."
+msgstr ""
+
+#: admin/views/bonus-hunts.php:35
 #: admin/views/dashboard.php:30
 #: admin/views/hunts-list.php:33
 msgid "Start Balance"
 msgstr ""
 
-#: admin/views/bonus-hunts.php:32
-#: admin/views/bonus-hunts.php:179
+#: admin/views/bonus-hunts.php:36
+#: admin/views/bonus-hunts.php:86
+#: admin/views/bonus-hunts.php:216
 #: admin/views/dashboard.php:31
-#: admin/views/header.php:213
 #: admin/views/hunts-list.php:34
 msgid "Final Balance"
 msgstr ""
 
-#: admin/views/bonus-hunts.php:33
+#: admin/views/bonus-hunts.php:37
 #: admin/views/hunts-list.php:36
 msgid "Winners"
 msgstr ""
 
-#: admin/views/bonus-hunts.php:40
+#: admin/views/bonus-hunts.php:44
 #: admin/views/hunts-list.php:61
-#: includes/class-bhg-shortcodes.php:146
+#: includes/class-bhg-shortcodes.php:151
 msgid "No hunts found."
 msgstr ""
 
-#: admin/views/bonus-hunts.php:66
-msgid "Add New Bonus Hunt"
+#: admin/views/bonus-hunts.php:56
+#: admin/views/bonus-hunts.php:91
+msgid "Close Hunt"
+msgstr ""
+
+#: admin/views/bonus-hunts.php:74
+#: bonus-hunt-guesser.php:421
+#: bonus-hunt-guesser.php:423
+msgid "Invalid hunt."
 msgstr ""
 
 #: admin/views/bonus-hunts.php:78
-#: admin/views/bonus-hunts.php:151
-#: admin/views/header.php:212
-#: includes/class-bhg-shortcodes.php:54
-msgid "Starting Balance"
+msgid "Close Bonus Hunt"
 msgstr ""
 
-#: admin/views/bonus-hunts.php:82
-#: admin/views/bonus-hunts.php:155
-#: admin/views/header.php:162
-#: admin/views/header.php:214
-#: includes/class-bhg-shortcodes.php:55
-msgid "Number of Bonuses"
-msgstr ""
-
-#: admin/views/bonus-hunts.php:86
-#: admin/views/bonus-hunts.php:159
-#: includes/class-bhg-shortcodes.php:57
-msgid "Prizes"
-msgstr ""
-
-#: admin/views/bonus-hunts.php:90
-#: admin/views/bonus-hunts.php:163
-msgid "Affiliate Site"
-msgstr ""
-
-#: admin/views/bonus-hunts.php:94
-#: admin/views/bonus-hunts.php:167
-#: admin/views/header.php:190
-msgid "None"
-msgstr ""
-
-#: admin/views/bonus-hunts.php:102
-#: admin/views/bonus-hunts.php:175
-msgid "Number of Winners"
-msgstr ""
-
-#: admin/views/bonus-hunts.php:109
-#: admin/views/bonus-hunts.php:186
-msgid "Open"
-msgstr ""
-
-#: admin/views/bonus-hunts.php:110
-#: admin/views/bonus-hunts.php:187
-#: includes/class-bhg-shortcodes.php:348
-msgid "Closed"
+#: admin/views/bonus-hunts.php:103
+msgid "Add New Bonus Hunt"
 msgstr ""
 
 #: admin/views/bonus-hunts.php:115
-msgid "Final Balance (optional)"
+#: admin/views/bonus-hunts.php:188
+#: includes/class-bhg-shortcodes.php:60
+msgid "Starting Balance"
 msgstr ""
 
-#: admin/views/bonus-hunts.php:120
-#: admin/views/header.php:201
-msgid "Create Bonus Hunt"
+#: admin/views/bonus-hunts.php:119
+#: admin/views/bonus-hunts.php:192
+#: includes/class-bhg-shortcodes.php:61
+msgid "Number of Bonuses"
+msgstr ""
+
+#: admin/views/bonus-hunts.php:123
+#: admin/views/bonus-hunts.php:196
+#: includes/class-bhg-shortcodes.php:63
+msgid "Prizes"
+msgstr ""
+
+#: admin/views/bonus-hunts.php:127
+#: admin/views/bonus-hunts.php:200
+msgid "Affiliate Site"
 msgstr ""
 
 #: admin/views/bonus-hunts.php:131
+#: admin/views/bonus-hunts.php:204
+msgid "None"
+msgstr ""
+
+#: admin/views/bonus-hunts.php:139
+#: admin/views/bonus-hunts.php:212
+msgid "Number of Winners"
+msgstr ""
+
+#: admin/views/bonus-hunts.php:146
+#: admin/views/bonus-hunts.php:223
+msgid "Open"
+msgstr ""
+
+#: admin/views/bonus-hunts.php:147
+#: admin/views/bonus-hunts.php:224
+#: includes/class-bhg-shortcodes.php:354
+msgid "Closed"
+msgstr ""
+
+#: admin/views/bonus-hunts.php:152
+msgid "Final Balance (optional)"
+msgstr ""
+
+#: admin/views/bonus-hunts.php:157
+msgid "Create Bonus Hunt"
+msgstr ""
+
+#: admin/views/bonus-hunts.php:168
 msgid "Invalid hunt"
 msgstr ""
 
-#: admin/views/bonus-hunts.php:137
+#: admin/views/bonus-hunts.php:174
 msgid "Edit Bonus Hunt"
 msgstr ""
 
-#: admin/views/bonus-hunts.php:193
+#: admin/views/bonus-hunts.php:230
 msgid "Save Hunt"
 msgstr ""
 
-#: admin/views/bonus-hunts.php:196
+#: admin/views/bonus-hunts.php:233
 #: admin/views/hunts-edit.php:38
 msgid "Participants"
 msgstr ""
 
-#: admin/views/bonus-hunts.php:207
+#: admin/views/bonus-hunts.php:244
 #: admin/views/hunts-edit.php:70
 msgid "No participants yet."
 msgstr ""
 
-#: admin/views/bonus-hunts.php:219
+#: admin/views/bonus-hunts.php:256
 msgid "Delete this guess?"
 msgstr ""
 
@@ -562,6 +573,7 @@ msgid "Closed At"
 msgstr ""
 
 #: admin/views/dashboard.php:51
+#: includes/class-bhg-shortcodes.php:426
 #, php-format
 msgid "User #%d"
 msgstr ""
@@ -575,7 +587,7 @@ msgid "No winners yet"
 msgstr ""
 
 #: admin/views/dashboard.php:72
-#: includes/class-bhg-shortcodes.php:386
+#: includes/class-bhg-shortcodes.php:406
 msgid "No closed hunts yet."
 msgstr ""
 
@@ -648,97 +660,8 @@ msgstr ""
 msgid "Reset & Reseed Demo Data"
 msgstr ""
 
-#: admin/views/header.php:114
-msgid "Bonus hunt created successfully!"
-msgstr ""
-
-#: admin/views/header.php:119
-msgid "Bonus hunt updated successfully!"
-msgstr ""
-
-#: admin/views/header.php:124
-msgid "Bonus hunt deleted successfully!"
-msgstr ""
-
-#: admin/views/header.php:129
-#: bonus-hunt-guesser.php:365
-msgid "An error occurred. Please try again."
-msgstr ""
-
-#: admin/views/header.php:141
-msgid "Create New Bonus Hunt"
-msgstr ""
-
-#: admin/views/header.php:148
-msgid "Bonus Hunt Title"
-msgstr ""
-
-#: admin/views/header.php:155
-msgid "Starting Balance (€)"
-msgstr ""
-
-#: admin/views/header.php:169
-msgid "Prizes Description"
-msgstr ""
-
-#: admin/views/header.php:181
-msgid "Upcoming"
-msgstr ""
-
-#: admin/views/header.php:182
-msgid "Completed"
-msgstr ""
-
-#: admin/views/header.php:187
-msgid "Affiliate Website"
-msgstr ""
-
-#: admin/views/header.php:206
-msgid "Existing Bonus Hunts"
-msgstr ""
-
-#: admin/views/header.php:216
-msgid "Created"
-msgstr ""
-
-#: admin/views/header.php:231
-msgid "Not set"
-msgstr ""
-
-#: admin/views/header.php:250
-msgid "Are you sure you want to delete this bonus hunt?"
-msgstr ""
-
-#: admin/views/header.php:251
-msgid "Delete"
-msgstr ""
-
-#: admin/views/header.php:259
-msgid "No bonus hunts found."
-msgstr ""
-
-#: admin/views/hunt-results.php:6
 #: admin/views/hunts-edit.php:6
 msgid "Missing hunt id"
-msgstr ""
-
-#: admin/views/hunt-results.php:11
-msgid "Required helper functions are missing. Please include class-bhg-bonus-hunts.php helpers."
-msgstr ""
-
-#: admin/views/hunt-results.php:21
-#, php-format
-msgid "Results — %s"
-msgstr ""
-
-#: admin/views/hunt-results.php:27
-#: includes/class-bhg-shortcodes.php:394
-msgid "Diff"
-msgstr ""
-
-#: admin/views/hunt-results.php:42
-#: includes/class-bhg-shortcodes.php:167
-msgid "No guesses yet."
 msgstr ""
 
 #: admin/views/hunts-edit.php:15
@@ -794,19 +717,19 @@ msgid "Default Tournament Period"
 msgstr ""
 
 #: admin/views/settings.php:64
-#: includes/class-bhg-shortcodes.php:339
+#: includes/class-bhg-shortcodes.php:345
 msgid "Weekly"
 msgstr ""
 
 #: admin/views/settings.php:67
-#: includes/class-bhg-shortcodes.php:339
-#: includes/class-bhg-shortcodes.php:431
+#: includes/class-bhg-shortcodes.php:345
+#: includes/class-bhg-shortcodes.php:467
 msgid "Monthly"
 msgstr ""
 
 #: admin/views/settings.php:70
-#: includes/class-bhg-shortcodes.php:339
-#: includes/class-bhg-shortcodes.php:437
+#: includes/class-bhg-shortcodes.php:345
+#: includes/class-bhg-shortcodes.php:473
 msgid "Yearly"
 msgstr ""
 
@@ -876,19 +799,19 @@ msgstr ""
 
 #: admin/views/tournaments.php:23
 #: admin/views/tournaments.php:64
-#: includes/class-bhg-shortcodes.php:360
+#: includes/class-bhg-shortcodes.php:366
 msgid "Type"
 msgstr ""
 
 #: admin/views/tournaments.php:24
-#: includes/class-bhg-shortcodes.php:270
-#: includes/class-bhg-shortcodes.php:361
+#: includes/class-bhg-shortcodes.php:276
+#: includes/class-bhg-shortcodes.php:367
 msgid "Start"
 msgstr ""
 
 #: admin/views/tournaments.php:25
-#: includes/class-bhg-shortcodes.php:271
-#: includes/class-bhg-shortcodes.php:362
+#: includes/class-bhg-shortcodes.php:277
+#: includes/class-bhg-shortcodes.php:368
 msgid "End"
 msgstr ""
 
@@ -924,39 +847,39 @@ msgstr ""
 msgid "Create Tournament"
 msgstr ""
 
-#: admin/views/translations.php:15
-#: bonus-hunt-guesser.php:518
+#: admin/views/translations.php:22
+#: bonus-hunt-guesser.php:405
 msgid "Security check failed."
 msgstr ""
 
-#: admin/views/translations.php:24
+#: admin/views/translations.php:31
 msgid "Key field is required."
 msgstr ""
 
-#: admin/views/translations.php:31
+#: admin/views/translations.php:38
 msgid "Translation saved."
 msgstr ""
 
-#: admin/views/translations.php:53
-#: admin/views/translations.php:67
+#: admin/views/translations.php:64
+#: admin/views/translations.php:78
 msgid "Key"
 msgstr ""
 
-#: admin/views/translations.php:57
-#: admin/views/translations.php:67
+#: admin/views/translations.php:68
+#: admin/views/translations.php:78
 msgid "Value"
 msgstr ""
 
-#: admin/views/translations.php:62
+#: admin/views/translations.php:73
 #: admin/views/users.php:74
 msgid "Save"
 msgstr ""
 
-#: admin/views/translations.php:65
+#: admin/views/translations.php:76
 msgid "Existing keys"
 msgstr ""
 
-#: admin/views/translations.php:75
+#: admin/views/translations.php:86
 msgid "No translations yet."
 msgstr ""
 
@@ -973,9 +896,9 @@ msgid "Real Name"
 msgstr ""
 
 #: admin/views/users.php:51
-#: bonus-hunt-guesser.php:366
+#: bonus-hunt-guesser.php:256
 #: includes/helpers-aff-dot.php:15
-#: includes/helpers.php:146
+#: includes/helpers.php:285
 msgid "Affiliate"
 msgstr ""
 
@@ -987,114 +910,98 @@ msgstr ""
 msgid "View / Edit"
 msgstr ""
 
-#: bonus-hunt-guesser.php:361
+#: bonus-hunt-guesser.php:251
 msgid "Please enter a guess."
 msgstr ""
 
-#: bonus-hunt-guesser.php:362
+#: bonus-hunt-guesser.php:252
 msgid "Please enter a valid number."
 msgstr ""
 
-#: bonus-hunt-guesser.php:363
+#: bonus-hunt-guesser.php:253
 msgid "Guess must be between €0 and €100,000."
 msgstr ""
 
-#: bonus-hunt-guesser.php:364
+#: bonus-hunt-guesser.php:254
 msgid "Your guess has been submitted!"
 msgstr ""
 
-#: bonus-hunt-guesser.php:367
+#: bonus-hunt-guesser.php:255
+msgid "An error occurred. Please try again."
+msgstr ""
+
+#: bonus-hunt-guesser.php:257
 #: includes/helpers-aff-dot.php:16
-#: includes/helpers.php:146
+#: includes/helpers.php:285
 msgid "Non-affiliate"
 msgstr ""
 
-#: bonus-hunt-guesser.php:432
+#: bonus-hunt-guesser.php:326
 msgid "You do not have sufficient permissions to perform this action."
 msgstr ""
 
-#: bonus-hunt-guesser.php:526
-#: bonus-hunt-guesser.php:528
+#: bonus-hunt-guesser.php:413
+#: bonus-hunt-guesser.php:415
 msgid "You must be logged in to submit a guess."
 msgstr ""
 
-#: bonus-hunt-guesser.php:534
-#: bonus-hunt-guesser.php:536
-#: includes/class-bhg-models.php:24
-msgid "Invalid hunt."
-msgstr ""
-
-#: bonus-hunt-guesser.php:558
-#: bonus-hunt-guesser.php:560
+#: bonus-hunt-guesser.php:450
+#: bonus-hunt-guesser.php:452
 msgid "Invalid guess amount."
 msgstr ""
 
-#: bonus-hunt-guesser.php:570
-#: bonus-hunt-guesser.php:572
+#: bonus-hunt-guesser.php:462
+#: bonus-hunt-guesser.php:464
 msgid "Hunt not found."
 msgstr ""
 
-#: bonus-hunt-guesser.php:576
-#: bonus-hunt-guesser.php:578
+#: bonus-hunt-guesser.php:468
+#: bonus-hunt-guesser.php:470
 msgid "This hunt is closed. You cannot submit or change a guess."
 msgstr ""
 
-#: bonus-hunt-guesser.php:599
-#: bonus-hunt-guesser.php:601
+#: bonus-hunt-guesser.php:489
+#: bonus-hunt-guesser.php:491
 msgid "You have reached the maximum number of guesses."
 msgstr ""
 
-#: bonus-hunt-guesser.php:713
-#: bonus-hunt-guesser.php:719
+#: bonus-hunt-guesser.php:603
+#: bonus-hunt-guesser.php:609
 msgid "Invalid timeframe"
 msgstr ""
 
-#: bonus-hunt-guesser.php:811
+#: bonus-hunt-guesser.php:701
 msgid "No data available."
 msgstr ""
 
-#: bonus-hunt-guesser.php:882
+#: bonus-hunt-guesser.php:772
 msgid "Bonus Hunt Guesser Information"
 msgstr ""
 
-#: bonus-hunt-guesser.php:885
+#: bonus-hunt-guesser.php:775
 msgid "Affiliate Status"
 msgstr ""
 
-#: bonus-hunt-guesser.php:888
+#: bonus-hunt-guesser.php:778
 msgid "Check if this user is an affiliate."
 msgstr ""
 
-#: bonus-hunt-guesser.php:945
-#: includes/class-bhg-shortcodes.php:76
+#: bonus-hunt-guesser.php:835
+#: includes/class-bhg-shortcodes.php:81
 msgid "Please log in to submit your guess."
 msgstr ""
 
-#: bonus-hunt-guesser.php:948
+#: bonus-hunt-guesser.php:838
 msgid "No active hunt selected."
 msgstr ""
 
-#: bonus-hunt-guesser.php:955
+#: bonus-hunt-guesser.php:845
 msgid "Your Guess (0 - 100,000)"
 msgstr ""
 
-#: bonus-hunt-guesser.php:958
-#: includes/class-bhg-shortcodes.php:125
+#: bonus-hunt-guesser.php:848
+#: includes/class-bhg-shortcodes.php:130
 msgid "Submit Guess"
-msgstr ""
-
-#: includes/admin.php:5
-#: includes/admin.php:13
-#: includes/admin.php:43
-#: includes/admin.php:53
-#: includes/admin.php:62
-#: includes/admin.php:86
-msgid "Forbidden"
-msgstr ""
-
-#: includes/admin.php:35
-#, php-format
-msgid "Results for %s"
 msgstr ""
 
 #: includes/class-bhg-front-menus.php:12
@@ -1115,10 +1022,6 @@ msgstr ""
 
 #: includes/class-bhg-front-menus.php:80
 msgid "Menu not assigned."
-msgstr ""
-
-#: includes/class-bhg-models.php:34
-msgid "This hunt is closed."
 msgstr ""
 
 #: includes/class-bhg-settings.php:15
@@ -1149,97 +1052,101 @@ msgstr ""
 msgid "Email From"
 msgstr ""
 
-#: includes/class-bhg-shortcodes.php:36
+#: includes/class-bhg-shortcodes.php:42
 msgid "Please log in to continue."
 msgstr ""
 
-#: includes/class-bhg-shortcodes.php:37
-#: includes/class-bhg-shortcodes.php:77
+#: includes/class-bhg-shortcodes.php:43
+#: includes/class-bhg-shortcodes.php:82
 msgid "Log in"
 msgstr ""
 
-#: includes/class-bhg-shortcodes.php:45
+#: includes/class-bhg-shortcodes.php:51
 msgid "No active bonus hunts at the moment."
 msgstr ""
 
-#: includes/class-bhg-shortcodes.php:85
+#: includes/class-bhg-shortcodes.php:90
 msgid "No open hunt found to guess."
 msgstr ""
 
-#: includes/class-bhg-shortcodes.php:107
+#: includes/class-bhg-shortcodes.php:112
 msgid "Choose a hunt:"
 msgstr ""
 
-#: includes/class-bhg-shortcodes.php:109
+#: includes/class-bhg-shortcodes.php:114
 msgid "Select a hunt"
 msgstr ""
 
-#: includes/class-bhg-shortcodes.php:120
+#: includes/class-bhg-shortcodes.php:125
 msgid "Your guess (final balance):"
 msgstr ""
 
-#: includes/class-bhg-shortcodes.php:235
+#: includes/class-bhg-shortcodes.php:172
+msgid "No guesses yet."
+msgstr ""
+
+#: includes/class-bhg-shortcodes.php:241
 msgid "Tournament not found."
 msgstr ""
 
-#: includes/class-bhg-shortcodes.php:268
+#: includes/class-bhg-shortcodes.php:274
 msgid "Back to tournaments"
 msgstr ""
 
-#: includes/class-bhg-shortcodes.php:275
+#: includes/class-bhg-shortcodes.php:281
 msgid "No results yet."
 msgstr ""
 
-#: includes/class-bhg-shortcodes.php:285
+#: includes/class-bhg-shortcodes.php:291
 msgid "Last win"
 msgstr ""
 
-#: includes/class-bhg-shortcodes.php:326
+#: includes/class-bhg-shortcodes.php:332
 msgid "No tournaments found."
 msgstr ""
 
-#: includes/class-bhg-shortcodes.php:337
+#: includes/class-bhg-shortcodes.php:343
 msgid "Period:"
 msgstr ""
 
-#: includes/class-bhg-shortcodes.php:339
-#: includes/class-bhg-shortcodes.php:348
+#: includes/class-bhg-shortcodes.php:345
+#: includes/class-bhg-shortcodes.php:354
 msgid "All"
 msgstr ""
 
-#: includes/class-bhg-shortcodes.php:346
+#: includes/class-bhg-shortcodes.php:352
 msgid "Status:"
 msgstr ""
 
-#: includes/class-bhg-shortcodes.php:355
+#: includes/class-bhg-shortcodes.php:361
 msgid "Filter"
 msgstr ""
 
-#: includes/class-bhg-shortcodes.php:364
+#: includes/class-bhg-shortcodes.php:370
 msgid "Details"
 msgstr ""
 
-#: includes/class-bhg-shortcodes.php:374
+#: includes/class-bhg-shortcodes.php:380
 msgid "Show details"
 msgstr ""
 
-#: includes/class-bhg-shortcodes.php:392
+#: includes/class-bhg-shortcodes.php:419
 msgid "Final"
 msgstr ""
 
-#: includes/class-bhg-shortcodes.php:404
+#: includes/class-bhg-shortcodes.php:440
 msgid "Please log in to view this content."
 msgstr ""
 
-#: includes/class-bhg-shortcodes.php:425
+#: includes/class-bhg-shortcodes.php:461
 msgid "Overall"
 msgstr ""
 
-#: includes/class-bhg-shortcodes.php:443
+#: includes/class-bhg-shortcodes.php:479
 msgid "All-Time"
 msgstr ""
 
-#: includes/class-bhg-shortcodes.php:504
+#: includes/class-bhg-shortcodes.php:540
 msgid "No data yet."
 msgstr ""
 
@@ -1247,26 +1154,254 @@ msgstr ""
 msgid "You do not have permission to access this page"
 msgstr ""
 
-#: includes/helpers.php:93
+#: includes/helpers.php:190
 msgid "Unknown User"
 msgstr ""
 
-#: includes/helpers.php:100
+#: includes/helpers.php:197
 msgid "Affiliate User"
 msgstr ""
 
-#: includes/helpers.php:245
+#: includes/helpers.php:396
 msgid "Bonus Hunt – Demo Open"
 msgstr ""
 
-#: includes/helpers.php:248
+#: includes/helpers.php:399
 msgid "Gift card + swag"
 msgstr ""
 
-#: includes/helpers.php:258
+#: includes/helpers.php:409
 msgid "Bonus Hunt – Demo Closed"
 msgstr ""
 
-#: includes/helpers.php:261
+#: includes/helpers.php:412
 msgid "T-shirt"
+msgstr ""
+
+#. Default translation key: welcome_message
+msgid "Welcome!"
+msgstr ""
+
+#. Default translation key: goodbye_message
+msgid "Goodbye!"
+msgstr ""
+
+#. Default translation key: menu_dashboard
+msgid "Dashboard"
+msgstr ""
+
+#. Default translation key: menu_bonus_hunts
+msgid "Bonus Hunts"
+msgstr ""
+
+#. Default translation key: menu_results
+msgid "Results"
+msgstr ""
+
+#. Default translation key: menu_tournaments
+msgid "Tournaments"
+msgstr ""
+
+#. Default translation key: menu_users
+msgid "Users"
+msgstr ""
+
+#. Default translation key: menu_affiliates
+msgid "Affiliates"
+msgstr ""
+
+#. Default translation key: menu_advertising
+msgid "Advertising"
+msgstr ""
+
+#. Default translation key: menu_translations
+msgid "Translations"
+msgstr ""
+
+#. Default translation key: menu_tools
+msgid "Tools"
+msgstr ""
+
+#. Default translation key: menu_ads
+msgid "Ads"
+msgstr ""
+
+#. Default translation key: label_start_balance
+msgid "Starting Balance"
+msgstr ""
+
+#. Default translation key: label_number_bonuses
+msgid "Number of Bonuses"
+msgstr ""
+
+#. Default translation key: label_prizes
+msgid "Prizes"
+msgstr ""
+
+#. Default translation key: label_submit_guess
+msgid "Submit Guess"
+msgstr ""
+
+#. Default translation key: label_guess
+msgid "Guess"
+msgstr ""
+
+#. Default translation key: label_username
+msgid "Username"
+msgstr ""
+
+#. Default translation key: label_position
+msgid "Position"
+msgstr ""
+
+#. Default translation key: label_final_balance
+msgid "Final Balance"
+msgstr ""
+
+#. Default translation key: label_leaderboard
+msgid "Leaderboard"
+msgstr ""
+
+#. Default translation key: label_affiliate
+msgid "Affiliate"
+msgstr ""
+
+#. Default translation key: label_non_affiliate
+msgid "Non-affiliate"
+msgstr ""
+
+#. Default translation key: label_affiliate_status
+msgid "Affiliate Status"
+msgstr ""
+
+#. Default translation key: label_actions
+msgid "Actions"
+msgstr ""
+
+#. Default translation key: label_placements
+msgid "Placements"
+msgstr ""
+
+#. Default translation key: label_visible_to
+msgid "Visible To"
+msgstr ""
+
+#. Default translation key: label_start_date
+msgid "Start Date"
+msgstr ""
+
+#. Default translation key: label_end_date
+msgid "End Date"
+msgstr ""
+
+#. Default translation key: label_email
+msgid "Email"
+msgstr ""
+
+#. Default translation key: label_real_name
+msgid "Real Name"
+msgstr ""
+
+#. Default translation key: label_search
+msgid "Search"
+msgstr ""
+
+#. Default translation key: notice_login_required
+msgid "You must be logged in to guess."
+msgstr ""
+
+#. Default translation key: notice_guess_saved
+msgid "Your guess has been saved."
+msgstr ""
+
+#. Default translation key: notice_guess_updated
+msgid "Your guess has been updated."
+msgstr ""
+
+#. Default translation key: notice_hunt_closed
+msgid "This bonus hunt is closed."
+msgstr ""
+
+#. Default translation key: notice_invalid_guess
+msgid "Please enter a valid guess."
+msgstr ""
+
+#. Default translation key: notice_not_authorized
+msgid "You are not authorized to perform this action."
+msgstr ""
+
+#. Default translation key: notice_translations_saved
+msgid "Translations saved."
+msgstr ""
+
+#. Default translation key: notice_translations_reset
+msgid "Translations reset."
+msgstr ""
+
+#. Default translation key: notice_no_active_hunt
+msgid "No active bonus hunt found."
+msgstr ""
+
+#. Default translation key: notice_no_results
+msgid "No results available."
+msgstr ""
+
+#. Default translation key: notice_user_removed
+msgid "User removed."
+msgstr ""
+
+#. Default translation key: notice_ad_saved
+msgid "Advertisement saved."
+msgstr ""
+
+#. Default translation key: notice_ad_deleted
+msgid "Advertisement deleted."
+msgstr ""
+
+#. Default translation key: notice_settings_saved
+msgid "Settings saved."
+msgstr ""
+
+#. Default translation key: notice_profile_updated
+msgid "Profile updated."
+msgstr ""
+
+#. Default translation key: button_save
+msgid "Save"
+msgstr ""
+
+#. Default translation key: button_cancel
+msgid "Cancel"
+msgstr ""
+
+#. Default translation key: button_delete
+msgid "Delete"
+msgstr ""
+
+#. Default translation key: button_edit
+msgid "Edit"
+msgstr ""
+
+#. Default translation key: button_view
+msgid "View"
+msgstr ""
+
+#. Default translation key: button_back
+msgid "Back"
+msgstr ""
+
+#. Default translation key: msg_no_guesses
+msgid "No guesses yet."
+msgstr ""
+
+#. Default translation key: msg_thank_you
+msgid "Thank you!"
+msgstr ""
+
+#. Default translation key: msg_error
+msgid "An error occurred."
+msgstr ""
+
+#. Default translation key: placeholder_enter_guess
+msgid "Enter your guess"
 msgstr ""
