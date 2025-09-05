@@ -7,9 +7,10 @@
  * Author: Bonus Hunt Guesser Development Team
  * Text Domain: bonus-hunt-guesser
  * Domain Path: /languages
- * Requires PHP: 7.4
  * Requires at least: 6.3.5
+ * Requires PHP: 7.4
  * License: GPLv2 or later
+ * MySQL tested up to: 5.5.5
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
