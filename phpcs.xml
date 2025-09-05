@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<ruleset name="Bonus Hunt Guesser">
+<description>WordPress coding standards for the Bonus Hunt Guesser plugin.</description>
+<rule ref="WordPress"/>
+<arg name="tab-width" value="4"/>
+<file>bonus-hunt-guesser.php</file>
+<file>admin</file>
+<file>includes</file>
+<exclude-pattern>vendor/*</exclude-pattern>
+</ruleset>

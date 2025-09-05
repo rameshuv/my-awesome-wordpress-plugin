@@ -152,12 +152,12 @@ spl_autoload_register( function ( $class ) {
 		'BHG_Logger' => 'includes/class-bhg-logger.php',
 		'BHG_Settings' => 'includes/class-bhg-settings.php',
 		'BHG_Utils' => 'includes/class-bhg-utils.php',
-                'BHG_Models' => 'includes/class-bhg-models.php',
-                'BHG_Front_Menus' => 'includes/class-bhg-front-menus.php',
-                'BHG_Ads' => 'includes/class-bhg-ads.php',
-                'BHG_Login_Redirect' => 'includes/class-bhg-login-redirect.php',
-                'BHG_Demo' => 'admin/class-bhg-demo.php',
-        ];
+				'BHG_Models' => 'includes/class-bhg-models.php',
+				'BHG_Front_Menus' => 'includes/class-bhg-front-menus.php',
+				'BHG_Ads' => 'includes/class-bhg-ads.php',
+				'BHG_Login_Redirect' => 'includes/class-bhg-login-redirect.php',
+				'BHG_Demo' => 'admin/class-bhg-demo.php',
+		];
 	
 	if ( isset( $class_map[ $class ] ) ) {
 		$file_path = BHG_PLUGIN_DIR . $class_map[ $class ];
@@ -291,17 +291,17 @@ function bhg_init_plugin() {
 	if ( class_exists( 'BHG_Shortcodes' ) ) {
 		new BHG_Shortcodes();
 	}
-        if ( class_exists( 'BHG_Front_Menus' ) ) {
-                new BHG_Front_Menus();
-        }
+		if ( class_exists( 'BHG_Front_Menus' ) ) {
+				new BHG_Front_Menus();
+		}
 
-        if ( class_exists( 'BHG_Login_Redirect' ) ) {
-                new BHG_Login_Redirect();
-        }
+		if ( class_exists( 'BHG_Login_Redirect' ) ) {
+				new BHG_Login_Redirect();
+		}
 
-        if ( class_exists( 'BHG_Ads' ) ) {
-                BHG_Ads::init();
-        }
+		if ( class_exists( 'BHG_Ads' ) ) {
+				BHG_Ads::init();
+		}
 
 	if ( class_exists( 'BHG_DB' ) ) {
 		BHG_DB::migrate();
