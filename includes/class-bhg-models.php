@@ -56,7 +56,9 @@ class BHG_Models {
             $wpdb->update(
                 $guesses_tbl,
                 array('guess' => $guess, 'updated_at' => $now),
-                array('id' => $existing_id)
+                array('id' => $existing_id),
+                array('%f', '%s'),
+                array('%d')
             );
         } else {
             $wpdb->insert(
@@ -67,7 +69,8 @@ class BHG_Models {
                     'guess'      => $guess,
                     'created_at' => $now,
                     'updated_at' => $now,
-                )
+                ),
+                array('%d','%d','%f','%s','%s')
             );
         }
 
