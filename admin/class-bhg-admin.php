@@ -7,6 +7,7 @@ class BHG_Admin {
         // Menus
         add_action('admin_menu', [$this, 'menu']);
         add_action('admin_notices', [$this, 'admin_notices']);
+        add_action('admin_enqueue_scripts', [$this, 'assets']);
         // Handlers
         add_action('admin_post_bhg_delete_guess',      [$this, 'handle_delete_guess']);
         add_action('admin_post_bhg_save_hunt',         [$this, 'handle_save_hunt']);
@@ -46,6 +47,14 @@ class BHG_Admin {
         add_submenu_page($slug, __('BHG Tools', 'bonus-hunt-guesser'),   __('BHG Tools', 'bonus-hunt-guesser'),   $cap, 'bhg-tools',                   [$this, 'bhg_tools_page']);
 
         remove_submenu_page($slug, $slug);
+    }
+
+    /** Enqueue admin assets on BHG screens. */
+    public function assets($hook) {
+        if (strpos($hook, 'bhg') !== false) {
+            wp_enqueue_style('bhg-admin', BHG_PLUGIN_URL . 'assets/css/admin.css', array(), defined('BHG_VERSION') ? BHG_VERSION : null);
+            wp_enqueue_script('bhg-admin', BHG_PLUGIN_URL . 'assets/js/admin.js', array('jquery'), defined('BHG_VERSION') ? BHG_VERSION : null, true);
+        }
     }
 
     // -------------------- Views --------------------
