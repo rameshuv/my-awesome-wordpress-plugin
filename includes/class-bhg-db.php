@@ -6,7 +6,31 @@ class BHG_DB {
     // Static wrapper to support legacy static calls.
     public static function migrate() {
         $db = new self();
-        return $db->create_tables();
+        $db->create_tables();
+
+        global $wpdb;
+        $tours_table = $wpdb->prefix . 'bhg_tournaments';
+
+        // Drop legacy "period" column and related index if they exist.
+        $has_period = $wpdb->get_var($wpdb->prepare(
+            "SELECT COLUMN_NAME FROM information_schema.COLUMNS WHERE TABLE_SCHEMA=%s AND TABLE_NAME=%s AND COLUMN_NAME='period'",
+            DB_NAME,
+            $tours_table
+        ));
+
+        if ($has_period) {
+            // Remove unique index first if present.
+            $has_index = $wpdb->get_var($wpdb->prepare(
+                "SELECT INDEX_NAME FROM information_schema.STATISTICS WHERE TABLE_SCHEMA=%s AND TABLE_NAME=%s AND INDEX_NAME='type_period'",
+                DB_NAME,
+                $tours_table
+            ));
+            if ($has_index) {
+                $wpdb->query("ALTER TABLE `{$tours_table}` DROP INDEX type_period");
+            }
+
+            $wpdb->query("ALTER TABLE `{$tours_table}` DROP COLUMN period");
+        }
     }
 
     public function create_tables() {
@@ -60,7 +84,6 @@ class BHG_DB {
             title VARCHAR(190) NOT NULL,
             description TEXT NULL,
             type VARCHAR(20) NOT NULL,
-            period VARCHAR(32) NULL,
             start_date DATE NULL,
             end_date DATE NULL,
             status VARCHAR(20) NOT NULL DEFAULT 'active',
@@ -138,7 +161,6 @@ class BHG_DB {
                 'title'       => "ALTER TABLE `{$tours_table}` ADD COLUMN title VARCHAR(190) NOT NULL",
                 'description' => "ALTER TABLE `{$tours_table}` ADD COLUMN description TEXT NULL",
                 'type'        => "ALTER TABLE `{$tours_table}` ADD COLUMN type VARCHAR(20) NOT NULL",
-                'period'      => "ALTER TABLE `{$tours_table}` ADD COLUMN period VARCHAR(32) NULL",
                 'start_date'  => "ALTER TABLE `{$tours_table}` ADD COLUMN start_date DATE NULL",
                 'end_date'    => "ALTER TABLE `{$tours_table}` ADD COLUMN end_date DATE NULL",
                 'status'      => "ALTER TABLE `{$tours_table}` ADD COLUMN status VARCHAR(20) NOT NULL DEFAULT 'active'",

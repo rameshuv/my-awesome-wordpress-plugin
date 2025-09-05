@@ -90,11 +90,8 @@ function bhg_seed_demo_on_activation(){
     $wpdb->update($hunts, array('winner_user_id'=>$winner_id, 'winner_diff'=>$winner_diff), array('id'=>$closed_id));
 
     // Insert a demo tournament (monthly)
-    $period_key = gmdate('Y-m');
     $wpdb->insert($tournaments, array(
         'title' => 'Monthly Tournament (Demo)',
-        'period' => 'monthly',
-        'period_key' => $period_key,
         'status' => 'active',
         'created_at' => current_time('mysql')
     ));

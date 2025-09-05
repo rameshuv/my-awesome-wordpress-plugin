@@ -44,8 +44,6 @@ class BHG_Demo {
         // Insert demo tournament
         $wpdb->insert("{$wpdb->prefix}bhg_tournaments",[
             'title'=>'August Tournament (Demo)',
-            'period'=>'monthly',
-            'period_key'=>'2025-08',
             'status'=>'active'
         ]);
 
