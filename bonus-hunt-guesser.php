@@ -820,35 +820,3 @@ if (!function_exists('bhg_self_heal_db')) {
 }
 
 
-// === BHG Guess Shortcode & Handler (clean block) ===
-if (!function_exists('bhg_guess_form_shortcode')) {
-    /**
-     * Render the guess form shortcode.
-     *
-     * @param array $atts Shortcode attributes.
-     * @return string Form HTML.
-     */
-    function bhg_guess_form_shortcode( $atts ) {
-        $atts = shortcode_atts(['hunt_id' => 0], $atts, 'bhg_guess_form');
-        $hunt_id = (int) $atts['hunt_id'];
-        if (!(function_exists('is_user_logged_in') && is_user_logged_in())) {
-            return '<p>' . esc_html__('Please log in to submit your guess.', 'bonus-hunt-guesser') . '</p>';
-        }
-        if (!$hunt_id) {
-            return '<p>' . esc_html__('No active hunt selected.', 'bonus-hunt-guesser') . '</p>';
-        }
-        ob_start(); ?>
-        <form method="post" action="<?php echo esc_url( admin_url('admin-post.php', 'relative') ); ?>" class="bhg-guess-form">
-            <input type="hidden" name="action" value="bhg_submit_guess" />
-            <input type="hidden" name="hunt_id" value="<?php echo (int) $hunt_id; ?>" />
-            <?php wp_nonce_field('bhg_submit_guess', 'bhg_nonce'); ?>
-            <label><?php esc_html_e('Your Guess (0 - 100,000)', 'bonus-hunt-guesser'); ?>
-                <input type="text" name="guess" placeholder="e.g. 1,234.56" required />
-            </label>
-            <button type="submit"><?php esc_html_e('Submit Guess', 'bonus-hunt-guesser'); ?></button>
-        </form>
-        <?php
-        return ob_get_clean();
-    }
-    add_shortcode('bhg_guess_form', 'bhg_guess_form_shortcode');
-}
