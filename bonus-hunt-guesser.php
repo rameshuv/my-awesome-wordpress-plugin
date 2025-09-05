@@ -192,6 +192,7 @@ function bhg_activate_plugin( $network_wide ) {
         'default_tournament_period' => 'monthly',
         'min_guess_amount' => 0,
         'max_guess_amount' => 100000,
+        'max_guesses' => 1,
         'ads_enabled' => 1,
         'email_from' => get_bloginfo( 'admin_email' ),
     ]);
@@ -382,7 +383,8 @@ function bhg_handle_settings_save() {
     }
 
     // Save settings
-    update_option( 'bhg_plugin_settings', $settings );
+    $existing = get_option( 'bhg_plugin_settings', [] );
+    update_option( 'bhg_plugin_settings', array_merge( $existing, $settings ) );
 
     // Redirect back to settings page
     wp_safe_redirect( esc_url_raw( admin_url( 'admin.php?page=bhg_settings&message=saved' ) ) );
@@ -434,8 +436,13 @@ function bhg_handle_submit_guess() {
     } else {
         $guess = is_numeric( $raw_guess ) ? (float) $raw_guess : -1.0;
     }
+    $settings   = get_option( 'bhg_plugin_settings', [] );
+    $min_guess  = isset( $settings['min_guess_amount'] ) ? (float) $settings['min_guess_amount'] : 0;
+    $max_guess  = isset( $settings['max_guess_amount'] ) ? (float) $settings['max_guess_amount'] : 100000;
+    $max        = isset( $settings['max_guesses'] ) ? (int) $settings['max_guesses'] : 1;
+    $allow_edit = isset( $settings['allow_guess_changes'] ) && $settings['allow_guess_changes'] === 'yes';
 
-    if ( $guess < 0 || $guess > 100000 ) {
+    if ( $guess < $min_guess || $guess > $max_guess ) {
         if ( function_exists( 'error_log' ) ) {
             error_log( '[BHG] invalid guess after parse: raw=' . print_r( $raw_guess, true ) . ' parsed=' . print_r( $guess, true ) );
         }
@@ -464,8 +471,6 @@ function bhg_handle_submit_guess() {
     }
 
     // Insert or update last guess per settings
-    $max        = (int) get_option( 'bhg_guesses_max', 1 );
-    $allow_edit = get_option( 'bhg_allow_guess_edit_until_close', 'yes' ) === 'yes';
 
     $count = (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM `$g_tbl` WHERE hunt_id=%d AND user_id=%d", $hunt_id, $user_id ) );
     if ( $count >= $max ) {
