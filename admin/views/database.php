@@ -113,8 +113,8 @@ function bhg_insert_demo_data() {
         <?php wp_nonce_field('bhg_db_cleanup_action', 'bhg_nonce'); ?>
         <input type="hidden" name="bhg_action" value="db_cleanup">
         <p>
-            <input type="submit" name="bhg_db_cleanup" class="button button-secondary" value="<?php esc_attr_e('Run Database Cleanup', 'bonus-hunt-guesser'); ?>" 
-                   onclick="return confirm('<?php esc_attr_e('Are you sure you want to run database cleanup? This action cannot be undone.', 'bonus-hunt-guesser'); ?>')">
+            <input type="submit" name="bhg_db_cleanup" class="button button-secondary" value="<?php esc_attr_e('Run Database Cleanup', 'bonus-hunt-guesser'); ?>"
+                   onclick="return confirm('<?php echo esc_js( __( 'Are you sure you want to run database cleanup? This action cannot be undone.', 'bonus-hunt-guesser' ) ); ?>')">
         </p>
         <p class="description">
             <?php esc_html_e('Note: This will remove any demo data and reset tables to their initial state.', 'bonus-hunt-guesser'); ?>
