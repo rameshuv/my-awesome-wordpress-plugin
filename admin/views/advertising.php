@@ -6,7 +6,7 @@ if (!current_user_can('manage_options')) {
 
 global $wpdb;
 $table = $wpdb->prefix . 'bhg_ads';
-$allowed_tables = [ $wpdb->prefix . 'bhg_ads' ];
+$allowed_tables = array( $wpdb->prefix . 'bhg_ads' );
 if ( ! in_array( $table, $allowed_tables, true ) ) {
 	wp_die( esc_html__( 'Invalid table.', 'bonus-hunt-guesser' ) );
 }
@@ -20,15 +20,23 @@ $edit_id  = isset( $_GET['edit'] ) ? absint( wp_unslash( $_GET['edit'] ) ) : 0;
 if ( 'delete' === $action && $ad_id && isset( $_GET['_wpnonce'] ) ) {
 	$nonce = sanitize_text_field( wp_unslash( $_GET['_wpnonce'] ) );
 	if ( wp_verify_nonce( $nonce, 'bhg_delete_ad' ) && current_user_can( 'manage_options' ) ) {
-		$wpdb->delete( $table, [ 'id' => $ad_id ], [ '%d' ] );
-		wp_safe_redirect( remove_query_arg( [ 'action', 'id', '_wpnonce' ] ) );
+        $wpdb->delete( $table, array( 'id' => $ad_id ), array( '%d' ) );
+        wp_safe_redirect( remove_query_arg( array( 'action', 'id', '_wpnonce' ) ) );
 		exit;
 	}
 }
 
 // Fetch ads
 $ads = $wpdb->get_results(
-	"SELECT * FROM {$table} ORDER BY id DESC"
+        "SELECT * FROM {$table} ORDER BY id DESC"
+);
+
+$placement_labels = array(
+        'none'      => __( 'None', 'bonus-hunt-guesser' ),
+        'footer'    => __( 'Footer', 'bonus-hunt-guesser' ),
+        'bottom'    => __( 'Bottom', 'bonus-hunt-guesser' ),
+        'sidebar'   => __( 'Sidebar', 'bonus-hunt-guesser' ),
+        'shortcode' => __( 'Shortcode', 'bonus-hunt-guesser' ),
 );
 ?>
 <div class="wrap">
@@ -50,19 +58,19 @@ $ads = $wpdb->get_results(
 	  <?php if (empty($ads)) : ?>
 		<tr><td colspan="6"><?php echo esc_html__('No ads yet.', 'bonus-hunt-guesser'); ?></td></tr>
 	  <?php else : foreach ($ads as $ad) : ?>
-		<tr>
-		  <td><?php echo (int)$ad->id; ?></td>
-		  <td><?php echo isset($ad->title) && $ad->title !== '' ? esc_html($ad->title) : wp_kses_post(wp_trim_words($ad->content, 12)); ?></td>
-		  <td><?php echo esc_html(isset($ad->placement)? $ad->placement : 'none'); ?></td>
-		  <td><?php echo esc_html(isset($ad->visible_to)? $ad->visible_to : 'all'); ?></td>
-		  <td><?php echo (int)$ad->active === 1 ? esc_html__('Yes','bonus-hunt-guesser') : esc_html__('No','bonus-hunt-guesser'); ?></td>
-		  <td>
-			<a class="button" href="<?php echo esc_url(add_query_arg(['edit'=> (int)$ad->id])); ?>"><?php echo esc_html__('Edit', 'bonus-hunt-guesser'); ?></a>
-			<a class="button-link-delete" href="<?php echo esc_url(wp_nonce_url(add_query_arg(['action'=>'delete','id'=>(int)$ad->id]), 'bhg_delete_ad')); ?>" onclick="return confirm('<?php echo esc_js( __( 'Delete this ad?', 'bonus-hunt-guesser' ) ); ?>');"><?php echo esc_html__('Remove', 'bonus-hunt-guesser'); ?></a>
-		  </td>
-		</tr>
-	  <?php endforeach; endif; ?>
-	</tbody>
+                <tr>
+                  <td><?php echo (int) $ad->id; ?></td>
+                  <td><?php echo isset( $ad->title ) && '' !== $ad->title ? esc_html( $ad->title ) : wp_kses_post( wp_trim_words( $ad->content, 12 ) ); ?></td>
+                  <td><?php echo esc_html( $placement_labels[ $ad->placement ] ?? $ad->placement ); ?></td>
+                  <td><?php echo esc_html( $ad->visible_to ?? 'all' ); ?></td>
+                  <td><?php echo (int) $ad->active === 1 ? esc_html__( 'Yes', 'bonus-hunt-guesser' ) : esc_html__( 'No', 'bonus-hunt-guesser' ); ?></td>
+                  <td>
+                        <a class="button" href="<?php echo esc_url( add_query_arg( array( 'edit' => (int) $ad->id ) ) ); ?>"><?php echo esc_html__( 'Edit', 'bonus-hunt-guesser' ); ?></a>
+                        <a class="button delete" href="<?php echo esc_url( wp_nonce_url( add_query_arg( array( 'action' => 'delete', 'id' => (int) $ad->id ) ), 'bhg_delete_ad' ) ); ?>" onclick="return confirm('<?php echo esc_js( __( 'Delete this ad?', 'bonus-hunt-guesser' ) ); ?>');"><?php echo esc_html__( 'Delete', 'bonus-hunt-guesser' ); ?></a>
+                  </td>
+                </tr>
+          <?php endforeach; endif; ?>
+        </tbody>
   </table>
 
   <h2 style="margin-top:2em"><?php echo $edit_id ? esc_html__('Edit Ad', 'bonus-hunt-guesser') : esc_html__('Add Ad', 'bonus-hunt-guesser'); ?></h2>
@@ -99,46 +107,39 @@ $ads = $wpdb->get_results(
 		  <th scope="row"><label for="bhg_ad_place"><?php echo esc_html__('Placement', 'bonus-hunt-guesser'); ?></label></th>
 		  <td>
 			<select id="bhg_ad_place" name="placement">
-			  <?php
-				$placement_opts   = ['none', 'footer', 'bottom', 'sidebar', 'shortcode'];
-				$placement_labels = [
-					'none'      => __('None', 'bonus-hunt-guesser'),
-					'footer'    => __('Footer', 'bonus-hunt-guesser'),
-					'bottom'    => __('Bottom', 'bonus-hunt-guesser'),
-					'sidebar'   => __('Sidebar', 'bonus-hunt-guesser'),
-					'shortcode' => __('Shortcode', 'bonus-hunt-guesser'),
-				];
-				$sel = $ad ? ($ad->placement ?? 'none') : 'none';
-				foreach ( $placement_opts as $o ) {
-					$label = $placement_labels[ $o ] ?? $o;
-					echo '<option value="' . esc_attr( $o ) . '" ' . selected( $sel, $o, false ) . '>' . esc_html( $label ) . '</option>';
-				}
-			  ?>
-			</select>
-		  </td>
-		</tr>
+                          <?php
+                                $placement_opts = array_keys( $placement_labels );
+                                $sel            = $ad ? ( $ad->placement ?? 'none' ) : 'none';
+                                foreach ( $placement_opts as $o ) {
+                                        $label = $placement_labels[ $o ];
+                                        echo '<option value="' . esc_attr( $o ) . '" ' . selected( $sel, $o, false ) . '>' . esc_html( $label ) . '</option>';
+                                }
+                          ?>
+                        </select>
+                  </td>
+                </tr>
 		<tr>
 		  <th scope="row"><label for="bhg_ad_vis"><?php echo esc_html__('Visible To', 'bonus-hunt-guesser'); ?></label></th>
 		  <td>
 			<select id="bhg_ad_vis" name="visible_to">
 			  <?php
-				$visible_opts   = ['all', 'guests', 'logged_in', 'affiliates', 'non_affiliates'];
-				$visible_labels = [
-					'all'            => __('All', 'bonus-hunt-guesser'),
-					'guests'         => __('Guests', 'bonus-hunt-guesser'),
-					'logged_in'      => __('Logged In', 'bonus-hunt-guesser'),
-					'affiliates'     => __('Affiliates', 'bonus-hunt-guesser'),
-					'non_affiliates' => __('Non Affiliates', 'bonus-hunt-guesser'),
-				];
-				$sel = $ad ? ($ad->visible_to ?? 'all') : 'all';
-				foreach ( $visible_opts as $o ) {
-					$label = $visible_labels[ $o ] ?? $o;
-					echo '<option value="' . esc_attr( $o ) . '" ' . selected( $sel, $o, false ) . '>' . esc_html( $label ) . '</option>';
-				}
-			  ?>
-			</select>
-		  </td>
-		</tr>
+                                $visible_opts   = array( 'all', 'guests', 'logged_in', 'affiliates', 'non_affiliates' );
+                                $visible_labels = array(
+                                        'all'            => __( 'All', 'bonus-hunt-guesser' ),
+                                        'guests'         => __( 'Guests', 'bonus-hunt-guesser' ),
+                                        'logged_in'      => __( 'Logged In', 'bonus-hunt-guesser' ),
+                                        'affiliates'     => __( 'Affiliates', 'bonus-hunt-guesser' ),
+                                        'non_affiliates' => __( 'Non Affiliates', 'bonus-hunt-guesser' ),
+                                );
+                                $sel = $ad ? ( $ad->visible_to ?? 'all' ) : 'all';
+                                foreach ( $visible_opts as $o ) {
+                                        $label = $visible_labels[ $o ] ?? $o;
+                                        echo '<option value="' . esc_attr( $o ) . '" ' . selected( $sel, $o, false ) . '>' . esc_html( $label ) . '</option>';
+                                }
+                          ?>
+                        </select>
+                  </td>
+                </tr>
 		<tr>
 		  <th scope="row"><label for="bhg_ad_targets"><?php echo esc_html__('Target Page Slugs', 'bonus-hunt-guesser'); ?></label></th>
 		  <td><input class="regular-text" id="bhg_ad_targets" name="target_pages" value="<?php echo esc_attr($ad ? ($ad->target_pages ?? '') : ''); ?>" placeholder="page-slug-1,page-slug-2"></td>
