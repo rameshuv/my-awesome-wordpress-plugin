@@ -49,13 +49,14 @@ $hunts = bhg_get_latest_closed_hunts( 3 );
 				  foreach ( $winners as $w ) {
 					  $u  = get_userdata( (int) $w->user_id );
 					  $nm = $u ? $u->user_login : sprintf( __( 'User #%d', 'bonus-hunt-guesser' ), (int) $w->user_id );
-					  $out[] = sprintf(
-						  '%s — %s (%s %s)',
-						  esc_html( $nm ),
-						  esc_html( number_format_i18n( (float) $w->guess, 2 ) ),
-						  esc_html__( 'diff', 'bonus-hunt-guesser' ),
-						  esc_html( number_format_i18n( (float) $w->diff, 2 ) )
-					  );
+                                          $out[] = sprintf(
+                                                  '%s %s %s (%s %s)',
+                                                  esc_html( $nm ),
+                                                  esc_html__( '—', 'bonus-hunt-guesser' ),
+                                                  esc_html( number_format_i18n( (float) $w->guess, 2 ) ),
+                                                  esc_html__( 'diff', 'bonus-hunt-guesser' ),
+                                                  esc_html( number_format_i18n( (float) $w->diff, 2 ) )
+                                          );
 				  }
 				  echo esc_html( implode( ' • ', $out ) );
 			  } else {
@@ -64,8 +65,8 @@ $hunts = bhg_get_latest_closed_hunts( 3 );
 			  ?>
 			</td>
 			<td><?php echo esc_html( number_format_i18n( (float) $h->starting_balance, 2 ) ); ?></td>
-			<td><?php echo ( $h->final_balance !== null ) ? esc_html( number_format_i18n( (float) $h->final_balance, 2 ) ) : '—'; ?></td>
-			<td><?php echo $h->closed_at ? esc_html( date_i18n( get_option( 'date_format' ) . ' ' . get_option( 'time_format' ), strtotime( $h->closed_at ) ) ) : '—'; ?></td>
+                        <td><?php echo ( $h->final_balance !== null ) ? esc_html( number_format_i18n( (float) $h->final_balance, 2 ) ) : esc_html__( '—', 'bonus-hunt-guesser' ); ?></td>
+                        <td><?php echo $h->closed_at ? esc_html( date_i18n( get_option( 'date_format' ) . ' ' . get_option( 'time_format' ), strtotime( $h->closed_at ) ) ) : esc_html__( '—', 'bonus-hunt-guesser' ); ?></td>
 		  </tr>
 		<?php endforeach; ?>
 	  <?php else : ?>

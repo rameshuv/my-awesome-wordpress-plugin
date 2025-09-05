@@ -71,7 +71,7 @@ if ( 'list' === $view ) :
 		  <td><?php echo (int) $h->id; ?></td>
 		  <td><a href="<?php echo esc_url( add_query_arg( [ 'view' => 'edit', 'id' => (int) $h->id ] ) ); ?>"><?php echo esc_html( $h->title ); ?></a></td>
 		  <td><?php echo esc_html( number_format_i18n( (float) $h->starting_balance, 2 ) ); ?></td>
-		  <td><?php echo null !== $h->final_balance ? esc_html( number_format_i18n( (float) $h->final_balance, 2 ) ) : '—'; ?></td>
+                  <td><?php echo null !== $h->final_balance ? esc_html( number_format_i18n( (float) $h->final_balance, 2 ) ) : esc_html__( '—', 'bonus-hunt-guesser' ); ?></td>
 		  <td><?php echo (int) ( $h->winners_count ?? 3 ); ?></td>
 		  <td><?php echo esc_html( $h->status ); ?></td>
 		  <td>
@@ -119,7 +119,7 @@ if ( 'close' === $view ) :
 	else :
 ?>
 <div class="wrap">
-  <h1 class="wp-heading-inline"><?php echo esc_html__( 'Close Bonus Hunt', 'bonus-hunt-guesser' ); ?> — <?php echo esc_html( $hunt->title ); ?></h1>
+  <h1 class="wp-heading-inline"><?php echo esc_html__( 'Close Bonus Hunt', 'bonus-hunt-guesser' ); ?> <?php echo esc_html__( '—', 'bonus-hunt-guesser' ); ?> <?php echo esc_html( $hunt->title ); ?></h1>
   <form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" class="bhg-max-width-400 bhg-margin-top-small">
 	<?php wp_nonce_field( 'bhg_close_hunt' ); ?>
 	<input type="hidden" name="action" value="bhg_close_hunt" />
@@ -237,7 +237,7 @@ if ($view === 'edit') :
 	);
 ?>
 <div class="wrap">
-  <h1 class="wp-heading-inline"><?php echo esc_html__('Edit Bonus Hunt', 'bonus-hunt-guesser'); ?> — <?php echo esc_html($hunt->title); ?></h1>
+  <h1 class="wp-heading-inline"><?php echo esc_html__( 'Edit Bonus Hunt', 'bonus-hunt-guesser' ); ?> <?php echo esc_html__( '—', 'bonus-hunt-guesser' ); ?> <?php echo esc_html( $hunt->title ); ?></h1>
 
   <form method="post" action="<?php echo esc_url(admin_url('admin-post.php')); ?>" class="bhg-max-width-900 bhg-margin-top-small">
 	<?php wp_nonce_field('bhg_save_hunt'); ?>
@@ -290,7 +290,7 @@ if ($view === 'edit') :
 		</tr>
 		<tr>
 		  <th scope="row"><label for="bhg_final"><?php echo esc_html__('Final Balance', 'bonus-hunt-guesser'); ?></label></th>
-		  <td><input type="number" step="0.01" min="0" id="bhg_final" name="final_balance" value="<?php echo esc_attr($hunt->final_balance); ?>" placeholder="—"></td>
+                  <td><input type="number" step="0.01" min="0" id="bhg_final" name="final_balance" value="<?php echo esc_attr( $hunt->final_balance ); ?>" placeholder="<?php echo esc_attr( esc_html__( '—', 'bonus-hunt-guesser' ) ); ?>"></td>
 		</tr>
 		<tr>
 		  <th scope="row"><label for="bhg_status"><?php echo esc_html__('Status', 'bonus-hunt-guesser'); ?></label></th>
