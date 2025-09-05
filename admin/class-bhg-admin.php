@@ -129,10 +129,75 @@ class BHG_Admin {
             'updated_at'       => current_time('mysql'),
         ];
 
-        if ($id) { $wpdb->update($hunts_table, $data, ['id' => $id]); }
-        else { $data['created_at'] = current_time('mysql'); $wpdb->insert($hunts_table, $data); }
+        if ($id) {
+            $wpdb->update($hunts_table, $data, ['id' => $id]);
+        } else {
+            $data['created_at'] = current_time('mysql');
+            $wpdb->insert($hunts_table, $data);
+            $id = (int) $wpdb->insert_id;
+        }
 
-        wp_redirect(admin_url('admin.php?page=bhg-bonus-hunts')); exit;
+        if ($status === 'closed' && $final_balance !== null) {
+            $winners = BHG_Models::close_hunt($id, $final_balance);
+
+            $emails_enabled = (int) get_option('bhg_email_enabled', 1);
+            if ($emails_enabled) {
+                $guesses_table = $wpdb->prefix . 'bhg_guesses';
+                $rows = $wpdb->get_results(
+                    $wpdb->prepare(
+                        "SELECT DISTINCT user_id FROM {$guesses_table} WHERE hunt_id=%d",
+                        $id
+                    )
+                );
+
+                $template = get_option(
+                    'bhg_email_template',
+                    'Hi {{username}},\nThe Bonus Hunt "{{hunt}}" is closed. Final balance: €{{final}}. Winners: {{winners}}. Thanks for playing!'
+                );
+
+                $hunt_title = (string) $wpdb->get_var(
+                    $wpdb->prepare(
+                        "SELECT title FROM {$hunts_table} WHERE id=%d",
+                        $id
+                    )
+                );
+
+                $winner_names = array();
+                foreach ((array) $winners as $winner_id) {
+                    $wu = get_userdata((int) $winner_id);
+                    if ($wu) {
+                        $winner_names[] = $wu->user_login;
+                    }
+                }
+                $winner_first = $winner_names ? $winner_names[0] : '—';
+                $winner_list  = $winner_names ? implode(', ', $winner_names) : '—';
+
+                foreach ($rows as $r) {
+                    $u = get_userdata((int) $r->user_id);
+                    if (! $u) {
+                        continue;
+                    }
+                    $body = strtr(
+                        $template,
+                        array(
+                            '{{username}}' => $u->user_login,
+                            '{{hunt}}'     => $hunt_title,
+                            '{{final}}'    => number_format($final_balance, 2),
+                            '{{winner}}'   => $winner_first,
+                            '{{winners}}'  => $winner_list,
+                        )
+                    );
+                    wp_mail(
+                        $u->user_email,
+                        sprintf(__('Results for %s', 'bonus-hunt-guesser'), $hunt_title ?: 'Bonus Hunt'),
+                        $body
+                    );
+                }
+            }
+        }
+
+        wp_redirect(admin_url('admin.php?page=bhg-bonus-hunts'));
+        exit;
     }
 
     public function handle_save_ad() {
