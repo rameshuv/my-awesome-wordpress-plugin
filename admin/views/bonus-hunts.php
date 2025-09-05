@@ -126,7 +126,7 @@ if ($view === 'add') : ?>
         <tr>
           <th scope="row"><label for="bhg_prizes"><?php echo esc_html__('Prizes', 'bonus-hunt-guesser'); ?></label></th>
           <td><textarea class="large-text" rows="3" id="bhg_prizes" name="prizes"></textarea></td>
-        
+        </tr>
         <tr>
           <th scope="row"><label for="bhg_affiliate"><?php echo esc_html__('Affiliate Site', 'bonus-hunt-guesser'); ?></label></th>
           <td>
@@ -215,7 +215,7 @@ if ($view === 'edit') :
         <tr>
           <th scope="row"><label for="bhg_prizes"><?php echo esc_html__('Prizes', 'bonus-hunt-guesser'); ?></label></th>
           <td><textarea class="large-text" rows="3" id="bhg_prizes" name="prizes"><?php echo esc_textarea($hunt->prizes); ?></textarea></td>
-        
+        </tr>
         <tr>
           <th scope="row"><label for="bhg_affiliate"><?php echo esc_html__('Affiliate Site', 'bonus-hunt-guesser'); ?></label></th>
           <td>
