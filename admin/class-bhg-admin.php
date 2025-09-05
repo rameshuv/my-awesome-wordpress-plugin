@@ -49,21 +49,20 @@ class BHG_Admin {
 		add_submenu_page($slug, __('Translations', 'bonus-hunt-guesser'),__('Translations', 'bonus-hunt-guesser'),$cap, 'bhg-translations',            [$this, 'translations']);
 		add_submenu_page($slug, __('Database', 'bonus-hunt-guesser'),    __('Database', 'bonus-hunt-guesser'),    $cap, 'bhg-database',                [$this, 'database']);
 		add_submenu_page($slug, __('Settings', 'bonus-hunt-guesser'),    __('Settings', 'bonus-hunt-guesser'),    $cap, 'bhg-settings',                [$this, 'settings']);
-		add_submenu_page(
-			$slug,
-			__('BHG Tools', 'bonus-hunt-guesser'),
-			__('BHG Tools', 'bonus-hunt-guesser'),
-			$cap,
-			'bhg-tools',
-			[$this, 'bhg_tools_page']
-		);
+                add_submenu_page(
+                        $slug,
+                        __('BHG Tools', 'bonus-hunt-guesser'),
+                        __('BHG Tools', 'bonus-hunt-guesser'),
+                        $cap,
+                        'bhg-tools',
+                        [$this, 'bhg_tools_page']
+                );
 
-		// NOTE: By default, WordPress adds a submenu item that duplicates the
-		// top-level “Bonus Hunt” menu. The previous `remove_submenu_page()`
-		// call removed this submenu, but it also inadvertently removed our
-		// custom “Dashboard” submenu. Removing the call ensures the Dashboard
-		// item remains visible under the "Bonus Hunt" menu.
-	}
+                // WordPress automatically adds a submenu item that duplicates the
+                // top-level "Bonus Hunt" menu. Remove that default item so the first
+                // submenu is the custom "Dashboard" page.
+                remove_submenu_page( $slug, $slug );
+        }
 
 	/** Enqueue admin assets on BHG screens. */
 	public function assets( $hook ) {

@@ -25,7 +25,7 @@ $hunts = bhg_get_latest_closed_hunts( 3 );
   <table class="widefat striped">
 	<thead>
 	  <tr>
-		<th><?php esc_html_e( 'Bonushunt', 'bonus-hunt-guesser' ); ?></th>
+                <th><?php esc_html_e( 'Bonus Hunt', 'bonus-hunt-guesser' ); ?></th>
 		<th><?php esc_html_e( 'All Winners', 'bonus-hunt-guesser' ); ?></th>
 		<th><?php esc_html_e( 'Start Balance', 'bonus-hunt-guesser' ); ?></th>
 		<th><?php esc_html_e( 'Final Balance', 'bonus-hunt-guesser' ); ?></th>
