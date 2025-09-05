@@ -7,11 +7,14 @@ if (!current_user_can('manage_options')) {
 global $wpdb;
 $table = $wpdb->prefix . 'bhg_ads';
 
+$action = isset( $_GET['action'] ) ? sanitize_key( $_GET['action'] ) : '';
+$ad_id  = isset( $_GET['id'] ) ? absint( $_GET['id'] ) : 0;
+
 // Delete action
-if (isset($_GET['action'], $_GET['id']) && $_GET['action']==='delete' && isset($_GET['_wpnonce'])) {
-    if (wp_verify_nonce($_GET['_wpnonce'], 'bhg_delete_ad') && current_user_can('manage_options')) {
-        $wpdb->delete($table, ['id'=>(int)$_GET['id']], ['%d']);
-        wp_redirect(remove_query_arg(['action','id','_wpnonce']));
+if ( 'delete' === $action && $ad_id && isset( $_GET['_wpnonce'] ) ) {
+    if ( wp_verify_nonce( $_GET['_wpnonce'], 'bhg_delete_ad' ) && current_user_can( 'manage_options' ) ) {
+        $wpdb->delete( $table, [ 'id' => $ad_id ], [ '%d' ] );
+        wp_redirect( remove_query_arg( [ 'action', 'id', '_wpnonce' ] ) );
         exit;
     }
 }
