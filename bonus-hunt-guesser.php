@@ -154,6 +154,7 @@ spl_autoload_register( function ( $class ) {
 		'BHG_Utils' => 'includes/class-bhg-utils.php',
 		'BHG_Models' => 'includes/class-bhg-models.php',
 		'BHG_Front_Menus' => 'includes/class-bhg-front-menus.php',
+		'BHG_Ads' => 'includes/class-bhg-ads.php',
 		'BHG_Demo' => 'admin/class-bhg-demo.php',
 	];
 	
@@ -291,6 +292,10 @@ function bhg_init_plugin() {
 	}
 	if ( class_exists( 'BHG_Front_Menus' ) ) {
 		new BHG_Front_Menus();
+	}
+
+	if ( class_exists( 'BHG_Ads' ) ) {
+		BHG_Ads::init();
 	}
 
 	if ( class_exists( 'BHG_DB' ) ) {
