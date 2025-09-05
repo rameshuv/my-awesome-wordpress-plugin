@@ -39,8 +39,8 @@ class BHG_Shortcodes {
 			return '';
 		}
 
-		$base     = home_url( sanitize_text_field( wp_unslash( $_SERVER['REQUEST_URI'] ) ) );
-		$redirect = add_query_arg( array(), $base );
+                $base     = wp_validate_redirect( wp_unslash( $_SERVER['REQUEST_URI'] ), home_url( '/' ) );
+                $redirect = esc_url_raw( add_query_arg( array(), $base ) );
 
 		return '<p>' . esc_html__( 'Please log in to continue.', 'bonus-hunt-guesser' ) . '</p>'
 			 . '<p><a class="button button-primary" href="' . esc_url( wp_login_url( $redirect ) ) . '">' . esc_html__( 'Log in', 'bonus-hunt-guesser' ) . '</a></p>';
@@ -85,8 +85,8 @@ class BHG_Shortcodes {
 		$hunt_id = (int) $atts['hunt_id'];
 
 		if ( ! is_user_logged_in() ) {
-			$base     = home_url( sanitize_text_field( wp_unslash( $_SERVER['REQUEST_URI'] ) ) );
-			$redirect = add_query_arg( array(), $base );
+                        $base     = wp_validate_redirect( wp_unslash( $_SERVER['REQUEST_URI'] ), home_url( '/' ) );
+                        $redirect = esc_url_raw( add_query_arg( array(), $base ) );
 
 			return '<p>' . esc_html__( 'Please log in to submit your guess.', 'bonus-hunt-guesser' ) . '</p>'
 				 . '<p><a class="button button-primary" href="' . esc_url( wp_login_url( $redirect ) ) . '">' . esc_html__( 'Log in', 'bonus-hunt-guesser' ) . '</a></p>';
@@ -234,7 +234,8 @@ class BHG_Shortcodes {
 
 		$pages = (int) ceil( $total / $per );
 		if ( $pages > 1 ) {
-			$base = remove_query_arg( 'page', home_url( sanitize_text_field( wp_unslash( $_SERVER['REQUEST_URI'] ) ) ) );
+                        $base = wp_validate_redirect( wp_unslash( $_SERVER['REQUEST_URI'] ), home_url( '/' ) );
+                        $base = esc_url_raw( remove_query_arg( 'page', $base ) );
 			echo '<div class="bhg-pagination">';
 			for ( $p = 1; $p <= $pages; $p++ ) {
 $class = $p == $page ? ' class="bhg-current-page"' : '';
@@ -661,7 +662,9 @@ echo '<td>' . esc_html($row->last_win_date ? mysql2date(get_option('date_format'
 			   if (!$rows) {
 					   return '<p>' . esc_html__('No tournaments found.', 'bonus-hunt-guesser') . '</p>';
 			   }
-				$current_url = (isset($_SERVER['REQUEST_URI']) ? esc_url_raw(wp_unslash($_SERVER['REQUEST_URI'])) : home_url('/'));
+                               $current_url = isset( $_SERVER['REQUEST_URI'] )
+                                       ? esc_url_raw( wp_validate_redirect( wp_unslash( $_SERVER['REQUEST_URI'] ), home_url( '/' ) ) )
+                                       : home_url( '/' );
 
 				ob_start();
 echo '<form method="get" class="bhg-tournament-filters">';
@@ -912,7 +915,8 @@ echo '<td><a href="' . $detail_url . '">' . esc_html__('Show details','bonus-hun
 		}
 
 		if ( $hunts ) {
-			$base = remove_query_arg( 'hunt_id', home_url( sanitize_text_field( wp_unslash( $_SERVER['REQUEST_URI'] ) ) ) );
+                       $base = wp_validate_redirect( wp_unslash( $_SERVER['REQUEST_URI'] ), home_url( '/' ) );
+                       $base = esc_url_raw( remove_query_arg( 'hunt_id', $base ) );
 			echo '<div id="bhg-tab-hunts" class="bhg-tab-pane">';
 			echo '<ul class="bhg-hunt-history">';
 			foreach ( $hunts as $hunt ) {
