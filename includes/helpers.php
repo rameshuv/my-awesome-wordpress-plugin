@@ -207,13 +207,18 @@ if ( ! function_exists( 'bhg_get_default_translations' ) ) {
 			'label_user_number'           => 'User #%d',
 			'label_diff'                  => 'diff',
 			'notice_login_view_content'   => 'Please log in to view this content.',
-			'label_latest_hunts'          => 'Latest Hunts',
-			'label_bonushunt'             => 'Bonushunt',
-			'label_all_winners'           => 'All Winners',
-			'label_closed_at'             => 'Closed At',
-			'notice_no_winners_yet'       => 'No winners yet.',
-		);
-	}
+                        'label_latest_hunts'          => 'Latest Hunts',
+                        'label_bonushunt'             => 'Bonushunt',
+                        'label_all_winners'           => 'All Winners',
+                        'label_closed_at'             => 'Closed At',
+                        'label_hunt'                  => 'Hunt',
+                        'label_title'                 => 'Title',
+                        'notice_no_user_specified'    => 'No user specified.',
+                        'notice_no_guesses_found'     => 'No guesses found.',
+                        'msg_no_ads_yet'              => 'No ads yet.',
+                        'notice_no_winners_yet'       => 'No winners yet.',
+                );
+        }
 }
 
 if ( ! function_exists( 'bhg_seed_default_translations_if_empty' ) ) {
