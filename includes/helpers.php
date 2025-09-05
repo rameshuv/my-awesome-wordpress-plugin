@@ -517,7 +517,12 @@ if ( ! function_exists( 'bhg_reset_demo_and_seed' ) ) {
 				'num_bonuses' => 10,
 				'prizes' => __('Gift card + swag', 'bonus-hunt-guesser'),
 				'status' => 'open',
-				'affiliate_site_id' => (int) $wpdb->get_var( "SELECT id FROM {$p}bhg_affiliate_websites ORDER BY id ASC LIMIT 1" ),
+                               'affiliate_site_id' => (int) $wpdb->get_var(
+                                       $wpdb->prepare(
+                                               "SELECT id FROM {$p}bhg_affiliate_websites ORDER BY id ASC LIMIT %d",
+                                               1
+                                       )
+                               ),
 				'created_at' => $now,
 				'updated_at' => $now,
 			), array('%s','%f','%d','%s','%s','%d','%s','%s'));
@@ -564,7 +569,12 @@ if ( ! function_exists( 'bhg_reset_demo_and_seed' ) ) {
 			if ($wpdb->get_var($wpdb->prepare("SHOW TABLES LIKE %s", $r_tbl)) === $r_tbl) {
 				$wpdb->query( "DELETE FROM `{$r_tbl}`" );
 			}
-			$closed = $wpdb->get_results( "SELECT winner_user_id, closed_at FROM {$hunts_tbl} WHERE status='closed' AND winner_user_id IS NOT NULL" );
+                       $closed = $wpdb->get_results(
+                               $wpdb->prepare(
+                                       "SELECT winner_user_id, closed_at FROM {$hunts_tbl} WHERE status=%s AND winner_user_id IS NOT NULL",
+                                       'closed'
+                               )
+                       );
 			foreach ($closed as $row) {
 				$ts = $row->closed_at ? strtotime($row->closed_at) : time();
 				$isoYear = date('o', $ts);

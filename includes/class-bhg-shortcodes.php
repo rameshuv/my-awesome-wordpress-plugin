@@ -49,7 +49,12 @@ class BHG_Shortcodes {
 	/** [bhg_active_hunt] — list all open hunts */
         public function active_hunt_shortcode($atts) {
                 global $wpdb;
-                $hunts = $wpdb->get_results( "SELECT * FROM {$wpdb->prefix}bhg_bonus_hunts WHERE status='open' ORDER BY created_at DESC" );
+               $hunts = $wpdb->get_results(
+                       $wpdb->prepare(
+                               "SELECT * FROM {$wpdb->prefix}bhg_bonus_hunts WHERE status=%s ORDER BY created_at DESC",
+                               'open'
+                       )
+               );
                 if (!$hunts) {
                         return '<div class="bhg-active-hunt"><p>' . esc_html__('No active bonus hunts at the moment.', 'bonus-hunt-guesser') . '</p></div>';
                 }
@@ -92,8 +97,13 @@ class BHG_Shortcodes {
 				 . '<p><a class="button button-primary" href="' . esc_url( wp_login_url( $redirect ) ) . '">' . esc_html__( 'Log in', 'bonus-hunt-guesser' ) . '</a></p>';
 		}
 
-		global $wpdb;
-		$open_hunts = $wpdb->get_results( "SELECT id, title FROM {$wpdb->prefix}bhg_bonus_hunts WHERE status='open' ORDER BY created_at DESC" );
+               global $wpdb;
+               $open_hunts = $wpdb->get_results(
+                       $wpdb->prepare(
+                               "SELECT id, title FROM {$wpdb->prefix}bhg_bonus_hunts WHERE status=%s ORDER BY created_at DESC",
+                               'open'
+                       )
+               );
 
 		if ($hunt_id <= 0) {
 			if (!$open_hunts) {
@@ -162,12 +172,17 @@ class BHG_Shortcodes {
 
 		global $wpdb;
 		$hunt_id = (int)$a['hunt_id'];
-		if ($hunt_id <= 0) {
-			$hunt_id = (int)$wpdb->get_var( "SELECT id FROM {$wpdb->prefix}bhg_bonus_hunts ORDER BY created_at DESC LIMIT 1" );
-			if ($hunt_id <= 0) {
-				return '<p>' . esc_html__('No hunts found.', 'bonus-hunt-guesser') . '</p>';
-			}
-		}
+               if ($hunt_id <= 0) {
+                       $hunt_id = (int) $wpdb->get_var(
+                               $wpdb->prepare(
+                                       "SELECT id FROM {$wpdb->prefix}bhg_bonus_hunts ORDER BY created_at DESC LIMIT %d",
+                                       1
+                               )
+                       );
+                       if ($hunt_id <= 0) {
+                               return '<p>' . esc_html__('No hunts found.', 'bonus-hunt-guesser') . '</p>';
+                       }
+               }
 
 		$g = $wpdb->prefix . 'bhg_guesses';
 		$u = $wpdb->users;
@@ -848,7 +863,7 @@ echo '<td><a href="' . $detail_url . '">' . esc_html__('Show details','bonus-hun
 						WHERE {$where}
 						GROUP BY u.ID, u.user_login
 						ORDER BY total_wins DESC, u.user_login ASC
-						LIMIT 50";
+						LIMIT %d";
 				array_unshift($params, $sql);
 				$prepared = call_user_func_array(array($wpdb, 'prepare'), $params);
 				$results[$key] = $wpdb->get_results($prepared);
@@ -858,13 +873,19 @@ echo '<td><a href="' . $detail_url . '">' . esc_html__('Show details','bonus-hun
 						INNER JOIN {$users_tbl} u ON u.ID = r.user_id
 						GROUP BY u.ID, u.user_login
 						ORDER BY total_wins DESC, u.user_login ASC
-						LIMIT 50";
-				$results[$key] = $wpdb->get_results( $sql );
+						LIMIT %d";
+                                $results[$key] = $wpdb->get_results( $wpdb->prepare( $sql, 50 ) );
 			}
 		}
 
-		$hunts_tbl = $wpdb->prefix . 'bhg_bonus_hunts';
-		$hunts = $wpdb->get_results( "SELECT id, title FROM {$hunts_tbl} WHERE status='closed' ORDER BY created_at DESC LIMIT 50" );
+               $hunts_tbl = $wpdb->prefix . 'bhg_bonus_hunts';
+               $hunts = $wpdb->get_results(
+                       $wpdb->prepare(
+                               "SELECT id, title FROM {$hunts_tbl} WHERE status=%s ORDER BY created_at DESC LIMIT %d",
+                               'closed',
+                               50
+                       )
+               );
 
 		wp_enqueue_style(
 			'bhg-shortcodes',
