@@ -1,9 +1,9 @@
 <?php
 if ( ! defined( 'ABSPATH' ) ) { exit; }
-if (!current_user_can('manage_options')) { wp_die(__('You do not have sufficient permissions to access this page.', 'bonus-hunt-guesser')); }
+if (!current_user_can('manage_options')) { wp_die(esc_html__('You do not have sufficient permissions to access this page.', 'bonus-hunt-guesser')); }
 
 $hunt_id = isset($_GET['id']) ? (int) $_GET['id'] : 0;
-if (!$hunt_id) { wp_die(__('Missing hunt id','bonus-hunt-guesser')); }
+if (!$hunt_id) { wp_die(esc_html__('Missing hunt id','bonus-hunt-guesser')); }
 
 check_admin_referer('bhg_edit_hunt_' . $hunt_id, 'bhg_nonce');
 
@@ -17,11 +17,11 @@ if (isset($_POST['bhg_remove_guess']) && isset($_POST['bhg_remove_guess_nonce'])
 }
 
 if (!function_exists('bhg_get_hunt') || !function_exists('bhg_get_hunt_participants')) {
-    wp_die(__('Missing helper functions. Please include class-bhg-bonus-hunts-helpers.php.', 'bonus-hunt-guesser'));
+    wp_die(esc_html__('Missing helper functions. Please include class-bhg-bonus-hunts-helpers.php.', 'bonus-hunt-guesser'));
 }
 
 $hunt = bhg_get_hunt($hunt_id);
-if (!$hunt) { wp_die(__('Hunt not found','bonus-hunt-guesser')); }
+if (!$hunt) { wp_die(esc_html__('Hunt not found','bonus-hunt-guesser')); }
 
 $paged = max(1, isset($_GET['ppaged']) ? (int) $_GET['ppaged'] : 1);
 $per_page = 30;
