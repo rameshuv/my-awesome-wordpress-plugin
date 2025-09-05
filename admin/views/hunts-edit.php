@@ -5,6 +5,8 @@ if (!current_user_can('manage_options')) { wp_die(__('You do not have sufficient
 $hunt_id = isset($_GET['id']) ? (int) $_GET['id'] : 0;
 if (!$hunt_id) { wp_die(__('Missing hunt id','bonus-hunt-guesser')); }
 
+check_admin_referer('bhg_edit_hunt_' . $hunt_id, 'bhg_nonce');
+
 // Handle delete guess action
 if (isset($_POST['bhg_remove_guess']) && isset($_POST['bhg_remove_guess_nonce']) && wp_verify_nonce($_POST['bhg_remove_guess_nonce'], 'bhg_remove_guess_action')) {
     $guess_id = (int) ($_POST['guess_id'] ?? 0);

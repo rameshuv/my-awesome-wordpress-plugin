@@ -51,9 +51,10 @@ $pages = max(1, (int) ceil($total / $per_page));
           <td>
             <?php
               $results_url = wp_nonce_url( admin_url('admin.php?page=bhg-hunt-results&id='.(int)$r->id), 'bhg_view_results_'.(int)$r->id, 'bhg_nonce' );
+              $edit_url    = wp_nonce_url( admin_url('admin.php?page=bhg-hunts-edit&id='.(int)$r->id), 'bhg_edit_hunt_'.(int)$r->id, 'bhg_nonce' );
             ?>
             <a class="button" href="<?php echo esc_url($results_url); ?>"><?php esc_html_e('Results','bonus-hunt-guesser'); ?></a>
-            <a class="button" href="<?php echo esc_url( admin_url('admin.php?page=bhg-hunts-edit&id='.(int)$r->id) ); ?>"><?php esc_html_e('Edit','bonus-hunt-guesser'); ?></a>
+            <a class="button" href="<?php echo esc_url($edit_url); ?>"><?php esc_html_e('Edit','bonus-hunt-guesser'); ?></a>
           </td>
         </tr>
       <?php endforeach; else: ?>
