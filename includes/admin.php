@@ -2,7 +2,7 @@
 if (!defined('ABSPATH')) exit;
 
 add_action('admin_post_bhg_save_hunt', function(){
-  if (!current_user_can(bhg_admin_cap())) wp_die('Forbidden', 403);
+  if (!current_user_can(bhg_admin_cap())) wp_die( esc_html__( 'Forbidden', 'bonus-hunt-guesser' ), 403 );
   check_admin_referer('bhg_save_hunt');
   $id = BHG_Models::save_hunt($_POST);
   wp_safe_redirect(add_query_arg(['page'=>'bhg-bonus-hunts','updated'=>'1','id'=>$id], admin_url('admin.php')));
@@ -10,7 +10,7 @@ add_action('admin_post_bhg_save_hunt', function(){
 });
 
 add_action('admin_post_bhg_close_hunt', function(){
-  if (!current_user_can(bhg_admin_cap())) wp_die('Forbidden', 403);
+  if (!current_user_can(bhg_admin_cap())) wp_die( esc_html__( 'Forbidden', 'bonus-hunt-guesser' ), 403 );
   check_admin_referer('bhg_close_hunt');
   $hunt_id = intval($_POST['hunt_id'] ?? 0);
   $final_balance = floatval($_POST['final_balance'] ?? 0);
@@ -40,7 +40,7 @@ add_action('admin_post_bhg_close_hunt', function(){
 });
 
 add_action('admin_post_bhg_add_affiliate', function(){
-  if (!current_user_can(bhg_admin_cap())) wp_die('Forbidden', 403);
+  if (!current_user_can(bhg_admin_cap())) wp_die( esc_html__( 'Forbidden', 'bonus-hunt-guesser' ), 403 );
   check_admin_referer('bhg_add_affiliate');
   global $wpdb; $t = BHG_DB::table('affiliate_websites');
   $wpdb->insert($t, ['name'=>sanitize_text_field($_POST['name']??''), 'slug'=>sanitize_title($_POST['slug']??'')]);
@@ -50,7 +50,7 @@ add_action('admin_post_bhg_add_affiliate', function(){
 
 
 add_action('admin_post_bhg_save_translations', function(){
-  if (!current_user_can(bhg_admin_cap())) wp_die('Forbidden', 403);
+  if (!current_user_can(bhg_admin_cap())) wp_die( esc_html__( 'Forbidden', 'bonus-hunt-guesser' ), 403 );
   check_admin_referer('bhg_save_translations');
   $strings = array_map('sanitize_text_field', $_POST['strings'] ?? []);
   update_option('bhg_translations', $strings);
@@ -59,7 +59,7 @@ add_action('admin_post_bhg_save_translations', function(){
 });
 
 add_action('admin_post_bhg_save_ads', function(){
-  if (!current_user_can(bhg_admin_cap())) wp_die('Forbidden', 403);
+  if (!current_user_can(bhg_admin_cap())) wp_die( esc_html__( 'Forbidden', 'bonus-hunt-guesser' ), 403 );
   check_admin_referer('bhg_save_ads');
   $ads = $_POST['ads'] ?? [];
   $clean = [];
@@ -83,7 +83,7 @@ add_action('admin_post_bhg_save_ads', function(){
 add_action( 'admin_post_bhg_save_user_affiliates', function () {
   // Verify capability and nonce.
   if ( ! current_user_can( bhg_admin_cap() ) ) {
-    wp_die( 'Forbidden', 403 );
+    wp_die( esc_html__( 'Forbidden', 'bonus-hunt-guesser' ), 403 );
   }
   check_admin_referer( 'bhg_save_user_affiliates' );
 
