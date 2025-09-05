@@ -11,6 +11,7 @@ class BHG_Admin {
         // Handlers
         add_action('admin_post_bhg_delete_guess',      [$this, 'handle_delete_guess']);
         add_action('admin_post_bhg_save_hunt',         [$this, 'handle_save_hunt']);
+        add_action('admin_post_bhg_close_hunt',        [$this, 'handle_close_hunt']);
         add_action('admin_post_bhg_save_ad',           [$this, 'handle_save_ad']);
         add_action('admin_post_bhg_tournament_save',   [$this, 'handle_save_tournament']);
         add_action('admin_post_bhg_save_affiliate',    [$this, 'handle_save_affiliate']);
@@ -198,6 +199,20 @@ class BHG_Admin {
             }
         }
 
+        wp_redirect(admin_url('admin.php?page=bhg-bonus-hunts'));
+        exit;
+    }
+
+    public function handle_close_hunt() {
+        if (!current_user_can('manage_options')) {
+            wp_die(esc_html__('No permission', 'bonus-hunt-guesser'));
+        }
+        check_admin_referer('bhg_close_hunt');
+        $hunt_id       = isset($_POST['hunt_id']) ? (int) $_POST['hunt_id'] : 0;
+        $final_balance = isset($_POST['final_balance']) ? (float) $_POST['final_balance'] : 0;
+        if ($hunt_id) {
+            BHG_Models::close_hunt($hunt_id, $final_balance);
+        }
         wp_redirect(admin_url('admin.php?page=bhg-bonus-hunts'));
         exit;
     }
