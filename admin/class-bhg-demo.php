@@ -47,7 +47,7 @@ class BHG_Demo {
             'status'=>'active'
         ]);
 
-        wp_redirect(admin_url('admin.php?page=bhg_demo&demo_reset=1'));
+        wp_safe_redirect( admin_url( 'admin.php?page=bhg_demo&demo_reset=1' ) );
         exit;
     }
 }
