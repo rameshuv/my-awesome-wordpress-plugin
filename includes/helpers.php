@@ -317,7 +317,7 @@ function bhg_render_ads( $placement = 'footer', $hunt_id = 0 ) {
             $uid = get_current_user_id();
             $show = $hunt_site_id > 0
                 ? bhg_is_user_affiliate_for_site($uid, $hunt_site_id)
-                : (bool) get_user_meta($uid, 'bhg_affiliate_status', true);
+                : (bool) get_user_meta($uid, 'bhg_is_affiliate', true);
         }
         if (!$show) continue;
         $msg  = wp_kses_post($r->content);

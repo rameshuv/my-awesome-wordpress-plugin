@@ -740,7 +740,7 @@ function bhg_is_affiliate( $user_id = null ) {
         return false;
     }
 
-    return (bool) get_user_meta($user_id, 'bhg_affiliate_status', true);
+    return (bool) get_user_meta($user_id, 'bhg_is_affiliate', true);
 }
 
 // Add user profile fields for affiliate status
@@ -758,14 +758,14 @@ function bhg_extra_user_profile_fields( $user ) {
         return;
     }
     
-    $affiliate_status = get_user_meta($user->ID, 'bhg_affiliate_status', true);
+    $affiliate_status = get_user_meta($user->ID, 'bhg_is_affiliate', true);
     ?>
     <h3><?php esc_html_e('Bonus Hunt Guesser Information', 'bonus-hunt-guesser'); ?></h3>
     <table class="form-table">
         <tr>
-            <th><label for="bhg_affiliate_status"><?php esc_html_e('Affiliate Status', 'bonus-hunt-guesser'); ?></label></th>
+            <th><label for="bhg_is_affiliate"><?php esc_html_e('Affiliate Status', 'bonus-hunt-guesser'); ?></label></th>
             <td>
-                <input type="checkbox" name="bhg_affiliate_status" id="bhg_affiliate_status" value="1" <?php checked($affiliate_status, 1); ?> />
+                <input type="checkbox" name="bhg_is_affiliate" id="bhg_is_affiliate" value="1" <?php checked($affiliate_status, 1); ?> />
                 <span class="description"><?php esc_html_e('Check if this user is an affiliate.', 'bonus-hunt-guesser'); ?></span>
             </td>
         </tr>
@@ -787,8 +787,8 @@ function bhg_save_extra_user_profile_fields( $user_id ) {
         return false;
     }
 
-    $affiliate_status = isset($_POST['bhg_affiliate_status']) ? 1 : 0;
-    update_user_meta($user_id, 'bhg_affiliate_status', $affiliate_status);
+    $affiliate_status = isset($_POST['bhg_is_affiliate']) ? 1 : 0;
+    update_user_meta($user_id, 'bhg_is_affiliate', $affiliate_status);
 }
 
 if (!function_exists('bhg_self_heal_db')) {

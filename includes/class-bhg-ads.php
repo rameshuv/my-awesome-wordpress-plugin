@@ -21,7 +21,7 @@ class BHG_Ads {
     protected static function user_is_affiliate() {
         if (!is_user_logged_in()) return false;
         $uid = get_current_user_id();
-        return (bool) get_user_meta($uid, 'bhg_affiliate_status', true);
+        return (bool) get_user_meta($uid, 'bhg_is_affiliate', true);
     }
 
     /** Whether current visitor matches the ad's visibility setting. */
