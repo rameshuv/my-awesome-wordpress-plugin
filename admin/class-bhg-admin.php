@@ -291,11 +291,21 @@ class BHG_Admin {
             wp_die( esc_html__( 'No permission', 'bonus-hunt-guesser' ) );
         }
         check_admin_referer( 'bhg_close_hunt' );
-        $hunt_id       = isset( $_POST['hunt_id'] ) ? (int) $_POST['hunt_id'] : 0;
-        $final_balance = isset( $_POST['final_balance'] ) ? (float) $_POST['final_balance'] : 0;
+
+        $hunt_id            = isset( $_POST['hunt_id'] ) ? (int) $_POST['hunt_id'] : 0;
+        $final_balance_raw  = isset( $_POST['final_balance'] ) ? sanitize_text_field( wp_unslash( $_POST['final_balance'] ) ) : '';
+
+        if ( '' === $final_balance_raw || ! is_numeric( $final_balance_raw ) || (float) $final_balance_raw < 0 ) {
+            wp_redirect( add_query_arg( 'bhg_msg', 'invalid_final_balance', admin_url( 'admin.php?page=bhg-bonus-hunts' ) ) );
+            exit;
+        }
+
+        $final_balance = (float) $final_balance_raw;
+
         if ( $hunt_id ) {
             BHG_Models::close_hunt( $hunt_id, $final_balance );
         }
+
         wp_redirect( admin_url( 'admin.php?page=bhg-bonus-hunts' ) );
         exit;
     }
@@ -485,6 +495,7 @@ class BHG_Admin {
             't_error'  => __( 'Could not save tournament. Check logs.', 'bonus-hunt-guesser' ),
             'nonce'    => __( 'Security check failed. Please retry.', 'bonus-hunt-guesser' ),
             'noaccess' => __( 'You do not have permission to do that.', 'bonus-hunt-guesser' ),
+            'invalid_final_balance' => __( 'Invalid final balance. Please enter a non-negative number.', 'bonus-hunt-guesser' ),
         ];
         $class = ( strpos( $msg, 'error' ) !== false || 'nonce' === $msg || 'noaccess' === $msg ) ? 'notice notice-error' : 'notice notice-success';
         $text  = isset( $map[ $msg ] ) ? $map[ $msg ] : esc_html( $msg );
