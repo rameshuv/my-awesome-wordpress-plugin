@@ -11,20 +11,23 @@ if (!class_exists('BHG_Shortcodes')) {
 
 class BHG_Shortcodes {
 
+    /**
+     * Register plugin shortcodes.
+     */
     public function __construct() {
-        // Register shortcodes once
-        add_shortcode('bhg_active_hunt',        array($this, 'active_hunt_shortcode'));
-        add_shortcode('bhg_guess_form',         array($this, 'guess_form_shortcode'));
-        add_shortcode('bhg_leaderboard',        array($this, 'leaderboard_shortcode'));
-        add_shortcode('bhg_tournaments',        array($this, 'tournaments_shortcode'));
-        add_shortcode('bhg_winner_notifications', array($this, 'winner_notifications_shortcode'));
-        add_shortcode('bhg_user_profile',       array($this, 'user_profile_shortcode'));
-        add_shortcode('bhg_best_guessers',      array($this, 'best_guessers_shortcode'));
+        // Register shortcodes once.
+        add_shortcode( 'bhg_active_hunt', array( $this, 'active_hunt_shortcode' ) );
+        add_shortcode( 'bhg_guess_form', array( $this, 'guess_form_shortcode' ) );
+        add_shortcode( 'bhg_leaderboard', array( $this, 'leaderboard_shortcode' ) );
+        add_shortcode( 'bhg_tournaments', array( $this, 'tournaments_shortcode' ) );
+        add_shortcode( 'bhg_winner_notifications', array( $this, 'winner_notifications_shortcode' ) );
+        add_shortcode( 'bhg_user_profile', array( $this, 'user_profile_shortcode' ) );
+        add_shortcode( 'bhg_best_guessers', array( $this, 'best_guessers_shortcode' ) );
 
-        // Legacy/alias tags if your site used alternatives
-        add_shortcode('bonus_hunt_leaderboard', array($this, 'leaderboard_shortcode'));
-        add_shortcode('bonus_hunt_login',       array($this, 'login_hint_shortcode'));
-        add_shortcode('bhg_active',             array($this, 'active_hunt_shortcode'));
+        // Legacy/alias tags if your site used alternatives.
+        add_shortcode( 'bonus_hunt_leaderboard', array( $this, 'leaderboard_shortcode' ) );
+        add_shortcode( 'bonus_hunt_login', array( $this, 'login_hint_shortcode' ) );
+        add_shortcode( 'bhg_active', array( $this, 'active_hunt_shortcode' ) );
     }
 
     /** Minimal login hint used by some themes */
