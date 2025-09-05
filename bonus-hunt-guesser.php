@@ -325,6 +325,53 @@ register_deactivation_hook(__FILE__, function() {
     // Keep data intact by default
 });
 
+// Frontend asset loader
+add_action( 'wp_enqueue_scripts', 'bhg_enqueue_public_assets' );
+
+/**
+ * Enqueue public-facing scripts and styles.
+ *
+ * @return void
+ */
+function bhg_enqueue_public_assets() {
+    wp_register_style(
+        'bhg-public',
+        BHG_PLUGIN_URL . 'assets/css/public.css',
+        array(),
+        defined( 'BHG_VERSION' ) ? BHG_VERSION : null
+    );
+
+    wp_register_script(
+        'bhg-public',
+        BHG_PLUGIN_URL . 'assets/js/public.js',
+        array( 'jquery' ),
+        defined( 'BHG_VERSION' ) ? BHG_VERSION : null,
+        true
+    );
+
+    wp_localize_script(
+        'bhg-public',
+        'bhg_public_ajax',
+        array(
+            'ajax_url'     => admin_url( 'admin-ajax.php' ),
+            'nonce'        => wp_create_nonce( 'bhg_public_nonce' ),
+            'is_logged_in' => is_user_logged_in(),
+            'i18n'         => array(
+                'guess_required'     => __( 'Please enter a guess.', 'bonus-hunt-guesser' ),
+                'guess_numeric'      => __( 'Please enter a valid number.', 'bonus-hunt-guesser' ),
+                'guess_range'        => __( 'Guess must be between €0 and €100,000.', 'bonus-hunt-guesser' ),
+                'guess_submitted'    => __( 'Your guess has been submitted!', 'bonus-hunt-guesser' ),
+                'ajax_error'         => __( 'An error occurred. Please try again.', 'bonus-hunt-guesser' ),
+                'affiliate_user'     => __( 'Affiliate', 'bonus-hunt-guesser' ),
+                'non_affiliate_user' => __( 'Non-affiliate', 'bonus-hunt-guesser' ),
+            ),
+        )
+    );
+
+    wp_enqueue_style( 'bhg-public' );
+    wp_enqueue_script( 'bhg-public' );
+}
+
 // Initialize plugin
 add_action('plugins_loaded', 'bhg_init_plugin');
 /**
