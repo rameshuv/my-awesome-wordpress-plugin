@@ -1,65 +1,101 @@
 <?php
 if ( ! defined( 'ABSPATH' ) ) { exit; }
 
-function bhg_log($message) {
-    if (!defined('WP_DEBUG') || !WP_DEBUG) return;
-    if (is_array($message) || is_object($message)) {
-        $message = print_r($message, true);
+/**
+ * Log debug messages when WP_DEBUG is enabled.
+ *
+ * @param mixed $message Message to log.
+ * @return void
+ */
+function bhg_log( $message ) {
+    if ( ! defined( 'WP_DEBUG' ) || ! WP_DEBUG ) {
+        return;
     }
-    error_log('[BHG] ' . $message);
+    if ( is_array( $message ) || is_object( $message ) ) {
+        $message = print_r( $message, true );
+    }
+    error_log( '[BHG] ' . $message );
 }
 
+/**
+ * Get the current user ID or 0 if not logged in.
+ *
+ * @return int
+ */
 function bhg_current_user_id() {
     $uid = get_current_user_id();
-    return $uid ? intval($uid) : 0;
+    return $uid ? intval( $uid ) : 0;
 }
 
-function bhg_slugify($text) {
-    $text = sanitize_title($text);
-    if (!$text) $text = uniqid('bhg');
+/**
+ * Create a URL-friendly slug.
+ *
+ * @param string $text Text to slugify.
+ * @return string
+ */
+function bhg_slugify( $text ) {
+    $text = sanitize_title( $text );
+    if ( ! $text ) {
+        $text = uniqid( 'bhg' );
+    }
     return $text;
 }
 
-// Get admin capability for BHG plugin
+/**
+ * Get admin capability for BHG plugin.
+ *
+ * @return string
+ */
 function bhg_admin_cap() {
-    return apply_filters('bhg_admin_capability', 'manage_options');
+    return apply_filters( 'bhg_admin_capability', 'manage_options' );
 }
 
-// Smart login redirect back to referring page
-add_filter('login_redirect', function($redirect_to, $requested_redirect_to, $user){
-    $r = isset($_REQUEST['bhg_redirect']) ? $_REQUEST['bhg_redirect'] : '';
-    if (!empty($r)) {
-        $safe = esc_url_raw($r);
-        $home_host = wp_parse_url(home_url(), PHP_URL_HOST);
-        $r_host = wp_parse_url($safe, PHP_URL_HOST);
-        if (!$r_host || $r_host === $home_host) {
+// Smart login redirect back to referring page.
+add_filter( 'login_redirect', function( $redirect_to, $requested_redirect_to, $user ) {
+    $r = isset( $_REQUEST['bhg_redirect'] ) ? $_REQUEST['bhg_redirect'] : '';
+    if ( ! empty( $r ) ) {
+        $safe     = esc_url_raw( $r );
+        $home_host = wp_parse_url( home_url(), PHP_URL_HOST );
+        $r_host   = wp_parse_url( $safe, PHP_URL_HOST );
+        if ( ! $r_host || $r_host === $home_host ) {
             return $safe;
         }
     }
     return $redirect_to;
-}, 10, 3);
+}, 10, 3 );
 
-// Safe checks for query conditionals (avoid early usage)
+/**
+ * Determine if code runs on the frontend.
+ *
+ * @return bool
+ */
 function bhg_is_frontend() {
-    return !is_admin() && !wp_doing_ajax() && !wp_doing_cron();
+    return ! is_admin() && ! wp_doing_ajax() && ! wp_doing_cron();
 }
 
-if (!function_exists('bhg_t')) {
-    function bhg_t($key, $default = '') {
+if ( ! function_exists( 'bhg_t' ) ) {
+    /**
+     * Retrieve a translation value from the database.
+     *
+     * @param string $key     Translation key.
+     * @param string $default Default text if not found.
+     * @return string
+     */
+    function bhg_t( $key, $default = '' ) {
         global $wpdb;
         static $cache = [];
 
-        if (isset($cache[$key])) {
-            return $cache[$key];
+        if ( isset( $cache[ $key ] ) ) {
+            return $cache[ $key ];
         }
 
         $table = $wpdb->prefix . 'bhg_translations';
-        $row = $wpdb->get_row(
-            $wpdb->prepare("SELECT tvalue FROM $table WHERE tkey = %s", $key)
+        $row   = $wpdb->get_row(
+            $wpdb->prepare( "SELECT tvalue FROM $table WHERE tkey = %s", $key )
         );
 
-        if ($row && isset($row->tvalue)) {
-            $cache[$key] = $row->tvalue;
+        if ( $row && isset( $row->tvalue ) ) {
+            $cache[ $key ] = $row->tvalue;
             return $row->tvalue;
         }
 
@@ -67,23 +103,33 @@ if (!function_exists('bhg_t')) {
     }
 }
 
-// Helper function to format currency
-function bhg_format_currency($amount) {
-    return '€' . number_format($amount, 2);
+/**
+ * Format an amount as Euro currency.
+ *
+ * @param float $amount Amount to format.
+ * @return string
+ */
+function bhg_format_currency( $amount ) {
+    return '€' . number_format( $amount, 2 );
 }
 
-// Helper function to validate guess value
-function bhg_validate_guess($guess) {
-    $settings = get_option('bhg_plugin_settings', []);
-    $min_guess = isset($settings['min_guess_amount']) ? (float)$settings['min_guess_amount'] : 0;
-    $max_guess = isset($settings['max_guess_amount']) ? (float)$settings['max_guess_amount'] : 100000;
+/**
+ * Validate a guess amount against settings.
+ *
+ * @param mixed $guess Guess value.
+ * @return bool
+ */
+function bhg_validate_guess( $guess ) {
+    $settings  = get_option( 'bhg_plugin_settings', [] );
+    $min_guess = isset( $settings['min_guess_amount'] ) ? (float) $settings['min_guess_amount'] : 0;
+    $max_guess = isset( $settings['max_guess_amount'] ) ? (float) $settings['max_guess_amount'] : 100000;
 
-    if (!is_numeric($guess)) {
+    if ( ! is_numeric( $guess ) ) {
         return false;
     }
 
-    $guess = floatval($guess);
-    return ($guess >= $min_guess && $guess <= $max_guess);
+    $guess = (float) $guess;
+    return ( $guess >= $min_guess && $guess <= $max_guess );
 }
 
 /**
@@ -111,52 +157,101 @@ function bhg_get_user_display_name( $user_id ) {
 }
 
 
-if (!function_exists('bhg_is_user_affiliate')) {
-    function bhg_is_user_affiliate($user_id) {
-        $val = get_user_meta($user_id, 'bhg_is_affiliate', true);
-        return $val === '1' || $val === 1 || $val === true || $val === 'yes';
+if ( ! function_exists( 'bhg_is_user_affiliate' ) ) {
+    /**
+     * Check if a user is an affiliate.
+     *
+     * @param int $user_id User ID.
+     * @return bool
+     */
+    function bhg_is_user_affiliate( $user_id ) {
+        $val = get_user_meta( $user_id, 'bhg_is_affiliate', true );
+        return $val === '1' || 1 === $val || true === $val || 'yes' === $val;
     }
 }
-if (!function_exists('bhg_get_user_affiliate_sites')) {
-    function bhg_get_user_affiliate_sites($user_id) {
-        $ids = get_user_meta($user_id, 'bhg_affiliate_sites', true);
-        if (is_array($ids)) return array_map('absint', $ids);
-        if (is_string($ids) && strlen($ids)) {
-            return array_map('absint', array_filter(array_map('trim', explode(',', $ids))));
+if ( ! function_exists( 'bhg_get_user_affiliate_sites' ) ) {
+    /**
+     * Get affiliate site IDs for a user.
+     *
+     * @param int $user_id User ID.
+     * @return array
+     */
+    function bhg_get_user_affiliate_sites( $user_id ) {
+        $ids = get_user_meta( $user_id, 'bhg_affiliate_sites', true );
+        if ( is_array( $ids ) ) {
+            return array_map( 'absint', $ids );
+        }
+        if ( is_string( $ids ) && strlen( $ids ) ) {
+            return array_map( 'absint', array_filter( array_map( 'trim', explode( ',', $ids ) ) ) );
         }
         return array();
     }
 }
-if (!function_exists('bhg_set_user_affiliate_sites')) {
-    function bhg_set_user_affiliate_sites($user_id, $site_ids) {
+if ( ! function_exists( 'bhg_set_user_affiliate_sites' ) ) {
+    /**
+     * Store affiliate site IDs for a user.
+     *
+     * @param int   $user_id  User ID.
+     * @param array $site_ids Site IDs.
+     * @return void
+     */
+    function bhg_set_user_affiliate_sites( $user_id, $site_ids ) {
         $clean = array();
-        if (is_array($site_ids)) {
-            foreach ($site_ids as $sid) { $sid = absint($sid); if ($sid) $clean[] = $sid; }
+        if ( is_array( $site_ids ) ) {
+            foreach ( $site_ids as $sid ) {
+                $sid = absint( $sid );
+                if ( $sid ) {
+                    $clean[] = $sid;
+                }
+            }
         }
-        update_user_meta($user_id, 'bhg_affiliate_sites', $clean);
+        update_user_meta( $user_id, 'bhg_affiliate_sites', $clean );
     }
 }
 
 
-if (!function_exists('bhg_is_user_affiliate_for_site')) {
-    function bhg_is_user_affiliate_for_site($user_id, $site_id) {
-        if (!$site_id) return bhg_is_user_affiliate($user_id);
-        $sites = bhg_get_user_affiliate_sites($user_id);
-        return in_array(absint($site_id), array_map('absint', (array)$sites), true);
+if ( ! function_exists( 'bhg_is_user_affiliate_for_site' ) ) {
+    /**
+     * Determine if a user is an affiliate for a specific site.
+     *
+     * @param int $user_id User ID.
+     * @param int $site_id Site ID.
+     * @return bool
+     */
+    function bhg_is_user_affiliate_for_site( $user_id, $site_id ) {
+        if ( ! $site_id ) {
+            return bhg_is_user_affiliate( $user_id );
+        }
+        $sites = bhg_get_user_affiliate_sites( $user_id );
+        return in_array( absint( $site_id ), array_map( 'absint', (array) $sites ), true );
     }
 }
 
-if (!function_exists('bhg_render_affiliate_dot')) {
-    function bhg_render_affiliate_dot($user_id, $hunt_affiliate_site_id = 0){
-        $is_aff = bhg_is_user_affiliate_for_site($user_id, $hunt_affiliate_site_id);
-        $cls   = $is_aff ? 'bhg-aff-green' : 'bhg-aff-red';
-        $label = $is_aff ? esc_attr__('Affiliate', 'bonus-hunt-guesser') : esc_attr__('Non-affiliate', 'bonus-hunt-guesser');
-        return '<span class="bhg-aff-dot ' . esc_attr($cls) . '" aria-label="' . $label . '"></span>';
+if ( ! function_exists( 'bhg_render_affiliate_dot' ) ) {
+    /**
+     * Render affiliate status dot.
+     *
+     * @param int $user_id               User ID.
+     * @param int $hunt_affiliate_site_id Hunt affiliate site ID.
+     * @return string
+     */
+    function bhg_render_affiliate_dot( $user_id, $hunt_affiliate_site_id = 0 ) {
+        $is_aff = bhg_is_user_affiliate_for_site( $user_id, $hunt_affiliate_site_id );
+        $cls    = $is_aff ? 'bhg-aff-green' : 'bhg-aff-red';
+        $label  = $is_aff ? esc_attr__( 'Affiliate', 'bonus-hunt-guesser' ) : esc_attr__( 'Non-affiliate', 'bonus-hunt-guesser' );
+        return '<span class="bhg-aff-dot ' . esc_attr( $cls ) . '" aria-label="' . $label . '"></span>';
     }
 }
 
 
-function bhg_render_ads($placement = 'footer', $hunt_id = 0) {
+/**
+ * Render advertising blocks based on placement and user state.
+ *
+ * @param string $placement Placement location.
+ * @param int    $hunt_id   Hunt ID.
+ * @return string
+ */
+function bhg_render_ads( $placement = 'footer', $hunt_id = 0 ) {
     global $wpdb;
     $tbl = $wpdb->prefix . 'bhg_ads';
     $placement = sanitize_text_field($placement);
@@ -195,8 +290,13 @@ function bhg_render_ads($placement = 'footer', $hunt_id = 0) {
     return $out;
 }
 
-// Demo reset and seed data
-if (!function_exists('bhg_reset_demo_and_seed')) {
+// Demo reset and seed data.
+if ( ! function_exists( 'bhg_reset_demo_and_seed' ) ) {
+    /**
+     * Reset demo tables and seed sample data.
+     *
+     * @return bool
+     */
     function bhg_reset_demo_and_seed() {
         global $wpdb;
 
