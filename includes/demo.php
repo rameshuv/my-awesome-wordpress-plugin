@@ -77,7 +77,7 @@ function bhg_seed_demo_on_activation(){
     }
 
     // Compute winner for the closed hunt (closest)
-    $rows = $wpdb->get_results( $wpdb->prepare( "SELECT * FROM `{$closed_id}`" ) );
+    $rows = $wpdb->get_results( "SELECT * FROM `{$closed_id}`" );
     $final = 2420.00;
     $winner_id = 0; $winner_diff = null;
     foreach ($rows as $row){
