@@ -1,7 +1,6 @@
 
 ## [Stage-1] Hygiene & Safety — 2025-09-03
 
-- Removed deprecated `includes/db.php` to avoid confusion with legacy ad renderer pointing to a different table name.
 - Standardized sanitization of `$_GET` / query args for leaderboard: `orderby`, `order`, `paged`, `hunt_id`.
 - Added server-side pagination links to `[bhg_leaderboard]` when total > per_page (uses `paginate_links()`).
 - Minor hardening in `[bhg_guess_form]` guest redirect URL construction (sanitizes host/URI).
