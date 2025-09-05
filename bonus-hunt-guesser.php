@@ -197,12 +197,10 @@ class BHG_DB_OLD {
         $sql = "CREATE TABLE $table_name (
             id mediumint(9) NOT NULL AUTO_INCREMENT,
             type varchar(20) NOT NULL,
-            period varchar(20) NOT NULL,
             created_at datetime NOT NULL,
             updated_at datetime NOT NULL,
             status varchar(20) DEFAULT 'active',
-            PRIMARY KEY  (id),
-            UNIQUE KEY type_period (type, period)
+            PRIMARY KEY  (id)
         ) $charset_collate;";
         dbDelta($sql);
         

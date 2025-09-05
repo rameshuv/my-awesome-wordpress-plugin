@@ -304,8 +304,6 @@ if (!function_exists('bhg_reset_demo_and_seed')) {
                 $yearKey = date('Y', $ts);
 
                 $ensure = function($type, $period) use ($wpdb, $t_tbl) {
-                    $id = $wpdb->get_var($wpdb->prepare("SELECT id FROM {$t_tbl} WHERE type=%s AND period=%s", $type, $period));
-                    if ($id) return (int)$id;
                     $now = current_time('mysql', 1);
                     $start = $now; $end = $now;
                     if ($type === 'weekly') {
@@ -318,10 +316,17 @@ if (!function_exists('bhg_reset_demo_and_seed')) {
                         $start = $period . '-01-01';
                         $end   = $period . '-12-31';
                     }
+                    $id = $wpdb->get_var($wpdb->prepare(
+                        "SELECT id FROM {$t_tbl} WHERE type=%s AND start_date=%s AND end_date=%s",
+                        $type,
+                        $start,
+                        $end
+                    ));
+                    if ($id) return (int) $id;
                     $wpdb->insert($t_tbl, array(
-                        'type'=>$type,'period'=>$period,'start_date'=>$start,'end_date'=>$end,'status'=>'active',
+                        'type'=>$type,'start_date'=>$start,'end_date'=>$end,'status'=>'active',
                         'created_at'=>$now,'updated_at'=>$now
-                    ), array('%s','%s','%s','%s','%s','%s','%s'));
+                    ), array('%s','%s','%s','%s','%s','%s'));
                     return (int)$wpdb->insert_id;
                 };
 

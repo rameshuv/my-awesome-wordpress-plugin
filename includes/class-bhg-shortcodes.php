@@ -227,7 +227,7 @@ class BHG_Shortcodes {
             $u = $wpdb->users;
 
             $tournament = $wpdb->get_row($wpdb->prepare(
-                "SELECT id, type, period, start_date, end_date, status FROM {$t} WHERE id=%d",
+                "SELECT id, type, start_date, end_date, status FROM {$t} WHERE id=%d",
                 $details_id
             ));
             if (!$tournament) {
@@ -265,7 +265,7 @@ class BHG_Shortcodes {
             ob_start();
             echo '<div class="bhg-tournament-details" style="border:1px solid #e2e8f0;border-radius:8px;padding:12px;">';
             echo '<p><a href="' . esc_url(remove_query_arg('bhg_tournament_id')) . '">&larr; ' . esc_html__('Back to tournaments', 'bonus-hunt-guesser') . '</a></p>';
-            echo '<h3 style="margin-top:0;">' . esc_html(ucfirst($tournament->type)) . ' — ' . esc_html($tournament->period) . '</h3>';
+            echo '<h3 style="margin-top:0;">' . esc_html(ucfirst($tournament->type)) . '</h3>';
             echo '<p><strong>' . esc_html__('Start', 'bonus-hunt-guesser') . ':</strong> ' . esc_html(mysql2date(get_option('date_format'), $tournament->start_date)) . ' &nbsp; ';
             echo '<strong>' . esc_html__('End', 'bonus-hunt-guesser') . ':</strong> ' . esc_html(mysql2date(get_option('date_format'), $tournament->end_date)) . ' &nbsp; ';
             echo '<strong>' . esc_html__('Status', 'bonus-hunt-guesser') . ':</strong> ' . esc_html($tournament->status) . '</p>';
@@ -357,7 +357,6 @@ class BHG_Shortcodes {
         echo '<table class="bhg-tournaments" style="width:100%;border-collapse:collapse">';
         echo '<thead><tr>';
         echo '<th style="text-align:left;border-bottom:1px solid #e2e8f0;padding:6px;">' . esc_html__('Type', 'bonus-hunt-guesser') . '</th>';
-        echo '<th style="text-align:left;border-bottom:1px solid #e2e8f0;padding:6px;">' . esc_html__('Period', 'bonus-hunt-guesser') . '</th>';
         echo '<th style="text-align:left;border-bottom:1px solid #e2e8f0;padding:6px;">' . esc_html__('Start', 'bonus-hunt-guesser') . '</th>';
         echo '<th style="text-align:left;border-bottom:1px solid #e2e8f0;padding:6px;">' . esc_html__('End', 'bonus-hunt-guesser') . '</th>';
         echo '<th style="text-align:left;border-bottom:1px solid #e2e8f0;padding:6px;">' . esc_html__('Status', 'bonus-hunt-guesser') . '</th>';
@@ -368,7 +367,6 @@ class BHG_Shortcodes {
             $detail_url = esc_url(add_query_arg('bhg_tournament_id', (int)$row->id, remove_query_arg(array('orderby','order'), $current_url)));
             echo '<tr>';
             echo '<td style="padding:6px;border-bottom:1px solid #f1f5f9;">' . esc_html(ucfirst($row->type)) . '</td>';
-            echo '<td style="padding:6px;border-bottom:1px solid #f1f5f9;">' . esc_html($row->period) . '</td>';
             echo '<td style="padding:6px;border-bottom:1px solid #f1f5f9;">' . esc_html(mysql2date(get_option('date_format'), $row->start_date)) . '</td>';
             echo '<td style="padding:6px;border-bottom:1px solid #f1f5f9;">' . esc_html(mysql2date(get_option('date_format'), $row->end_date)) . '</td>';
             echo '<td style="padding:6px;border-bottom:1px solid #f1f5f9;">' . esc_html($row->status) . '</td>';
@@ -425,22 +423,26 @@ class BHG_Shortcodes {
             'overall' => array(
                 'label' => esc_html__('Overall', 'bonus-hunt-guesser'),
                 'type'  => '',
-                'period'=> '',
+                'start' => '',
+                'end'   => '',
             ),
             'monthly' => array(
                 'label' => esc_html__('Monthly', 'bonus-hunt-guesser'),
                 'type'  => 'monthly',
-                'period'=> $current_month,
+                'start' => $current_month . '-01',
+                'end'   => date('Y-m-t', strtotime($current_month . '-01')),
             ),
             'yearly' => array(
                 'label' => esc_html__('Yearly', 'bonus-hunt-guesser'),
                 'type'  => 'yearly',
-                'period'=> $current_year,
+                'start' => $current_year . '-01-01',
+                'end'   => $current_year . '-12-31',
             ),
             'alltime' => array(
                 'label' => esc_html__('All-Time', 'bonus-hunt-guesser'),
                 'type'  => 'alltime',
-                'period'=> '',
+                'start' => '',
+                'end'   => '',
             ),
         );
 
@@ -449,9 +451,10 @@ class BHG_Shortcodes {
             if ($info['type']) {
                 $where = 't.type = %s';
                 $params = array($info['type']);
-                if ($info['period']) {
-                    $where .= ' AND t.period = %s';
-                    $params[] = $info['period'];
+                if (!empty($info['start']) && !empty($info['end'])) {
+                    $where .= ' AND t.start_date >= %s AND t.end_date <= %s';
+                    $params[] = $info['start'];
+                    $params[] = $info['end'];
                 }
                 $sql = "SELECT u.ID as user_id, u.user_login, SUM(r.wins) as total_wins
                         FROM {$wins_tbl} r
