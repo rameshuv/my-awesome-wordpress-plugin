@@ -1,55 +1,59 @@
 <?php
-if ( ! defined( 'ABSPATH' ) ) { exit; }
+/**
+ * Demo data seeding utilities.
+ *
+ * @package BonusHuntGuesser
+ */
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
+/**
+ * Handles demo reseeding actions.
+ */
 class BHG_Demo {
+	/**
+	 * Register handlers for demo reseeding.
+	 */
 	public function __construct() {
-		add_action('admin_menu', [$this,'demo_menu']);
-		add_action('admin_post_bhg_demo_reseed', [$this,'reseed']);
+		add_action( 'admin_post_bhg_demo_reseed', array( $this, 'reseed' ) );
 	}
 
-	public function demo_menu() {
-		add_submenu_page(
-			'bhg_dashboard',
-			__('Demo Tools','bonus-hunt-guesser'),
-			__('Demo Tools','bonus-hunt-guesser'),
-			'manage_options',
-			'bhg_demo',
-			[$this,'render_demo']
+	/**
+	 * Reseed demo data.
+	 *
+	 * @return void
+	 */
+	public function reseed() {
+		check_admin_referer( 'bhg_demo_reseed' );
+		global $wpdb;
+
+		// Wipe demo data.
+		$wpdb->query( "DELETE FROM {$wpdb->prefix}bhg_bonus_hunts WHERE title LIKE '%(Demo)%'" ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
+		$wpdb->query( "DELETE FROM {$wpdb->prefix}bhg_tournaments WHERE title LIKE '%(Demo)%'" ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
+
+		// Insert demo hunt.
+		$wpdb->insert(
+			"{$wpdb->prefix}bhg_bonus_hunts",
+			array(
+				'title'            => 'Sample Hunt (Demo)',
+				'starting_balance' => 1000,
+				'num_bonuses'      => 5,
+				'status'           => 'open',
+			)
 		);
-	}
 
-	public function render_demo() {
-		echo '<div class="wrap"><h1>Demo Tools</h1>';
-               echo '<form method="post" action="'.admin_url('admin-post.php').'">';
-               echo '<input type="hidden" name="action" value="bhg_demo_reseed" />';
-               wp_nonce_field( 'bhg_demo_reseed' );
-               submit_button(__('Reset & Reseed Demo','bonus-hunt-guesser'));
-               echo '</form></div>';
-       }
+		// Insert demo tournament.
+		$wpdb->insert(
+			"{$wpdb->prefix}bhg_tournaments",
+			array(
+				'title'  => 'August Tournament (Demo)',
+				'status' => 'active',
+			)
+		);
 
-       public function reseed() {
-               check_admin_referer( 'bhg_demo_reseed' );
-               global $wpdb;
-
-               // Wipe demo data
-               $wpdb->query( "DELETE FROM {$wpdb->prefix}bhg_bonus_hunts WHERE title LIKE '%(Demo)%'" );
-               $wpdb->query( "DELETE FROM {$wpdb->prefix}bhg_tournaments WHERE title LIKE '%(Demo)%'" );
-
-		// Insert demo hunt
-		$wpdb->insert("{$wpdb->prefix}bhg_bonus_hunts",[
-			'title'=>'Sample Hunt (Demo)',
-			'starting_balance'=>1000,
-			'num_bonuses'=>5,
-			'status'=>'open'
-		]);
-
-		// Insert demo tournament
-		$wpdb->insert("{$wpdb->prefix}bhg_tournaments",[
-			'title'=>'August Tournament (Demo)',
-			'status'=>'active'
-		]);
-
-		wp_safe_redirect( admin_url( 'admin.php?page=bhg_demo&demo_reset=1' ) );
+		wp_safe_redirect( admin_url( 'admin.php?page=bhg-tools&demo_reset=1' ) );
 		exit;
 	}
 }
