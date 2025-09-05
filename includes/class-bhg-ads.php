@@ -65,17 +65,19 @@ class BHG_Ads {
 		return false;
 	}
 
-	/** Render a single ad row to HTML */
-	protected static function render_ad_row($row) {
-		$msg = isset($row->content) ? $row->content : '';
-		$msg = wp_kses_post($msg);
-		$link = isset($row->link_url) ? esc_url($row->link_url) : '';
+        /** Render a single ad row to HTML */
+        protected static function render_ad_row( $row ) {
+                $msg  = isset( $row->content ) ? $row->content : '';
+                $msg  = wp_kses_post( $msg );
+                $link = isset( $row->link_url ) ? esc_url( $row->link_url ) : '';
 
-		if ($link) {
-			$msg = '<a href="' . $link . '">' . $msg . '</a>';
-		}
-		return '<div class="bhg-ad bhg-ad-' . esc_attr($row->placement) . '">' . $msg . '</div>';
-	}
+                if ( $link ) {
+                        $msg = '<a href="' . $link . '">' . $msg . '</a>';
+                }
+
+                $template = '<div class="bhg-ad bhg-ad-%1$s">%2$s</div>';
+                return sprintf( $template, esc_attr( $row->placement ), $msg );
+        }
 
 	/** Fetch active ads for a placement */
 	protected static function get_ads_for_placement($placement = 'footer') {
