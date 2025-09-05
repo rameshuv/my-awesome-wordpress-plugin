@@ -84,7 +84,7 @@ if (!function_exists('bhg_get_hunt_participants')) {
              LIMIT %d OFFSET %d",
             (int)$hunt_id, (int)$per_page, (int)$offset
         ));
-        $total = (int) $wpdb->get_var( $wpdb->prepare( "SELECT FOUND_ROWS()" ) );
+        $total = (int) $wpdb->get_var( "SELECT FOUND_ROWS()" );
         return array('rows' => $rows, 'total' => $total);
     }
 }
