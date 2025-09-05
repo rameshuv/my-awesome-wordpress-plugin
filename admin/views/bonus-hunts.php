@@ -80,6 +80,18 @@ if ($view === 'add') : ?>
         <tr>
           <th scope="row"><label for="bhg_prizes"><?php echo esc_html__('Prizes', 'bonus-hunt-guesser'); ?></label></th>
           <td><textarea class="large-text" rows="3" id="bhg_prizes" name="prizes"></textarea></td>
+        
+        <tr>
+          <th scope="row"><label for="bhg_affiliate"><?php echo esc_html__('Affiliate Site', 'bonus-hunt-guesser'); ?></label></th>
+          <td>
+            <?php $affs = $wpdb->get_results("SELECT id, name FROM `{$wpdb->prefix}bhg_affiliates` ORDER BY name ASC"); $sel = isset($hunt->affiliate_site_id)? (int)$hunt->affiliate_site_id : 0; ?>
+            <select id="bhg_affiliate" name="affiliate_site_id">
+              <option value="0"><?php echo esc_html__('None', 'bonus-hunt-guesser'); ?></option>
+              <?php foreach ($affs as $a): ?>
+                <option value="<?php echo (int)$a->id; ?>" <?php if ($sel === (int)$a->id) echo 'selected'; ?>><?php echo esc_html($a->name); ?></option>
+              <?php endforeach; ?>
+            </select>
+          </td>
         </tr>
         <tr>
           <th scope="row"><label for="bhg_winners"><?php echo esc_html__('Number of Winners', 'bonus-hunt-guesser'); ?></label></th>
@@ -141,6 +153,18 @@ if ($view === 'edit') :
         <tr>
           <th scope="row"><label for="bhg_prizes"><?php echo esc_html__('Prizes', 'bonus-hunt-guesser'); ?></label></th>
           <td><textarea class="large-text" rows="3" id="bhg_prizes" name="prizes"><?php echo esc_textarea($hunt->prizes); ?></textarea></td>
+        
+        <tr>
+          <th scope="row"><label for="bhg_affiliate"><?php echo esc_html__('Affiliate Site', 'bonus-hunt-guesser'); ?></label></th>
+          <td>
+            <?php $affs = $wpdb->get_results("SELECT id, name FROM `{$wpdb->prefix}bhg_affiliates` ORDER BY name ASC"); $sel = isset($hunt->affiliate_site_id)? (int)$hunt->affiliate_site_id : 0; ?>
+            <select id="bhg_affiliate" name="affiliate_site_id">
+              <option value="0"><?php echo esc_html__('None', 'bonus-hunt-guesser'); ?></option>
+              <?php foreach ($affs as $a): ?>
+                <option value="<?php echo (int)$a->id; ?>" <?php if ($sel === (int)$a->id) echo 'selected'; ?>><?php echo esc_html($a->name); ?></option>
+              <?php endforeach; ?>
+            </select>
+          </td>
         </tr>
         <tr>
           <th scope="row"><label for="bhg_winners"><?php echo esc_html__('Number of Winners', 'bonus-hunt-guesser'); ?></label></th>

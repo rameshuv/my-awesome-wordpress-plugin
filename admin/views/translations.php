@@ -1,61 +1,79 @@
-<?php if (!defined('ABSPATH')) exit; ?>
+<?php
+if (!defined('ABSPATH')) exit;
+
+if (!current_user_can('manage_options')) {
+    wp_die(__('You do not have sufficient permissions to access this page.', 'bonus-hunt-guesser'));
+}
+
+global $wpdb;
+$table = $wpdb->prefix . 'bhg_translations';
+
+// Handle form submission
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['bhg_save_translation'])) {
+    // Verify nonce
+    if (!isset($_POST['bhg_nonce']) || !wp_verify_nonce($_POST['bhg_nonce'], 'bhg_save_translation_action')) {
+        wp_die(__('Security check failed.', 'bonus-hunt-guesser'));
+    }
+
+    // Sanitize input
+    $t_key   = isset($_POST['t_key']) ? sanitize_text_field(wp_unslash($_POST['t_key'])) : '';
+    $t_value = isset($_POST['t_value']) ? sanitize_textarea_field(wp_unslash($_POST['t_value'])) : '';
+
+    // Validate input
+    if ($t_key === '') {
+        $error = __('Key field is required.', 'bonus-hunt-guesser');
+    } else {
+        $wpdb->replace(
+            $table,
+            array('t_key' => $t_key, 't_value' => $t_value),
+            array('%s', '%s')
+        );
+        $notice = __('Translation saved.', 'bonus-hunt-guesser');
+    }
+}
+
+// Fetch rows
+$rows = $wpdb->get_results( "SELECT t_key, t_value FROM {$table} ORDER BY t_key ASC" );
+?>
 <div class="wrap">
-  <h1><?php echo esc_html__('Translations', 'bonus-hunt-guesser'); ?></h1>
+  <h1><?php esc_html_e('Translations', 'bonus-hunt-guesser'); ?></h1>
 
-  <?php
-  global $wpdb;
-  $table = $wpdb->prefix . 'bhg_translations';
-  $rows = $wpdb->get_results("SELECT id, `key`, `value` FROM `$table` ORDER BY `key` ASC");
-  $total = is_array($rows) ? count($rows) : 0;
-  ?>
+  <?php if (!empty($notice)): ?>
+    <div class="notice notice-success"><p><?php echo esc_html($notice); ?></p></div>
+  <?php endif; ?>
+  <?php if (!empty($error)): ?>
+    <div class="notice notice-error"><p><?php echo esc_html($error); ?></p></div>
+  <?php endif; ?>
 
-  <div class="card" style="max-width:900px;padding:12px;margin:12px 0;">
-    <p>
-      <?php
-        if ($total > 0) {
-            printf(esc_html__('%d translation keys loaded.', 'bonus-hunt-guesser'), (int)$total);
-        } else {
-            echo esc_html__('No translations yet. Add one below.', 'bonus-hunt-guesser');
-        }
-      ?>
-    </p>
-
-    <?php if ($total > 0): ?>
-    <table class="widefat fixed striped">
-      <thead>
-        <tr>
-          <th><?php echo esc_html__('Key', 'bonus-hunt-guesser'); ?></th>
-          <th><?php echo esc_html__('Value', 'bonus-hunt-guesser'); ?></th>
-        </tr>
-      </thead>
-      <tbody>
-        <?php foreach ($rows as $r): ?>
-          <tr>
-            <td><code><?php echo esc_html($r->key); ?></code></td>
-            <td><?php echo esc_html(wp_html_excerpt(wp_strip_all_tags($r->value), 160, '…')); ?></td>
-          </tr>
-        <?php endforeach; ?>
-      </tbody>
-    </table>
-    <?php endif; ?>
-  </div>
-
-  <form method="post" action="<?php echo esc_url(admin_url('admin-post.php')); ?>">
-    <?php wp_nonce_field('bhg_save_translation', 'bhg_save_translation_nonce'); ?>
-    <input type="hidden" name="action" value="bhg_save_translation">
-
+  <form method="post">
+    <?php wp_nonce_field('bhg_save_translation_action', 'bhg_nonce'); ?>
     <table class="form-table" role="presentation">
       <tbody>
         <tr>
-          <th scope="row"><label for="bhg_t_key"><?php echo esc_html__('Key', 'bonus-hunt-guesser'); ?></label></th>
-          <td><input class="regular-text" name="t_key" id="bhg_t_key" required></td>
+          <th scope="row"><label for="t_key"><?php esc_html_e('Key','bonus-hunt-guesser'); ?></label></th>
+          <td><input name="t_key" id="t_key" type="text" class="regular-text" required></td>
         </tr>
         <tr>
-          <th scope="row"><label for="bhg_t_value"><?php echo esc_html__('Value', 'bonus-hunt-guesser'); ?></label></th>
-          <td><textarea class="large-text" name="t_value" id="bhg_t_value" rows="3"></textarea></td>
+          <th scope="row"><label for="t_value"><?php esc_html_e('Value','bonus-hunt-guesser'); ?></label></th>
+          <td><textarea name="t_value" id="t_value" class="large-text" rows="4"></textarea></td>
         </tr>
       </tbody>
     </table>
-    <?php submit_button(__('Save', 'bonus-hunt-guesser')); ?>
+    <p class="submit"><button type="submit" name="bhg_save_translation" class="button button-primary"><?php esc_html_e('Save','bonus-hunt-guesser'); ?></button></p>
   </form>
+
+  <h2><?php esc_html_e('Existing keys', 'bonus-hunt-guesser'); ?></h2>
+  <table class="widefat striped">
+    <thead><tr><th><?php esc_html_e('Key','bonus-hunt-guesser'); ?></th><th><?php esc_html_e('Value','bonus-hunt-guesser'); ?></th></tr></thead>
+    <tbody>
+      <?php if ($rows): foreach ($rows as $r): ?>
+        <tr>
+          <td><code><?php echo esc_html($r->t_key); ?></code></td>
+          <td><?php echo esc_html($r->t_value); ?></td>
+        </tr>
+      <?php endforeach; else: ?>
+        <tr><td colspan="2"><?php esc_html_e('No translations yet.','bonus-hunt-guesser'); ?></td></tr>
+      <?php endif; ?>
+    </tbody>
+  </table>
 </div>

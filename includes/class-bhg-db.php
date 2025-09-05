@@ -3,331 +3,215 @@ if (!defined('ABSPATH')) exit;
 
 class BHG_DB {
 
-    public function __construct() {}
+    // Static wrapper to support legacy static calls.
+    public static function migrate() {
+        $db = new self();
+        return $db->create_tables();
+    }
 
-    /** Create or update all required tables (idempotent via dbDelta). */
     public function create_tables() {
         global $wpdb;
         require_once ABSPATH . 'wp-admin/includes/upgrade.php';
+
         $charset_collate = $wpdb->get_charset_collate();
 
-        // --- Bonus hunts (admin expects winner fields) ---
-        $sql = "CREATE TABLE {$wpdb->prefix}bhg_bonus_hunts (
+        $hunts_table   = $wpdb->prefix . 'bhg_bonus_hunts';
+        $guesses_table = $wpdb->prefix . 'bhg_guesses';
+        $tours_table   = $wpdb->prefix . 'bhg_tournaments';
+        $ads_table     = $wpdb->prefix . 'bhg_ads';
+        $trans_table   = $wpdb->prefix . 'bhg_translations';
+        $aff_table     = $wpdb->prefix . 'bhg_affiliates';
+
+        $sql = [];
+
+        // Bonus Hunts
+        $sql[] = "CREATE TABLE {$hunts_table} (
             id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
-            title VARCHAR(255) NOT NULL,
-            starting_balance DECIMAL(12,2) NOT NULL DEFAULT 0,
+            title VARCHAR(190) NOT NULL,
+            starting_balance DECIMAL(12,2) NOT NULL DEFAULT 0.00,
             num_bonuses INT UNSIGNED NOT NULL DEFAULT 0,
             prizes TEXT NULL,
-            status VARCHAR(20) NOT NULL DEFAULT 'open',
             affiliate_site_id BIGINT UNSIGNED NULL,
+            winners_count INT UNSIGNED NOT NULL DEFAULT 3,
             final_balance DECIMAL(12,2) NULL,
-            winner_user_id BIGINT UNSIGNED NULL,
-            winner_diff DECIMAL(12,2) NULL,
+            status VARCHAR(20) NOT NULL DEFAULT 'open',
+            created_at DATETIME NULL,
+            updated_at DATETIME NULL,
             closed_at DATETIME NULL,
-            created_at DATETIME NOT NULL DEFAULT '0000-00-00 00:00:00',
-            updated_at DATETIME NOT NULL DEFAULT '0000-00-00 00:00:00',
-            PRIMARY KEY (id),
-            KEY winner_user_idx (winner_user_id),
-            KEY status_idx (status),
-            KEY affiliate_site_idx (affiliate_site_id)
-        ) $charset_collate;";
-        dbDelta($sql);
+            PRIMARY KEY  (id),
+            KEY status (status)
+        ) {$charset_collate};";
 
-        // --- Guesses ---
-        $sql = "CREATE TABLE {$wpdb->prefix}bhg_guesses (
+        // Guesses
+        $sql[] = "CREATE TABLE {$guesses_table} (
             id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
             hunt_id BIGINT UNSIGNED NOT NULL,
             user_id BIGINT UNSIGNED NOT NULL,
-            guess_value DECIMAL(12,2) NOT NULL,
-            created_at DATETIME NOT NULL DEFAULT '0000-00-00 00:00:00',
-            updated_at DATETIME NOT NULL DEFAULT '0000-00-00 00:00:00',
-            PRIMARY KEY (id),
-            KEY hunt_id_idx (hunt_id),
-            KEY user_id_idx (user_id)
-        ) $charset_collate;";
-        dbDelta($sql);
+            guess DECIMAL(12,2) NOT NULL,
+            created_at DATETIME NULL,
+            PRIMARY KEY  (id),
+            KEY hunt_id (hunt_id),
+            KEY user_id (user_id)
+        ) {$charset_collate};";
 
-        // --- Ads ---
-        $sql = "CREATE TABLE {$wpdb->prefix}bhg_ads (
+        // Tournaments
+        $sql[] = "CREATE TABLE {$tours_table} (
             id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
-            message TEXT NOT NULL,
-            link VARCHAR(255) NULL,
-            placement VARCHAR(50) NOT NULL DEFAULT 'footer',
-            visibility VARCHAR(50) NOT NULL DEFAULT 'all',
-            active TINYINT(1) NOT NULL DEFAULT 1,
-            target_pages TEXT NULL,
-            created_at DATETIME NOT NULL DEFAULT '0000-00-00 00:00:00',
-            updated_at DATETIME NOT NULL DEFAULT '0000-00-00 00:00:00',
-            PRIMARY KEY (id)
-        ) $charset_collate;";
-        dbDelta($sql);
-
-        // --- Tournaments ---
-        $sql = "CREATE TABLE {$wpdb->prefix}bhg_tournaments (
-            id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+            title VARCHAR(190) NOT NULL,
+            description TEXT NULL,
             type VARCHAR(20) NOT NULL,
-            period VARCHAR(20) NOT NULL,
-            start_date DATETIME NOT NULL,
-            end_date DATETIME NOT NULL,
+            period VARCHAR(32) NULL,
+            start_date DATE NULL,
+            end_date DATE NULL,
             status VARCHAR(20) NOT NULL DEFAULT 'active',
-            created_at DATETIME NOT NULL DEFAULT '0000-00-00 00:00:00',
-            updated_at DATETIME NOT NULL DEFAULT '0000-00-00 00:00:00',
-            PRIMARY KEY (id),
-            UNIQUE KEY type_period (type, period)
-        ) $charset_collate;";
-        dbDelta($sql);
+            created_at DATETIME NULL,
+            updated_at DATETIME NULL,
+            PRIMARY KEY  (id),
+            KEY type (type),
+            KEY status (status)
+        ) {$charset_collate};";
 
-        // --- Tournament wins (legacy/for admin UI) ---
-        $sql = "CREATE TABLE {$wpdb->prefix}bhg_tournament_wins (
+        // Ads
+        $sql[] = "CREATE TABLE {$ads_table} (
             id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
-            tournament_id BIGINT UNSIGNED NOT NULL,
-            user_id BIGINT UNSIGNED NOT NULL,
-            wins INT UNSIGNED NOT NULL DEFAULT 0,
-            last_win_date DATETIME NULL,
-            PRIMARY KEY (id),
-            KEY tournament_idx (tournament_id),
-            KEY user_idx (user_id),
-            KEY wins_idx (wins)
-        ) $charset_collate;";
-        dbDelta($sql);
+            title VARCHAR(190) NOT NULL,
+            content TEXT NULL,
+            link_url VARCHAR(255) NULL,
+            placement VARCHAR(50) NOT NULL DEFAULT 'none',
+            visible_to VARCHAR(30) NOT NULL DEFAULT 'all',
+            created_at DATETIME NULL,
+            updated_at DATETIME NULL,
+            PRIMARY KEY  (id),
+            KEY placement (placement),
+            KEY visible_to (visible_to)
+        ) {$charset_collate};";
 
-        // --- Tournament results (consolidated) ---
-        $sql = "CREATE TABLE {$wpdb->prefix}bhg_tournament_results (
+        // Translations
+        $sql[] = "CREATE TABLE {$trans_table} (
             id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
-            tournament_id BIGINT UNSIGNED NOT NULL,
-            user_id BIGINT UNSIGNED NOT NULL,
-            wins INT UNSIGNED NOT NULL DEFAULT 0,
-            last_win_date DATETIME NULL,
-            PRIMARY KEY (id),
-            UNIQUE KEY tu_unique (tournament_id, user_id),
-            KEY tournament_idx (tournament_id),
-            KEY user_idx (user_id),
-            KEY wins_idx (wins)
-        ) $charset_collate;";
-        dbDelta($sql);
+            tkey VARCHAR(190) NOT NULL,
+            tvalue LONGTEXT NULL,
+            locale VARCHAR(20) NOT NULL DEFAULT 'en_US',
+            created_at DATETIME NULL,
+            updated_at DATETIME NULL,
+            PRIMARY KEY  (id),
+            UNIQUE KEY tkey_locale (tkey, locale)
+        ) {$charset_collate};";
 
-        // --- Translations ---
-        $sql = "CREATE TABLE {$wpdb->prefix}bhg_translations (
+        // Affiliates
+        $sql[] = "CREATE TABLE {$aff_table} (
             id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
-            `key` VARCHAR(191) NOT NULL,
-            `value` TEXT NULL,
-            PRIMARY KEY (id),
-            UNIQUE KEY tkey (`key`)
-        ) $charset_collate;";
-        dbDelta($sql);
-
-        // --- Affiliate websites ---
-        $sql = "CREATE TABLE {$wpdb->prefix}bhg_affiliate_websites (
-            id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
-            name VARCHAR(191) NOT NULL,
-            slug VARCHAR(191) NOT NULL,
+            name VARCHAR(190) NOT NULL,
             url VARCHAR(255) NULL,
-            created_at DATETIME NOT NULL DEFAULT '0000-00-00 00:00:00',
-            updated_at DATETIME NOT NULL DEFAULT '0000-00-00 00:00:00',
-            PRIMARY KEY (id),
-            UNIQUE KEY slug_unique (slug)
-        ) $charset_collate;";
-        dbDelta($sql);
+            status VARCHAR(20) NOT NULL DEFAULT 'active',
+            created_at DATETIME NULL,
+            updated_at DATETIME NULL,
+            PRIMARY KEY  (id),
+            UNIQUE KEY name_unique (name)
+        ) {$charset_collate};";
 
-        // --- Hunt winners (history) ---
-        $sql = "CREATE TABLE {$wpdb->prefix}bhg_hunt_winners (
-            id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
-            hunt_id BIGINT UNSIGNED NOT NULL,
-            user_id BIGINT UNSIGNED NOT NULL,
-            position INT UNSIGNED NOT NULL DEFAULT 0,
-            diff_value DECIMAL(12,2) NOT NULL DEFAULT 0,
-            created_at DATETIME NOT NULL DEFAULT '0000-00-00 00:00:00',
-            updated_at DATETIME NOT NULL DEFAULT '0000-00-00 00:00:00',
-            PRIMARY KEY (id),
-            KEY hunt_idx (hunt_id),
-            KEY user_idx (user_id)
-        ) $charset_collate;";
-        dbDelta($sql);
-
-        // Back-compat call, if other code expects it.
-        if (method_exists(__CLASS__, 'add_missing_tournament_columns')) {
-            self::add_missing_tournament_columns();
+        foreach ($sql as $statement) {
+            dbDelta($statement);
         }
-    
-        // --- Ensure missing columns exist (safe to run repeatedly) ---
+
+        // Idempotent ensure for columns/indexes
         try {
-            // Winners count on hunts (per-hunt configurable)
-            $hunts = $wpdb->prefix . 'bhg_bonus_hunts';
-            $col = $wpdb->get_var($wpdb->prepare(
-                "SELECT COLUMN_NAME FROM information_schema.COLUMNS WHERE TABLE_SCHEMA=%s AND TABLE_NAME=%s AND COLUMN_NAME='winners_count'",
-                DB_NAME, $hunts
-            ));
-            if (!$col) {
-                $wpdb->query("ALTER TABLE `$hunts` ADD COLUMN winners_count INT UNSIGNED NOT NULL DEFAULT 3 AFTER affiliate_site_id");
+            // Hunts: winners_count, affiliate_site_id
+            $need = [
+                'winners_count'    => "ALTER TABLE `{$hunts_table}` ADD COLUMN winners_count INT UNSIGNED NOT NULL DEFAULT 3",
+                'affiliate_site_id'=> "ALTER TABLE `{$hunts_table}` ADD COLUMN affiliate_site_id BIGINT UNSIGNED NULL",
+                'final_balance'    => "ALTER TABLE `{$hunts_table}` ADD COLUMN final_balance DECIMAL(12,2) NULL",
+                'status'           => "ALTER TABLE `{$hunts_table}` ADD COLUMN status VARCHAR(20) NOT NULL DEFAULT 'open'",
+            ];
+            foreach ($need as $c => $alter) {
+                $exists = $wpdb->get_var($wpdb->prepare(
+                    "SELECT COLUMN_NAME FROM information_schema.COLUMNS WHERE TABLE_SCHEMA=%s AND TABLE_NAME=%s AND COLUMN_NAME=%s",
+                    DB_NAME, $hunts_table, $c
+                ));
+                if (!$exists) { $wpdb->query($alter); }
             }
 
-            // Tournaments title/description (per customer spec)
-            $tour = $wpdb->prefix . 'bhg_tournaments';
-            $col = $wpdb->get_var($wpdb->prepare(
-                "SELECT COLUMN_NAME FROM information_schema.COLUMNS WHERE TABLE_SCHEMA=%s AND TABLE_NAME=%s AND COLUMN_NAME='title'",
-                DB_NAME, $tour
-            ));
-            if (!$col) {
-                $wpdb->query("ALTER TABLE `$tour` ADD COLUMN title VARCHAR(190) NOT NULL AFTER id");
-            }
-            $col = $wpdb->get_var($wpdb->prepare(
-                "SELECT COLUMN_NAME FROM information_schema.COLUMNS WHERE TABLE_SCHEMA=%s AND TABLE_NAME=%s AND COLUMN_NAME='description'",
-                DB_NAME, $tour
-            ));
-            if (!$col) {
-                $wpdb->query("ALTER TABLE `$tour` ADD COLUMN description TEXT NULL AFTER title");
+            // Tournaments: make sure common columns exist
+            $tneed = [
+                'title'       => "ALTER TABLE `{$tours_table}` ADD COLUMN title VARCHAR(190) NOT NULL",
+                'description' => "ALTER TABLE `{$tours_table}` ADD COLUMN description TEXT NULL",
+                'type'        => "ALTER TABLE `{$tours_table}` ADD COLUMN type VARCHAR(20) NOT NULL",
+                'period'      => "ALTER TABLE `{$tours_table}` ADD COLUMN period VARCHAR(32) NULL",
+                'start_date'  => "ALTER TABLE `{$tours_table}` ADD COLUMN start_date DATE NULL",
+                'end_date'    => "ALTER TABLE `{$tours_table}` ADD COLUMN end_date DATE NULL",
+                'status'      => "ALTER TABLE `{$tours_table}` ADD COLUMN status VARCHAR(20) NOT NULL DEFAULT 'active'",
+            ];
+            foreach ($tneed as $c => $alter) {
+                $exists = $wpdb->get_var($wpdb->prepare(
+                    "SELECT COLUMN_NAME FROM information_schema.COLUMNS WHERE TABLE_SCHEMA=%s AND TABLE_NAME=%s AND COLUMN_NAME=%s",
+                    DB_NAME, $tours_table, $c
+                ));
+                if (!$exists) { $wpdb->query($alter); }
             }
 
-            // Also ensure start_date and end_date exist (earlier logs showed missing columns)
-            $col = $wpdb->get_var($wpdb->prepare(
-                "SELECT COLUMN_NAME FROM information_schema.COLUMNS WHERE TABLE_SCHEMA=%s AND TABLE_NAME=%s AND COLUMN_NAME='start_date'",
-                DB_NAME, $tour
-            ));
-            if (!$col) {
-                $wpdb->query("ALTER TABLE `$tour` ADD COLUMN start_date DATETIME NULL AFTER period");
+            // Ads columns
+            $aneed = [
+                'title'      => "ALTER TABLE `{$ads_table}` ADD COLUMN title VARCHAR(190) NOT NULL",
+                'content'    => "ALTER TABLE `{$ads_table}` ADD COLUMN content TEXT NULL",
+                'link_url'   => "ALTER TABLE `{$ads_table}` ADD COLUMN link_url VARCHAR(255) NULL",
+                'placement'  => "ALTER TABLE `{$ads_table}` ADD COLUMN placement VARCHAR(50) NOT NULL DEFAULT 'none'",
+                'visible_to' => "ALTER TABLE `{$ads_table}` ADD COLUMN visible_to VARCHAR(30) NOT NULL DEFAULT 'all'",
+                'created_at' => "ALTER TABLE `{$ads_table}` ADD COLUMN created_at DATETIME NULL",
+                'updated_at' => "ALTER TABLE `{$ads_table}` ADD COLUMN updated_at DATETIME NULL",
+            ];
+            forEach ($aneed as $c => $alter) {
+                $exists = $wpdb->get_var($wpdb->prepare(
+                    "SELECT COLUMN_NAME FROM information_schema.COLUMNS WHERE TABLE_SCHEMA=%s AND TABLE_NAME=%s AND COLUMN_NAME=%s",
+                    DB_NAME, $ads_table, $c
+                ));
+                if (!$exists) { $wpdb->query($alter); }
             }
-            $col = $wpdb->get_var($wpdb->prepare(
-                "SELECT COLUMN_NAME FROM information_schema.COLUMNS WHERE TABLE_SCHEMA=%s AND TABLE_NAME=%s AND COLUMN_NAME='end_date'",
-                DB_NAME, $tour
-            ));
-            if (!$col) {
-                $wpdb->query("ALTER TABLE `$tour` ADD COLUMN end_date DATETIME NULL AFTER start_date");
+
+            // Translations columns
+            $trneed = [
+                'tkey'       => "ALTER TABLE `{$trans_table}` ADD COLUMN tkey VARCHAR(190) NOT NULL",
+                'tvalue'     => "ALTER TABLE `{$trans_table}` ADD COLUMN tvalue LONGTEXT NULL",
+                'locale'     => "ALTER TABLE `{$trans_table}` ADD COLUMN locale VARCHAR(20) NOT NULL DEFAULT 'en_US'",
+                'created_at' => "ALTER TABLE `{$trans_table}` ADD COLUMN created_at DATETIME NULL",
+                'updated_at' => "ALTER TABLE `{$trans_table}` ADD COLUMN updated_at DATETIME NULL",
+            ];
+            foreach ($trneed as $c => $alter) {
+                $exists = $wpdb->get_var($wpdb->prepare(
+                    "SELECT COLUMN_NAME FROM information_schema.COLUMNS WHERE TABLE_SCHEMA=%s AND TABLE_NAME=%s AND COLUMN_NAME=%s",
+                    DB_NAME, $trans_table, $c
+                ));
+                if (!$exists) { $wpdb->query($alter); }
             }
-        } catch (\Throwable $e) {
+            // Ensure unique index
+            $has = $wpdb->get_var($wpdb->prepare(
+                "SELECT INDEX_NAME FROM information_schema.STATISTICS WHERE TABLE_SCHEMA=%s AND TABLE_NAME=%s AND INDEX_NAME='tkey_locale'",
+                DB_NAME, $trans_table
+            ));
+            if (!$has) { $wpdb->query("ALTER TABLE `{$trans_table}` ADD UNIQUE KEY tkey_locale (tkey, locale)"); }
+
+            // Affiliates columns / unique index
+            $afneed = [
+                'name'       => "ALTER TABLE `{$aff_table}` ADD COLUMN name VARCHAR(190) NOT NULL",
+                'url'        => "ALTER TABLE `{$aff_table}` ADD COLUMN url VARCHAR(255) NULL",
+                'status'     => "ALTER TABLE `{$aff_table}` ADD COLUMN status VARCHAR(20) NOT NULL DEFAULT 'active'",
+                'created_at' => "ALTER TABLE `{$aff_table}` ADD COLUMN created_at DATETIME NULL",
+                'updated_at' => "ALTER TABLE `{$aff_table}` ADD COLUMN updated_at DATETIME NULL",
+            ];
+            foreach ($afneed as $c => $alter) {
+                $exists = $wpdb->get_var($wpdb->prepare(
+                    "SELECT COLUMN_NAME FROM information_schema.COLUMNS WHERE TABLE_SCHEMA=%s AND TABLE_NAME=%s AND COLUMN_NAME=%s",
+                    DB_NAME, $aff_table, $c
+                ));
+                if (!$exists) { $wpdb->query($alter); }
+            }
+            $uniq = $wpdb->get_var($wpdb->prepare(
+                "SELECT INDEX_NAME FROM information_schema.STATISTICS WHERE TABLE_SCHEMA=%s AND TABLE_NAME=%s AND INDEX_NAME='name_unique'",
+                DB_NAME, $aff_table
+            ));
+            if (!$uniq) { $wpdb->query("ALTER TABLE `{$aff_table}` ADD UNIQUE KEY name_unique (name)"); }
+
+        } catch (Throwable $e) {
             if (function_exists('error_log')) error_log('[BHG] Schema ensure error: ' . $e->getMessage());
         }
-}
-
-    /** One-time migrations / backfills. Safe to call on every load. */
-    public static function migrate() {
-        global $wpdb;
-        $charset_collate = $wpdb->get_charset_collate();
-
-        // Helpers
-        $table_exists = function($table) use ($wpdb) {
-            $full = $wpdb->prefix . $table;
-            return $wpdb->get_var($wpdb->prepare("SHOW TABLES LIKE %s", $full)) === $full;
-        };
-        $col_exists = function($table, $column) use ($wpdb) {
-            $full = $wpdb->prefix . $table;
-            $col  = esc_sql($column);
-            return (bool) $wpdb->get_var("SHOW COLUMNS FROM `{$full}` LIKE '{$col}'");
-        };
-        $index_exists = function($table, $index_name) use ($wpdb) {
-            $full = $wpdb->prefix . $table;
-            $idx  = esc_sql($index_name);
-            return (bool) $wpdb->get_var("SHOW INDEX FROM `{$full}` WHERE Key_name = '{$idx}'");
-        };
-
-        // Ensure guesses indexes
-        if ($table_exists('bhg_guesses')) {
-            $tbl = $wpdb->prefix . 'bhg_guesses';
-            if (!$index_exists('bhg_guesses', 'hunt_id_idx')) {
-                $wpdb->query("ALTER TABLE `{$tbl}` ADD INDEX `hunt_id_idx` (`hunt_id`)");
-            }
-            if (!$index_exists('bhg_guesses', 'user_id_idx')) {
-                $wpdb->query("ALTER TABLE `{$tbl}` ADD INDEX `user_id_idx` (`user_id`)");
-            }
-        }
-
-        // Tournaments migration (columns + unique)
-        if ($table_exists('bhg_tournaments')) {
-            $tbl = $wpdb->prefix . 'bhg_tournaments';
-            if (!$col_exists('bhg_tournaments', 'updated_at')) {
-                $wpdb->query("ALTER TABLE `{$tbl}` ADD COLUMN `updated_at` DATETIME NOT NULL DEFAULT '0000-00-00 00:00:00' AFTER `created_at`");
-            }
-            if (!$col_exists('bhg_tournaments', 'start_date')) {
-                $wpdb->query("ALTER TABLE `{$tbl}` ADD COLUMN `start_date` DATETIME NOT NULL AFTER `period`");
-            }
-            if (!$col_exists('bhg_tournaments', 'end_date')) {
-                $wpdb->query("ALTER TABLE `{$tbl}` ADD COLUMN `end_date` DATETIME NOT NULL AFTER `start_date`");
-            }
-            if ($col_exists('bhg_tournaments', 'from_date')) {
-                $wpdb->query("ALTER TABLE `{$tbl}` DROP COLUMN `from_date`");
-            }
-            if ($col_exists('bhg_tournaments', 'to_date')) {
-                $wpdb->query("ALTER TABLE `{$tbl}` DROP COLUMN `to_date`");
-            }
-            if ($col_exists('bhg_tournaments', 'title')) {
-                $wpdb->query("ALTER TABLE `{$tbl}` DROP COLUMN `title`");
-            }
-            if ($col_exists('bhg_tournaments', 'period_key')) {
-                $wpdb->query("ALTER TABLE `{$tbl}` DROP COLUMN `period_key`");
-            }
-            if (!$index_exists('bhg_tournaments', 'type_period')) {
-                $wpdb->query("ALTER TABLE `{$tbl}` ADD UNIQUE INDEX `type_period` (`type`, `period`)");
-            }
-        }
-
-        // Backfill hunts winner columns + indexes
-        if ($table_exists('bhg_bonus_hunts')) {
-            $tbl = $wpdb->prefix . 'bhg_bonus_hunts';
-            if (!$col_exists('bhg_bonus_hunts', 'final_balance')) {
-                $wpdb->query("ALTER TABLE `{$tbl}` ADD COLUMN `final_balance` DECIMAL(12,2) NULL AFTER `status`");
-            }
-            if (!$col_exists('bhg_bonus_hunts', 'winner_user_id')) {
-                $wpdb->query("ALTER TABLE `{$tbl}` ADD COLUMN `winner_user_id` BIGINT UNSIGNED NULL AFTER `final_balance`");
-            }
-            if (!$col_exists('bhg_bonus_hunts', 'winner_diff')) {
-                $wpdb->query("ALTER TABLE `{$tbl}` ADD COLUMN `winner_diff` DECIMAL(12,2) NULL AFTER `winner_user_id`");
-            }
-            if (!$col_exists('bhg_bonus_hunts', 'closed_at')) {
-                $wpdb->query("ALTER TABLE `{$tbl}` ADD COLUMN `closed_at` DATETIME NULL AFTER `winner_diff`");
-            }
-            if (!$index_exists('bhg_bonus_hunts', 'winner_user_idx')) {
-                $wpdb->query("ALTER TABLE `{$tbl}` ADD INDEX `winner_user_idx` (`winner_user_id`)");
-            }
-            if (!$index_exists('bhg_bonus_hunts', 'status_idx')) {
-                $wpdb->query("ALTER TABLE `{$tbl}` ADD INDEX `status_idx` (`status`)");
-            }
-            if (!$col_exists('bhg_bonus_hunts', 'affiliate_site_id')) {
-                $wpdb->query("ALTER TABLE `{$tbl}` ADD COLUMN `affiliate_site_id` BIGINT UNSIGNED NULL AFTER `status`");
-            }
-            if (!$index_exists('bhg_bonus_hunts', 'affiliate_site_idx')) {
-                $wpdb->query("ALTER TABLE `{$tbl}` ADD INDEX `affiliate_site_idx` (`affiliate_site_id`)");
-            }
-        }
-
-        // Ensure tournament_results table exists (with last_win_date); backfill from wins if present
-        if (!$table_exists('bhg_tournament_results')) {
-            require_once ABSPATH . 'wp-admin/includes/upgrade.php';
-            $sql = "CREATE TABLE {$wpdb->prefix}bhg_tournament_results (
-                id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
-                tournament_id BIGINT UNSIGNED NOT NULL,
-                user_id BIGINT UNSIGNED NOT NULL,
-                wins INT UNSIGNED NOT NULL DEFAULT 0,
-                last_win_date DATETIME NULL,
-                PRIMARY KEY (id),
-                UNIQUE KEY tu_unique (tournament_id, user_id),
-                KEY tournament_idx (tournament_id),
-                KEY user_idx (user_id),
-                KEY wins_idx (wins)
-            ) $charset_collate;";
-            dbDelta($sql);
-        }
-        if ($table_exists('bhg_tournament_wins')) {
-            $wpdb->query("INSERT INTO `{$wpdb->prefix}bhg_tournament_results` (tournament_id, user_id, wins, last_win_date)
-                          SELECT tournament_id, user_id, wins, last_win_date FROM `{$wpdb->prefix}bhg_tournament_wins`
-                          ON DUPLICATE KEY UPDATE wins = VALUES(wins), last_win_date = VALUES(last_win_date)");
-        }
-
-        // Translations: ensure expected column names
-        if ($table_exists('bhg_translations')) {
-            $tbl = $wpdb->prefix . 'bhg_translations';
-            if (!$col_exists('bhg_translations', 'key')) {
-                $wpdb->query("ALTER TABLE `{$tbl}` ADD COLUMN `key` VARCHAR(191) NOT NULL AFTER `id`");
-            }
-            if (!$col_exists('bhg_translations', 'value')) {
-                $wpdb->query("ALTER TABLE `{$tbl}` ADD COLUMN `value` TEXT NULL AFTER `key`");
-            }
-            if (!$index_exists('bhg_translations', 'tkey')) {
-                $wpdb->query("ALTER TABLE `{$tbl}` ADD UNIQUE INDEX `tkey` (`key`)");
-            }
-        }
-    }
-
-    /** Back-compat shim: old code may call this during activation. */
-    public static function add_missing_tournament_columns() {
-        self::migrate();
     }
 }

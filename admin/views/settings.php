@@ -50,7 +50,8 @@ if (isset($_GET['error'])) {
         <input type="hidden" name="action" value="bhg_save_settings">
         <?php wp_nonce_field('bhg_save_settings_nonce', 'bhg_settings_nonce'); ?>
         
-        <table class="form-table">
+        <?php wp_nonce_field('bhg_save_settings'); ?>
+<table class="form-table">
             <tr>
                 <th scope="row">
                     <label for="bhg_default_tournament_period">

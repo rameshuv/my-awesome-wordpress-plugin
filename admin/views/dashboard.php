@@ -1,63 +1,59 @@
 <?php
 if (!defined('ABSPATH')) exit;
+if (!current_user_can('manage_options')) { wp_die(__('You do not have sufficient permissions to access this page.', 'bonus-hunt-guesser')); }
 
-// Check capabilities
-if (!current_user_can('manage_options')) {
-    wp_die(__('You do not have sufficient permissions to access this page.', 'bonus-hunt-guesser'));
+if (!function_exists('bhg_get_latest_closed_hunts')) {
+    wp_die(__('Helper function bhg_get_latest_closed_hunts() missing. Please include class-bhg-bonus-hunts.php helpers.', 'bonus-hunt-guesser'));
 }
 
-require_once BHG_PLUGIN_DIR . 'includes/class-bhg-bonus-hunts.php';
-$rows = BHG_Bonus_Hunts::get_latest_hunts_with_winners(3);
+$hunts = bhg_get_latest_closed_hunts(3);
 ?>
 <div class="wrap">
-  <h1><?php echo esc_html__('Dashboard', 'bonus-hunt-guesser'); ?></h1>
-
-  <h2 style="margin-top:1em"><?php echo esc_html__('Latest Hunts', 'bonus-hunt-guesser'); ?></h2>
+  <h1><?php esc_html_e('Latest Hunts', 'bonus-hunt-guesser'); ?></h1>
   <table class="widefat striped">
     <thead>
       <tr>
-        <th><?php echo esc_html__('Bonushunt', 'bonus-hunt-guesser'); ?></th>
-        <th><?php echo esc_html__('All Winners (name • guess • diff)', 'bonus-hunt-guesser'); ?></th>
-        <th><?php echo esc_html__('Start Balance', 'bonus-hunt-guesser'); ?></th>
-        <th><?php echo esc_html__('Final Balance', 'bonus-hunt-guesser'); ?></th>
-        <th><?php echo esc_html__('Closed At', 'bonus-hunt-guesser'); ?></th>
+        <th><?php esc_html_e('Bonushunt', 'bonus-hunt-guesser'); ?></th>
+        <th><?php esc_html_e('All Winners', 'bonus-hunt-guesser'); ?></th>
+        <th><?php esc_html_e('Start Balance', 'bonus-hunt-guesser'); ?></th>
+        <th><?php esc_html_e('Final Balance', 'bonus-hunt-guesser'); ?></th>
+        <th><?php esc_html_e('Closed At', 'bonus-hunt-guesser'); ?></th>
       </tr>
     </thead>
     <tbody>
-      <?php if (empty($rows)) : ?>
-        <tr><td colspan="5"><?php echo esc_html__('No closed hunts yet.', 'bonus-hunt-guesser'); ?></td></tr>
-      <?php else : foreach ($rows as $row) :
-        $h = $row['hunt']; $winners = $row['winners'];
-        $wcount = (int)($h->winners_count ?: 3);
-        ?>
-        <tr>
-          <td><?php echo esc_html($h->title); ?></td>
-          <td>
-            <?php
-            if (empty($winners)) {
-                echo '<em>' . esc_html__('No winners found', 'bonus-hunt-guesser') . '</em>';
+    <?php if ($hunts): foreach ($hunts as $h): 
+      $winners = function_exists('bhg_get_top_winners_for_hunt') ? bhg_get_top_winners_for_hunt($h->id, (int) $h->winners_limit) : array();
+    ?>
+      <tr>
+        <td><?php echo esc_html($h->title); ?></td>
+        <td>
+          <?php
+            if ($winners) {
+              $out = array();
+              foreach ($winners as $w) {
+                $u   = get_userdata((int)$w->user_id);
+                $nm  = $u ? $u->user_login : sprintf(__('User #%d','bonus-hunt-guesser'), (int)$w->user_id);
+                $out[] = sprintf(
+                  '%s — %s (%s %s)',
+                  esc_html($nm),
+                  esc_html(number_format_i18n((float)$w->guess, 2)),
+                  esc_html__('diff', 'bonus-hunt-guesser'),
+                  esc_html(number_format_i18n((float)$w->diff, 2))
+                );
+              }
+              echo esc_html(implode(' • ', $out));
             } else {
-                $parts = [];
-                $pos = 1;
-                foreach ($winners as $w) {
-                    $parts[] = sprintf(
-                        '#%d %s • %s • %s',
-                        $pos++,
-                        esc_html($w->display_name ?: ('user#' . (int)$w->user_id)),
-                        esc_html(number_format_i18n($w->guess, 2)),
-                        esc_html(number_format_i18n($w->diff, 2))
-                    );
-                    if ($pos > $wcount) break;
-                }
-                echo wp_kses_post(implode('<br>', $parts));
+              esc_html_e('No winners yet', 'bonus-hunt-guesser');
             }
-            ?>
-          </td>
-          <td><?php echo esc_html(number_format_i18n($h->starting_balance, 2)); ?></td>
-          <td><?php echo $h->final_balance !== null ? esc_html(number_format_i18n($h->final_balance, 2)) : '—'; ?></td>
-          <td><?php echo $h->closed_at ? esc_html(mysql2date(get_option('date_format') . ' ' . get_option('time_format'), $h->closed_at)) : '—'; ?></td>
-        </tr>
-      <?php endforeach; endif; ?>
+          ?>
+        </td>
+        <td><?php echo esc_html(number_format_i18n((float)$h->start_balance, 2)); ?></td>
+        <td><?php echo ($h->final_balance !== null) ? esc_html(number_format_i18n((float)$h->final_balance, 2)) : '—'; ?></td>
+        <td><?php echo $h->closed_at ? esc_html(date_i18n(get_option('date_format') . ' ' . get_option('time_format'), strtotime($h->closed_at))) : '—'; ?></td>
+      </tr>
+    <?php endforeach; else: ?>
+      <tr><td colspan="5"><?php esc_html_e('No closed hunts yet.', 'bonus-hunt-guesser'); ?></td></tr>
+    <?php endif; ?>
     </tbody>
   </table>
 </div>
