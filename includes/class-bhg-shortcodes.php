@@ -412,26 +412,119 @@ class BHG_Shortcodes {
     /** [bhg_best_guessers] — simple wins leaderboard */
     public function best_guessers_shortcode($atts) {
         global $wpdb;
-        $wins = $wpdb->prefix . 'bhg_tournament_results';
-        $users = $wpdb->prefix . 'users';
 
-        $rows = $wpdb->get_results(
-            "SELECT u.ID as user_id, u.user_login, SUM(w.wins) as total_wins
-             FROM {$wins} w
-             JOIN {$users} u ON u.ID = w.user_id
-             GROUP BY u.ID, u.user_login
-             ORDER BY total_wins DESC, u.user_login ASC
-             LIMIT 50"
+        $wins_tbl = $wpdb->prefix . 'bhg_tournament_results';
+        $tours_tbl = $wpdb->prefix . 'bhg_tournaments';
+        $users_tbl = $wpdb->users;
+
+        $now_ts = current_time('timestamp');
+        $current_month = gmdate('Y-m', $now_ts);
+        $current_year  = gmdate('Y', $now_ts);
+
+        $periods = array(
+            'overall' => array(
+                'label' => esc_html__('Overall', 'bonus-hunt-guesser'),
+                'type'  => '',
+                'period'=> '',
+            ),
+            'monthly' => array(
+                'label' => esc_html__('Monthly', 'bonus-hunt-guesser'),
+                'type'  => 'monthly',
+                'period'=> $current_month,
+            ),
+            'yearly' => array(
+                'label' => esc_html__('Yearly', 'bonus-hunt-guesser'),
+                'type'  => 'yearly',
+                'period'=> $current_year,
+            ),
+            'alltime' => array(
+                'label' => esc_html__('All-Time', 'bonus-hunt-guesser'),
+                'type'  => 'alltime',
+                'period'=> '',
+            ),
         );
-        if (!$rows) return '<p>' . esc_html__('No data yet.', 'bonus-hunt-guesser') . '</p>';
+
+        $results = array();
+        foreach ($periods as $key => $info) {
+            if ($info['type']) {
+                $where = 't.type = %s';
+                $params = array($info['type']);
+                if ($info['period']) {
+                    $where .= ' AND t.period = %s';
+                    $params[] = $info['period'];
+                }
+                $sql = "SELECT u.ID as user_id, u.user_login, SUM(r.wins) as total_wins
+                        FROM {$wins_tbl} r
+                        INNER JOIN {$users_tbl} u ON u.ID = r.user_id
+                        INNER JOIN {$tours_tbl} t ON t.id = r.tournament_id
+                        WHERE {$where}
+                        GROUP BY u.ID, u.user_login
+                        ORDER BY total_wins DESC, u.user_login ASC
+                        LIMIT 50";
+                array_unshift($params, $sql);
+                $prepared = call_user_func_array(array($wpdb, 'prepare'), $params);
+                $results[$key] = $wpdb->get_results($prepared);
+            } else {
+                $sql = "SELECT u.ID as user_id, u.user_login, SUM(r.wins) as total_wins
+                        FROM {$wins_tbl} r
+                        INNER JOIN {$users_tbl} u ON u.ID = r.user_id
+                        GROUP BY u.ID, u.user_login
+                        ORDER BY total_wins DESC, u.user_login ASC
+                        LIMIT 50";
+                $results[$key] = $wpdb->get_results($sql);
+            }
+        }
+
+        $hunts_tbl = $wpdb->prefix . 'bhg_bonus_hunts';
+        $hunts = $wpdb->get_results("SELECT id, title FROM {$hunts_tbl} WHERE status='closed' ORDER BY created_at DESC LIMIT 50");
 
         ob_start();
-        echo '<table class="bhg-leaderboard"><thead><tr><th>#</th><th>' . esc_html__('User', 'bonus-hunt-guesser') . '</th><th>' . esc_html__('Wins', 'bonus-hunt-guesser') . '</th></tr></thead><tbody>';
-        $pos = 1;
-        foreach ($rows as $r) {
-            echo '<tr><td>' . (int)$pos++ . '</td><td>' . esc_html($r->user_login ?: ('user#' . (int)$r->user_id)) . '</td><td>' . (int)$r->total_wins . '</td></tr>';
+        echo '<ul class="bhg-tabs">';
+        $first = true;
+        foreach ($periods as $key => $info) {
+            $active = $first ? ' class="active"' : '';
+            echo '<li' . $active . '><a href="#bhg-tab-' . esc_attr($key) . '">' . esc_html($info['label']) . '</a></li>';
+            $first = false;
         }
-        echo '</tbody></table>';
+        if ($hunts) {
+            echo '<li><a href="#bhg-tab-hunts">' . esc_html__('Bonus Hunts', 'bonus-hunt-guesser') . '</a></li>';
+        }
+        echo '</ul>';
+
+        $first = true;
+        foreach ($periods as $key => $info) {
+            $active = $first ? ' active' : '';
+            echo '<div id="bhg-tab-' . esc_attr($key) . '" class="bhg-tab-pane' . $active . '">';
+            $rows = isset($results[$key]) ? $results[$key] : array();
+            if (!$rows) {
+                echo '<p>' . esc_html__('No data yet.', 'bonus-hunt-guesser') . '</p>';
+            } else {
+                echo '<table class="bhg-leaderboard"><thead><tr><th>#</th><th>' . esc_html__('User', 'bonus-hunt-guesser') . '</th><th>' . esc_html__('Wins', 'bonus-hunt-guesser') . '</th></tr></thead><tbody>';
+                $pos = 1;
+                foreach ($rows as $r) {
+                    $user_label = $r->user_login ? $r->user_login : 'user#' . (int) $r->user_id;
+                    echo '<tr><td>' . (int) $pos++ . '</td><td>' . esc_html($user_label) . '</td><td>' . (int) $r->total_wins . '</td></tr>';
+                }
+                echo '</tbody></table>';
+            }
+            echo '</div>';
+            $first = false;
+        }
+
+        if ($hunts) {
+            echo '<div id="bhg-tab-hunts" class="bhg-tab-pane">';
+            echo '<ul class="bhg-hunt-history">';
+            foreach ($hunts as $hunt) {
+                $url = esc_url(add_query_arg('hunt_id', (int) $hunt->id));
+                echo '<li><a href="' . $url . '">' . esc_html($hunt->title) . '</a></li>';
+            }
+            echo '</ul>';
+            echo '</div>';
+        }
+
+        echo '<style>.bhg-tabs{list-style:none;margin:0;padding:0;display:flex;border-bottom:1px solid #e2e8f0}.bhg-tabs li{margin:0;padding:0}.bhg-tabs a{display:block;padding:8px 12px;text-decoration:none;border:1px solid #e2e8f0;border-bottom:none;margin-right:4px;background:#f7fafc;border-top-left-radius:4px;border-top-right-radius:4px}.bhg-tabs li.active a{background:#fff;font-weight:700}.bhg-tab-pane{display:none;border:1px solid #e2e8f0;padding:12px;border-top:none}.bhg-tab-pane.active{display:block}</style>';
+        echo '<script>document.addEventListener("DOMContentLoaded",function(){var t=document.querySelectorAll(".bhg-tabs a");t.forEach(function(e){e.addEventListener("click",function(t){t.preventDefault();var n=this.getAttribute("href").substring(1);document.querySelectorAll(".bhg-tabs li").forEach(function(e){e.classList.remove("active")});document.querySelectorAll(".bhg-tab-pane").forEach(function(e){e.classList.remove("active")});this.parentElement.classList.add("active");var e=document.getElementById(n);e&&e.classList.add("active")})})});</script>';
+
         return ob_get_clean();
     }
 }
