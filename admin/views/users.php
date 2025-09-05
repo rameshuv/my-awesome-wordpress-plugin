@@ -32,7 +32,7 @@ $base_url = remove_query_arg(['paged']);
 <div class="wrap">
   <h1 class="wp-heading-inline"><?php echo esc_html__('Users', 'bonus-hunt-guesser'); ?></h1>
 
-  <form method="get" style="margin-top:1em">
+  <form method="get" class="bhg-margin-top-small">
     <input type="hidden" name="page" value="bhg-users" />
     <p class="search-box">
       <label class="screen-reader-text" for="user-search-input"><?php echo esc_html__('Search Users', 'bonus-hunt-guesser'); ?></label>
@@ -65,7 +65,7 @@ $base_url = remove_query_arg(['paged']);
           <td><?php echo esc_html($u->display_name); ?></td>
           <td><input type="text" name="bhg_real_name" form="<?php echo esc_attr($form_id); ?>" value="<?php echo esc_attr($real_name); ?>" /></td>
           <td><?php echo esc_html($u->user_email); ?></td>
-          <td style="text-align:center;"><input type="checkbox" name="bhg_is_affiliate" value="1" form="<?php echo esc_attr($form_id); ?>" <?php checked( $is_aff, 1 ); ?> /></td>
+          <td class="bhg-text-center"><input type="checkbox" name="bhg_is_affiliate" value="1" form="<?php echo esc_attr($form_id); ?>" <?php checked( $is_aff, 1 ); ?> /></td>
           <td>
             <form id="<?php echo esc_attr($form_id); ?>" method="post" action="<?php echo esc_url(admin_url('admin-post.php')); ?>">
               <input type="hidden" name="action" value="bhg_save_user_meta" />

@@ -14,7 +14,7 @@ $rows = $wpdb->get_results( "SELECT * FROM `$table` ORDER BY id DESC" );
 <div class="wrap">
   <h1 class="wp-heading-inline"><?php esc_html_e('Tournaments', 'bonus-hunt-guesser'); ?></h1>
 
-  <h2 style="margin-top:1em"><?php esc_html_e('All Tournaments', 'bonus-hunt-guesser'); ?></h2>
+  <h2 class="bhg-margin-top-small"><?php esc_html_e('All Tournaments', 'bonus-hunt-guesser'); ?></h2>
   <table class="widefat striped">
     <thead>
       <tr>
@@ -46,8 +46,8 @@ $rows = $wpdb->get_results( "SELECT * FROM `$table` ORDER BY id DESC" );
     </tbody>
   </table>
 
-  <h2 style="margin-top:2em"><?php echo $row ? esc_html__('Edit Tournament', 'bonus-hunt-guesser') : esc_html__('Add Tournament', 'bonus-hunt-guesser'); ?></h2>
-  <form method="post" action="<?php echo esc_url(admin_url('admin-post.php')); ?>" style="max-width:900px">
+  <h2 class="bhg-margin-top-large"><?php echo $row ? esc_html__('Edit Tournament', 'bonus-hunt-guesser') : esc_html__('Add Tournament', 'bonus-hunt-guesser'); ?></h2>
+  <form method="post" action="<?php echo esc_url(admin_url('admin-post.php')); ?>" class="bhg-max-width-900">
     <?php wp_nonce_field('bhg_tournament_save_action'); ?>
     <input type="hidden" name="action" value="bhg_tournament_save" />
     <?php if ($row): ?><input type="hidden" name="id" value="<?php echo (int)$row->id; ?>" /><?php endif; ?>
