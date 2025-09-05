@@ -797,20 +797,29 @@ echo '<td><a href="' . esc_url( $detail_url ) . '">' . esc_html__( 'Show details
 		return ob_get_clean();
 	}
 
-	/** Minimal profile view: affiliate status badge */
-	public function user_profile_shortcode($atts) {
-		if (!is_user_logged_in()) return '<p>' . esc_html__('Please log in to view this content.', 'bonus-hunt-guesser') . '</p>';
-		wp_enqueue_style(
-			'bhg-shortcodes',
-			BHG_PLUGIN_URL . 'assets/css/bhg-shortcodes.css',
-			array(),
-			defined( 'BHG_VERSION' ) ? BHG_VERSION : null
-		);
-		$user_id = get_current_user_id();
-		$is_affiliate = (int)get_user_meta($user_id, 'bhg_is_affiliate', true);
-		$badge = $is_affiliate ? '<span class="bhg-aff-green" aria-hidden="true"></span>' : '<span class="bhg-aff-red" aria-hidden="true"></span>';
-		return '<div class="bhg-user-profile">' . $badge . ' ' . esc_html(wp_get_current_user()->display_name) . '</div>';
-	}
+        /** Minimal profile view: affiliate status badge */
+        public function user_profile_shortcode( $atts ) {
+                if ( ! is_user_logged_in() ) {
+                        return '<p>' . esc_html__( 'Please log in to view this content.', 'bonus-hunt-guesser' ) . '</p>';
+                }
+                wp_enqueue_style(
+                        'bhg-shortcodes',
+                        BHG_PLUGIN_URL . 'assets/css/bhg-shortcodes.css',
+                        array(),
+                        defined( 'BHG_VERSION' ) ? BHG_VERSION : null
+                );
+                $user_id      = get_current_user_id();
+                $is_affiliate = (int) get_user_meta( $user_id, 'bhg_is_affiliate', true );
+                $badge        = $is_affiliate
+                        ? '<span class="bhg-aff-green" aria-hidden="true"></span>'
+                        : '<span class="bhg-aff-red" aria-hidden="true"></span>';
+
+                return sprintf(
+                        '<div class="bhg-user-profile">%s %s</div>',
+                        wp_kses_post( $badge ),
+                        esc_html( wp_get_current_user()->display_name )
+                );
+        }
 
 	/** [bhg_best_guessers] — simple wins leaderboard */
 	public function best_guessers_shortcode($atts) {
