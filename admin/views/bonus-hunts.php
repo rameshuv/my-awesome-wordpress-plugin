@@ -40,6 +40,11 @@ if ( 'list' === $view ) :
                 )
         );
 
+        $status_labels = [
+                'open'   => __( 'Open', 'bonus-hunt-guesser' ),
+                'closed' => __( 'Closed', 'bonus-hunt-guesser' ),
+        ];
+
         $total    = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$hunts_table}" );
         $base_url = remove_query_arg( [ 'paged' ] );
 ?>
@@ -73,7 +78,7 @@ if ( 'list' === $view ) :
 		  <td><?php echo esc_html( number_format_i18n( (float) $h->starting_balance, 2 ) ); ?></td>
                   <td><?php echo null !== $h->final_balance ? esc_html( number_format_i18n( (float) $h->final_balance, 2 ) ) : esc_html__( '—', 'bonus-hunt-guesser' ); ?></td>
 		  <td><?php echo (int) ( $h->winners_count ?? 3 ); ?></td>
-		  <td><?php echo esc_html( $h->status ); ?></td>
+                  <td><?php echo esc_html( $status_labels[ $h->status ] ?? $h->status ); ?></td>
 		  <td>
 			<a class="button" href="<?php echo esc_url( add_query_arg( [ 'view' => 'edit', 'id' => (int) $h->id ] ) ); ?>"><?php echo esc_html__( 'Edit', 'bonus-hunt-guesser' ); ?></a>
 			<?php if ( 'open' === $h->status ) : ?>

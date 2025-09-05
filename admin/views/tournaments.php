@@ -23,7 +23,12 @@ $labels = [
 	'monthly'   => __( 'Monthly', 'bonus-hunt-guesser' ),
 	'quarterly' => __( 'Quarterly', 'bonus-hunt-guesser' ),
 	'yearly'    => __( 'Yearly', 'bonus-hunt-guesser' ),
-	'alltime'   => __( 'Alltime', 'bonus-hunt-guesser' ),
+        'alltime'   => __( 'Alltime', 'bonus-hunt-guesser' ),
+];
+
+$status_labels = [
+        'active'   => __( 'Active', 'bonus-hunt-guesser' ),
+        'archived' => __( 'Archived', 'bonus-hunt-guesser' ),
 ];
 ?>
 <div class="wrap">
@@ -52,7 +57,7 @@ $labels = [
 		  <td><?php echo esc_html( $labels[ $r->type ] ?? $r->type ); ?></td>
 		  <td><?php echo esc_html($r->start_date); ?></td>
 		  <td><?php echo esc_html($r->end_date); ?></td>
-		  <td><?php echo esc_html($r->status); ?></td>
+                  <td><?php echo esc_html( $status_labels[ $r->status ] ?? $r->status ); ?></td>
 		  <td>
 			<a class="button" href="<?php echo esc_url(add_query_arg(['edit' => (int)$r->id])); ?>"><?php esc_html_e('Edit','bonus-hunt-guesser'); ?></a>
 		  </td>
@@ -100,15 +105,15 @@ $labels = [
 	  <tr>
 		<th><label for="bhg_t_status"><?php esc_html_e('Status','bonus-hunt-guesser'); ?></label></th>
 		<td>
-		  <?php $st = ['active','archived']; $cur = $row->status ?? 'active'; ?>
-		  <select id="bhg_t_status" name="status">
-			<?php foreach ($st as $v): ?>
-			  <option value="<?php echo esc_attr($v); ?>" <?php selected($cur, $v); ?>><?php echo esc_html(ucfirst($v)); ?></option>
-			<?php endforeach; ?>
-		  </select>
-		</td>
-	  </tr>
-	</table>
+                  <?php $st = array_keys( $status_labels ); $cur = $row->status ?? 'active'; ?>
+                  <select id="bhg_t_status" name="status">
+                        <?php foreach ( $st as $v ) : ?>
+                          <option value="<?php echo esc_attr( $v ); ?>" <?php selected( $cur, $v ); ?>><?php echo esc_html( $status_labels[ $v ] ); ?></option>
+                        <?php endforeach; ?>
+                  </select>
+                </td>
+          </tr>
+        </table>
 	<?php submit_button($row ? __('Update Tournament','bonus-hunt-guesser') : __('Create Tournament','bonus-hunt-guesser')); ?>
   </form>
 </div>
