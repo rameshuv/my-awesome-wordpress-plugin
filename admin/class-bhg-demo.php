@@ -20,18 +20,20 @@ class BHG_Demo {
 
 	public function render_demo() {
 		echo '<div class="wrap"><h1>Demo Tools</h1>';
-		echo '<form method="post" action="'.admin_url('admin-post.php').'">';
-		echo '<input type="hidden" name="action" value="bhg_demo_reseed" />';
-		submit_button(__('Reset & Reseed Demo','bonus-hunt-guesser'));
-		echo '</form></div>';
-	}
+               echo '<form method="post" action="'.admin_url('admin-post.php').'">';
+               echo '<input type="hidden" name="action" value="bhg_demo_reseed" />';
+               wp_nonce_field( 'bhg_demo_reseed' );
+               submit_button(__('Reset & Reseed Demo','bonus-hunt-guesser'));
+               echo '</form></div>';
+       }
 
-	public function reseed() {
-		global $wpdb;
+       public function reseed() {
+               check_admin_referer( 'bhg_demo_reseed' );
+               global $wpdb;
 
-		// Wipe demo data
-		$wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->prefix}bhg_bonus_hunts WHERE title LIKE '%(Demo)%'" ) );
-		$wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->prefix}bhg_tournaments WHERE title LIKE '%(Demo)%'" ) );
+               // Wipe demo data
+               $wpdb->query( "DELETE FROM {$wpdb->prefix}bhg_bonus_hunts WHERE title LIKE '%(Demo)%'" );
+               $wpdb->query( "DELETE FROM {$wpdb->prefix}bhg_tournaments WHERE title LIKE '%(Demo)%'" );
 
 		// Insert demo hunt
 		$wpdb->insert("{$wpdb->prefix}bhg_bonus_hunts",[
