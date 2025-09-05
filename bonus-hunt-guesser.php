@@ -419,6 +419,8 @@ new BHG_Front_Menus();
     add_action('admin_post_nopriv_bhg_save_bonus_hunt', 'bhg_handle_bonus_hunt_save_unauth');
     add_action('admin_post_bhg_submit_guess', 'bhg_handle_submit_guess');
     add_action('admin_post_nopriv_bhg_submit_guess', function(){ $ref = wp_get_referer(); wp_safe_redirect( wp_login_url( $ref ? $ref : home_url() ) ); exit; });
+    add_action('wp_ajax_submit_bhg_guess', 'bhg_handle_submit_guess');
+    add_action('wp_ajax_nopriv_submit_bhg_guess', 'bhg_handle_submit_guess');
     add_action('admin_post_bhg_save_settings', 'bhg_handle_settings_save');
 }
 
@@ -570,74 +572,117 @@ function bhg_handle_guess_submission() { return bhg_handle_submit_guess(); }
 
 // Canonical guess submit handler
 /**
- * Process a guess submission.
+ * Process a guess submission from admin-post or AJAX.
  *
  * @return void
  */
 function bhg_handle_submit_guess() {
-    // This hook (admin_post_*) is authenticated; no need to check login again here.
-    // Nonce check
-    if (!isset($_POST['bhg_nonce'])) {
-        wp_die(esc_html__('Security check failed.', 'bonus-hunt-guesser'));
+    if ( wp_doing_ajax() ) {
+        check_ajax_referer( 'bhg_public_nonce', 'nonce' );
+    } else {
+        if ( ! isset( $_POST['bhg_nonce'] ) ) {
+            wp_die( esc_html__( 'Security check failed.', 'bonus-hunt-guesser' ) );
+        }
+        check_admin_referer( 'bhg_submit_guess', 'bhg_nonce' );
     }
-    check_admin_referer('bhg_submit_guess', 'bhg_nonce');
 
     $user_id = get_current_user_id();
-    $hunt_id = isset($_POST['hunt_id']) ? (int) $_POST['hunt_id'] : 0;
-    if ($hunt_id <= 0) {
-        wp_die(esc_html__('Invalid hunt.', 'bonus-hunt-guesser'));
+    if ( ! $user_id ) {
+        if ( wp_doing_ajax() ) {
+            wp_send_json_error( __( 'You must be logged in to submit a guess.', 'bonus-hunt-guesser' ) );
+        }
+        wp_die( esc_html__( 'You must be logged in to submit a guess.', 'bonus-hunt-guesser' ) );
+    }
+
+    $hunt_id = isset( $_POST['hunt_id'] ) ? (int) $_POST['hunt_id'] : 0;
+    if ( $hunt_id <= 0 ) {
+        if ( wp_doing_ajax() ) {
+            wp_send_json_error( __( 'Invalid hunt.', 'bonus-hunt-guesser' ) );
+        }
+        wp_die( esc_html__( 'Invalid hunt.', 'bonus-hunt-guesser' ) );
     }
 
     // Parse guess robustly
-    $raw_guess = isset($_POST['guess']) ? wp_unslash($_POST['guess']) : (isset($_POST['balance_guess']) ? wp_unslash($_POST['balance_guess']) : '');
-    $guess = -1.0;
-    if (function_exists('bhg_parse_amount')) {
-        $parsed = bhg_parse_amount($raw_guess);
-        $guess = ($parsed === null) ? -1.0 : (float) $parsed;
+    if ( wp_doing_ajax() ) {
+        $raw_guess = isset( $_POST['guess_amount'] ) ? wp_unslash( $_POST['guess_amount'] ) : '';
     } else {
-        $guess = is_numeric($raw_guess) ? (float) $raw_guess : -1.0;
+        $raw_guess = isset( $_POST['guess'] ) ? wp_unslash( $_POST['guess'] ) : ( isset( $_POST['balance_guess'] ) ? wp_unslash( $_POST['balance_guess'] ) : '' );
+    }
+    $guess = -1.0;
+    if ( function_exists( 'bhg_parse_amount' ) ) {
+        $parsed = bhg_parse_amount( $raw_guess );
+        $guess  = ( null === $parsed ) ? -1.0 : (float) $parsed;
+    } else {
+        $guess = is_numeric( $raw_guess ) ? (float) $raw_guess : -1.0;
     }
 
-    if ($guess < 0 || $guess > 100000) { if (function_exists('error_log')) error_log('[BHG] invalid guess after parse: raw=' . print_r($raw_guess,true) . ' parsed=' . print_r($guess,true));
-        wp_die(esc_html__('Invalid guess amount.', 'bonus-hunt-guesser'));
+    if ( $guess < 0 || $guess > 100000 ) {
+        if ( function_exists( 'error_log' ) ) {
+            error_log( '[BHG] invalid guess after parse: raw=' . print_r( $raw_guess, true ) . ' parsed=' . print_r( $guess, true ) );
+        }
+        if ( wp_doing_ajax() ) {
+            wp_send_json_error( __( 'Invalid guess amount.', 'bonus-hunt-guesser' ) );
+        }
+        wp_die( esc_html__( 'Invalid guess amount.', 'bonus-hunt-guesser' ) );
     }
 
     global $wpdb;
     $hunts = $wpdb->prefix . 'bhg_bonus_hunts';
     $g_tbl = $wpdb->prefix . 'bhg_guesses';
 
-    $hunt = $wpdb->get_row($wpdb->prepare("SELECT id, status FROM `$hunts` WHERE id=%d", $hunt_id));
-    if (!$hunt) {
-        wp_die(esc_html__('Hunt not found.', 'bonus-hunt-guesser'));
+    $hunt = $wpdb->get_row( $wpdb->prepare( "SELECT id, status FROM `$hunts` WHERE id=%d", $hunt_id ) );
+    if ( ! $hunt ) {
+        if ( wp_doing_ajax() ) {
+            wp_send_json_error( __( 'Hunt not found.', 'bonus-hunt-guesser' ) );
+        }
+        wp_die( esc_html__( 'Hunt not found.', 'bonus-hunt-guesser' ) );
     }
-    if ($hunt->status !== 'open') {
-        wp_die(esc_html__('This hunt is closed. You cannot submit or change a guess.', 'bonus-hunt-guesser'));
+    if ( $hunt->status !== 'open' ) {
+        if ( wp_doing_ajax() ) {
+            wp_send_json_error( __( 'This hunt is closed. You cannot submit or change a guess.', 'bonus-hunt-guesser' ) );
+        }
+        wp_die( esc_html__( 'This hunt is closed. You cannot submit or change a guess.', 'bonus-hunt-guesser' ) );
     }
 
     // Insert or update last guess per settings
-    $max = (int) get_option('bhg_guesses_max', 1);
-    $allow_edit = get_option('bhg_allow_guess_edit_until_close', 'yes') === 'yes';
+    $max        = (int) get_option( 'bhg_guesses_max', 1 );
+    $allow_edit = get_option( 'bhg_allow_guess_edit_until_close', 'yes' ) === 'yes';
 
-    $count = (int) $wpdb->get_var($wpdb->prepare("SELECT COUNT(*) FROM `$g_tbl` WHERE hunt_id=%d AND user_id=%d", $hunt_id, $user_id));
-    if ($count >= $max) {
-        if ($allow_edit && $count > 0) {
-            $gid = (int) $wpdb->get_var($wpdb->prepare("SELECT id FROM `$g_tbl` WHERE hunt_id=%d AND user_id=%d ORDER BY id DESC LIMIT 1", $hunt_id, $user_id));
-            if ($gid) {
-                $wpdb->update($g_tbl, ['guess' => $guess, 'updated_at' => current_time('mysql')], ['id' => $gid]);
-                wp_safe_redirect(wp_get_referer() ?: home_url()); exit;
+    $count = (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM `$g_tbl` WHERE hunt_id=%d AND user_id=%d", $hunt_id, $user_id ) );
+    if ( $count >= $max ) {
+        if ( $allow_edit && $count > 0 ) {
+            $gid = (int) $wpdb->get_var( $wpdb->prepare( "SELECT id FROM `$g_tbl` WHERE hunt_id=%d AND user_id=%d ORDER BY id DESC LIMIT 1", $hunt_id, $user_id ) );
+            if ( $gid ) {
+                $wpdb->update( $g_tbl, [ 'guess' => $guess, 'updated_at' => current_time( 'mysql' ) ], [ 'id' => $gid ] );
+                if ( wp_doing_ajax() ) {
+                    wp_send_json_success();
+                }
+                wp_safe_redirect( wp_get_referer() ?: home_url() );
+                exit;
             }
         }
-        wp_die(esc_html__('You have reached the maximum number of guesses.', 'bonus-hunt-guesser'));
+        if ( wp_doing_ajax() ) {
+            wp_send_json_error( __( 'You have reached the maximum number of guesses.', 'bonus-hunt-guesser' ) );
+        }
+        wp_die( esc_html__( 'You have reached the maximum number of guesses.', 'bonus-hunt-guesser' ) );
     }
 
     // Insert
-    $wpdb->insert($g_tbl, [
-        'hunt_id'    => $hunt_id,
-        'user_id'    => $user_id,
-        'guess'      => $guess,
-        'created_at' => current_time('mysql'),
-    ]);
-    wp_safe_redirect(wp_get_referer() ?: home_url());
+    $wpdb->insert(
+        $g_tbl,
+        [
+            'hunt_id'    => $hunt_id,
+            'user_id'    => $user_id,
+            'guess'      => $guess,
+            'created_at' => current_time( 'mysql' ),
+        ]
+    );
+
+    if ( wp_doing_ajax() ) {
+        wp_send_json_success();
+    }
+
+    wp_safe_redirect( wp_get_referer() ?: home_url() );
     exit;
 }
 
