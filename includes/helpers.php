@@ -119,7 +119,7 @@ if ( ! function_exists( 'bhg_get_default_translations' ) ) {
 
 if ( ! function_exists( 'bhg_seed_default_translations_if_empty' ) ) {
     /**
-     * Seed default translations if the table is empty.
+     * Seed default translations, avoiding duplicate entries.
      *
      * @return void
      */
@@ -127,20 +127,22 @@ if ( ! function_exists( 'bhg_seed_default_translations_if_empty' ) ) {
         global $wpdb;
 
         $table = $wpdb->prefix . 'bhg_translations';
-        $count = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$table}" );
 
-        if ( 0 === $count ) {
-            foreach ( bhg_get_default_translations() as $tkey => $tvalue ) {
-                $wpdb->insert(
-                    $table,
-                    array(
-                        'tkey'   => $tkey,
-                        'tvalue' => $tvalue,
-                        'locale' => get_locale(),
-                    ),
-                    array( '%s', '%s', '%s' )
-                );
+        foreach ( bhg_get_default_translations() as $tkey => $tvalue ) {
+            $tkey = trim( (string) $tkey );
+            if ( '' === $tkey ) {
+                continue; // Skip invalid keys.
             }
+
+            $wpdb->replace(
+                $table,
+                array(
+                    'tkey'   => $tkey,
+                    'tvalue' => $tvalue,
+                    'locale' => get_locale(),
+                ),
+                array( '%s', '%s', '%s' )
+            );
         }
     }
 }
