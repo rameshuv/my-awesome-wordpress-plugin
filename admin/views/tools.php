@@ -14,17 +14,17 @@ if ( ! defined( 'ABSPATH' ) ) { exit; }
   ?>
 
   <div class="card" style="max-width:900px;padding:16px;margin-top:12px;">
-    <h2><?php echo esc_html__('Diagnostics', 'bonus-hunt-guesser'); ?></h2>
-    <?php if (($hunts + $guesses + $users + $ads + $tournaments) > 0): ?>
-      <ul>
-        <li><?php echo esc_html__('Hunts:', 'bonus-hunt-guesser'); ?> <?php echo number_format_i18n($hunts); ?></li>
-        <li><?php echo esc_html__('Guesses:', 'bonus-hunt-guesser'); ?> <?php echo number_format_i18n($guesses); ?></li>
-        <li><?php echo esc_html__('Users:', 'bonus-hunt-guesser'); ?> <?php echo number_format_i18n($users); ?></li>
-        <li><?php echo esc_html__('Ads:', 'bonus-hunt-guesser'); ?> <?php echo number_format_i18n($ads); ?></li>
-        <li><?php echo esc_html__('Tournaments:', 'bonus-hunt-guesser'); ?> <?php echo number_format_i18n($tournaments); ?></li>
-      </ul>
-    <?php else: ?>
-      <p><?php echo esc_html__('Nothing to show yet. Start by creating a hunt or a test user.', 'bonus-hunt-guesser'); ?></p>
-    <?php endif; ?>
+	<h2><?php echo esc_html__('Diagnostics', 'bonus-hunt-guesser'); ?></h2>
+	<?php if (($hunts + $guesses + $users + $ads + $tournaments) > 0): ?>
+	  <ul>
+		<li><?php echo esc_html__('Hunts:', 'bonus-hunt-guesser'); ?> <?php echo number_format_i18n($hunts); ?></li>
+		<li><?php echo esc_html__('Guesses:', 'bonus-hunt-guesser'); ?> <?php echo number_format_i18n($guesses); ?></li>
+		<li><?php echo esc_html__('Users:', 'bonus-hunt-guesser'); ?> <?php echo number_format_i18n($users); ?></li>
+		<li><?php echo esc_html__('Ads:', 'bonus-hunt-guesser'); ?> <?php echo number_format_i18n($ads); ?></li>
+		<li><?php echo esc_html__('Tournaments:', 'bonus-hunt-guesser'); ?> <?php echo number_format_i18n($tournaments); ?></li>
+	  </ul>
+	<?php else: ?>
+	  <p><?php echo esc_html__('Nothing to show yet. Start by creating a hunt or a test user.', 'bonus-hunt-guesser'); ?></p>
+	<?php endif; ?>
   </div>
 </div>
