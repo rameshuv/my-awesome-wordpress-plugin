@@ -29,12 +29,14 @@ class BHG_Shortcodes {
 
     /** Minimal login hint used by some themes */
     public function login_hint_shortcode($atts = array()) {
-        if (is_user_logged_in()) {
+        if ( is_user_logged_in() ) {
             return '';
         }
-        $redirect = (is_ssl() ? 'https://' : 'http://') . (isset($_SERVER['HTTP_HOST']) ? esc_attr(wp_unslash($_SERVER['HTTP_HOST'])) : parse_url(home_url('/'), PHP_URL_HOST)) . (isset($_SERVER['REQUEST_URI']) ? esc_url_raw(wp_unslash($_SERVER['REQUEST_URI'])) : '/');
-        return '<p>' . esc_html__('Please log in to continue.', 'bonus-hunt-guesser') . '</p>'
-             . '<p><a class="button button-primary" href="' . esc_url(wp_login_url($redirect)) . '">' . esc_html__('Log in', 'bonus-hunt-guesser') . '</a></p>';
+
+        $redirect = home_url( add_query_arg( [], wp_unslash( $_SERVER['REQUEST_URI'] ) ) );
+
+        return '<p>' . esc_html__( 'Please log in to continue.', 'bonus-hunt-guesser' ) . '</p>'
+             . '<p><a class="button button-primary" href="' . esc_url( wp_login_url( $redirect ) ) . '">' . esc_html__( 'Log in', 'bonus-hunt-guesser' ) . '</a></p>';
     }
 
     /** [bhg_active_hunt] — list all open hunts */
@@ -68,13 +70,11 @@ class BHG_Shortcodes {
         $atts = shortcode_atts(array('hunt_id' => 0), $atts, 'bhg_guess_form');
         $hunt_id = (int) $atts['hunt_id'];
 
-        if (!is_user_logged_in()) {
-            $scheme = is_ssl() ? 'https://' : 'http://';
-            $host   = isset($_SERVER['HTTP_HOST']) ? sanitize_text_field(wp_unslash($_SERVER['HTTP_HOST'])) : parse_url(home_url('/'), PHP_URL_HOST);
-            $uri    = isset($_SERVER['REQUEST_URI']) ? esc_url_raw(wp_unslash($_SERVER['REQUEST_URI'])) : '/';
-            $redirect = esc_url_raw($scheme . $host . $uri);
-            return '<p>' . esc_html__('Please log in to submit your guess.', 'bonus-hunt-guesser') . '</p>'
-                 . '<p><a class="button button-primary" href="' . esc_url(wp_login_url($redirect)) . '">' . esc_html__('Log in', 'bonus-hunt-guesser') . '</a></p>';
+        if ( ! is_user_logged_in() ) {
+            $redirect = home_url( add_query_arg( [], wp_unslash( $_SERVER['REQUEST_URI'] ) ) );
+
+            return '<p>' . esc_html__( 'Please log in to submit your guess.', 'bonus-hunt-guesser' ) . '</p>'
+                 . '<p><a class="button button-primary" href="' . esc_url( wp_login_url( $redirect ) ) . '">' . esc_html__( 'Log in', 'bonus-hunt-guesser' ) . '</a></p>';
         }
 
         global $wpdb;
