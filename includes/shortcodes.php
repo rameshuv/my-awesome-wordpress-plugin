@@ -60,7 +60,13 @@ add_shortcode('bhg_user_profile', function($atts) {
 // [bhg_active_hunt] — show all open hunts with description, prizes and user guesses
 add_shortcode('bhg_active_hunt', function($atts) {
     global $wpdb;
-    $hunts = $wpdb->get_results("SELECT * FROM `" . $status . "`");
+    $status = isset($_GET['status']) ? sanitize_key($_GET['status']) : 'active';
+    $rows   = $wpdb->get_results(
+        $wpdb->prepare(
+            "SELECT * FROM {$wpdb->prefix}bhg_bonus_hunts WHERE status=%s",
+            $status
+        )
+    );
 
     ob_start(); ?>
     
