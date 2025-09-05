@@ -216,7 +216,7 @@ if (!function_exists('bhg_reset_demo_and_seed')) {
                 // keep existing; we'll upsert below
                 continue;
             }
-            $wpdb->query( $wpdb->prepare( "DELETE FROM `{$tbl}`" ) );
+            $wpdb->query( "DELETE FROM `{$tbl}`" );
         }
 
         // Seed affiliate websites (idempotent upsert by slug)
@@ -292,7 +292,7 @@ if (!function_exists('bhg_reset_demo_and_seed')) {
         if ($wpdb->get_var($wpdb->prepare("SHOW TABLES LIKE %s", $t_tbl)) === $t_tbl) {
             // Wipe results only
             if ($wpdb->get_var($wpdb->prepare("SHOW TABLES LIKE %s", $r_tbl)) === $r_tbl) {
-                $wpdb->query( $wpdb->prepare( "DELETE FROM `{$r_tbl}`" ) );
+                $wpdb->query( "DELETE FROM `{$r_tbl}`" );
             }
             $closed = $wpdb->get_results( $wpdb->prepare( "SELECT winner_user_id, closed_at FROM {$hunts_tbl} WHERE status='closed' AND winner_user_id IS NOT NULL" ) );
             foreach ($closed as $row) {
