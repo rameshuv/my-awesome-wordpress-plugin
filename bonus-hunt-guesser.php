@@ -1,6 +1,25 @@
 <?php
+/**
+ * Plugin Name: Bonus Hunt Guesser
+ * Plugin URI: https://yourdomain.com/
+ * Description: Comprehensive bonus hunt management system with tournaments, leaderboards, and user guessing functionality
+ * Version: 8.0.07
+ * Author: Bonus Hunt Guesser Development Team
+ * Text Domain: bonus-hunt-guesser
+ * Domain Path: /languages
+ * Requires PHP: 7.4
+ * Requires at least: 6.3.5
+ * License: GPLv2 or later
+ */
+
 // Helper: parse human-entered money-like strings into float
 if ( ! function_exists( 'bhg_parse_amount' ) ) {
+    /**
+     * Parse a human-entered money-like string into a float.
+     *
+     * @param string $s Raw amount string.
+     * @return float|null Parsed float value or null on failure.
+     */
     function bhg_parse_amount( $s ) {
         if ( ! is_string( $s ) ) {
             return null;
@@ -76,19 +95,6 @@ if ( ! function_exists( 'bhg_parse_amount' ) ) {
         return null;
     }
 }
-
-/**
- * Plugin Name: Bonus Hunt Guesser
- * Plugin URI: https://yourdomain.com/
- * Description: Comprehensive bonus hunt management system with tournaments, leaderboards, and user guessing functionality
- * Version: 8.0.07
- * Author: Bonus Hunt Guesser Development Team
- * Text Domain: bonus-hunt-guesser
- * Domain Path: /languages
- * Requires PHP: 7.4
- * Requires at least: 6.3.5
- * License: GPLv2 or later
- */
 // Ensure canonical DB class is loaded
 require_once __DIR__ . '/includes/class-bhg-db.php';
 
@@ -107,14 +113,30 @@ define('BHG_PLUGIN_URL', plugin_dir_url(__FILE__));
 define('BHG_TABLE_PREFIX', 'bhg_');
 
 // Simple BHG_DB class for activation
+/**
+ * Legacy database handler used for table creation during activation.
+ */
 class BHG_DB_OLD {
+    /**
+     * Table name prefix.
+     *
+     * @var string
+     */
     private $table_prefix;
 
+    /**
+     * Set up the table prefix.
+     */
     public function __construct() {
         global $wpdb;
         $this->table_prefix = $wpdb->prefix . BHG_TABLE_PREFIX;
     }
 
+    /**
+     * Create required database tables.
+     *
+     * @return void
+     */
     public function create_tables() {
         global $wpdb;
         
@@ -184,6 +206,11 @@ class BHG_DB_OLD {
         error_log('[BHG] All tables created successfully');
     }
     
+    /**
+     * Run database migrations for legacy schema.
+     *
+     * @return void
+     */
     public static function migrate() {
         // Future database migration logic
         $current_version = get_option('bhg_db_version', '1.0');
@@ -199,6 +226,11 @@ class BHG_DB_OLD {
 }
 
 // Table creation function
+/**
+ * Create plugin database tables using active DB class.
+ *
+ * @return void
+ */
 function bhg_create_tables() {
         if (class_exists('BHG_DB')) {
             (new BHG_DB())->create_tables();
@@ -208,6 +240,11 @@ function bhg_create_tables() {
 }
 
 // Check and create tables if needed
+/**
+ * Create tables on first run if they do not exist.
+ *
+ * @return void
+ */
 function bhg_check_tables() {
     if (!get_option('bhg_tables_created')) {
         bhg_create_tables();
@@ -245,11 +282,17 @@ spl_autoload_register(function ($class) {
 require_once BHG_PLUGIN_DIR . 'includes/helpers.php';
 
 // Activation hook: create tables and set default options
-function bhg_activate_plugin($network_wide) {
+/**
+ * Activation callback for setting up the plugin.
+ *
+ * @param bool $network_wide Whether plugin is network activated.
+ * @return void
+ */
+function bhg_activate_plugin( $network_wide ) {
     if (!current_user_can('activate_plugins')) {
         return;
     }
-    
+
     bhg_create_tables();
     
     // Set default options
@@ -284,6 +327,11 @@ register_deactivation_hook(__FILE__, function() {
 
 // Initialize plugin
 add_action('plugins_loaded', 'bhg_init_plugin');
+/**
+ * Initialize plugin components.
+ *
+ * @return void
+ */
 function bhg_init_plugin() {
     // Load text domain
     load_plugin_textdomain('bonus-hunt-guesser', false, dirname(plugin_basename(__FILE__)) . '/languages/');
@@ -328,10 +376,15 @@ new BHG_Front_Menus();
 add_action('init', 'bhg_check_tables', 0);
 
 // Form handler for settings save
+/**
+ * Handle saving of plugin settings.
+ *
+ * @return void
+ */
 function bhg_handle_settings_save() {
     // Check user capabilities
     if (!current_user_can('manage_options')) {
-        wp_die(__('You do not have sufficient permissions to perform this action.', 'bonus-hunt-guesser'));
+        wp_die(esc_html__('You do not have sufficient permissions to perform this action.', 'bonus-hunt-guesser'));
     }
     
     // Verify nonce
@@ -399,6 +452,11 @@ function bhg_handle_settings_save() {
 }
 
 // Form handler for bonus hunt save (admin)
+/**
+ * Handle admin bonus hunt form submissions.
+ *
+ * @return void
+ */
 function bhg_handle_bonus_hunt_save() {
     // Verify nonce
     if (!isset($_POST['_wpnonce']) || !wp_verify_nonce($_POST['_wpnonce'], 'bhg_form_nonce')) {
@@ -443,14 +501,29 @@ function bhg_handle_bonus_hunt_save() {
     exit;
 }
 
+/**
+ * Handle unauthorized bonus hunt save attempts.
+ *
+ * @return void
+ */
 function bhg_handle_bonus_hunt_save_unauth() {
     wp_die('You must be logged in to submit this form');
 }
 
 // Form handler for guess submission (frontend)
+/**
+ * Proxy handler for guess submissions.
+ *
+ * @return void
+ */
 function bhg_handle_guess_submission() { return bhg_handle_submit_guess(); }
 
 // Canonical guess submit handler
+/**
+ * Process a guess submission.
+ *
+ * @return void
+ */
 function bhg_handle_submit_guess() {
     // This hook (admin_post_*) is authenticated; no need to check login again here.
     // Nonce check
@@ -519,7 +592,13 @@ function bhg_handle_submit_guess() {
 }
 
 // Frontend ads rendering
-function bhg_should_show_ad($visibility) {
+/**
+ * Determine if an advertisement should be displayed.
+ *
+ * @param string $visibility Visibility rule.
+ * @return bool True if ad should be shown, false otherwise.
+ */
+function bhg_should_show_ad( $visibility ) {
     if ($visibility === 'all') {
         return true;
     }
@@ -540,8 +619,12 @@ function bhg_should_show_ad($visibility) {
 
 /**
  * Safe and validated ads query builder.
+ *
+ * @param string $table     Table name without prefix.
+ * @param string $placement Ad placement.
+ * @return array List of ad rows.
  */
-function bhg_build_ads_query($table, $placement = 'footer') {
+function bhg_build_ads_query( $table, $placement = 'footer' ) {
     global $wpdb;
 
     // Validate table variable (only allow alphanumeric and underscore)
@@ -589,6 +672,11 @@ function bhg_build_ads_query($table, $placement = 'footer') {
 add_action('wp_ajax_bhg_load_leaderboard', 'bhg_load_leaderboard_ajax');
 add_action('wp_ajax_nopriv_bhg_load_leaderboard', 'bhg_load_leaderboard_ajax');
 
+/**
+ * AJAX handler for loading leaderboard markup.
+ *
+ * @return void
+ */
 function bhg_load_leaderboard_ajax() {
     check_ajax_referer('bhg_public_nonce', 'nonce');
     
@@ -605,20 +693,32 @@ function bhg_load_leaderboard_ajax() {
 }
 
 // Helper function to generate leaderboard HTML
-function bhg_generate_leaderboard_html($timeframe) {
-    return '<div class="bhg-leaderboard" data-timeframe="' . esc_attr($timeframe) . '">Leaderboard content for ' . esc_html($timeframe) . '</div>';
+/**
+ * Generate leaderboard HTML for a timeframe.
+ *
+ * @param string $timeframe Timeframe key.
+ * @return string Generated HTML.
+ */
+function bhg_generate_leaderboard_html( $timeframe ) {
+    return '<div class="bhg-leaderboard" data-timeframe="' . esc_attr( $timeframe ) . '">Leaderboard content for ' . esc_html( $timeframe ) . '</div>';
 }
 
 // Helper function to check if user is affiliate
-function bhg_is_affiliate($user_id = null) {
+/**
+ * Check whether a user has affiliate status.
+ *
+ * @param int|null $user_id Optional. User ID to check. Defaults to current user.
+ * @return bool True if user is an affiliate.
+ */
+function bhg_is_affiliate( $user_id = null ) {
     if (!$user_id) {
         $user_id = get_current_user_id();
     }
-    
+
     if (!$user_id) {
         return false;
     }
-    
+
     return (bool) get_user_meta($user_id, 'bhg_affiliate_status', true);
 }
 
@@ -626,7 +726,13 @@ function bhg_is_affiliate($user_id = null) {
 add_action('show_user_profile', 'bhg_extra_user_profile_fields');
 add_action('edit_user_profile', 'bhg_extra_user_profile_fields');
 
-function bhg_extra_user_profile_fields($user) {
+/**
+ * Display affiliate status field on user profile.
+ *
+ * @param WP_User $user User object.
+ * @return void
+ */
+function bhg_extra_user_profile_fields( $user ) {
     if (!current_user_can('manage_options')) {
         return;
     }
@@ -649,16 +755,27 @@ function bhg_extra_user_profile_fields($user) {
 add_action('personal_options_update', 'bhg_save_extra_user_profile_fields');
 add_action('edit_user_profile_update', 'bhg_save_extra_user_profile_fields');
 
-function bhg_save_extra_user_profile_fields($user_id) {
+/**
+ * Save affiliate status from user profile.
+ *
+ * @param int $user_id User ID.
+ * @return void|false Returns false if the user cannot be edited.
+ */
+function bhg_save_extra_user_profile_fields( $user_id ) {
     if (!current_user_can('edit_user', $user_id)) {
         return false;
     }
-    
+
     $affiliate_status = isset($_POST['bhg_affiliate_status']) ? 1 : 0;
     update_user_meta($user_id, 'bhg_affiliate_status', $affiliate_status);
 }
 
 if (!function_exists('bhg_self_heal_db')) {
+    /**
+     * Attempt to repair missing database tables.
+     *
+     * @return void
+     */
     function bhg_self_heal_db() {
         if (!class_exists('BHG_DB')) require_once __DIR__ . '/includes/class-bhg-db.php';
         try {
@@ -675,7 +792,13 @@ if (!function_exists('bhg_self_heal_db')) {
 
 // === BHG Guess Shortcode & Handler (clean block) ===
 if (!function_exists('bhg_guess_form_shortcode')) {
-    function bhg_guess_form_shortcode($atts) {
+    /**
+     * Render the guess form shortcode.
+     *
+     * @param array $atts Shortcode attributes.
+     * @return string Form HTML.
+     */
+    function bhg_guess_form_shortcode( $atts ) {
         $atts = shortcode_atts(['hunt_id' => 0], $atts, 'bhg_guess_form');
         $hunt_id = (int) $atts['hunt_id'];
         if (!(function_exists('is_user_logged_in') && is_user_logged_in())) {
@@ -701,7 +824,13 @@ if (!function_exists('bhg_guess_form_shortcode')) {
 }
 
 if (!function_exists('bhg_handle_submit_guess')) {
-    function bhg_handle_submit_guess() {$user_id = get_current_user_id();
+    /**
+     * Fallback guess submission handler.
+     *
+     * @return void
+     */
+    function bhg_handle_submit_guess() {
+        $user_id = get_current_user_id();
         $hunt_id = isset($_POST['hunt_id']) ? (int) $_POST['hunt_id'] : 0;
         if ($hunt_id <= 0) {
             wp_die(esc_html__('Invalid request (hunt).', 'bonus-hunt-guesser'));
@@ -710,12 +839,16 @@ if (!function_exists('bhg_handle_submit_guess')) {
         check_admin_referer('bhg_submit_guess', 'bhg_nonce');
 
         // Robust parse of 'guess' supporting commas/currency
-$raw_guess = isset($_POST['guess']) ? wp_unslash($_POST['guess']) : (isset($_POST['balance_guess']) ? wp_unslash($_POST['balance_guess']) : (isset($_POST['final_balance_guess']) ? wp_unslash($_POST['final_balance_guess']) : ''));
-$guess_val = bhg_parse_amount($raw_guess);
-$guess = ($guess_val === null) ? -1.0 : (float) $guess_val;
-// Range 0..100000 inclusive
+        $raw_guess = isset($_POST['guess']) ? wp_unslash($_POST['guess']) : (isset($_POST['balance_guess']) ? wp_unslash($_POST['balance_guess']) : (isset($_POST['final_balance_guess']) ? wp_unslash($_POST['final_balance_guess']) : ''));
+        $guess_val = bhg_parse_amount($raw_guess);
+        $guess     = ($guess_val === null) ? -1.0 : (float) $guess_val;
+        // Range 0..100000 inclusive
 
-        if ($guess < 0 || $guess > 100000) { if (function_exists('error_log')) error_log('[BHG] invalid guess after parse: raw=' . print_r($raw_guess,true) . ' parsed=' . print_r($guess,true)); if (function_exists('error_log')) error_log('[BHG] invalid guess: raw=' . print_r($raw_guess,true) . ' normalized=' . $guess);
+        if ($guess < 0 || $guess > 100000) {
+            if (function_exists('error_log')) {
+                error_log('[BHG] invalid guess after parse: raw=' . print_r($raw_guess, true) . ' parsed=' . print_r($guess, true));
+                error_log('[BHG] invalid guess: raw=' . print_r($raw_guess, true) . ' normalized=' . $guess);
+            }
             wp_die(esc_html__('Invalid guess amount.', 'bonus-hunt-guesser'));
         }
 
@@ -732,7 +865,7 @@ $guess = ($guess_val === null) ? -1.0 : (float) $guess_val;
         }
 
         // Enforce per-user guess limits
-        $max = (int) get_option('bhg_guesses_max', 1);
+        $max   = (int) get_option('bhg_guesses_max', 1);
         $count = (int) $wpdb->get_var($wpdb->prepare("SELECT COUNT(*) FROM `$g_tbl` WHERE hunt_id=%d AND user_id=%d", $hunt_id, $user_id));
         if ($count >= $max) {
             $allow_edit = get_option('bhg_allow_guess_edit_until_close', 'yes') === 'yes';
@@ -740,7 +873,8 @@ $guess = ($guess_val === null) ? -1.0 : (float) $guess_val;
                 $gid = (int) $wpdb->get_var($wpdb->prepare("SELECT id FROM `$g_tbl` WHERE hunt_id=%d AND user_id=%d ORDER BY id DESC LIMIT 1", $hunt_id, $user_id));
                 if ($gid) {
                     $wpdb->update($g_tbl, ['guess' => $guess, 'created_at' => current_time('mysql')], ['id' => $gid]);
-                    wp_safe_redirect(wp_get_referer() ?: home_url()); exit;
+                    wp_safe_redirect(wp_get_referer() ?: home_url());
+                    exit;
                 }
             }
             wp_die(esc_html__('You have reached the maximum number of guesses.', 'bonus-hunt-guesser'));
