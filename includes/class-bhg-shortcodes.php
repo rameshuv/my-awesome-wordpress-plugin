@@ -382,17 +382,47 @@ class BHG_Shortcodes {
     /** Minimal winners widget: latest closed hunts */
     public function winner_notifications_shortcode($atts) {
         global $wpdb;
-        $rows = $wpdb->get_results( "SELECT title, final_balance, winner_diff, closed_at FROM {$wpdb->prefix}bhg_bonus_hunts WHERE status='closed' AND winner_user_id IS NOT NULL ORDER BY id DESC LIMIT 5" );
-        if (!$rows) return '<p>' . esc_html__('No closed hunts yet.', 'bonus-hunt-guesser') . '</p>';
+
+        $a = shortcode_atts(
+            array('limit' => 5),
+            $atts,
+            'bhg_winner_notifications'
+        );
+
+        $hunts = $wpdb->get_results(
+            $wpdb->prepare(
+                "SELECT id, title, final_balance, winners_count, closed_at FROM {$wpdb->prefix}bhg_bonus_hunts WHERE status='closed' ORDER BY closed_at DESC LIMIT %d",
+                (int) $a['limit']
+            )
+        );
+
+        if ( ! $hunts ) {
+            return '<p>' . esc_html__( 'No closed hunts yet.', 'bonus-hunt-guesser' ) . '</p>';
+        }
+
         ob_start();
         echo '<div class="bhg-winner-notifications">';
-        foreach ($rows as $row) {
-            echo '<div class="bhg-winner">';
-            echo '<p><strong>' . esc_html($row->title) . '</strong></p>';
-            echo '<p><em>' . esc_html__('Final', 'bonus-hunt-guesser') . ':</em> ' . esc_html(number_format_i18n((float)$row->final_balance, 2)) . '</p>';
-            if (!empty($row->winner_diff)) {
-                echo '<p><em>' . esc_html__('Diff', 'bonus-hunt-guesser') . ':</em> ' . esc_html(number_format_i18n((float)$row->winner_diff, 2)) . '</p>';
+        foreach ( $hunts as $hunt ) {
+            $winners = function_exists( 'bhg_get_top_winners_for_hunt' )
+                ? bhg_get_top_winners_for_hunt( $hunt->id, (int) $hunt->winners_count )
+                : array();
+
+            echo '<div class="bhg-winner" style="margin-bottom:15px;">';
+            echo '<p><strong>' . esc_html( $hunt->title ) . '</strong></p>';
+            if ( $hunt->final_balance !== null ) {
+                echo '<p><em>' . esc_html__( 'Final', 'bonus-hunt-guesser' ) . ':</em> ' . esc_html( number_format_i18n( (float) $hunt->final_balance, 2 ) ) . '</p>';
             }
+
+            if ( $winners ) {
+                echo '<ul class="bhg-winner-list">';
+                foreach ( $winners as $w ) {
+                    $u  = get_userdata( (int) $w->user_id );
+                    $nm = $u ? $u->user_login : sprintf( __( 'User #%d', 'bonus-hunt-guesser' ), (int) $w->user_id );
+                    echo '<li>' . esc_html( $nm ) . ' — ' . esc_html( number_format_i18n( (float) $w->guess, 2 ) ) . ' (' . esc_html( number_format_i18n( (float) $w->diff, 2 ) ) . ')</li>';
+                }
+                echo '</ul>';
+            }
+
             echo '</div>';
         }
         echo '</div>';
