@@ -336,9 +336,12 @@ class BHG_Shortcodes {
 
         ob_start();
         echo '<form method="get" class="bhg-tournament-filters" style="margin-bottom:10px;">';
-        foreach ($_GET as $k=>$v) {
-            if ($k === 'bhg_period' || $k === 'bhg_status' || $k === 'bhg_tournament_id') continue;
-            echo '<input type="hidden" name="'.esc_attr($k).'" value="'.esc_attr(is_array($v)? reset($v) : $v).'">';
+        foreach ( $_GET as $raw_key => $v ) {
+            $key = sanitize_key( $raw_key );
+            if ( $key === 'bhg_period' || $key === 'bhg_status' || $key === 'bhg_tournament_id' ) {
+                continue;
+            }
+            echo '<input type="hidden" name="' . esc_attr( $key ) . '" value="' . esc_attr( is_array( $v ) ? reset( $v ) : $v ) . '">';
         }
         echo '<label style="margin-right:8px;">' . esc_html__('Period:', 'bonus-hunt-guesser') . ' ';
         echo '<select name="bhg_period">';
