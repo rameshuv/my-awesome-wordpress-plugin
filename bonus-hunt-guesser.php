@@ -506,45 +506,45 @@ function bhg_handle_settings_save() {
  */
 function bhg_handle_bonus_hunt_save() {
     // Verify nonce
-    if (!isset($_POST['_wpnonce']) || !wp_verify_nonce($_POST['_wpnonce'], 'bhg_form_nonce')) {
+    if ( ! isset( $_POST['_wpnonce'] ) || ! wp_verify_nonce( wp_unslash( $_POST['_wpnonce'] ), 'bhg_form_nonce' ) ) {
         wp_die( esc_html__( 'Security check failed', 'bonus-hunt-guesser' ) );
     }
 
-    if (!current_user_can('manage_options')) {
+    if ( ! current_user_can( 'manage_options' ) ) {
         wp_die( esc_html__( 'Access denied', 'bonus-hunt-guesser' ) );
     }
-    
+
     // Process form data
     global $wpdb;
     $table_name = $wpdb->prefix . 'bhg_bonus_hunts';
-    
+
     $data = [
-        'title' => sanitize_text_field($_POST['title']),
-        'starting_balance' => floatval($_POST['starting_balance']),
-        'num_bonuses' => intval($_POST['num_bonuses']),
-        'prizes' => sanitize_textarea_field($_POST['prizes']),
-        'status' => sanitize_text_field($_POST['status']),
-        'updated_at' => current_time('mysql', 1)
+        'title'           => sanitize_text_field( wp_unslash( $_POST['title'] ) ),
+        'starting_balance' => floatval( wp_unslash( $_POST['starting_balance'] ) ),
+        'num_bonuses'     => intval( wp_unslash( $_POST['num_bonuses'] ) ),
+        'prizes'          => wp_kses_post( wp_unslash( $_POST['prizes'] ) ),
+        'status'          => sanitize_text_field( wp_unslash( $_POST['status'] ) ),
+        'updated_at'      => current_time( 'mysql', 1 ),
     ];
-    
-    if (isset($_POST['final_balance'])) {
-        $data['final_balance'] = floatval($_POST['final_balance']);
+
+    if ( isset( $_POST['final_balance'] ) ) {
+        $data['final_balance'] = floatval( wp_unslash( $_POST['final_balance'] ) );
     }
-    
-    if (isset($_POST['id']) && !empty($_POST['id'])) {
+
+    if ( isset( $_POST['id'] ) && ! empty( $_POST['id'] ) ) {
         // Update existing hunt
         $wpdb->update(
             $table_name,
             $data,
-            ['id' => intval($_POST['id'])]
+            [ 'id' => intval( wp_unslash( $_POST['id'] ) ) ]
         );
     } else {
         // Insert new hunt
-        $data['created_at'] = current_time('mysql', 1);
-        $wpdb->insert($table_name, $data);
+        $data['created_at'] = current_time( 'mysql', 1 );
+        $wpdb->insert( $table_name, $data );
     }
-    
-    wp_redirect(admin_url('admin.php?page=bhg_bonus_hunts&message=saved'));
+
+    wp_redirect( admin_url( 'admin.php?page=bhg_bonus_hunts&message=saved' ) );
     exit;
 }
 
