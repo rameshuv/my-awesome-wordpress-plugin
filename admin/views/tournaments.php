@@ -11,7 +11,7 @@ if ( ! in_array( $table, $allowed_tables, true ) ) {
 }
 $table   = esc_sql( $table );
 
-$edit_id = isset( $_GET['edit'] ) ? (int) $_GET['edit'] : 0;
+$edit_id = isset( $_GET['edit'] ) ? (int) wp_unslash( $_GET['edit'] ) : 0;
 $row     = $edit_id
 	? $wpdb->get_row( $wpdb->prepare( "SELECT * FROM {$table} WHERE id = %d", $edit_id ) )
 	: null;
