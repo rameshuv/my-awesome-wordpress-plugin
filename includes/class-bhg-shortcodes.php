@@ -456,8 +456,8 @@ class BHG_Shortcodes {
         $users_tbl = $wpdb->users;
 
         $now_ts = current_time('timestamp');
-        $current_month = gmdate('Y-m', $now_ts);
-        $current_year  = gmdate('Y', $now_ts);
+        $current_month = wp_date('Y-m', $now_ts);
+        $current_year  = wp_date('Y', $now_ts);
 
         $periods = array(
             'overall' => array(
@@ -470,7 +470,7 @@ class BHG_Shortcodes {
                 'label' => esc_html__('Monthly', 'bonus-hunt-guesser'),
                 'type'  => 'monthly',
                 'start' => $current_month . '-01',
-                'end'   => date('Y-m-t', strtotime($current_month . '-01')),
+                'end'   => wp_date('Y-m-t', strtotime($current_month . '-01', $now_ts)),
             ),
             'yearly' => array(
                 'label' => esc_html__('Yearly', 'bonus-hunt-guesser'),
