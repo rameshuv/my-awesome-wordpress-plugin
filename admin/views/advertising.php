@@ -20,7 +20,7 @@ if ( 'delete' === $action && $ad_id && isset( $_GET['_wpnonce'] ) ) {
 }
 
 // Fetch ads
-$ads = $wpdb->get_results( $wpdb->prepare( "SELECT * FROM `$table` ORDER BY id DESC" ) );
+$ads = $wpdb->get_results( $wpdb->prepare( "SELECT id, title, content, placement, visible_to, active FROM `$table` ORDER BY id DESC" ) );
 ?>
 <div class="wrap">
   <h1 class="wp-heading-inline"><?php echo esc_html__('Advertising', 'bonus-hunt-guesser'); ?></h1>
@@ -60,7 +60,7 @@ $ads = $wpdb->get_results( $wpdb->prepare( "SELECT * FROM `$table` ORDER BY id D
   <?php
     $ad = null;
     if (isset($_GET['edit'])) {
-        $ad = $wpdb->get_row($wpdb->prepare("SELECT * FROM `$table` WHERE id = %d", (int)$_GET['edit']));
+        $ad = $wpdb->get_row($wpdb->prepare("SELECT id, title, content, link_url, placement, visible_to, target_pages, active FROM `$table` WHERE id = %d", (int)$_GET['edit']));
     }
   ?>
   <form method="post" action="<?php echo esc_url(admin_url('admin-post.php')); ?>" style="max-width:800px">

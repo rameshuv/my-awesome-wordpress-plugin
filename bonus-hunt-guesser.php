@@ -565,7 +565,7 @@ function bhg_build_ads_query( $table, $placement = 'footer' ) {
 
     // Use prepare for the placement value
     $query = $wpdb->prepare(
-        "SELECT * FROM `{$safe_table}` WHERE placement = %s AND active = %d",
+        "SELECT id, title, content, link_url, placement, visible_to, target_pages FROM `{$safe_table}` WHERE placement = %s AND active = %d",
         $placement,
         1
     );

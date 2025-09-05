@@ -61,27 +61,27 @@ function bhg_seed_demo_on_activation(){
 
     // Add demo guesses for closed hunt
     $grows = array(
-        array('hunt_id'=>$closed_id,'user_id'=>$user_ids['alice_demo'],'guess_amount'=>2450.00),
-        array('hunt_id'=>$closed_id,'user_id'=>$user_ids['bob_demo'],'guess_amount'=>2400.00),
-        array('hunt_id'=>$closed_id,'user_id'=>$user_ids['charlie_demo'],'guess_amount'=>1800.00),
+        array('hunt_id'=>$closed_id,'user_id'=>$user_ids['alice_demo'],'guess'=>2450.00),
+        array('hunt_id'=>$closed_id,'user_id'=>$user_ids['bob_demo'],'guess'=>2400.00),
+        array('hunt_id'=>$closed_id,'user_id'=>$user_ids['charlie_demo'],'guess'=>1800.00),
     );
     foreach ($grows as $r){
         if ($r['user_id']) {
             $wpdb->insert($guesses, array(
                 'hunt_id'=>$r['hunt_id'],
                 'user_id'=>$r['user_id'],
-                'guess_amount'=>$r['guess_amount'],
+                'guess'=>$r['guess'],
                 'created_at'=> current_time('mysql')
             ));
         }
     }
 
     // Compute winner for the closed hunt (closest)
-    $rows = $wpdb->get_results( "SELECT * FROM `{$closed_id}`" );
+    $rows = $wpdb->get_results( $wpdb->prepare( "SELECT user_id, guess FROM `$guesses` WHERE hunt_id=%d", $closed_id ) );
     $final = 2420.00;
     $winner_id = 0; $winner_diff = null;
     foreach ($rows as $row){
-        $diff = abs(floatval($row->guess_amount) - $final);
+        $diff = abs(floatval($row->guess) - $final);
         if ($winner_diff === null || $diff < $winner_diff){
             $winner_diff = $diff;
             $winner_id = intval($row->user_id);

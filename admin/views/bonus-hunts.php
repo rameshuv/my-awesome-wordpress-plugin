@@ -17,7 +17,7 @@ $view = isset( $_GET['view'] ) ? sanitize_text_field( $_GET['view'] ) : 'list';
 
 /** LIST VIEW */
 if ( 'list' === $view ) :
-    $hunts = $wpdb->get_results( $wpdb->prepare( "SELECT * FROM `$hunts_table` ORDER BY id DESC" ) );
+    $hunts = $wpdb->get_results( $wpdb->prepare( "SELECT id, title, starting_balance, final_balance, winners_count, status FROM `$hunts_table` ORDER BY id DESC" ) );
 ?>
 <div class="wrap">
   <h1 class="wp-heading-inline"><?php echo esc_html__('Bonus Hunts', 'bonus-hunt-guesser'); ?></h1>
@@ -69,7 +69,7 @@ if ( 'list' === $view ) :
 /** CLOSE VIEW */
 if ( 'close' === $view ) :
     $id   = isset( $_GET['id'] ) ? (int) $_GET['id'] : 0;
-    $hunt = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM `$hunts_table` WHERE id = %d", $id ) );
+    $hunt = $wpdb->get_row( $wpdb->prepare( "SELECT id, title, status FROM `$hunts_table` WHERE id = %d", $id ) );
     if ( ! $hunt || 'open' !== $hunt->status ) :
         echo '<div class="notice notice-error"><p>' . esc_html__( 'Invalid hunt.', 'bonus-hunt-guesser' ) . '</p></div>';
     else :
@@ -163,12 +163,12 @@ if ($view === 'add') : ?>
 /** EDIT VIEW */
 if ($view === 'edit') :
     $id    = isset($_GET['id']) ? (int) $_GET['id'] : 0;
-    $hunt  = $wpdb->get_row($wpdb->prepare("SELECT * FROM `$hunts_table` WHERE id = %d", $id));
+    $hunt  = $wpdb->get_row($wpdb->prepare("SELECT id, title, starting_balance, num_bonuses, prizes, affiliate_site_id, winners_count, final_balance, status FROM `$hunts_table` WHERE id = %d", $id));
     if (!$hunt) {
         echo '<div class="notice notice-error"><p>'.esc_html__('Invalid hunt', 'bonus-hunt-guesser').'</p></div>';
         return;
     }
-    $guesses = $wpdb->get_results($wpdb->prepare("SELECT g.*, u.display_name FROM `$guesses_table` g LEFT JOIN `$wpdb->users` u ON u.ID = g.user_id WHERE g.hunt_id = %d ORDER BY g.id ASC", $id));
+    $guesses = $wpdb->get_results($wpdb->prepare("SELECT g.id, g.user_id, g.guess, u.display_name FROM `$guesses_table` g LEFT JOIN `$wpdb->users` u ON u.ID = g.user_id WHERE g.hunt_id = %d ORDER BY g.id ASC", $id));
 ?>
 <div class="wrap">
   <h1 class="wp-heading-inline"><?php echo esc_html__('Edit Bonus Hunt', 'bonus-hunt-guesser'); ?> — <?php echo esc_html($hunt->title); ?></h1>

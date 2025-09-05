@@ -42,7 +42,7 @@ class BHG_Shortcodes {
     /** [bhg_active_hunt] — list all open hunts */
     public function active_hunt_shortcode($atts) {
         global $wpdb;
-        $hunts = $wpdb->get_results( "SELECT * FROM {$wpdb->prefix}bhg_bonus_hunts WHERE status='open' ORDER BY created_at DESC" );
+        $hunts = $wpdb->get_results( "SELECT title, starting_balance, num_bonuses, prizes FROM {$wpdb->prefix}bhg_bonus_hunts WHERE status='open' ORDER BY created_at DESC" );
         if (!$hunts) {
             return '<div class="bhg-active-hunt"><p>' . esc_html__('No active bonus hunts at the moment.', 'bonus-hunt-guesser') . '</p></div>';
         }
@@ -168,7 +168,7 @@ class BHG_Shortcodes {
         }
 
         $rows = $wpdb->get_results($wpdb->prepare(
-            "SELECT g.*, u.user_login, h.affiliate_site_id
+            "SELECT g.id, g.user_id, g.guess, u.user_login, h.affiliate_site_id
              FROM {$g} g
              LEFT JOIN {$u} u ON u.ID = g.user_id
              LEFT JOIN {$wpdb->prefix}bhg_bonus_hunts h ON h.id = g.hunt_id
@@ -315,7 +315,7 @@ class BHG_Shortcodes {
             $args[]  = $a['status'];
         }
 
-        $sql = "SELECT * FROM {$t}";
+        $sql = "SELECT id, type, start_date, end_date, status FROM {$t}";
         if ($where) {
             $sql .= " WHERE " . implode(" AND ", $where);
         }

@@ -68,7 +68,7 @@ class BHG_Bonus_Hunts {
         global $wpdb;
         $hunts_table = $wpdb->prefix . 'bhg_bonus_hunts';
 
-        return $wpdb->get_row( $wpdb->prepare( "SELECT * FROM `$hunts_table` WHERE id=%d", (int) $hunt_id ) );
+        return $wpdb->get_row( $wpdb->prepare( "SELECT id, title, starting_balance, final_balance, winners_count, status, closed_at FROM `$hunts_table` WHERE id=%d", (int) $hunt_id ) );
     }
 
     /**
@@ -88,7 +88,7 @@ class BHG_Bonus_Hunts {
         if ( null !== $hunt->final_balance ) {
             return $wpdb->get_results(
                 $wpdb->prepare(
-                    "SELECT g.*, u.display_name, ABS(g.guess - %f) AS diff
+                    "SELECT g.id, g.user_id, g.guess, g.created_at, u.display_name, ABS(g.guess - %f) AS diff
                      FROM `$guesses_table` g
                      LEFT JOIN `$wpdb->users` u ON u.ID = g.user_id
                      WHERE g.hunt_id = %d
@@ -101,7 +101,7 @@ class BHG_Bonus_Hunts {
 
         return $wpdb->get_results(
             $wpdb->prepare(
-                "SELECT g.*, u.display_name, NULL AS diff
+                "SELECT g.id, g.user_id, g.guess, g.created_at, u.display_name, NULL AS diff
                  FROM `$guesses_table` g
                  LEFT JOIN `$wpdb->users` u ON u.ID = g.user_id
                  WHERE g.hunt_id = %d
