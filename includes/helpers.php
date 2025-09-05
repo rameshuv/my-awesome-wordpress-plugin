@@ -153,7 +153,7 @@ function bhg_render_ads($placement = 'footer', $hunt_id = 0) {
     global $wpdb;
     $tbl = $wpdb->prefix . 'bhg_ads';
     $placement = sanitize_text_field($placement);
-    $rows = $wpdb->get_results($wpdb->prepare("SELECT * FROM {$tbl} WHERE active=1 AND placement=%s ORDER BY id DESC", $placement));
+    $rows = $wpdb->get_results($wpdb->prepare("SELECT content, link_url, visible_to FROM {$tbl} WHERE active=1 AND placement=%s ORDER BY id DESC", $placement));
     $hunt_site_id = 0;
     if ($hunt_id) {
         $hunt_site_id = (int) $wpdb->get_var(
@@ -164,7 +164,7 @@ function bhg_render_ads($placement = 'footer', $hunt_id = 0) {
 
     $out = '<div class="bhg-ads bhg-ads-' . esc_attr($placement) . '">';
     foreach ($rows as $r) {
-        $vis = $r->visibility ?: 'all';
+        $vis = $r->visible_to ?: 'all';
         $show = false;
         if ($vis === 'all') $show = true;
         elseif ($vis === 'guests' && !is_user_logged_in()) $show = true;
@@ -176,8 +176,8 @@ function bhg_render_ads($placement = 'footer', $hunt_id = 0) {
                 : (bool) get_user_meta($uid, 'bhg_affiliate_status', true);
         }
         if (!$show) continue;
-        $msg  = wp_kses_post($r->message);
-        $link = $r->link ? esc_url($r->link) : '';
+        $msg  = wp_kses_post($r->content);
+        $link = $r->link_url ? esc_url($r->link_url) : '';
         $out .= '<div class="bhg-ad" style="margin:10px 0;padding:10px;border:1px solid #e2e8f0;border-radius:6px;">';
         if ($link) { $out .= '<a href="' . $link . '">'; }
         $out .= $msg;
@@ -368,14 +368,16 @@ if (!function_exists('bhg_reset_demo_and_seed')) {
         if ($wpdb->get_var($wpdb->prepare("SHOW TABLES LIKE %s", $ads_tbl)) === $ads_tbl) {
             $now = current_time('mysql', 1);
             $wpdb->insert($ads_tbl, array(
-                'message' => '<strong>Play responsibly.</strong> <a href="'.esc_url(home_url('/promo')).'">See promo</a>',
-                'placement' => 'footer',
-                'visibility' => 'all',
-                'active' => 1,
+                'title'        => '',
+                'content'      => '<strong>Play responsibly.</strong> <a href="'.esc_url(home_url('/promo')).'">See promo</a>',
+                'link_url'     => '',
+                'placement'    => 'footer',
+                'visible_to'   => 'all',
                 'target_pages' => '',
-                'created_at' => $now,
-                'updated_at' => $now,
-            ), array('%s','%s','%s','%d','%s','%s','%s'));
+                'active'       => 1,
+                'created_at'   => $now,
+                'updated_at'   => $now,
+            ), array('%s','%s','%s','%s','%s','%s','%d','%s','%s'));
         }
 
         return true;

@@ -103,7 +103,15 @@ function bhg_seed_demo_on_activation(){
     $wpdb->insert($trans, array('tkey'=>'email_results_title', 'tvalue'=>'The Bonus Hunt has been closed!'));
     $wpdb->insert($trans, array('tkey'=>'email_final_balance', 'tvalue'=>'Final Balance'));
     $wpdb->insert($trans, array('tkey'=>'email_winner', 'tvalue'=>'Winner'));
-    $wpdb->insert($ads, array('message'=>'Sponsored by Demo Casino – Play Now', 'link'=>'https://example.com', 'placement'=>'footer', 'visibility'=>'guests', 'active'=>1));
+    $wpdb->insert($ads, array(
+        'title'        => '',
+        'content'      => 'Sponsored by Demo Casino – Play Now',
+        'link_url'     => 'https://example.com',
+        'placement'    => 'footer',
+        'visible_to'   => 'guests',
+        'target_pages' => '',
+        'active'       => 1,
+    ));
 
     // Create demo pages with shortcodes (with (Demo) suffix)
     $pages = array(

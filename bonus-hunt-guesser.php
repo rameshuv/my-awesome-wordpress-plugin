@@ -180,11 +180,14 @@ class BHG_DB_OLD {
         $sql = "CREATE TABLE $table_name (
             id int(11) NOT NULL AUTO_INCREMENT,
             title varchar(255) NOT NULL,
-            content text NOT NULL,
+            content text NULL,
+            link_url varchar(255) DEFAULT NULL,
             placement varchar(50) NOT NULL,
-            visibility varchar(20) DEFAULT 'all',
+            visible_to varchar(20) DEFAULT 'all',
+            target_pages text NULL,
             active tinyint(1) DEFAULT 1,
             created_at datetime NOT NULL,
+            updated_at datetime NOT NULL,
             PRIMARY KEY (id)
         ) $charset_collate;";
         dbDelta($sql);
