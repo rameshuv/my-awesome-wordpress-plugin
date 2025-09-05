@@ -7,6 +7,8 @@ jQuery(document).ready(function($) {
     // Global variables
     var bhg_ajax_url = bhg_public_ajax.ajax_url;
     var bhg_nonce = bhg_public_ajax.nonce;
+    var bhg_min_guess = parseFloat(bhg_public_ajax.min_guess_amount);
+    var bhg_max_guess = parseFloat(bhg_public_ajax.max_guess_amount);
 
     // Initialize plugin functionality
     function initBonusHuntGuesser() {
@@ -53,8 +55,8 @@ jQuery(document).ready(function($) {
                 guessInput.addClass('error');
                 isValid = false;
             }
-            // Validate range (0 - 100,000)
-            else if (guessValue < 0 || guessValue > 100000) {
+            // Validate range
+            else if (guessValue < bhg_min_guess || guessValue > bhg_max_guess) {
                 showError(errorContainer, bhg_public_ajax.i18n.guess_range);
                 guessInput.addClass('error');
                 isValid = false;

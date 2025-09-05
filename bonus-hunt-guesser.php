@@ -229,39 +229,51 @@ add_action( 'wp_enqueue_scripts', 'bhg_enqueue_public_assets' );
  * @return void
  */
 function bhg_enqueue_public_assets() {
-	wp_register_style(
-		'bhg-public',
-		BHG_PLUGIN_URL . 'assets/css/public.css',
-		array(),
-		defined( 'BHG_VERSION' ) ? BHG_VERSION : null
-	);
+        $settings  = get_option( 'bhg_plugin_settings', [] );
+        $min_guess = isset( $settings['min_guess_amount'] ) ? (float) $settings['min_guess_amount'] : 0;
+        $max_guess = isset( $settings['max_guess_amount'] ) ? (float) $settings['max_guess_amount'] : 100000;
 
-	wp_register_script(
-		'bhg-public',
-		BHG_PLUGIN_URL . 'assets/js/public.js',
-		array( 'jquery' ),
-		defined( 'BHG_VERSION' ) ? BHG_VERSION : null,
-		true
-	);
+        wp_register_style(
+                'bhg-public',
+                BHG_PLUGIN_URL . 'assets/css/public.css',
+                array(),
+                defined( 'BHG_VERSION' ) ? BHG_VERSION : null
+        );
 
-	wp_localize_script(
-		'bhg-public',
-		'bhg_public_ajax',
-		array(
-			'ajax_url'     => admin_url( 'admin-ajax.php' ),
-			'nonce'        => wp_create_nonce( 'bhg_public_nonce' ),
-			'is_logged_in' => is_user_logged_in(),
-			'i18n'         => array(
-				'guess_required'     => __( 'Please enter a guess.', 'bonus-hunt-guesser' ),
-				'guess_numeric'      => __( 'Please enter a valid number.', 'bonus-hunt-guesser' ),
-				'guess_range'        => __( 'Guess must be between €0 and €100,000.', 'bonus-hunt-guesser' ),
-				'guess_submitted'    => __( 'Your guess has been submitted!', 'bonus-hunt-guesser' ),
-				'ajax_error'         => __( 'An error occurred. Please try again.', 'bonus-hunt-guesser' ),
-				'affiliate_user'     => __( 'Affiliate', 'bonus-hunt-guesser' ),
-				'non_affiliate_user' => __( 'Non-affiliate', 'bonus-hunt-guesser' ),
-			),
-		)
-	);
+        wp_register_script(
+                'bhg-public',
+                BHG_PLUGIN_URL . 'assets/js/public.js',
+                array( 'jquery' ),
+                defined( 'BHG_VERSION' ) ? BHG_VERSION : null,
+                true
+        );
+
+        $guess_range = sprintf(
+                __( 'Guess must be between %1$s and %2$s.', 'bonus-hunt-guesser' ),
+                bhg_format_currency( $min_guess ),
+                bhg_format_currency( $max_guess )
+        );
+
+        wp_localize_script(
+                'bhg-public',
+                'bhg_public_ajax',
+                array(
+                        'ajax_url'         => admin_url( 'admin-ajax.php' ),
+                        'nonce'            => wp_create_nonce( 'bhg_public_nonce' ),
+                        'is_logged_in'     => is_user_logged_in(),
+                        'min_guess_amount' => $min_guess,
+                        'max_guess_amount' => $max_guess,
+                        'i18n'             => array(
+                                'guess_required'     => __( 'Please enter a guess.', 'bonus-hunt-guesser' ),
+                                'guess_numeric'      => __( 'Please enter a valid number.', 'bonus-hunt-guesser' ),
+                                'guess_range'        => $guess_range,
+                                'guess_submitted'    => __( 'Your guess has been submitted!', 'bonus-hunt-guesser' ),
+                                'ajax_error'         => __( 'An error occurred. Please try again.', 'bonus-hunt-guesser' ),
+                                'affiliate_user'     => __( 'Affiliate', 'bonus-hunt-guesser' ),
+                                'non_affiliate_user' => __( 'Non-affiliate', 'bonus-hunt-guesser' ),
+                        ),
+                )
+        );
 
 	wp_enqueue_style( 'bhg-public' );
 	wp_enqueue_script( 'bhg-public' );
