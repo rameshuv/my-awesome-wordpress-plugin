@@ -24,7 +24,7 @@ if ( ! in_array( $hunts_table, $allowed_tables, true ) || ! in_array( $guesses_t
 $hunts_table   = esc_sql( $hunts_table );
 $guesses_table = esc_sql( $guesses_table );
 
-$view = isset( $_GET['view'] ) ? sanitize_text_field( $_GET['view'] ) : 'list';
+$view = isset( $_GET['view'] ) ? sanitize_text_field( wp_unslash( $_GET['view'] ) ) : 'list';
 
 /** LIST VIEW */
 if ( 'list' === $view ) :
