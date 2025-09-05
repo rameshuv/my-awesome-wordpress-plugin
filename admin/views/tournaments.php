@@ -14,6 +14,14 @@ $row     = $edit_id
 $rows = $wpdb->get_results(
     $wpdb->prepare( 'SELECT * FROM %i ORDER BY id DESC', $table )
 );
+
+$labels = [
+    'weekly'    => __( 'Weekly', 'bonus-hunt-guesser' ),
+    'monthly'   => __( 'Monthly', 'bonus-hunt-guesser' ),
+    'quarterly' => __( 'Quarterly', 'bonus-hunt-guesser' ),
+    'yearly'    => __( 'Yearly', 'bonus-hunt-guesser' ),
+    'alltime'   => __( 'Alltime', 'bonus-hunt-guesser' ),
+];
 ?>
 <div class="wrap">
   <h1 class="wp-heading-inline"><?php esc_html_e('Tournaments', 'bonus-hunt-guesser'); ?></h1>
@@ -38,7 +46,7 @@ $rows = $wpdb->get_results(
         <tr>
           <td><?php echo (int)$r->id; ?></td>
           <td><?php echo esc_html($r->title); ?></td>
-          <td><?php echo esc_html($r->type); ?></td>
+          <td><?php echo esc_html( $labels[ $r->type ] ?? $r->type ); ?></td>
           <td><?php echo esc_html($r->start_date); ?></td>
           <td><?php echo esc_html($r->end_date); ?></td>
           <td><?php echo esc_html($r->status); ?></td>
@@ -68,15 +76,8 @@ $rows = $wpdb->get_results(
         <th><label for="bhg_t_type"><?php esc_html_e('Type','bonus-hunt-guesser'); ?></label></th>
         <td>
           <?php
-          $types  = [ 'weekly', 'monthly', 'quarterly', 'yearly', 'alltime' ];
-          $cur    = $row->type ?? 'weekly';
-          $labels = [
-            'weekly'    => __( 'Weekly', 'bonus-hunt-guesser' ),
-            'monthly'   => __( 'Monthly', 'bonus-hunt-guesser' ),
-            'quarterly' => __( 'Quarterly', 'bonus-hunt-guesser' ),
-            'yearly'    => __( 'Yearly', 'bonus-hunt-guesser' ),
-            'alltime'   => __( 'Alltime', 'bonus-hunt-guesser' ),
-          ];
+          $types = [ 'weekly', 'monthly', 'quarterly', 'yearly', 'alltime' ];
+          $cur   = $row->type ?? 'weekly';
           ?>
           <select id="bhg_t_type" name="type">
             <?php foreach ( $types as $t ) : ?>
