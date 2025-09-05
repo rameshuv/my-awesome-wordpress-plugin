@@ -51,5 +51,3 @@ if ( ! class_exists( 'BHG_Login_Redirect' ) ) {
 		}
 	}
 }
-new BHG_Login_Redirect();
-
