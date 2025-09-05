@@ -47,24 +47,31 @@ class BHG_Shortcodes {
 	}
 
 	/** [bhg_active_hunt] — list all open hunts */
-	public function active_hunt_shortcode($atts) {
-		global $wpdb;
-		$hunts = $wpdb->get_results( "SELECT * FROM {$wpdb->prefix}bhg_bonus_hunts WHERE status='open' ORDER BY created_at DESC" );
-		if (!$hunts) {
-			return '<div class="bhg-active-hunt"><p>' . esc_html__('No active bonus hunts at the moment.', 'bonus-hunt-guesser') . '</p></div>';
-		}
+        public function active_hunt_shortcode($atts) {
+                global $wpdb;
+                $hunts = $wpdb->get_results( "SELECT * FROM {$wpdb->prefix}bhg_bonus_hunts WHERE status='open' ORDER BY created_at DESC" );
+                if (!$hunts) {
+                        return '<div class="bhg-active-hunt"><p>' . esc_html__('No active bonus hunts at the moment.', 'bonus-hunt-guesser') . '</p></div>';
+                }
 
-		ob_start();
-		echo '<div class="bhg-active-hunts">';
-		foreach ($hunts as $hunt) {
-			echo '<div class="bhg-hunt-card" style="border:1px solid #e2e8f0;border-radius:8px;padding:12px;margin:12px 0;">';
-			echo '<h3 style="margin:0 0 8px;">' . esc_html($hunt->title) . '</h3>';
-			echo '<ul class="bhg-hunt-meta" style="list-style:none;margin:0;padding:0">';
-			echo '<li><strong>' . esc_html__('Starting Balance', 'bonus-hunt-guesser') . ':</strong> ' . esc_html(number_format_i18n((float)$hunt->starting_balance, 2)) . '</li>';
-			echo '<li><strong>' . esc_html__('Number of Bonuses', 'bonus-hunt-guesser') . ':</strong> ' . (int)$hunt->num_bonuses . '</li>';
-			if (!empty($hunt->prizes)) {
-				echo '<li><strong>' . esc_html__('Prizes', 'bonus-hunt-guesser') . ':</strong> ' . wp_kses_post($hunt->prizes) . '</li>';
-			}
+               wp_enqueue_style(
+                       'bhg-shortcodes',
+                       BHG_PLUGIN_URL . 'assets/css/bhg-shortcodes.css',
+                       array(),
+                       defined( 'BHG_VERSION' ) ? BHG_VERSION : null
+               );
+
+               ob_start();
+               echo '<div class="bhg-active-hunts">';
+               foreach ($hunts as $hunt) {
+                       echo '<div class="bhg-hunt-card">';
+                       echo '<h3>' . esc_html($hunt->title) . '</h3>';
+                       echo '<ul class="bhg-hunt-meta">';
+                       echo '<li><strong>' . esc_html__('Starting Balance', 'bonus-hunt-guesser') . ':</strong> ' . esc_html(number_format_i18n((float)$hunt->starting_balance, 2)) . '</li>';
+                       echo '<li><strong>' . esc_html__('Number of Bonuses', 'bonus-hunt-guesser') . ':</strong> ' . (int)$hunt->num_bonuses . '</li>';
+                       if (!empty($hunt->prizes)) {
+                               echo '<li><strong>' . esc_html__('Prizes', 'bonus-hunt-guesser') . ':</strong> ' . wp_kses_post($hunt->prizes) . '</li>';
+                       }
 			echo '</ul>';
 			echo '</div>';
 		}
@@ -102,12 +109,19 @@ class BHG_Shortcodes {
 		$existing_id = $hunt_id > 0 ? (int)$wpdb->get_var($wpdb->prepare("SELECT id FROM {$table} WHERE user_id=%d AND hunt_id=%d", $user_id, $hunt_id)) : 0;
 		$existing_guess = $existing_id ? (float) $wpdb->get_var($wpdb->prepare("SELECT guess FROM {$table} WHERE id=%d", $existing_id)) : '';
 
-		$settings = get_option('bhg_plugin_settings');
-		$min = isset($settings['min_guess_amount']) ? (float)$settings['min_guess_amount'] : 0;
-		$max = isset($settings['max_guess_amount']) ? (float)$settings['max_guess_amount'] : 100000;
+               $settings = get_option('bhg_plugin_settings');
+               $min = isset($settings['min_guess_amount']) ? (float)$settings['min_guess_amount'] : 0;
+               $max = isset($settings['max_guess_amount']) ? (float)$settings['max_guess_amount'] : 100000;
 
-		ob_start(); ?>
-		<form class="bhg-guess-form" method="post" action="<?php echo esc_url(admin_url('admin-post.php')); ?>" style="border:1px solid #e2e8f0;border-radius:8px;padding:12px;">
+               wp_enqueue_style(
+                       'bhg-shortcodes',
+                       BHG_PLUGIN_URL . 'assets/css/bhg-shortcodes.css',
+                       array(),
+                       defined( 'BHG_VERSION' ) ? BHG_VERSION : null
+               );
+
+               ob_start(); ?>
+               <form class="bhg-guess-form" method="post" action="<?php echo esc_url(admin_url('admin-post.php')); ?>">
 			<input type="hidden" name="action" value="bhg_submit_guess">
 			<?php wp_nonce_field('bhg_submit_guess', 'bhg_nonce'); ?>
 
@@ -125,11 +139,11 @@ class BHG_Shortcodes {
 				<input type="hidden" name="hunt_id" value="<?php echo esc_attr($hunt_id); ?>">
 			<?php endif; ?>
 
-			<label for="bhg-guess" style="display:block;margin-top:10px;"><?php esc_html_e('Your guess (final balance):', 'bonus-hunt-guesser'); ?></label>
+			<label for="bhg-guess" class="bhg-guess-label"><?php esc_html_e('Your guess (final balance):', 'bonus-hunt-guesser'); ?></label>
 			<input type="number" step="0.01" min="<?php echo esc_attr($min); ?>" max="<?php echo esc_attr($max); ?>"
 				   id="bhg-guess" name="guess" value="<?php echo esc_attr($existing_guess); ?>" required>
-			<div class="bhg-error-message" style="color:#dc2626;margin-top:10px;display:none;"></div>
-			<button type="submit" class="bhg-submit-btn button button-primary" style="margin-top:20px;">
+			<div class="bhg-error-message"></div>
+			<button type="submit" class="bhg-submit-btn button button-primary">
 				<?php echo esc_html__('Submit Guess', 'bonus-hunt-guesser'); ?></button>
 		</form>
 		<?php
@@ -223,8 +237,8 @@ class BHG_Shortcodes {
 			$base = remove_query_arg( 'page', home_url( sanitize_text_field( wp_unslash( $_SERVER['REQUEST_URI'] ) ) ) );
 			echo '<div class="bhg-pagination">';
 			for ( $p = 1; $p <= $pages; $p++ ) {
-				$is = $p == $page ? ' style="font-weight:bold;"' : '';
-				echo '<a' . $is . ' href="' . esc_url( add_query_arg( array( 'page' => $p ), $base ) ) . '">' . (int) $p . '</a> ';
+$class = $p == $page ? ' class="bhg-current-page"' : '';
+echo '<a' . $class . ' href="' . esc_url( add_query_arg( array( 'page' => $p ), $base ) ) . '">' . (int) $p . '</a> ';
 			}
 			echo '</div>';
 		}
@@ -506,8 +520,15 @@ class BHG_Shortcodes {
 		* @param array $atts Shortcode attributes.
 		* @return string HTML output.
 		*/
-	   public function tournaments_shortcode($atts) {
-			   global $wpdb;
+       public function tournaments_shortcode($atts) {
+                          global $wpdb;
+
+               wp_enqueue_style(
+                       'bhg-shortcodes',
+                       BHG_PLUGIN_URL . 'assets/css/bhg-shortcodes.css',
+                       array(),
+                       defined( 'BHG_VERSION' ) ? BHG_VERSION : null
+               );
 
 		// If a specific tournament ID is requested, render details
 		$details_id = isset($_GET['bhg_tournament_id']) ? absint($_GET['bhg_tournament_id']) : 0;
@@ -552,10 +573,10 @@ class BHG_Shortcodes {
 				return esc_url(add_query_arg(array('orderby'=>$key,'order'=>$next), $base));
 			};
 
-			ob_start();
-			echo '<div class="bhg-tournament-details" style="border:1px solid #e2e8f0;border-radius:8px;padding:12px;">';
+ob_start();
+echo '<div class="bhg-tournament-details">';
 			echo '<p><a href="' . esc_url(remove_query_arg('bhg_tournament_id')) . '">&larr; ' . esc_html__('Back to tournaments', 'bonus-hunt-guesser') . '</a></p>';
-			echo '<h3 style="margin-top:0;">' . esc_html(ucfirst($tournament->type)) . '</h3>';
+echo '<h3>' . esc_html(ucfirst($tournament->type)) . '</h3>';
 			echo '<p><strong>' . esc_html__('Start', 'bonus-hunt-guesser') . ':</strong> ' . esc_html(mysql2date(get_option('date_format'), $tournament->start_date)) . ' &nbsp; ';
 			echo '<strong>' . esc_html__('End', 'bonus-hunt-guesser') . ':</strong> ' . esc_html(mysql2date(get_option('date_format'), $tournament->end_date)) . ' &nbsp; ';
 			echo '<strong>' . esc_html__('Status', 'bonus-hunt-guesser') . ':</strong> ' . esc_html($tournament->status) . '</p>';
@@ -566,25 +587,25 @@ class BHG_Shortcodes {
 				return ob_get_clean();
 			}
 
-			echo '<table class="bhg-leaderboard" style="width:100%;border-collapse:collapse">';
-			echo '<thead><tr>';
-			echo '<th style="text-align:left;border-bottom:1px solid #e2e8f0;padding:6px;">#</th>';
-			echo '<th style="text-align:left;border-bottom:1px solid #e2e8f0;padding:6px;"><a href="' . $toggle('username') . '">' . esc_html__('Username', 'bonus-hunt-guesser') . '</a></th>';
-			echo '<th style="text-align:left;border-bottom:1px solid #e2e8f0;padding:6px;"><a href="' . $toggle('wins') . '">' . esc_html__('Wins', 'bonus-hunt-guesser') . '</a></th>';
-			echo '<th style="text-align:left;border-bottom:1px solid #e2e8f0;padding:6px;"><a href="' . $toggle('last_win_at') . '">' . esc_html__('Last win', 'bonus-hunt-guesser') . '</a></th>';
-			echo '</tr></thead><tbody>';
+echo '<table class="bhg-leaderboard">';
+echo '<thead><tr>';
+echo '<th>#</th>';
+echo '<th><a href="' . $toggle('username') . '">' . esc_html__('Username', 'bonus-hunt-guesser') . '</a></th>';
+echo '<th><a href="' . $toggle('wins') . '">' . esc_html__('Wins', 'bonus-hunt-guesser') . '</a></th>';
+echo '<th><a href="' . $toggle('last_win_at') . '">' . esc_html__('Last win', 'bonus-hunt-guesser') . '</a></th>';
+echo '</tr></thead><tbody>';
 
 			$pos = 1;
-			foreach ($rows as $row) {
-				echo '<tr>';
-				echo '<td style="padding:6px;border-bottom:1px solid #f1f5f9;">' . (int)$pos++ . '</td>';
-                               echo '<td style="padding:6px;border-bottom:1px solid #f1f5f9;">' . esc_html( $row->user_login ?: sprintf(
+foreach ($rows as $row) {
+echo '<tr>';
+echo '<td>' . (int)$pos++ . '</td>';
+echo '<td>' . esc_html( $row->user_login ?: sprintf(
                                        /* translators: %d: user ID. */
                                        __( 'user#%d', 'bonus-hunt-guesser' ),
                                        (int) $row->user_id
                                ) ) . '</td>';
-				echo '<td style="padding:6px;border-bottom:1px solid #f1f5f9;">' . (int)$row->wins . '</td>';
-				echo '<td style="padding:6px;border-bottom:1px solid #f1f5f9;">' . esc_html($row->last_win_date ? mysql2date(get_option('date_format'), $row->last_win_date) : '—') . '</td>';
+echo '<td>' . (int)$row->wins . '</td>';
+echo '<td>' . esc_html($row->last_win_date ? mysql2date(get_option('date_format'), $row->last_win_date) : '—') . '</td>';
 				echo '</tr>';
 			}
 			echo '</tbody></table>';
@@ -643,7 +664,7 @@ class BHG_Shortcodes {
 				$current_url = (isset($_SERVER['REQUEST_URI']) ? esc_url_raw(wp_unslash($_SERVER['REQUEST_URI'])) : home_url('/'));
 
 				ob_start();
-				echo '<form method="get" class="bhg-tournament-filters" style="margin-bottom:10px;">';
+echo '<form method="get" class="bhg-tournament-filters">';
 				foreach ( $_GET as $raw_key => $v ) {
 						$key = sanitize_key( $raw_key );
 						if ( $key === 'bhg_timeline' || $key === 'bhg_status' || $key === 'bhg_tournament_id' ) {
@@ -651,7 +672,7 @@ class BHG_Shortcodes {
 						}
 						echo '<input type="hidden" name="' . esc_attr( $key ) . '" value="' . esc_attr( is_array( $v ) ? reset( $v ) : $v ) . '">';
 				}
-				echo '<label style="margin-right:8px;">' . esc_html__( 'Timeline:', 'bonus-hunt-guesser' ) . ' ';
+echo '<label class="bhg-tournament-label">' . esc_html__( 'Timeline:', 'bonus-hunt-guesser' ) . ' ';
 				echo '<select name="bhg_timeline">';
 				$timelines = array( 'all' => __( 'All', 'bonus-hunt-guesser' ), 'weekly' => __( 'Weekly', 'bonus-hunt-guesser' ), 'monthly' => __( 'Monthly', 'bonus-hunt-guesser' ), 'yearly' => __( 'Yearly', 'bonus-hunt-guesser' ), 'quarterly' => __( 'Quarterly', 'bonus-hunt-guesser' ), 'alltime' => __( 'All-Time', 'bonus-hunt-guesser' ) );
 				$timeline_key = isset( $_GET['bhg_timeline'] ) ? sanitize_key( $_GET['bhg_timeline'] ) : $timeline;
@@ -669,26 +690,26 @@ class BHG_Shortcodes {
 				}
 				echo '</select></label> ';
 
-		echo '<button class="button" type="submit" style="margin-left:8px;">'.esc_html__('Filter','bonus-hunt-guesser').'</button>';
-		echo '</form>';
+echo '<button class="button bhg-filter-button" type="submit">'.esc_html__('Filter','bonus-hunt-guesser').'</button>';
+echo '</form>';
 
-		echo '<table class="bhg-tournaments" style="width:100%;border-collapse:collapse">';
+echo '<table class="bhg-tournaments">';
 		echo '<thead><tr>';
-		echo '<th style="text-align:left;border-bottom:1px solid #e2e8f0;padding:6px;">' . esc_html__('Type', 'bonus-hunt-guesser') . '</th>';
-		echo '<th style="text-align:left;border-bottom:1px solid #e2e8f0;padding:6px;">' . esc_html__('Start', 'bonus-hunt-guesser') . '</th>';
-		echo '<th style="text-align:left;border-bottom:1px solid #e2e8f0;padding:6px;">' . esc_html__('End', 'bonus-hunt-guesser') . '</th>';
-		echo '<th style="text-align:left;border-bottom:1px solid #e2e8f0;padding:6px;">' . esc_html__('Status', 'bonus-hunt-guesser') . '</th>';
-		echo '<th style="text-align:left;border-bottom:1px solid #e2e8f0;padding:6px;">' . esc_html__('Details', 'bonus-hunt-guesser') . '</th>';
+echo '<th>' . esc_html__('Type', 'bonus-hunt-guesser') . '</th>';
+echo '<th>' . esc_html__('Start', 'bonus-hunt-guesser') . '</th>';
+echo '<th>' . esc_html__('End', 'bonus-hunt-guesser') . '</th>';
+echo '<th>' . esc_html__('Status', 'bonus-hunt-guesser') . '</th>';
+echo '<th>' . esc_html__('Details', 'bonus-hunt-guesser') . '</th>';
 		echo '</tr></thead><tbody>';
 
 		foreach ($rows as $row) {
 			$detail_url = esc_url(add_query_arg('bhg_tournament_id', (int)$row->id, remove_query_arg(array('orderby','order'), $current_url)));
 			echo '<tr>';
-			echo '<td style="padding:6px;border-bottom:1px solid #f1f5f9;">' . esc_html(ucfirst($row->type)) . '</td>';
-			echo '<td style="padding:6px;border-bottom:1px solid #f1f5f9;">' . esc_html(mysql2date(get_option('date_format'), $row->start_date)) . '</td>';
-			echo '<td style="padding:6px;border-bottom:1px solid #f1f5f9;">' . esc_html(mysql2date(get_option('date_format'), $row->end_date)) . '</td>';
-			echo '<td style="padding:6px;border-bottom:1px solid #f1f5f9;">' . esc_html($row->status) . '</td>';
-			echo '<td style="padding:6px;border-bottom:1px solid #f1f5f9;"><a href="' . $detail_url . '">' . esc_html__('Show details','bonus-hunt-guesser') . '</a></td>';
+echo '<td>' . esc_html(ucfirst($row->type)) . '</td>';
+echo '<td>' . esc_html(mysql2date(get_option('date_format'), $row->start_date)) . '</td>';
+echo '<td>' . esc_html(mysql2date(get_option('date_format'), $row->end_date)) . '</td>';
+echo '<td>' . esc_html($row->status) . '</td>';
+echo '<td><a href="' . $detail_url . '">' . esc_html__('Show details','bonus-hunt-guesser') . '</a></td>';
 			echo '</tr>';
 		}
 
@@ -713,18 +734,25 @@ class BHG_Shortcodes {
 			)
 		);
 
-		if ( ! $hunts ) {
-			return '<p>' . esc_html__( 'No closed hunts yet.', 'bonus-hunt-guesser' ) . '</p>';
-		}
+               if ( ! $hunts ) {
+                       return '<p>' . esc_html__( 'No closed hunts yet.', 'bonus-hunt-guesser' ) . '</p>';
+               }
 
-		ob_start();
-		echo '<div class="bhg-winner-notifications">';
-		foreach ( $hunts as $hunt ) {
-			$winners = function_exists( 'bhg_get_top_winners_for_hunt' )
-				? bhg_get_top_winners_for_hunt( $hunt->id, (int) $hunt->winners_count )
-				: array();
+               wp_enqueue_style(
+                       'bhg-shortcodes',
+                       BHG_PLUGIN_URL . 'assets/css/bhg-shortcodes.css',
+                       array(),
+                       defined( 'BHG_VERSION' ) ? BHG_VERSION : null
+               );
 
-			echo '<div class="bhg-winner" style="margin-bottom:15px;">';
+               ob_start();
+               echo '<div class="bhg-winner-notifications">';
+               foreach ( $hunts as $hunt ) {
+                        $winners = function_exists( 'bhg_get_top_winners_for_hunt' )
+                                ? bhg_get_top_winners_for_hunt( $hunt->id, (int) $hunt->winners_count )
+                                : array();
+
+                       echo '<div class="bhg-winner">';
 			echo '<p><strong>' . esc_html( $hunt->title ) . '</strong></p>';
 			if ( $hunt->final_balance !== null ) {
 				echo '<p><em>' . esc_html__( 'Final', 'bonus-hunt-guesser' ) . ':</em> ' . esc_html( number_format_i18n( (float) $hunt->final_balance, 2 ) ) . '</p>';

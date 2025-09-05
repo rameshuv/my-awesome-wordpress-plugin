@@ -7,3 +7,31 @@
 .bhg-tabs li.active a{background:#fff;font-weight:700}
 .bhg-tab-pane{display:none;border:1px solid #e2e8f0;padding:12px;border-top:none}
 .bhg-tab-pane.active{display:block}
+
+.bhg-hunt-card{border:1px solid #e2e8f0;border-radius:8px;padding:12px;margin:12px 0}
+.bhg-hunt-card h3{margin:0 0 8px}
+.bhg-hunt-meta{list-style:none;margin:0;padding:0}
+
+.bhg-guess-form{border:1px solid #e2e8f0;border-radius:8px;padding:12px}
+.bhg-guess-label{display:block;margin-top:10px}
+.bhg-error-message{color:#dc2626;margin-top:10px;display:none}
+.bhg-submit-btn{margin-top:20px}
+
+.bhg-pagination .bhg-current-page{font-weight:700}
+
+.bhg-tournament-details{border:1px solid #e2e8f0;border-radius:8px;padding:12px}
+.bhg-tournament-details h3{margin-top:0}
+
+.bhg-leaderboard{width:100%;border-collapse:collapse}
+.bhg-leaderboard th{text-align:left;border-bottom:1px solid #e2e8f0;padding:6px}
+.bhg-leaderboard td{padding:6px;border-bottom:1px solid #f1f5f9}
+
+.bhg-tournament-filters{margin-bottom:10px}
+.bhg-tournament-label{margin-right:8px}
+.bhg-filter-button{margin-left:8px}
+
+.bhg-tournaments{width:100%;border-collapse:collapse}
+.bhg-tournaments th{text-align:left;border-bottom:1px solid #e2e8f0;padding:6px}
+.bhg-tournaments td{padding:6px;border-bottom:1px solid #f1f5f9}
+
+.bhg-winner{margin-bottom:15px}
