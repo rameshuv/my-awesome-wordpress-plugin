@@ -415,7 +415,7 @@ function bhg_handle_submit_guess() {
         wp_die( esc_html__( 'You must be logged in to submit a guess.', 'bonus-hunt-guesser' ) );
     }
 
-    $hunt_id = isset( $_POST['hunt_id'] ) ? (int) $_POST['hunt_id'] : 0;
+    $hunt_id = isset( $_POST['hunt_id'] ) ? absint( wp_unslash( $_POST['hunt_id'] ) ) : 0;
     if ( $hunt_id <= 0 ) {
         if ( wp_doing_ajax() ) {
             wp_send_json_error( __( 'Invalid hunt.', 'bonus-hunt-guesser' ) );
