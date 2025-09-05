@@ -12,8 +12,9 @@ if ( ! in_array( $table, $allowed_tables, true ) ) {
 }
 $table  = esc_sql( $table );
 
-$action = isset( $_GET['action'] ) ? sanitize_key( $_GET['action'] ) : '';
-$ad_id  = isset( $_GET['id'] ) ? absint( $_GET['id'] ) : 0;
+$action   = isset( $_GET['action'] ) ? sanitize_key( wp_unslash( $_GET['action'] ) ) : '';
+$ad_id    = isset( $_GET['id'] ) ? absint( wp_unslash( $_GET['id'] ) ) : 0;
+$edit_id  = isset( $_GET['edit'] ) ? absint( wp_unslash( $_GET['edit'] ) ) : 0;
 
 // Delete action
 if ( 'delete' === $action && $ad_id && isset( $_GET['_wpnonce'] ) ) {
@@ -64,14 +65,14 @@ $ads = $wpdb->get_results(
 	</tbody>
   </table>
 
-  <h2 style="margin-top:2em"><?php echo isset($_GET['edit']) ? esc_html__('Edit Ad', 'bonus-hunt-guesser') : esc_html__('Add Ad', 'bonus-hunt-guesser'); ?></h2>
+  <h2 style="margin-top:2em"><?php echo $edit_id ? esc_html__('Edit Ad', 'bonus-hunt-guesser') : esc_html__('Add Ad', 'bonus-hunt-guesser'); ?></h2>
   <?php
-	$ad = null;
-	if (isset($_GET['edit'])) {
-		$ad = $wpdb->get_row(
-			$wpdb->prepare( "SELECT * FROM {$table} WHERE id = %d", (int) $_GET['edit'] )
-		);
-	}
+        $ad = null;
+        if ( $edit_id ) {
+                $ad = $wpdb->get_row(
+                        $wpdb->prepare( "SELECT * FROM {$table} WHERE id = %d", $edit_id )
+                );
+        }
   ?>
   <form method="post" action="<?php echo esc_url(admin_url('admin-post.php')); ?>" style="max-width:800px">
 	<?php wp_nonce_field('bhg_save_ad'); ?>
