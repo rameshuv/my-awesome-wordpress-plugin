@@ -130,7 +130,7 @@ class BHG_DB {
                     "SELECT COLUMN_NAME FROM information_schema.COLUMNS WHERE TABLE_SCHEMA=%s AND TABLE_NAME=%s AND COLUMN_NAME=%s",
                     DB_NAME, $hunts_table, $c
                 ));
-                if (!$exists) { $wpdb->query($alter); }
+                if ( ! $exists ) { $wpdb->query( $wpdb->prepare( $alter ) ); }
             }
 
             // Tournaments: make sure common columns exist
@@ -148,7 +148,7 @@ class BHG_DB {
                     "SELECT COLUMN_NAME FROM information_schema.COLUMNS WHERE TABLE_SCHEMA=%s AND TABLE_NAME=%s AND COLUMN_NAME=%s",
                     DB_NAME, $tours_table, $c
                 ));
-                if (!$exists) { $wpdb->query($alter); }
+                if ( ! $exists ) { $wpdb->query( $wpdb->prepare( $alter ) ); }
             }
 
             // Ads columns
@@ -168,7 +168,7 @@ class BHG_DB {
                     "SELECT COLUMN_NAME FROM information_schema.COLUMNS WHERE TABLE_SCHEMA=%s AND TABLE_NAME=%s AND COLUMN_NAME=%s",
                     DB_NAME, $ads_table, $c
                 ));
-                if (!$exists) { $wpdb->query($alter); }
+                if ( ! $exists ) { $wpdb->query( $wpdb->prepare( $alter ) ); }
             }
 
             // Translations columns
@@ -184,14 +184,14 @@ class BHG_DB {
                     "SELECT COLUMN_NAME FROM information_schema.COLUMNS WHERE TABLE_SCHEMA=%s AND TABLE_NAME=%s AND COLUMN_NAME=%s",
                     DB_NAME, $trans_table, $c
                 ));
-                if (!$exists) { $wpdb->query($alter); }
+                if ( ! $exists ) { $wpdb->query( $wpdb->prepare( $alter ) ); }
             }
             // Ensure unique index
             $has = $wpdb->get_var($wpdb->prepare(
                 "SELECT INDEX_NAME FROM information_schema.STATISTICS WHERE TABLE_SCHEMA=%s AND TABLE_NAME=%s AND INDEX_NAME='tkey_locale'",
                 DB_NAME, $trans_table
             ));
-            if (!$has) { $wpdb->query("ALTER TABLE `{$trans_table}` ADD UNIQUE KEY tkey_locale (tkey, locale)"); }
+            if ( ! $has ) { $wpdb->query( $wpdb->prepare( "ALTER TABLE `{$trans_table}` ADD UNIQUE KEY tkey_locale (tkey, locale)" ) ); }
 
             // Affiliates columns / unique index
             $afneed = [
@@ -206,13 +206,13 @@ class BHG_DB {
                     "SELECT COLUMN_NAME FROM information_schema.COLUMNS WHERE TABLE_SCHEMA=%s AND TABLE_NAME=%s AND COLUMN_NAME=%s",
                     DB_NAME, $aff_table, $c
                 ));
-                if (!$exists) { $wpdb->query($alter); }
+                if ( ! $exists ) { $wpdb->query( $wpdb->prepare( $alter ) ); }
             }
             $uniq = $wpdb->get_var($wpdb->prepare(
                 "SELECT INDEX_NAME FROM information_schema.STATISTICS WHERE TABLE_SCHEMA=%s AND TABLE_NAME=%s AND INDEX_NAME='name_unique'",
                 DB_NAME, $aff_table
             ));
-            if (!$uniq) { $wpdb->query("ALTER TABLE `{$aff_table}` ADD UNIQUE KEY name_unique (name)"); }
+            if ( ! $uniq ) { $wpdb->query( $wpdb->prepare( "ALTER TABLE `{$aff_table}` ADD UNIQUE KEY name_unique (name)" ) ); }
 
         } catch (Throwable $e) {
             if (function_exists('error_log')) error_log('[BHG] Schema ensure error: ' . $e->getMessage());
