@@ -44,7 +44,7 @@ $ads = $wpdb->get_results("SELECT * FROM `$table` ORDER BY id DESC");
           <td><?php echo esc_html(isset($ad->visibility)? $ad->visibility : 'all'); ?></td>
           <td>
             <a class="button" href="<?php echo esc_url(add_query_arg(['edit'=> (int)$ad->id])); ?>"><?php echo esc_html__('Edit', 'bonus-hunt-guesser'); ?></a>
-            <a class="button-link-delete" href="<?php echo esc_url(wp_nonce_url(add_query_arg(['action'=>'delete','id'=>(int)$ad->id]), 'bhg_delete_ad')); ?>" onclick="return confirm('Delete this ad?');"><?php echo esc_html__('Remove', 'bonus-hunt-guesser'); ?></a>
+            <a class="button-link-delete" href="<?php echo esc_url(wp_nonce_url(add_query_arg(['action'=>'delete','id'=>(int)$ad->id]), 'bhg_delete_ad')); ?>" onclick="return confirm('<?php echo esc_js( __( 'Delete this ad?', 'bonus-hunt-guesser' ) ); ?>');"><?php echo esc_html__('Remove', 'bonus-hunt-guesser'); ?></a>
           </td>
         </tr>
       <?php endforeach; endif; ?>
