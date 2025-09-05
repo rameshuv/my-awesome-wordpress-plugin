@@ -8,6 +8,13 @@ if (!current_user_can('manage_options')) {
 global $wpdb;
 $table = $wpdb->prefix . 'bhg_translations';
 
+if ( function_exists( 'bhg_seed_default_translations_if_empty' ) ) {
+    bhg_seed_default_translations_if_empty();
+}
+
+$default_translations = function_exists( 'bhg_get_default_translations' ) ? bhg_get_default_translations() : array();
+$default_keys        = array_keys( $default_translations );
+
 // Handle form submission
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['bhg_save_translation'])) {
     // Verify nonce
@@ -38,6 +45,10 @@ $rows = $wpdb->get_results( "SELECT tkey, tvalue FROM {$table} ORDER BY tkey ASC
 <div class="wrap">
   <h1><?php esc_html_e('Translations', 'bonus-hunt-guesser'); ?></h1>
 
+  <style>
+    .bhg-default-row td { background-color: #fffbcc; }
+  </style>
+
   <?php if (!empty($notice)): ?>
     <div class="notice notice-success"><p><?php echo esc_html($notice); ?></p></div>
   <?php endif; ?>
@@ -59,15 +70,15 @@ $rows = $wpdb->get_results( "SELECT tkey, tvalue FROM {$table} ORDER BY tkey ASC
         </tr>
       </tbody>
     </table>
-    <p class="submit"><button type="submit" name="bhg_save_translation" class="button button-primary"><?php esc_html_e('Save','bonus-hunt-guesser'); ?></button></p>
+          <p class="submit"><button type="submit" name="bhg_save_translation" class="button button-primary"><?php esc_html_e('Save', 'bonus-hunt-guesser'); ?></button></p>
   </form>
 
   <h2><?php esc_html_e('Existing keys', 'bonus-hunt-guesser'); ?></h2>
   <table class="widefat striped">
-    <thead><tr><th><?php esc_html_e('Key','bonus-hunt-guesser'); ?></th><th><?php esc_html_e('Value','bonus-hunt-guesser'); ?></th></tr></thead>
+    <thead><tr><th><?php esc_html_e('Key', 'bonus-hunt-guesser'); ?></th><th><?php esc_html_e('Value', 'bonus-hunt-guesser'); ?></th></tr></thead>
     <tbody>
       <?php if ($rows): foreach ($rows as $r): ?>
-        <tr>
+        <tr<?php echo in_array( $r->tkey, $default_keys, true ) ? ' class="bhg-default-row"' : ''; ?>>
           <td><code><?php echo esc_html($r->tkey); ?></code></td>
           <td><?php echo esc_html($r->tvalue); ?></td>
         </tr>
