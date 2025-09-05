@@ -2,14 +2,14 @@
 if ( ! defined( 'ABSPATH' ) ) { exit; }
 
 if (!current_user_can('manage_options')) {
-    wp_die(__('You do not have sufficient permissions to access this page.', 'bonus-hunt-guesser'));
+    wp_die(esc_html__('You do not have sufficient permissions to access this page.', 'bonus-hunt-guesser'));
 }
 
 // Handle form submissions
 if (isset($_POST['bhg_action'])) {
     if ($_POST['bhg_action'] === 'db_cleanup' && isset($_POST['bhg_db_cleanup'])) {
         if (!wp_verify_nonce($_POST['bhg_nonce'], 'bhg_db_cleanup_action')) {
-            wp_die(__('Security check failed', 'bonus-hunt-guesser'));
+            wp_die(esc_html__('Security check failed', 'bonus-hunt-guesser'));
         }
         
         // Perform database cleanup
@@ -18,7 +18,7 @@ if (isset($_POST['bhg_action'])) {
     } 
     elseif ($_POST['bhg_action'] === 'db_optimize' && isset($_POST['bhg_db_optimize'])) {
         if (!wp_verify_nonce($_POST['bhg_nonce'], 'bhg_db_optimize_action')) {
-            wp_die(__('Security check failed', 'bonus-hunt-guesser'));
+            wp_die(esc_html__('Security check failed', 'bonus-hunt-guesser'));
         }
         
         // Perform database optimization
