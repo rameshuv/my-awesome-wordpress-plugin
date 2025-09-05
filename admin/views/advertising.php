@@ -12,7 +12,8 @@ $ad_id  = isset( $_GET['id'] ) ? absint( $_GET['id'] ) : 0;
 
 // Delete action
 if ( 'delete' === $action && $ad_id && isset( $_GET['_wpnonce'] ) ) {
-    if ( wp_verify_nonce( $_GET['_wpnonce'], 'bhg_delete_ad' ) && current_user_can( 'manage_options' ) ) {
+    $nonce = sanitize_text_field( wp_unslash( $_GET['_wpnonce'] ) );
+    if ( wp_verify_nonce( $nonce, 'bhg_delete_ad' ) && current_user_can( 'manage_options' ) ) {
         $wpdb->delete( $table, [ 'id' => $ad_id ], [ '%d' ] );
         wp_safe_redirect( remove_query_arg( [ 'action', 'id', '_wpnonce' ] ) );
         exit;
