@@ -55,12 +55,12 @@ if (!function_exists('bhg_t')) {
 
         $table = $wpdb->prefix . 'bhg_translations';
         $row = $wpdb->get_row(
-            $wpdb->prepare("SELECT value FROM $table WHERE `key` = %s", $key)
+            $wpdb->prepare("SELECT tvalue FROM $table WHERE tkey = %s", $key)
         );
 
-        if ($row && isset($row->value)) {
-            $cache[$key] = $row->value;
-            return $row->value;
+        if ($row && isset($row->tvalue)) {
+            $cache[$key] = $row->tvalue;
+            return $row->tvalue;
         }
 
         return $default;
@@ -354,11 +354,11 @@ if (!function_exists('bhg_reset_demo_and_seed')) {
                 'email_hunt' => 'Hunt',
             );
             foreach ($pairs as $k=>$v) {
-                $exists = $wpdb->get_var($wpdb->prepare("SELECT id FROM {$tr_tbl} WHERE `key`=%s", $k));
+                $exists = $wpdb->get_var($wpdb->prepare("SELECT id FROM {$tr_tbl} WHERE tkey=%s", $k));
                 if ($exists) {
-                    $wpdb->update($tr_tbl, array('value'=>$v), array('id'=>$exists), array('%s'), array('%d'));
+                    $wpdb->update($tr_tbl, array('tvalue'=>$v), array('id'=>$exists), array('%s'), array('%d'));
                 } else {
-                    $wpdb->insert($tr_tbl, array('key'=>$k, 'value'=>$v), array('%s','%s'));
+                    $wpdb->insert($tr_tbl, array('tkey'=>$k, 'tvalue'=>$v), array('%s','%s'));
                 }
             }
         }

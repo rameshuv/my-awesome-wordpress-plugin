@@ -16,16 +16,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['bhg_save_translation'
     }
 
     // Sanitize input
-    $t_key   = isset($_POST['t_key']) ? sanitize_text_field(wp_unslash($_POST['t_key'])) : '';
-    $t_value = isset($_POST['t_value']) ? sanitize_textarea_field(wp_unslash($_POST['t_value'])) : '';
+    $tkey   = isset($_POST['tkey']) ? sanitize_text_field(wp_unslash($_POST['tkey'])) : '';
+    $tvalue = isset($_POST['tvalue']) ? sanitize_textarea_field(wp_unslash($_POST['tvalue'])) : '';
 
     // Validate input
-    if ($t_key === '') {
+    if ($tkey === '') {
         $error = __('Key field is required.', 'bonus-hunt-guesser');
     } else {
         $wpdb->replace(
             $table,
-            array('t_key' => $t_key, 't_value' => $t_value),
+            array('tkey' => $tkey, 'tvalue' => $tvalue),
             array('%s', '%s')
         );
         $notice = __('Translation saved.', 'bonus-hunt-guesser');
@@ -33,7 +33,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['bhg_save_translation'
 }
 
 // Fetch rows
-$rows = $wpdb->get_results( "SELECT t_key, t_value FROM {$table} ORDER BY t_key ASC" );
+$rows = $wpdb->get_results( "SELECT tkey, tvalue FROM {$table} ORDER BY tkey ASC" );
 ?>
 <div class="wrap">
   <h1><?php esc_html_e('Translations', 'bonus-hunt-guesser'); ?></h1>
@@ -50,12 +50,12 @@ $rows = $wpdb->get_results( "SELECT t_key, t_value FROM {$table} ORDER BY t_key 
     <table class="form-table" role="presentation">
       <tbody>
         <tr>
-          <th scope="row"><label for="t_key"><?php esc_html_e('Key','bonus-hunt-guesser'); ?></label></th>
-          <td><input name="t_key" id="t_key" type="text" class="regular-text" required></td>
+          <th scope="row"><label for="tkey"><?php esc_html_e('Key','bonus-hunt-guesser'); ?></label></th>
+          <td><input name="tkey" id="tkey" type="text" class="regular-text" required></td>
         </tr>
         <tr>
-          <th scope="row"><label for="t_value"><?php esc_html_e('Value','bonus-hunt-guesser'); ?></label></th>
-          <td><textarea name="t_value" id="t_value" class="large-text" rows="4"></textarea></td>
+          <th scope="row"><label for="tvalue"><?php esc_html_e('Value','bonus-hunt-guesser'); ?></label></th>
+          <td><textarea name="tvalue" id="tvalue" class="large-text" rows="4"></textarea></td>
         </tr>
       </tbody>
     </table>
@@ -68,8 +68,8 @@ $rows = $wpdb->get_results( "SELECT t_key, t_value FROM {$table} ORDER BY t_key 
     <tbody>
       <?php if ($rows): foreach ($rows as $r): ?>
         <tr>
-          <td><code><?php echo esc_html($r->t_key); ?></code></td>
-          <td><?php echo esc_html($r->t_value); ?></td>
+          <td><code><?php echo esc_html($r->tkey); ?></code></td>
+          <td><?php echo esc_html($r->tvalue); ?></td>
         </tr>
       <?php endforeach; else: ?>
         <tr><td colspan="2"><?php esc_html_e('No translations yet.','bonus-hunt-guesser'); ?></td></tr>
