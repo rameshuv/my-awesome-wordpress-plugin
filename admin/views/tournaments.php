@@ -5,15 +5,18 @@ if (!current_user_can('manage_options')) {
 }
 global $wpdb;
 $table = $wpdb->prefix . 'bhg_tournaments';
+$allowed_tables = [ $wpdb->prefix . 'bhg_tournaments' ];
+if ( ! in_array( $table, $allowed_tables, true ) ) {
+    wp_die( esc_html__( 'Invalid table.', 'bonus-hunt-guesser' ) );
+}
+$table   = esc_sql( $table );
 
 $edit_id = isset( $_GET['edit'] ) ? (int) $_GET['edit'] : 0;
 $row     = $edit_id
-    ? $wpdb->get_row( $wpdb->prepare( 'SELECT * FROM %i WHERE id = %d', $table, $edit_id ) )
+    ? $wpdb->get_row( $wpdb->prepare( "SELECT * FROM {$table} WHERE id = %d", $edit_id ) )
     : null;
 
-$rows = $wpdb->get_results(
-    $wpdb->prepare( 'SELECT * FROM %i ORDER BY id DESC', $table )
-);
+$rows = $wpdb->get_results( "SELECT * FROM {$table} ORDER BY id DESC" );
 
 $labels = [
     'weekly'    => __( 'Weekly', 'bonus-hunt-guesser' ),
