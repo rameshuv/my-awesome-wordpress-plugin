@@ -166,6 +166,7 @@ spl_autoload_register( function ( $class ) {
 
 // Include helper functions
 require_once BHG_PLUGIN_DIR . 'includes/helpers.php';
+require_once BHG_PLUGIN_DIR . 'includes/class-bhg-bonus-hunts-helpers.php';
 
 // Activation hook: create tables and set default options
 /**
