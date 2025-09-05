@@ -131,20 +131,24 @@ class BHG_Admin {
         global $wpdb;
         $table = $wpdb->prefix . 'bhg_ads';
 
-        $id    = isset($_POST['id']) ? (int) $_POST['id'] : 0;
-        $title = isset($_POST['title']) ? sanitize_text_field(wp_unslash($_POST['title'])) : '';
-        $msg   = isset($_POST['message']) ? wp_kses_post(wp_unslash($_POST['message'])) : '';
-        $link  = isset($_POST['link']) ? esc_url_raw(wp_unslash($_POST['link'])) : '';
-        $place = isset($_POST['placement']) ? sanitize_text_field($_POST['placement']) : 'none';
-        $vis   = isset($_POST['visibility']) ? sanitize_text_field($_POST['visibility']) : 'all';
+        $id       = isset($_POST['id']) ? (int) $_POST['id'] : 0;
+        $title    = isset($_POST['title']) ? sanitize_text_field(wp_unslash($_POST['title'])) : '';
+        $content  = isset($_POST['content']) ? wp_kses_post(wp_unslash($_POST['content'])) : '';
+        $link     = isset($_POST['link_url']) ? esc_url_raw(wp_unslash($_POST['link_url'])) : '';
+        $place    = isset($_POST['placement']) ? sanitize_text_field($_POST['placement']) : 'none';
+        $visible  = isset($_POST['visible_to']) ? sanitize_text_field($_POST['visible_to']) : 'all';
+        $targets  = isset($_POST['target_pages']) ? sanitize_text_field(wp_unslash($_POST['target_pages'])) : '';
+        $active   = isset($_POST['active']) ? 1 : 0;
 
         $data = [
-            'title'      => $title,
-            'content'    => $msg,
-            'link_url'   => $link,
-            'placement'  => $place,
-            'visible_to' => $vis,
-            'updated_at' => current_time('mysql'),
+            'title'        => $title,
+            'content'      => $content,
+            'link_url'     => $link,
+            'placement'    => $place,
+            'visible_to'   => $visible,
+            'target_pages' => $targets,
+            'active'       => $active,
+            'updated_at'   => current_time('mysql'),
         ];
 
         if ($id) { $wpdb->update($table, $data, ['id' => $id]); }

@@ -79,6 +79,8 @@ class BHG_DB {
             link_url VARCHAR(255) NULL,
             placement VARCHAR(50) NOT NULL DEFAULT 'none',
             visible_to VARCHAR(30) NOT NULL DEFAULT 'all',
+            target_pages TEXT NULL,
+            active TINYINT(1) NOT NULL DEFAULT 1,
             created_at DATETIME NULL,
             updated_at DATETIME NULL,
             PRIMARY KEY  (id),
@@ -151,13 +153,15 @@ class BHG_DB {
 
             // Ads columns
             $aneed = [
-                'title'      => "ALTER TABLE `{$ads_table}` ADD COLUMN title VARCHAR(190) NOT NULL",
-                'content'    => "ALTER TABLE `{$ads_table}` ADD COLUMN content TEXT NULL",
-                'link_url'   => "ALTER TABLE `{$ads_table}` ADD COLUMN link_url VARCHAR(255) NULL",
-                'placement'  => "ALTER TABLE `{$ads_table}` ADD COLUMN placement VARCHAR(50) NOT NULL DEFAULT 'none'",
-                'visible_to' => "ALTER TABLE `{$ads_table}` ADD COLUMN visible_to VARCHAR(30) NOT NULL DEFAULT 'all'",
-                'created_at' => "ALTER TABLE `{$ads_table}` ADD COLUMN created_at DATETIME NULL",
-                'updated_at' => "ALTER TABLE `{$ads_table}` ADD COLUMN updated_at DATETIME NULL",
+                'title'        => "ALTER TABLE `{$ads_table}` ADD COLUMN title VARCHAR(190) NOT NULL",
+                'content'      => "ALTER TABLE `{$ads_table}` ADD COLUMN content TEXT NULL",
+                'link_url'     => "ALTER TABLE `{$ads_table}` ADD COLUMN link_url VARCHAR(255) NULL",
+                'placement'    => "ALTER TABLE `{$ads_table}` ADD COLUMN placement VARCHAR(50) NOT NULL DEFAULT 'none'",
+                'visible_to'   => "ALTER TABLE `{$ads_table}` ADD COLUMN visible_to VARCHAR(30) NOT NULL DEFAULT 'all'",
+                'target_pages' => "ALTER TABLE `{$ads_table}` ADD COLUMN target_pages TEXT NULL",
+                'active'       => "ALTER TABLE `{$ads_table}` ADD COLUMN active TINYINT(1) NOT NULL DEFAULT 1",
+                'created_at'   => "ALTER TABLE `{$ads_table}` ADD COLUMN created_at DATETIME NULL",
+                'updated_at'   => "ALTER TABLE `{$ads_table}` ADD COLUMN updated_at DATETIME NULL",
             ];
             forEach ($aneed as $c => $alter) {
                 $exists = $wpdb->get_var($wpdb->prepare(
