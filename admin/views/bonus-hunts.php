@@ -23,6 +23,10 @@ if ( 'list' === $view ) :
   <h1 class="wp-heading-inline"><?php echo esc_html__('Bonus Hunts', 'bonus-hunt-guesser'); ?></h1>
   <a href="<?php echo esc_url(add_query_arg(['view'=>'add'])); ?>" class="page-title-action"><?php echo esc_html__('Add New', 'bonus-hunt-guesser'); ?></a>
 
+  <?php if ( isset( $_GET['closed'] ) && '1' === $_GET['closed'] ) : ?>
+    <div class="notice notice-success is-dismissible"><p><?php echo esc_html__( 'Hunt closed successfully.', 'bonus-hunt-guesser' ); ?></p></div>
+  <?php endif; ?>
+
   <table class="widefat striped" style="margin-top:1em">
     <thead>
       <tr>
@@ -40,16 +44,18 @@ if ( 'list' === $view ) :
         <tr><td colspan="7"><?php echo esc_html__('No hunts found.', 'bonus-hunt-guesser'); ?></td></tr>
       <?php else : foreach ( $hunts as $h ) : ?>
         <tr>
-          <td><?php echo (int)$h->id; ?></td>
-          <td><a href="<?php echo esc_url(add_query_arg(['view'=>'edit','id'=>(int)$h->id])); ?>"><?php echo esc_html($h->title); ?></a></td>
-          <td><?php echo esc_html(number_format_i18n((float)$h->starting_balance, 2)); ?></td>
-          <td><?php echo $h->final_balance !== null ? esc_html(number_format_i18n((float)$h->final_balance, 2)) : '—'; ?></td>
-          <td><?php echo (int)($h->winners_count ?? 3); ?></td>
-          <td><?php echo esc_html($h->status); ?></td>
+          <td><?php echo (int) $h->id; ?></td>
+          <td><a href="<?php echo esc_url( add_query_arg( [ 'view' => 'edit', 'id' => (int) $h->id ] ) ); ?>"><?php echo esc_html( $h->title ); ?></a></td>
+          <td><?php echo esc_html( number_format_i18n( (float) $h->starting_balance, 2 ) ); ?></td>
+          <td><?php echo null !== $h->final_balance ? esc_html( number_format_i18n( (float) $h->final_balance, 2 ) ) : '—'; ?></td>
+          <td><?php echo (int) ( $h->winners_count ?? 3 ); ?></td>
+          <td><?php echo esc_html( $h->status ); ?></td>
           <td>
-            <a class="button" href="<?php echo esc_url(add_query_arg(['view'=>'edit','id'=>(int)$h->id])); ?>"><?php echo esc_html__('Edit', 'bonus-hunt-guesser'); ?></a>
-            <?php if ($h->status === 'closed' && $h->final_balance !== null) : ?>
-              <a class="button button-primary" href="<?php echo esc_url(admin_url('admin.php?page=bhg-bonus-hunts-results&id='.(int)$h->id)); ?>"><?php echo esc_html__('Results', 'bonus-hunt-guesser'); ?></a>
+            <a class="button" href="<?php echo esc_url( add_query_arg( [ 'view' => 'edit', 'id' => (int) $h->id ] ) ); ?>"><?php echo esc_html__( 'Edit', 'bonus-hunt-guesser' ); ?></a>
+            <?php if ( 'open' === $h->status ) : ?>
+              <a class="button" href="<?php echo esc_url( add_query_arg( [ 'view' => 'close', 'id' => (int) $h->id ] ) ); ?>"><?php echo esc_html__( 'Close Hunt', 'bonus-hunt-guesser' ); ?></a>
+            <?php elseif ( $h->final_balance !== null ) : ?>
+              <a class="button button-primary" href="<?php echo esc_url( admin_url( 'admin.php?page=bhg-bonus-hunts-results&id=' . (int) $h->id ) ); ?>"><?php echo esc_html__( 'Results', 'bonus-hunt-guesser' ); ?></a>
             <?php endif; ?>
           </td>
         </tr>
@@ -58,6 +64,37 @@ if ( 'list' === $view ) :
   </table>
 </div>
 <?php endif; ?>
+
+<?php
+/** CLOSE VIEW */
+if ( 'close' === $view ) :
+    $id   = isset( $_GET['id'] ) ? (int) $_GET['id'] : 0;
+    $hunt = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM `$hunts_table` WHERE id = %d", $id ) );
+    if ( ! $hunt || 'open' !== $hunt->status ) :
+        echo '<div class="notice notice-error"><p>' . esc_html__( 'Invalid hunt.', 'bonus-hunt-guesser' ) . '</p></div>';
+    else :
+?>
+<div class="wrap">
+  <h1 class="wp-heading-inline"><?php echo esc_html__( 'Close Bonus Hunt', 'bonus-hunt-guesser' ); ?> — <?php echo esc_html( $hunt->title ); ?></h1>
+  <form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" style="max-width:400px;margin-top:1em">
+    <?php wp_nonce_field( 'bhg_close_hunt' ); ?>
+    <input type="hidden" name="action" value="bhg_close_hunt" />
+    <input type="hidden" name="hunt_id" value="<?php echo (int) $hunt->id; ?>" />
+    <table class="form-table" role="presentation">
+      <tbody>
+        <tr>
+          <th scope="row"><label for="bhg_final_balance"><?php echo esc_html__( 'Final Balance', 'bonus-hunt-guesser' ); ?></label></th>
+          <td><input type="number" step="0.01" min="0" id="bhg_final_balance" name="final_balance" required></td>
+        </tr>
+      </tbody>
+    </table>
+    <?php submit_button( __( 'Close Hunt', 'bonus-hunt-guesser' ) ); ?>
+  </form>
+</div>
+<?php
+    endif;
+endif;
+?>
 
 <?php
 /** ADD VIEW */
