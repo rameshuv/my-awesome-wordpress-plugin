@@ -48,59 +48,6 @@ add_action('admin_post_bhg_add_affiliate', function(){
   exit;
 });
 
-add_action('admin_post_bhg_save_user_affiliates', function(){
-  if (!current_user_can(bhg_admin_cap())) wp_die('Forbidden', 403);
-  check_admin_referer('bhg_save_user_affiliates');
-  global $wpdb; $t = BHG_DB::table('user_affiliate_sites');
-  $is_aff = $_POST['is_affiliate'] ?? [];
-  $site = $_POST['site'] ?? [];
-  $users = get_users(['fields'=>['ID'],'number'=>2000]);
-  foreach ($users as $u){
-    $uid = intval($u->ID);
-    if (isset($is_aff[$uid])) update_user_meta($uid, 'bhg_is_affiliate', 1);
-    else delete_user_meta($uid, 'bhg_is_affiliate');
-    // per-site: delete all then insert selected
-$uid = intval( $u->ID );
-if ( isset( $is_aff[ $uid ] ) ) {
-    update_user_meta( $uid, 'bhg_is_affiliate', 1 );
-} else {
-    delete_user_meta( $uid, 'bhg_is_affiliate' );
-}
-
-// Ensure table name variable $t exists and is safe
-if ( empty( $t ) ) {
-    $t = $wpdb->prefix . 'bhg_affiliate_user_sites';
-}
-
-if ( ! empty( $t ) ) {
-    // Safely delete existing rows for this user
-    $wpdb->delete( $t, array( 'user_id' => $uid ) );
-
-    if ( ! empty( $site[ $uid ] ) && is_array( $site[ $uid ] ) ) {
-        foreach ( $site[ $uid ] as $sid ) {
-            $wpdb->insert(
-                $t,
-                array(
-                    'user_id'    => $uid,
-                    'site_id'    => intval( $sid ),
-                    'active'     => 1,
-                    'created_at' => current_time( 'mysql' ),
-                ),
-                array( '%d', '%d', '%d', '%s' )
-            );
-        }
-    }
-}
-};
-    if (!empty($site[$uid]) && is_array($site[$uid])){
-      foreach ($site[$uid] as $sid){
-        $wpdb->insert($t, ['user_id'=>$uid, 'site_id'=>intval($sid), 'active'=>1, 'created_at'=>current_time('mysql')]);
-      }
-    }
-  }
-  wp_safe_redirect(add_query_arg(['page'=>'bhg-users','saved'=>'1'], admin_url('admin.php')));
-  exit;
-});
 
 add_action('admin_post_bhg_save_translations', function(){
   if (!current_user_can(bhg_admin_cap())) wp_die('Forbidden', 403);
@@ -130,3 +77,67 @@ add_action('admin_post_bhg_save_ads', function(){
   wp_safe_redirect(add_query_arg(['page'=>'bhg-advertising','saved'=>'1'], admin_url('admin.php')));
   exit;
 });
+/**
+ * Save affiliate flags and site assignments for users.
+ */
+add_action( 'admin_post_bhg_save_user_affiliates', function () {
+  // Verify capability and nonce.
+  if ( ! current_user_can( bhg_admin_cap() ) ) {
+    wp_die( 'Forbidden', 403 );
+  }
+  check_admin_referer( 'bhg_save_user_affiliates' );
+
+  global $wpdb;
+  $table = BHG_DB::table( 'user_affiliate_sites' );
+
+  // Sanitize incoming arrays.
+  $is_aff_raw   = isset( $_POST['is_affiliate'] ) ? (array) $_POST['is_affiliate'] : [];
+  $is_affiliate = array_fill_keys( array_map( 'intval', array_keys( $is_aff_raw ) ), true );
+
+  $sites_raw = isset( $_POST['site'] ) ? (array) $_POST['site'] : [];
+  $sites     = array_map(
+    static function ( $site_ids ) {
+      return array_map( 'intval', (array) $site_ids );
+    },
+    $sites_raw
+  );
+
+  $users = get_users( [ 'fields' => [ 'ID' ], 'number' => 2000 ] );
+  if ( empty( $users ) ) {
+    wp_safe_redirect( add_query_arg( [ 'page' => 'bhg-users', 'saved' => '0' ], admin_url( 'admin.php' ) ) );
+    return;
+  }
+
+  foreach ( $users as $u ) {
+    $uid = (int) $u->ID;
+
+    // Flag user as affiliate.
+    if ( isset( $is_affiliate[ $uid ] ) ) {
+      update_user_meta( $uid, 'bhg_is_affiliate', 1 );
+    } else {
+      delete_user_meta( $uid, 'bhg_is_affiliate' );
+    }
+
+    // Remove existing site assignments for this user.
+    $wpdb->delete( $table, [ 'user_id' => $uid ], [ '%d' ] );
+
+    // Insert selected sites.
+    if ( ! empty( $sites[ $uid ] ) ) {
+      foreach ( $sites[ $uid ] as $sid ) {
+        $wpdb->insert(
+          $table,
+          [
+            'user_id'    => $uid,
+            'site_id'    => $sid,
+            'active'     => 1,
+            'created_at' => current_time( 'mysql' ),
+          ],
+          [ '%d', '%d', '%d', '%s' ]
+        );
+      }
+    }
+  }
+
+  wp_safe_redirect( add_query_arg( [ 'page' => 'bhg-users', 'saved' => '1' ], admin_url( 'admin.php' ) ) );
+  exit;
+} );
