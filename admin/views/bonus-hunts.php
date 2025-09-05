@@ -17,7 +17,9 @@ $view = isset( $_GET['view'] ) ? sanitize_text_field( $_GET['view'] ) : 'list';
 
 /** LIST VIEW */
 if ( 'list' === $view ) :
-    $hunts = $wpdb->get_results( "SELECT * FROM `$hunts_table` ORDER BY id DESC" );
+    $hunts = $wpdb->get_results(
+        $wpdb->prepare( 'SELECT * FROM %i ORDER BY id DESC', $hunts_table )
+    );
 ?>
 <div class="wrap">
   <h1 class="wp-heading-inline"><?php echo esc_html__('Bonus Hunts', 'bonus-hunt-guesser'); ?></h1>
@@ -69,7 +71,9 @@ if ( 'list' === $view ) :
 /** CLOSE VIEW */
 if ( 'close' === $view ) :
     $id   = isset( $_GET['id'] ) ? (int) $_GET['id'] : 0;
-    $hunt = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM `$hunts_table` WHERE id = %d", $id ) );
+    $hunt = $wpdb->get_row(
+        $wpdb->prepare( 'SELECT * FROM %i WHERE id = %d', $hunts_table, $id )
+    );
     if ( ! $hunt || 'open' !== $hunt->status ) :
         echo '<div class="notice notice-error"><p>' . esc_html__( 'Invalid hunt.', 'bonus-hunt-guesser' ) . '</p></div>';
     else :
@@ -126,7 +130,13 @@ if ($view === 'add') : ?>
         <tr>
           <th scope="row"><label for="bhg_affiliate"><?php echo esc_html__('Affiliate Site', 'bonus-hunt-guesser'); ?></label></th>
           <td>
-            <?php $affs = $wpdb->get_results( "SELECT id, name FROM `{$wpdb->prefix}bhg_affiliates` ORDER BY name ASC" ); $sel = isset( $hunt->affiliate_site_id ) ? (int) $hunt->affiliate_site_id : 0; ?>
+            <?php
+            $aff_table = $wpdb->prefix . 'bhg_affiliates';
+            $affs      = $wpdb->get_results(
+                $wpdb->prepare( 'SELECT id, name FROM %i ORDER BY name ASC', $aff_table )
+            );
+            $sel       = isset( $hunt->affiliate_site_id ) ? (int) $hunt->affiliate_site_id : 0;
+            ?>
             <select id="bhg_affiliate" name="affiliate_site_id">
               <option value="0"><?php echo esc_html__('None', 'bonus-hunt-guesser'); ?></option>
               <?php foreach ($affs as $a): ?>
@@ -163,12 +173,22 @@ if ($view === 'add') : ?>
 /** EDIT VIEW */
 if ($view === 'edit') :
     $id    = isset($_GET['id']) ? (int) $_GET['id'] : 0;
-    $hunt  = $wpdb->get_row($wpdb->prepare("SELECT * FROM `$hunts_table` WHERE id = %d", $id));
+    $hunt  = $wpdb->get_row(
+        $wpdb->prepare( 'SELECT * FROM %i WHERE id = %d', $hunts_table, $id )
+    );
     if (!$hunt) {
         echo '<div class="notice notice-error"><p>'.esc_html__('Invalid hunt', 'bonus-hunt-guesser').'</p></div>';
         return;
     }
-    $guesses = $wpdb->get_results($wpdb->prepare("SELECT g.*, u.display_name FROM `$guesses_table` g LEFT JOIN `$wpdb->users` u ON u.ID = g.user_id WHERE g.hunt_id = %d ORDER BY g.id ASC", $id));
+    $users_table = $wpdb->users;
+    $guesses     = $wpdb->get_results(
+        $wpdb->prepare(
+            'SELECT g.*, u.display_name FROM %i g LEFT JOIN %i u ON u.ID = g.user_id WHERE g.hunt_id = %d ORDER BY g.id ASC',
+            $guesses_table,
+            $users_table,
+            $id
+        )
+    );
 ?>
 <div class="wrap">
   <h1 class="wp-heading-inline"><?php echo esc_html__('Edit Bonus Hunt', 'bonus-hunt-guesser'); ?> — <?php echo esc_html($hunt->title); ?></h1>
@@ -199,7 +219,13 @@ if ($view === 'edit') :
         <tr>
           <th scope="row"><label for="bhg_affiliate"><?php echo esc_html__('Affiliate Site', 'bonus-hunt-guesser'); ?></label></th>
           <td>
-            <?php $affs = $wpdb->get_results( "SELECT id, name FROM `{$wpdb->prefix}bhg_affiliates` ORDER BY name ASC" ); $sel = isset( $hunt->affiliate_site_id ) ? (int) $hunt->affiliate_site_id : 0; ?>
+            <?php
+            $aff_table = $wpdb->prefix . 'bhg_affiliates';
+            $affs      = $wpdb->get_results(
+                $wpdb->prepare( 'SELECT id, name FROM %i ORDER BY name ASC', $aff_table )
+            );
+            $sel       = isset( $hunt->affiliate_site_id ) ? (int) $hunt->affiliate_site_id : 0;
+            ?>
             <select id="bhg_affiliate" name="affiliate_site_id">
               <option value="0"><?php echo esc_html__('None', 'bonus-hunt-guesser'); ?></option>
               <?php foreach ($affs as $a): ?>

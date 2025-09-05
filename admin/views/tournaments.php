@@ -6,10 +6,14 @@ if (!current_user_can('manage_options')) {
 global $wpdb;
 $table = $wpdb->prefix . 'bhg_tournaments';
 
-$edit_id = isset($_GET['edit']) ? (int) $_GET['edit'] : 0;
-$row = $edit_id ? $wpdb->get_row($wpdb->prepare("SELECT * FROM `$table` WHERE id=%d", $edit_id)) : null;
+$edit_id = isset( $_GET['edit'] ) ? (int) $_GET['edit'] : 0;
+$row     = $edit_id
+    ? $wpdb->get_row( $wpdb->prepare( 'SELECT * FROM %i WHERE id = %d', $table, $edit_id ) )
+    : null;
 
-$rows = $wpdb->get_results( "SELECT * FROM `$table` ORDER BY id DESC" );
+$rows = $wpdb->get_results(
+    $wpdb->prepare( 'SELECT * FROM %i ORDER BY id DESC', $table )
+);
 ?>
 <div class="wrap">
   <h1 class="wp-heading-inline"><?php esc_html_e('Tournaments', 'bonus-hunt-guesser'); ?></h1>
