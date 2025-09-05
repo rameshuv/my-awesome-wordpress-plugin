@@ -410,8 +410,6 @@ function bhg_init_plugin() {
     }
     
     // Register form handlers
-    add_action('admin_post_bhg_save_bonus_hunt', 'bhg_handle_bonus_hunt_save');
-    add_action('admin_post_nopriv_bhg_save_bonus_hunt', 'bhg_handle_bonus_hunt_save_unauth');
     add_action('admin_post_bhg_submit_guess', 'bhg_handle_submit_guess');
     add_action('admin_post_nopriv_bhg_submit_guess', function(){ $ref = wp_get_referer(); wp_safe_redirect( wp_login_url( $ref ? $ref : home_url() ) ); exit; });
     add_action('wp_ajax_submit_bhg_guess', 'bhg_handle_submit_guess');
@@ -496,65 +494,6 @@ function bhg_handle_settings_save() {
     // Redirect back to settings page
     wp_safe_redirect( esc_url_raw( admin_url( 'admin.php?page=bhg_settings&message=saved' ) ) );
     exit;
-}
-
-// Form handler for bonus hunt save (admin)
-/**
- * Handle admin bonus hunt form submissions.
- *
- * @return void
- */
-function bhg_handle_bonus_hunt_save() {
-    // Verify nonce
-    if ( ! isset( $_POST['_wpnonce'] ) || ! wp_verify_nonce( wp_unslash( $_POST['_wpnonce'] ), 'bhg_form_nonce' ) ) {
-        wp_die( esc_html__( 'Security check failed', 'bonus-hunt-guesser' ) );
-    }
-
-    if ( ! current_user_can( 'manage_options' ) ) {
-        wp_die( esc_html__( 'Access denied', 'bonus-hunt-guesser' ) );
-    }
-
-    // Process form data
-    global $wpdb;
-    $table_name = $wpdb->prefix . 'bhg_bonus_hunts';
-
-    $data = [
-        'title'           => sanitize_text_field( wp_unslash( $_POST['title'] ) ),
-        'starting_balance' => floatval( wp_unslash( $_POST['starting_balance'] ) ),
-        'num_bonuses'     => intval( wp_unslash( $_POST['num_bonuses'] ) ),
-        'prizes'          => wp_kses_post( wp_unslash( $_POST['prizes'] ) ),
-        'status'          => sanitize_text_field( wp_unslash( $_POST['status'] ) ),
-        'updated_at'      => current_time( 'mysql', 1 ),
-    ];
-
-    if ( isset( $_POST['final_balance'] ) ) {
-        $data['final_balance'] = floatval( wp_unslash( $_POST['final_balance'] ) );
-    }
-
-    if ( isset( $_POST['id'] ) && ! empty( $_POST['id'] ) ) {
-        // Update existing hunt
-        $wpdb->update(
-            $table_name,
-            $data,
-            [ 'id' => intval( wp_unslash( $_POST['id'] ) ) ]
-        );
-    } else {
-        // Insert new hunt
-        $data['created_at'] = current_time( 'mysql', 1 );
-        $wpdb->insert( $table_name, $data );
-    }
-
-    wp_safe_redirect( esc_url_raw( admin_url( 'admin.php?page=bhg_bonus_hunts&message=saved' ) ) );
-    exit;
-}
-
-/**
- * Handle unauthorized bonus hunt save attempts.
- *
- * @return void
- */
-function bhg_handle_bonus_hunt_save_unauth() {
-    wp_die( esc_html__( 'You must be logged in to submit this form', 'bonus-hunt-guesser' ) );
 }
 
 // Form handler for guess submission (frontend)
