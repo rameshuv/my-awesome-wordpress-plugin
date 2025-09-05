@@ -1,0 +1,1272 @@
+# Copyright (C) 2025 Bonus Hunt Guesser Development Team
+# This file is distributed under the GPLv2 or later.
+msgid ""
+msgstr ""
+"Project-Id-Version: Bonus Hunt Guesser 8.0.07\n"
+"Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/my-awesome-wordpress-plugin\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"POT-Creation-Date: 2025-09-05T08:54:23+00:00\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"X-Generator: WP-CLI 2.12.0\n"
+"X-Domain: bonus-hunt-guesser\n"
+
+#. Plugin Name of the plugin
+#: bonus-hunt-guesser.php
+#: admin/views/header.php:137
+msgid "Bonus Hunt Guesser"
+msgstr ""
+
+#. Plugin URI of the plugin
+#: bonus-hunt-guesser.php
+msgid "https://yourdomain.com/"
+msgstr ""
+
+#. Description of the plugin
+#: bonus-hunt-guesser.php
+msgid "Comprehensive bonus hunt management system with tournaments, leaderboards, and user guessing functionality"
+msgstr ""
+
+#. Author of the plugin
+#: bonus-hunt-guesser.php
+msgid "Bonus Hunt Guesser Development Team"
+msgstr ""
+
+#: admin/class-bhg-admin.php:28
+#: admin/class-bhg-admin.php:29
+msgid "Bonus Hunt"
+msgstr ""
+
+#: admin/class-bhg-admin.php:37
+msgid "Dashboard"
+msgstr ""
+
+#: admin/class-bhg-admin.php:38
+#: admin/views/bonus-hunts.php:23
+#: admin/views/hunts-list.php:27
+#: includes/class-bhg-shortcodes.php:494
+msgid "Bonus Hunts"
+msgstr ""
+
+#: admin/class-bhg-admin.php:39
+#: admin/views/bonus-hunts.php:52
+#: admin/views/hunts-list.php:56
+msgid "Results"
+msgstr ""
+
+#: admin/class-bhg-admin.php:40
+#: admin/views/tournaments.php:15
+msgid "Tournaments"
+msgstr ""
+
+#: admin/class-bhg-admin.php:41
+#: admin/views/users.php:33
+msgid "Users"
+msgstr ""
+
+#: admin/class-bhg-admin.php:42
+#: admin/class-bhg-admin.php:69
+#: admin/views/affiliate-websites.php:17
+msgid "Affiliates"
+msgstr ""
+
+#: admin/class-bhg-admin.php:43
+#: admin/views/advertising.php:23
+msgid "Advertising"
+msgstr ""
+
+#: admin/class-bhg-admin.php:44
+#: admin/class-bhg-admin.php:75
+#: admin/views/translations.php:39
+msgid "Translations"
+msgstr ""
+
+#: admin/class-bhg-admin.php:45
+#: admin/class-bhg-admin.php:80
+msgid "Database"
+msgstr ""
+
+#: admin/class-bhg-admin.php:46
+#: admin/class-bhg-admin.php:85
+msgid "Settings"
+msgstr ""
+
+#: admin/class-bhg-admin.php:47
+#: admin/class-bhg-admin.php:90
+#: admin/views/tools.php:5
+msgid "BHG Tools"
+msgstr ""
+
+#: admin/class-bhg-admin.php:69
+msgid "Affiliate management UI not provided yet."
+msgstr ""
+
+#: admin/class-bhg-admin.php:75
+msgid "No translations UI found."
+msgstr ""
+
+#: admin/class-bhg-admin.php:80
+msgid "No database UI found."
+msgstr ""
+
+#: admin/class-bhg-admin.php:85
+msgid "No settings UI found."
+msgstr ""
+
+#: admin/class-bhg-admin.php:90
+msgid "No tools UI found."
+msgstr ""
+
+#: admin/class-bhg-admin.php:95
+#: admin/class-bhg-admin.php:105
+#: admin/class-bhg-admin.php:139
+#: admin/class-bhg-admin.php:207
+#: admin/class-bhg-admin.php:228
+#: admin/class-bhg-admin.php:239
+#: admin/class-bhg-admin.php:254
+msgid "No permission"
+msgstr ""
+
+#: admin/class-bhg-admin.php:274
+msgid "Tournament saved."
+msgstr ""
+
+#: admin/class-bhg-admin.php:275
+msgid "Could not save tournament. Check logs."
+msgstr ""
+
+#: admin/class-bhg-admin.php:276
+msgid "Security check failed. Please retry."
+msgstr ""
+
+#: admin/class-bhg-admin.php:277
+msgid "You do not have permission to do that."
+msgstr ""
+
+#: admin/class-bhg-demo.php:13
+#: admin/class-bhg-demo.php:14
+#: admin/views/demo-tools.php:7
+msgid "Demo Tools"
+msgstr ""
+
+#: admin/class-bhg-demo.php:25
+msgid "Reset & Reseed Demo"
+msgstr ""
+
+#: admin/class-bhg-users-table.php:24
+#: admin/views/advertising.php:29
+#: admin/views/affiliate-websites.php:23
+#: admin/views/bonus-hunts.php:29
+#: admin/views/header.php:210
+#: admin/views/hunts-list.php:31
+#: admin/views/tournaments.php:21
+msgid "ID"
+msgstr ""
+
+#: admin/class-bhg-users-table.php:25
+#: admin/views/users.php:47
+#: includes/class-bhg-shortcodes.php:283
+msgid "Username"
+msgstr ""
+
+#: admin/class-bhg-users-table.php:26
+#: admin/views/users.php:50
+msgid "Email"
+msgstr ""
+
+#: admin/class-bhg-users-table.php:27
+msgid "Role"
+msgstr ""
+
+#: admin/class-bhg-users-table.php:28
+msgid "Guesses"
+msgstr ""
+
+#: admin/class-bhg-users-table.php:29
+#: bonus-hunt-guesser.php:819
+#: includes/class-bhg-shortcodes.php:284
+#: includes/class-bhg-shortcodes.php:506
+msgid "Wins"
+msgstr ""
+
+#: admin/class-bhg-users-table.php:30
+msgid "Profile"
+msgstr ""
+
+#: admin/class-bhg-users-table.php:60
+#: admin/views/advertising.php:48
+#: admin/views/affiliate-websites.php:40
+#: admin/views/bonus-hunts.php:50
+#: admin/views/header.php:243
+#: admin/views/hunts-list.php:57
+#: admin/views/tournaments.php:42
+msgid "Edit"
+msgstr ""
+
+#: admin/class-bhg-users-table.php:166
+msgid "Search users"
+msgstr ""
+
+#: admin/views/advertising.php:4
+#: admin/views/affiliate-websites.php:4
+#: admin/views/bonus-hunts.php:9
+#: admin/views/dashboard.php:8
+#: admin/views/database.php:5
+#: admin/views/header.php:8
+#: admin/views/hunt-results.php:3
+#: admin/views/hunts-edit.php:3
+#: admin/views/hunts-list.php:3
+#: admin/views/settings.php:8
+#: admin/views/tournaments.php:4
+#: admin/views/translations.php:5
+#: admin/views/users.php:4
+msgid "You do not have sufficient permissions to access this page."
+msgstr ""
+
+#: admin/views/advertising.php:25
+msgid "Existing Ads"
+msgstr ""
+
+#: admin/views/advertising.php:30
+msgid "Title/Content"
+msgstr ""
+
+#: admin/views/advertising.php:31
+#: admin/views/advertising.php:85
+msgid "Placement"
+msgstr ""
+
+#: admin/views/advertising.php:32
+#: admin/views/advertising.php:99
+msgid "Visible To"
+msgstr ""
+
+#: admin/views/advertising.php:33
+#: admin/views/advertising.php:117
+#: admin/views/header.php:180
+#: includes/class-bhg-shortcodes.php:348
+msgid "Active"
+msgstr ""
+
+#: admin/views/advertising.php:34
+#: admin/views/affiliate-websites.php:27
+#: admin/views/bonus-hunts.php:35
+#: admin/views/bonus-hunts.php:202
+#: admin/views/header.php:217
+#: admin/views/hunts-edit.php:47
+#: admin/views/hunts-list.php:38
+#: admin/views/tournaments.php:27
+#: admin/views/users.php:52
+msgid "Actions"
+msgstr ""
+
+#: admin/views/advertising.php:39
+msgid "No ads yet."
+msgstr ""
+
+#: admin/views/advertising.php:46
+#: admin/views/settings.php:120
+msgid "Yes"
+msgstr ""
+
+#: admin/views/advertising.php:46
+#: admin/views/settings.php:123
+msgid "No"
+msgstr ""
+
+#: admin/views/advertising.php:49
+msgid "Delete this ad?"
+msgstr ""
+
+#: admin/views/advertising.php:49
+#: admin/views/affiliate-websites.php:45
+#: admin/views/bonus-hunts.php:223
+#: admin/views/hunts-edit.php:64
+msgid "Remove"
+msgstr ""
+
+#: admin/views/advertising.php:56
+msgid "Edit Ad"
+msgstr ""
+
+#: admin/views/advertising.php:56
+msgid "Add Ad"
+msgstr ""
+
+#: admin/views/advertising.php:73
+#: admin/views/bonus-hunts.php:30
+#: admin/views/bonus-hunts.php:74
+#: admin/views/bonus-hunts.php:147
+#: admin/views/header.php:211
+#: admin/views/hunts-list.php:32
+#: admin/views/tournaments.php:22
+#: admin/views/tournaments.php:56
+msgid "Title"
+msgstr ""
+
+#: admin/views/advertising.php:77
+msgid "Content"
+msgstr ""
+
+#: admin/views/advertising.php:81
+msgid "Link URL (optional)"
+msgstr ""
+
+#: admin/views/advertising.php:113
+msgid "Target Page Slugs"
+msgstr ""
+
+#: admin/views/advertising.php:122
+msgid "Update Ad"
+msgstr ""
+
+#: admin/views/advertising.php:122
+msgid "Create Ad"
+msgstr ""
+
+#: admin/views/affiliate-websites.php:19
+msgid "All Affiliate Websites"
+msgstr ""
+
+#: admin/views/affiliate-websites.php:24
+#: admin/views/affiliate-websites.php:60
+#: admin/views/users.php:48
+msgid "Name"
+msgstr ""
+
+#: admin/views/affiliate-websites.php:25
+#: admin/views/affiliate-websites.php:64
+msgid "URL"
+msgstr ""
+
+#: admin/views/affiliate-websites.php:26
+#: admin/views/affiliate-websites.php:68
+#: admin/views/bonus-hunts.php:34
+#: admin/views/bonus-hunts.php:106
+#: admin/views/bonus-hunts.php:183
+#: admin/views/database.php:129
+#: admin/views/header.php:177
+#: admin/views/header.php:215
+#: admin/views/hunts-list.php:35
+#: admin/views/tournaments.php:26
+#: admin/views/tournaments.php:83
+#: includes/class-bhg-shortcodes.php:272
+#: includes/class-bhg-shortcodes.php:363
+msgid "Status"
+msgstr ""
+
+#: admin/views/affiliate-websites.php:32
+msgid "No affiliates yet."
+msgstr ""
+
+#: admin/views/affiliate-websites.php:41
+msgid "Delete this affiliate?"
+msgstr ""
+
+#: admin/views/affiliate-websites.php:53
+msgid "Edit Affiliate"
+msgstr ""
+
+#: admin/views/affiliate-websites.php:53
+msgid "Add Affiliate"
+msgstr ""
+
+#: admin/views/affiliate-websites.php:78
+msgid "Update Affiliate"
+msgstr ""
+
+#: admin/views/affiliate-websites.php:78
+msgid "Create Affiliate"
+msgstr ""
+
+#: admin/views/bonus-hunts-results.php:3
+msgid "Insufficient permissions"
+msgstr ""
+
+#: admin/views/bonus-hunts-results.php:9
+#: admin/views/hunt-results.php:15
+#: admin/views/hunts-edit.php:24
+msgid "Hunt not found"
+msgstr ""
+
+#: admin/views/bonus-hunts-results.php:19
+msgid "Results for "
+msgstr ""
+
+#: admin/views/bonus-hunts-results.php:22
+#: bonus-hunt-guesser.php:817
+#: includes/class-bhg-shortcodes.php:183
+msgid "Position"
+msgstr ""
+
+#: admin/views/bonus-hunts-results.php:23
+#: admin/views/bonus-hunts.php:200
+#: admin/views/hunt-results.php:25
+#: admin/views/hunts-edit.php:44
+#: bonus-hunt-guesser.php:818
+#: includes/class-bhg-shortcodes.php:184
+#: includes/class-bhg-shortcodes.php:506
+msgid "User"
+msgstr ""
+
+#: admin/views/bonus-hunts-results.php:24
+#: admin/views/bonus-hunts.php:201
+#: admin/views/hunt-results.php:26
+#: admin/views/hunts-edit.php:45
+#: includes/class-bhg-shortcodes.php:185
+msgid "Guess"
+msgstr ""
+
+#: admin/views/bonus-hunts-results.php:25
+msgid "Difference"
+msgstr ""
+
+#: admin/views/bonus-hunts.php:24
+msgid "Add New"
+msgstr ""
+
+#: admin/views/bonus-hunts.php:31
+#: admin/views/dashboard.php:30
+#: admin/views/hunts-list.php:33
+msgid "Start Balance"
+msgstr ""
+
+#: admin/views/bonus-hunts.php:32
+#: admin/views/bonus-hunts.php:179
+#: admin/views/dashboard.php:31
+#: admin/views/header.php:213
+#: admin/views/hunts-list.php:34
+msgid "Final Balance"
+msgstr ""
+
+#: admin/views/bonus-hunts.php:33
+#: admin/views/hunts-list.php:36
+msgid "Winners"
+msgstr ""
+
+#: admin/views/bonus-hunts.php:40
+#: admin/views/hunts-list.php:61
+#: includes/class-bhg-shortcodes.php:146
+msgid "No hunts found."
+msgstr ""
+
+#: admin/views/bonus-hunts.php:66
+msgid "Add New Bonus Hunt"
+msgstr ""
+
+#: admin/views/bonus-hunts.php:78
+#: admin/views/bonus-hunts.php:151
+#: admin/views/header.php:212
+#: includes/class-bhg-shortcodes.php:54
+msgid "Starting Balance"
+msgstr ""
+
+#: admin/views/bonus-hunts.php:82
+#: admin/views/bonus-hunts.php:155
+#: admin/views/header.php:162
+#: admin/views/header.php:214
+#: includes/class-bhg-shortcodes.php:55
+msgid "Number of Bonuses"
+msgstr ""
+
+#: admin/views/bonus-hunts.php:86
+#: admin/views/bonus-hunts.php:159
+#: includes/class-bhg-shortcodes.php:57
+msgid "Prizes"
+msgstr ""
+
+#: admin/views/bonus-hunts.php:90
+#: admin/views/bonus-hunts.php:163
+msgid "Affiliate Site"
+msgstr ""
+
+#: admin/views/bonus-hunts.php:94
+#: admin/views/bonus-hunts.php:167
+#: admin/views/header.php:190
+msgid "None"
+msgstr ""
+
+#: admin/views/bonus-hunts.php:102
+#: admin/views/bonus-hunts.php:175
+msgid "Number of Winners"
+msgstr ""
+
+#: admin/views/bonus-hunts.php:109
+#: admin/views/bonus-hunts.php:186
+msgid "Open"
+msgstr ""
+
+#: admin/views/bonus-hunts.php:110
+#: admin/views/bonus-hunts.php:187
+#: includes/class-bhg-shortcodes.php:348
+msgid "Closed"
+msgstr ""
+
+#: admin/views/bonus-hunts.php:115
+msgid "Final Balance (optional)"
+msgstr ""
+
+#: admin/views/bonus-hunts.php:120
+#: admin/views/header.php:201
+msgid "Create Bonus Hunt"
+msgstr ""
+
+#: admin/views/bonus-hunts.php:131
+msgid "Invalid hunt"
+msgstr ""
+
+#: admin/views/bonus-hunts.php:137
+msgid "Edit Bonus Hunt"
+msgstr ""
+
+#: admin/views/bonus-hunts.php:193
+msgid "Save Hunt"
+msgstr ""
+
+#: admin/views/bonus-hunts.php:196
+#: admin/views/hunts-edit.php:38
+msgid "Participants"
+msgstr ""
+
+#: admin/views/bonus-hunts.php:207
+#: admin/views/hunts-edit.php:70
+msgid "No participants yet."
+msgstr ""
+
+#: admin/views/bonus-hunts.php:219
+msgid "Delete this guess?"
+msgstr ""
+
+#: admin/views/dashboard.php:14
+msgid "Helper function bhg_get_latest_closed_hunts() missing. Please include class-bhg-bonus-hunts.php helpers."
+msgstr ""
+
+#: admin/views/dashboard.php:24
+msgid "Latest Hunts"
+msgstr ""
+
+#: admin/views/dashboard.php:28
+msgid "Bonushunt"
+msgstr ""
+
+#: admin/views/dashboard.php:29
+msgid "All Winners"
+msgstr ""
+
+#: admin/views/dashboard.php:32
+#: admin/views/hunts-list.php:37
+msgid "Closed At"
+msgstr ""
+
+#: admin/views/dashboard.php:51
+#, php-format
+msgid "User #%d"
+msgstr ""
+
+#: admin/views/dashboard.php:56
+msgid "diff"
+msgstr ""
+
+#: admin/views/dashboard.php:62
+msgid "No winners yet"
+msgstr ""
+
+#: admin/views/dashboard.php:72
+#: includes/class-bhg-shortcodes.php:386
+msgid "No closed hunts yet."
+msgstr ""
+
+#: admin/views/database.php:12
+#: admin/views/database.php:21
+msgid "Security check failed"
+msgstr ""
+
+#: admin/views/database.php:97
+msgid "Database Tools"
+msgstr ""
+
+#: admin/views/database.php:98
+msgid "Tables are automatically created on activation. If you need to reinstall them, deactivate and activate the plugin again."
+msgstr ""
+
+#: admin/views/database.php:102
+msgid "Database cleanup completed successfully."
+msgstr ""
+
+#: admin/views/database.php:108
+msgid "Database optimization completed successfully."
+msgstr ""
+
+#: admin/views/database.php:116
+msgid "Run Database Cleanup"
+msgstr ""
+
+#: admin/views/database.php:117
+msgid "Are you sure you want to run database cleanup? This action cannot be undone."
+msgstr ""
+
+#: admin/views/database.php:120
+msgid "Note: This will remove any demo data and reset tables to their initial state."
+msgstr ""
+
+#: admin/views/database.php:124
+msgid "Current Database Status"
+msgstr ""
+
+#: admin/views/database.php:128
+msgid "Table Name"
+msgstr ""
+
+#: admin/views/database.php:130
+msgid "Rows"
+msgstr ""
+
+#: admin/views/database.php:154
+msgid "Exists"
+msgstr ""
+
+#: admin/views/database.php:154
+msgid "Missing"
+msgstr ""
+
+#: admin/views/database.php:162
+msgid "Database Maintenance"
+msgstr ""
+
+#: admin/views/database.php:167
+msgid "Optimize Database Tables"
+msgstr ""
+
+#: admin/views/demo-tools.php:11
+msgid "This will delete all demo data and pages, then recreate fresh demo content."
+msgstr ""
+
+#: admin/views/demo-tools.php:12
+msgid "Reset & Reseed Demo Data"
+msgstr ""
+
+#: admin/views/header.php:114
+msgid "Bonus hunt created successfully!"
+msgstr ""
+
+#: admin/views/header.php:119
+msgid "Bonus hunt updated successfully!"
+msgstr ""
+
+#: admin/views/header.php:124
+msgid "Bonus hunt deleted successfully!"
+msgstr ""
+
+#: admin/views/header.php:129
+#: bonus-hunt-guesser.php:365
+msgid "An error occurred. Please try again."
+msgstr ""
+
+#: admin/views/header.php:141
+msgid "Create New Bonus Hunt"
+msgstr ""
+
+#: admin/views/header.php:148
+msgid "Bonus Hunt Title"
+msgstr ""
+
+#: admin/views/header.php:155
+msgid "Starting Balance (€)"
+msgstr ""
+
+#: admin/views/header.php:169
+msgid "Prizes Description"
+msgstr ""
+
+#: admin/views/header.php:181
+msgid "Upcoming"
+msgstr ""
+
+#: admin/views/header.php:182
+msgid "Completed"
+msgstr ""
+
+#: admin/views/header.php:187
+msgid "Affiliate Website"
+msgstr ""
+
+#: admin/views/header.php:206
+msgid "Existing Bonus Hunts"
+msgstr ""
+
+#: admin/views/header.php:216
+msgid "Created"
+msgstr ""
+
+#: admin/views/header.php:231
+msgid "Not set"
+msgstr ""
+
+#: admin/views/header.php:250
+msgid "Are you sure you want to delete this bonus hunt?"
+msgstr ""
+
+#: admin/views/header.php:251
+msgid "Delete"
+msgstr ""
+
+#: admin/views/header.php:259
+msgid "No bonus hunts found."
+msgstr ""
+
+#: admin/views/hunt-results.php:6
+#: admin/views/hunts-edit.php:6
+msgid "Missing hunt id"
+msgstr ""
+
+#: admin/views/hunt-results.php:11
+msgid "Required helper functions are missing. Please include class-bhg-bonus-hunts.php helpers."
+msgstr ""
+
+#: admin/views/hunt-results.php:21
+#, php-format
+msgid "Results — %s"
+msgstr ""
+
+#: admin/views/hunt-results.php:27
+#: includes/class-bhg-shortcodes.php:394
+msgid "Diff"
+msgstr ""
+
+#: admin/views/hunt-results.php:42
+#: includes/class-bhg-shortcodes.php:167
+msgid "No guesses yet."
+msgstr ""
+
+#: admin/views/hunts-edit.php:15
+msgid "Guess removed."
+msgstr ""
+
+#: admin/views/hunts-edit.php:20
+msgid "Missing helper functions. Please include class-bhg-bonus-hunts-helpers.php."
+msgstr ""
+
+#: admin/views/hunts-edit.php:34
+#, php-format
+msgid "Edit Hunt — %s"
+msgstr ""
+
+#: admin/views/hunts-edit.php:39
+#, php-format
+msgid "%s participant"
+msgid_plural "%s participants"
+msgstr[0] ""
+msgstr[1] ""
+
+#: admin/views/hunts-edit.php:46
+msgid "Date"
+msgstr ""
+
+#: admin/views/hunts-edit.php:63
+msgid "Remove this guess?"
+msgstr ""
+
+#: admin/views/settings.php:22
+msgid "Settings saved successfully."
+msgstr ""
+
+#: admin/views/settings.php:31
+msgid "Security check failed. Please try again."
+msgstr ""
+
+#: admin/views/settings.php:34
+msgid "Invalid data submitted. Please check your inputs."
+msgstr ""
+
+#: admin/views/settings.php:37
+msgid "An error occurred while saving settings."
+msgstr ""
+
+#: admin/views/settings.php:47
+msgid "Bonus Hunt Guesser Settings"
+msgstr ""
+
+#: admin/views/settings.php:58
+msgid "Default Tournament Period"
+msgstr ""
+
+#: admin/views/settings.php:64
+#: includes/class-bhg-shortcodes.php:339
+msgid "Weekly"
+msgstr ""
+
+#: admin/views/settings.php:67
+#: includes/class-bhg-shortcodes.php:339
+#: includes/class-bhg-shortcodes.php:431
+msgid "Monthly"
+msgstr ""
+
+#: admin/views/settings.php:70
+#: includes/class-bhg-shortcodes.php:339
+#: includes/class-bhg-shortcodes.php:437
+msgid "Yearly"
+msgstr ""
+
+#: admin/views/settings.php:74
+msgid "Default period for tournament calculations."
+msgstr ""
+
+#: admin/views/settings.php:82
+msgid "Minimum Guess Amount"
+msgstr ""
+
+#: admin/views/settings.php:90
+msgid "Minimum amount users can guess for a bonus hunt."
+msgstr ""
+
+#: admin/views/settings.php:98
+msgid "Maximum Guess Amount"
+msgstr ""
+
+#: admin/views/settings.php:106
+msgid "Maximum amount users can guess for a bonus hunt."
+msgstr ""
+
+#: admin/views/settings.php:114
+msgid "Allow Guess Changes"
+msgstr ""
+
+#: admin/views/settings.php:127
+msgid "Allow users to change their guesses before a bonus hunt closes."
+msgstr ""
+
+#: admin/views/settings.php:135
+msgid "Save Changes"
+msgstr ""
+
+#: admin/views/tools.php:17
+msgid "Diagnostics"
+msgstr ""
+
+#: admin/views/tools.php:20
+msgid "Hunts:"
+msgstr ""
+
+#: admin/views/tools.php:21
+msgid "Guesses:"
+msgstr ""
+
+#: admin/views/tools.php:22
+msgid "Users:"
+msgstr ""
+
+#: admin/views/tools.php:23
+msgid "Ads:"
+msgstr ""
+
+#: admin/views/tools.php:24
+msgid "Tournaments:"
+msgstr ""
+
+#: admin/views/tools.php:27
+msgid "Nothing to show yet. Start by creating a hunt or a test user."
+msgstr ""
+
+#: admin/views/tournaments.php:17
+msgid "All Tournaments"
+msgstr ""
+
+#: admin/views/tournaments.php:23
+#: admin/views/tournaments.php:64
+#: includes/class-bhg-shortcodes.php:360
+msgid "Type"
+msgstr ""
+
+#: admin/views/tournaments.php:24
+#: includes/class-bhg-shortcodes.php:270
+#: includes/class-bhg-shortcodes.php:361
+msgid "Start"
+msgstr ""
+
+#: admin/views/tournaments.php:25
+#: includes/class-bhg-shortcodes.php:271
+#: includes/class-bhg-shortcodes.php:362
+msgid "End"
+msgstr ""
+
+#: admin/views/tournaments.php:32
+msgid "No tournaments yet."
+msgstr ""
+
+#: admin/views/tournaments.php:49
+msgid "Edit Tournament"
+msgstr ""
+
+#: admin/views/tournaments.php:49
+msgid "Add Tournament"
+msgstr ""
+
+#: admin/views/tournaments.php:60
+msgid "Description"
+msgstr ""
+
+#: admin/views/tournaments.php:75
+msgid "Start Date"
+msgstr ""
+
+#: admin/views/tournaments.php:79
+msgid "End Date"
+msgstr ""
+
+#: admin/views/tournaments.php:94
+msgid "Update Tournament"
+msgstr ""
+
+#: admin/views/tournaments.php:94
+msgid "Create Tournament"
+msgstr ""
+
+#: admin/views/translations.php:15
+#: bonus-hunt-guesser.php:518
+msgid "Security check failed."
+msgstr ""
+
+#: admin/views/translations.php:24
+msgid "Key field is required."
+msgstr ""
+
+#: admin/views/translations.php:31
+msgid "Translation saved."
+msgstr ""
+
+#: admin/views/translations.php:53
+#: admin/views/translations.php:67
+msgid "Key"
+msgstr ""
+
+#: admin/views/translations.php:57
+#: admin/views/translations.php:67
+msgid "Value"
+msgstr ""
+
+#: admin/views/translations.php:62
+#: admin/views/users.php:74
+msgid "Save"
+msgstr ""
+
+#: admin/views/translations.php:65
+msgid "Existing keys"
+msgstr ""
+
+#: admin/views/translations.php:75
+msgid "No translations yet."
+msgstr ""
+
+#: admin/views/users.php:38
+msgid "Search Users"
+msgstr ""
+
+#: admin/views/users.php:40
+msgid "Search"
+msgstr ""
+
+#: admin/views/users.php:49
+msgid "Real Name"
+msgstr ""
+
+#: admin/views/users.php:51
+#: bonus-hunt-guesser.php:366
+#: includes/helpers-aff-dot.php:15
+#: includes/helpers.php:146
+msgid "Affiliate"
+msgstr ""
+
+#: admin/views/users.php:57
+msgid "No users found."
+msgstr ""
+
+#: admin/views/users.php:76
+msgid "View / Edit"
+msgstr ""
+
+#: bonus-hunt-guesser.php:361
+msgid "Please enter a guess."
+msgstr ""
+
+#: bonus-hunt-guesser.php:362
+msgid "Please enter a valid number."
+msgstr ""
+
+#: bonus-hunt-guesser.php:363
+msgid "Guess must be between €0 and €100,000."
+msgstr ""
+
+#: bonus-hunt-guesser.php:364
+msgid "Your guess has been submitted!"
+msgstr ""
+
+#: bonus-hunt-guesser.php:367
+#: includes/helpers-aff-dot.php:16
+#: includes/helpers.php:146
+msgid "Non-affiliate"
+msgstr ""
+
+#: bonus-hunt-guesser.php:432
+msgid "You do not have sufficient permissions to perform this action."
+msgstr ""
+
+#: bonus-hunt-guesser.php:526
+#: bonus-hunt-guesser.php:528
+msgid "You must be logged in to submit a guess."
+msgstr ""
+
+#: bonus-hunt-guesser.php:534
+#: bonus-hunt-guesser.php:536
+#: includes/class-bhg-models.php:24
+msgid "Invalid hunt."
+msgstr ""
+
+#: bonus-hunt-guesser.php:558
+#: bonus-hunt-guesser.php:560
+msgid "Invalid guess amount."
+msgstr ""
+
+#: bonus-hunt-guesser.php:570
+#: bonus-hunt-guesser.php:572
+msgid "Hunt not found."
+msgstr ""
+
+#: bonus-hunt-guesser.php:576
+#: bonus-hunt-guesser.php:578
+msgid "This hunt is closed. You cannot submit or change a guess."
+msgstr ""
+
+#: bonus-hunt-guesser.php:599
+#: bonus-hunt-guesser.php:601
+msgid "You have reached the maximum number of guesses."
+msgstr ""
+
+#: bonus-hunt-guesser.php:713
+#: bonus-hunt-guesser.php:719
+msgid "Invalid timeframe"
+msgstr ""
+
+#: bonus-hunt-guesser.php:811
+msgid "No data available."
+msgstr ""
+
+#: bonus-hunt-guesser.php:882
+msgid "Bonus Hunt Guesser Information"
+msgstr ""
+
+#: bonus-hunt-guesser.php:885
+msgid "Affiliate Status"
+msgstr ""
+
+#: bonus-hunt-guesser.php:888
+msgid "Check if this user is an affiliate."
+msgstr ""
+
+#: bonus-hunt-guesser.php:945
+#: includes/class-bhg-shortcodes.php:76
+msgid "Please log in to submit your guess."
+msgstr ""
+
+#: bonus-hunt-guesser.php:948
+msgid "No active hunt selected."
+msgstr ""
+
+#: bonus-hunt-guesser.php:955
+msgid "Your Guess (0 - 100,000)"
+msgstr ""
+
+#: bonus-hunt-guesser.php:958
+#: includes/class-bhg-shortcodes.php:125
+msgid "Submit Guess"
+msgstr ""
+
+#: includes/admin.php:5
+#: includes/admin.php:13
+#: includes/admin.php:43
+#: includes/admin.php:53
+#: includes/admin.php:62
+#: includes/admin.php:86
+msgid "Forbidden"
+msgstr ""
+
+#: includes/admin.php:35
+#, php-format
+msgid "Results for %s"
+msgstr ""
+
+#: includes/class-bhg-front-menus.php:12
+msgid "BHG Admin/Moderator Menu"
+msgstr ""
+
+#: includes/class-bhg-front-menus.php:13
+msgid "BHG Logged-in User Menu"
+msgstr ""
+
+#: includes/class-bhg-front-menus.php:14
+msgid "BHG Guest Menu"
+msgstr ""
+
+#: includes/class-bhg-front-menus.php:52
+msgid "Reminder: Assign your BHG menus (Admin/Moderator, Logged-in, Guest) under Appearance → Menus → Manage Locations. Use shortcode [bhg_nav] to display."
+msgstr ""
+
+#: includes/class-bhg-front-menus.php:80
+msgid "Menu not assigned."
+msgstr ""
+
+#: includes/class-bhg-models.php:34
+msgid "This hunt is closed."
+msgstr ""
+
+#: includes/class-bhg-settings.php:15
+msgid "Settings saved."
+msgstr ""
+
+#: includes/class-bhg-settings.php:20
+msgid "Bonus Hunt - Settings"
+msgstr ""
+
+#: includes/class-bhg-settings.php:25
+msgid "Allow Guess Editing"
+msgstr ""
+
+#: includes/class-bhg-settings.php:26
+msgid "Users can edit their guess while hunt is open."
+msgstr ""
+
+#: includes/class-bhg-settings.php:29
+msgid "Enable Ads"
+msgstr ""
+
+#: includes/class-bhg-settings.php:30
+msgid "Show ads block on selected pages."
+msgstr ""
+
+#: includes/class-bhg-settings.php:33
+msgid "Email From"
+msgstr ""
+
+#: includes/class-bhg-shortcodes.php:36
+msgid "Please log in to continue."
+msgstr ""
+
+#: includes/class-bhg-shortcodes.php:37
+#: includes/class-bhg-shortcodes.php:77
+msgid "Log in"
+msgstr ""
+
+#: includes/class-bhg-shortcodes.php:45
+msgid "No active bonus hunts at the moment."
+msgstr ""
+
+#: includes/class-bhg-shortcodes.php:85
+msgid "No open hunt found to guess."
+msgstr ""
+
+#: includes/class-bhg-shortcodes.php:107
+msgid "Choose a hunt:"
+msgstr ""
+
+#: includes/class-bhg-shortcodes.php:109
+msgid "Select a hunt"
+msgstr ""
+
+#: includes/class-bhg-shortcodes.php:120
+msgid "Your guess (final balance):"
+msgstr ""
+
+#: includes/class-bhg-shortcodes.php:235
+msgid "Tournament not found."
+msgstr ""
+
+#: includes/class-bhg-shortcodes.php:268
+msgid "Back to tournaments"
+msgstr ""
+
+#: includes/class-bhg-shortcodes.php:275
+msgid "No results yet."
+msgstr ""
+
+#: includes/class-bhg-shortcodes.php:285
+msgid "Last win"
+msgstr ""
+
+#: includes/class-bhg-shortcodes.php:326
+msgid "No tournaments found."
+msgstr ""
+
+#: includes/class-bhg-shortcodes.php:337
+msgid "Period:"
+msgstr ""
+
+#: includes/class-bhg-shortcodes.php:339
+#: includes/class-bhg-shortcodes.php:348
+msgid "All"
+msgstr ""
+
+#: includes/class-bhg-shortcodes.php:346
+msgid "Status:"
+msgstr ""
+
+#: includes/class-bhg-shortcodes.php:355
+msgid "Filter"
+msgstr ""
+
+#: includes/class-bhg-shortcodes.php:364
+msgid "Details"
+msgstr ""
+
+#: includes/class-bhg-shortcodes.php:374
+msgid "Show details"
+msgstr ""
+
+#: includes/class-bhg-shortcodes.php:392
+msgid "Final"
+msgstr ""
+
+#: includes/class-bhg-shortcodes.php:404
+msgid "Please log in to view this content."
+msgstr ""
+
+#: includes/class-bhg-shortcodes.php:425
+msgid "Overall"
+msgstr ""
+
+#: includes/class-bhg-shortcodes.php:443
+msgid "All-Time"
+msgstr ""
+
+#: includes/class-bhg-shortcodes.php:504
+msgid "No data yet."
+msgstr ""
+
+#: includes/class-bhg-utils.php:74
+msgid "You do not have permission to access this page"
+msgstr ""
+
+#: includes/helpers.php:93
+msgid "Unknown User"
+msgstr ""
+
+#: includes/helpers.php:100
+msgid "Affiliate User"
+msgstr ""
+
+#: includes/helpers.php:245
+msgid "Bonus Hunt – Demo Open"
+msgstr ""
+
+#: includes/helpers.php:248
+msgid "Gift card + swag"
+msgstr ""
+
+#: includes/helpers.php:258
+msgid "Bonus Hunt – Demo Closed"
+msgstr ""
+
+#: includes/helpers.php:261
+msgid "T-shirt"
+msgstr ""
