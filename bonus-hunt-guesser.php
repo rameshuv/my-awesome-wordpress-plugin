@@ -351,7 +351,7 @@ function bhg_handle_settings_save() {
 	}
 
 	// Verify nonce
-	if ( ! isset( $_POST['bhg_settings_nonce'] ) || ! wp_verify_nonce( $_POST['bhg_settings_nonce'], 'bhg_save_settings_nonce' ) ) {
+        if ( ! isset( $_POST['bhg_settings_nonce'] ) || ! wp_verify_nonce( wp_unslash( $_POST['bhg_settings_nonce'] ), 'bhg_save_settings_nonce' ) ) {
 		wp_safe_redirect( esc_url_raw( admin_url( 'admin.php?page=bhg_settings&error=nonce_failed' ) ) );
 		exit;
 	}
@@ -359,22 +359,22 @@ function bhg_handle_settings_save() {
 	// Sanitize and validate data
 	$settings = array();
 
-	if ( isset( $_POST['bhg_default_tournament_period'] ) ) {
-		$period = sanitize_text_field( $_POST['bhg_default_tournament_period'] );
+        if ( isset( $_POST['bhg_default_tournament_period'] ) ) {
+                $period = sanitize_text_field( wp_unslash( $_POST['bhg_default_tournament_period'] ) );
 		if ( in_array( $period, array( 'weekly', 'monthly', 'quarterly', 'yearly', 'alltime' ) ) ) {
 			$settings['default_tournament_period'] = $period;
 		}
 	}
 
-	if ( isset( $_POST['bhg_max_guess_amount'] ) ) {
-		$max = floatval( $_POST['bhg_max_guess_amount'] );
+        if ( isset( $_POST['bhg_max_guess_amount'] ) ) {
+                $max = floatval( wp_unslash( $_POST['bhg_max_guess_amount'] ) );
 		if ( $max >= 0 ) {
 			$settings['max_guess_amount'] = $max;
 		}
 	}
 
-	if ( isset( $_POST['bhg_min_guess_amount'] ) ) {
-		$min = floatval( $_POST['bhg_min_guess_amount'] );
+        if ( isset( $_POST['bhg_min_guess_amount'] ) ) {
+                $min = floatval( wp_unslash( $_POST['bhg_min_guess_amount'] ) );
 		if ( $min >= 0 ) {
 			$settings['min_guess_amount'] = $min;
 		}
@@ -387,20 +387,20 @@ function bhg_handle_settings_save() {
 		exit;
 	}
 
-	if ( isset( $_POST['bhg_allow_guess_changes'] ) ) {
-		$allow = sanitize_text_field( $_POST['bhg_allow_guess_changes'] );
+        if ( isset( $_POST['bhg_allow_guess_changes'] ) ) {
+                $allow = sanitize_text_field( wp_unslash( $_POST['bhg_allow_guess_changes'] ) );
 		if ( in_array( $allow, array( 'yes', 'no' ) ) ) {
 			$settings['allow_guess_changes'] = $allow;
 		}
 	}
 
-	if ( isset( $_POST['bhg_ads_enabled'] ) ) {
-		$ads_enabled           = sanitize_text_field( $_POST['bhg_ads_enabled'] );
+        if ( isset( $_POST['bhg_ads_enabled'] ) ) {
+                $ads_enabled           = sanitize_text_field( wp_unslash( $_POST['bhg_ads_enabled'] ) );
 		$settings['ads_enabled'] = $ads_enabled === '1' ? 1 : 0;
 	}
 
-	if ( isset( $_POST['bhg_email_from'] ) ) {
-		$email_from = sanitize_email( $_POST['bhg_email_from'] );
+        if ( isset( $_POST['bhg_email_from'] ) ) {
+                $email_from = sanitize_email( wp_unslash( $_POST['bhg_email_from'] ) );
 		if ( $email_from ) {
 			$settings['email_from'] = $email_from;
 		}
