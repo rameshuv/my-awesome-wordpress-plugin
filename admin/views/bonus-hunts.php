@@ -28,9 +28,20 @@ $view = isset( $_GET['view'] ) ? sanitize_text_field( wp_unslash( $_GET['view'] 
 
 /** LIST VIEW */
 if ( 'list' === $view ) :
-	$hunts = $wpdb->get_results(
-		"SELECT * FROM {$hunts_table} ORDER BY id DESC"
-	);
+        $current_page = max( 1, isset( $_GET['paged'] ) ? (int) $_GET['paged'] : 1 );
+        $per_page     = 30;
+        $offset       = ( $current_page - 1 ) * $per_page;
+
+        $hunts = $wpdb->get_results(
+                $wpdb->prepare(
+                        "SELECT * FROM {$hunts_table} ORDER BY id DESC LIMIT %d OFFSET %d",
+                        $per_page,
+                        $offset
+                )
+        );
+
+        $total    = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$hunts_table}" );
+        $base_url = remove_query_arg( [ 'paged' ] );
 ?>
 <div class="wrap">
   <h1 class="wp-heading-inline"><?php echo esc_html__('Bonus Hunts', 'bonus-hunt-guesser'); ?></h1>
@@ -72,9 +83,27 @@ if ( 'list' === $view ) :
 			<?php endif; ?>
 		  </td>
 		</tr>
-	  <?php endforeach; endif; ?>
-	</tbody>
+          <?php endforeach; endif; ?>
+        </tbody>
   </table>
+
+  <?php
+        $total_pages = (int) ceil( $total / $per_page );
+        if ( $total_pages > 1 ) {
+                echo '<div class="tablenav"><div class="tablenav-pages">';
+                echo paginate_links(
+                        [
+                                'base'      => add_query_arg( 'paged', '%#%', $base_url ),
+                                'format'    => '',
+                                'prev_text' => '&laquo;',
+                                'next_text' => '&raquo;',
+                                'total'     => $total_pages,
+                                'current'   => $current_page,
+                        ]
+                );
+                echo '</div></div>';
+        }
+  ?>
 </div>
 <?php endif; ?>
 
