@@ -252,13 +252,17 @@ if ( ! function_exists( 'bhg_seed_default_translations_if_empty' ) ) {
 }
 
 /**
- * Format an amount as Euro currency.
+ * Format an amount as currency.
+ *
+ * Allows the currency symbol to be customized via the `bhg_currency_symbol` filter.
  *
  * @param float $amount Amount to format.
  * @return string
  */
 function bhg_format_currency( $amount ) {
-	return '€' . number_format( $amount, 2 );
+	$symbol = apply_filters( 'bhg_currency_symbol', '€' );
+
+	return sprintf( '%s%s', $symbol, number_format_i18n( $amount, 2 ) );
 }
 
 /**
