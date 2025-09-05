@@ -120,8 +120,9 @@ class BHG_Shortcodes {
             <label for="bhg-guess" style="display:block;margin-top:10px;"><?php esc_html_e('Your guess (final balance):', 'bonus-hunt-guesser'); ?></label>
             <input type="number" step="0.01" min="<?php echo esc_attr($min); ?>" max="<?php echo esc_attr($max); ?>"
                    id="bhg-guess" name="guess" value="<?php echo esc_attr($existing_guess); ?>" required>
-
-            <button type="submit" class="button button-primary" style="margin-top:20px;"><?php echo esc_html__('Submit Guess', 'bonus-hunt-guesser'); ?></button>
+            <div class="bhg-error-message" style="color:#dc2626;margin-top:10px;display:none;"></div>
+            <button type="submit" class="bhg-submit-btn button button-primary" style="margin-top:20px;">
+                <?php echo esc_html__('Submit Guess', 'bonus-hunt-guesser'); ?></button>
         </form>
         <?php
         return ob_get_clean();

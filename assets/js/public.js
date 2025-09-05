@@ -76,7 +76,7 @@ jQuery(document).ready(function($) {
                     action: 'submit_bhg_guess',
                     nonce: bhg_nonce,
                     guess_amount: guessValue,
-                    hunt_id: form.find('input[name="hunt_id"]').val()
+                    hunt_id: form.find('[name="hunt_id"]').val()
                 },
                 success: function(response) {
                     if (response.success) {
