@@ -180,7 +180,11 @@ function bhg_activate_plugin( $network_wide ) {
     }
 
     bhg_create_tables();
-    
+
+    if ( function_exists( 'bhg_seed_default_translations_if_empty' ) ) {
+        bhg_seed_default_translations_if_empty();
+    }
+
     // Set default options
     add_option('bhg_version', BHG_VERSION);
     add_option('bhg_plugin_settings', [

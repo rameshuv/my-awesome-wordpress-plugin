@@ -103,6 +103,48 @@ if ( ! function_exists( 'bhg_t' ) ) {
     }
 }
 
+if ( ! function_exists( 'bhg_get_default_translations' ) ) {
+    /**
+     * Retrieve default translation key/value pairs.
+     *
+     * @return array
+     */
+    function bhg_get_default_translations() {
+        return array(
+            'welcome_message' => 'Welcome!',
+            'goodbye_message' => 'Goodbye!',
+        );
+    }
+}
+
+if ( ! function_exists( 'bhg_seed_default_translations_if_empty' ) ) {
+    /**
+     * Seed default translations if the table is empty.
+     *
+     * @return void
+     */
+    function bhg_seed_default_translations_if_empty() {
+        global $wpdb;
+
+        $table = $wpdb->prefix . 'bhg_translations';
+        $count = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$table}" );
+
+        if ( 0 === $count ) {
+            foreach ( bhg_get_default_translations() as $tkey => $tvalue ) {
+                $wpdb->insert(
+                    $table,
+                    array(
+                        'tkey'   => $tkey,
+                        'tvalue' => $tvalue,
+                        'locale' => get_locale(),
+                    ),
+                    array( '%s', '%s', '%s' )
+                );
+            }
+        }
+    }
+}
+
 /**
  * Format an amount as Euro currency.
  *
