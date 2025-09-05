@@ -512,11 +512,11 @@ function bhg_handle_settings_save() {
 function bhg_handle_bonus_hunt_save() {
     // Verify nonce
     if (!isset($_POST['_wpnonce']) || !wp_verify_nonce($_POST['_wpnonce'], 'bhg_form_nonce')) {
-        wp_die('Security check failed');
+        wp_die( esc_html__( 'Security check failed', 'bonus-hunt-guesser' ) );
     }
-    
+
     if (!current_user_can('manage_options')) {
-        wp_die('Access denied');
+        wp_die( esc_html__( 'Access denied', 'bonus-hunt-guesser' ) );
     }
     
     // Process form data
@@ -559,7 +559,7 @@ function bhg_handle_bonus_hunt_save() {
  * @return void
  */
 function bhg_handle_bonus_hunt_save_unauth() {
-    wp_die('You must be logged in to submit this form');
+    wp_die( esc_html__( 'You must be logged in to submit this form', 'bonus-hunt-guesser' ) );
 }
 
 // Form handler for guess submission (frontend)
