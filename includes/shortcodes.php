@@ -72,10 +72,16 @@ add_shortcode('bhg_active_hunt', function($atts) {
     
     <div class="bhg-box">
         <form method="get" class="bhg-field">
-            <?php foreach ($_GET as $k => $v): 
-                if ($k === 'status') continue; ?>
-                <input type="hidden" name="<?php echo esc_attr($k); ?>" value="<?php echo esc_attr($v); ?>">
-            <?php endforeach; ?>
+            <?php
+            // Preserve only allowed query vars when changing the status filter.
+            $bhg_allowed_query_vars = array( 'status', 'paged' );
+            foreach ( $_GET as $k => $v ) {
+                if ( 'status' === $k || ! in_array( $k, $bhg_allowed_query_vars, true ) ) {
+                    continue;
+                }
+                ?>
+                <input type="hidden" name="<?php echo esc_attr( $k ); ?>" value="<?php echo esc_attr( $v ); ?>">
+            <?php } ?>
             
             <label><?php esc_html_e('Filter', 'bonus-hunt-guesser'); ?></label>
             <select name="status" onchange="this.form.submit()">
