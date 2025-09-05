@@ -724,7 +724,8 @@ function bhg_generate_leaderboard_html( $timeframe ) {
 
 	$pos = $offset + 1;
 	foreach ( $rows as $row ) {
-		$user_label = $row->user_login ? $row->user_login : 'user#' . (int) $row->user_id;
+               /* translators: %d: user ID. */
+               $user_label = $row->user_login ? $row->user_login : sprintf( __( 'user#%d', 'bonus-hunt-guesser' ), (int) $row->user_id );
 		echo '<tr>';
 		echo '<td>' . (int) $pos++ . '</td>';
 		echo '<td>' . esc_html( $user_label ) . '</td>';

@@ -207,7 +207,8 @@ class BHG_Shortcodes {
 				? (int)get_user_meta((int)$r->user_id, 'bhg_affiliate_website_' . $site_id, true)
 				: (int)get_user_meta((int)$r->user_id, 'bhg_is_affiliate', true);
 			$aff = $is_aff ? 'green' : 'red';
-			$user_label = $r->user_login ? $r->user_login : ('user#' . (int)$r->user_id);
+                       /* translators: %d: user ID. */
+                       $user_label = $r->user_login ? $r->user_login : sprintf( __( 'user#%d', 'bonus-hunt-guesser' ), (int) $r->user_id );
 
 			echo '<tr>';
 			echo '<td data-column="position">' . (int)$pos++ . '</td>';
@@ -577,7 +578,11 @@ class BHG_Shortcodes {
 			foreach ($rows as $row) {
 				echo '<tr>';
 				echo '<td style="padding:6px;border-bottom:1px solid #f1f5f9;">' . (int)$pos++ . '</td>';
-				echo '<td style="padding:6px;border-bottom:1px solid #f1f5f9;">' . esc_html($row->user_login ?: ('user#' . (int)$row->user_id)) . '</td>';
+                               echo '<td style="padding:6px;border-bottom:1px solid #f1f5f9;">' . esc_html( $row->user_login ?: sprintf(
+                                       /* translators: %d: user ID. */
+                                       __( 'user#%d', 'bonus-hunt-guesser' ),
+                                       (int) $row->user_id
+                               ) ) . '</td>';
 				echo '<td style="padding:6px;border-bottom:1px solid #f1f5f9;">' . (int)$row->wins . '</td>';
 				echo '<td style="padding:6px;border-bottom:1px solid #f1f5f9;">' . esc_html($row->last_win_date ? mysql2date(get_option('date_format'), $row->last_win_date) : '—') . '</td>';
 				echo '</tr>';
@@ -868,7 +873,8 @@ class BHG_Shortcodes {
 				echo '<table class="bhg-leaderboard"><thead><tr><th>#</th><th>' . esc_html__('User', 'bonus-hunt-guesser') . '</th><th>' . esc_html__('Wins', 'bonus-hunt-guesser') . '</th></tr></thead><tbody>';
 				$pos = 1;
 				foreach ($rows as $r) {
-					$user_label = $r->user_login ? $r->user_login : 'user#' . (int) $r->user_id;
+                                       /* translators: %d: user ID. */
+                                       $user_label = $r->user_login ? $r->user_login : sprintf( __( 'user#%d', 'bonus-hunt-guesser' ), (int) $r->user_id );
 					echo '<tr><td>' . (int) $pos++ . '</td><td>' . esc_html($user_label) . '</td><td>' . (int) $r->total_wins . '</td></tr>';
 				}
 				echo '</tbody></table>';

@@ -293,7 +293,8 @@ if ($view === 'edit') :
 		<tr>
 		  <td>
 			<?php
-			  $name = $g->display_name ? $g->display_name : ('user#' . (int)$g->user_id);
+                          /* translators: %d: user ID. */
+                          $name = $g->display_name ? $g->display_name : sprintf( __( 'user#%d', 'bonus-hunt-guesser' ), (int) $g->user_id );
 			  $url  = admin_url('user-edit.php?user_id=' . (int)$g->user_id);
 			  echo '<a href="' . esc_url($url) . '">' . esc_html($name) . '</a>';
 			?>
