@@ -94,10 +94,18 @@ $ads = $wpdb->get_results(
           <td>
             <select id="bhg_ad_place" name="placement">
               <?php
-                $opts = ['none','footer','bottom','sidebar','shortcode'];
-                $sel  = $ad ? ($ad->placement ?? 'none') : 'none';
-                foreach ($opts as $o) {
-                    echo '<option value="'.esc_attr($o).'" '.selected($sel, $o, false).'>'.esc_html(ucfirst($o)).'</option>';
+                $placement_opts   = ['none', 'footer', 'bottom', 'sidebar', 'shortcode'];
+                $placement_labels = [
+                    'none'      => __('None', 'bonus-hunt-guesser'),
+                    'footer'    => __('Footer', 'bonus-hunt-guesser'),
+                    'bottom'    => __('Bottom', 'bonus-hunt-guesser'),
+                    'sidebar'   => __('Sidebar', 'bonus-hunt-guesser'),
+                    'shortcode' => __('Shortcode', 'bonus-hunt-guesser'),
+                ];
+                $sel = $ad ? ($ad->placement ?? 'none') : 'none';
+                foreach ( $placement_opts as $o ) {
+                    $label = $placement_labels[ $o ] ?? $o;
+                    echo '<option value="' . esc_attr( $o ) . '" ' . selected( $sel, $o, false ) . '>' . esc_html( $label ) . '</option>';
                 }
               ?>
             </select>
@@ -108,10 +116,18 @@ $ads = $wpdb->get_results(
           <td>
             <select id="bhg_ad_vis" name="visible_to">
               <?php
-                $opts = ['all','guests','logged_in','affiliates','non_affiliates'];
-                $sel  = $ad ? ($ad->visible_to ?? 'all') : 'all';
-                foreach ($opts as $o) {
-                    echo '<option value="'.esc_attr($o).'" '.selected($sel, $o, false).'>'.esc_html(ucfirst(str_replace('_',' ', $o))).'</option>';
+                $visible_opts   = ['all', 'guests', 'logged_in', 'affiliates', 'non_affiliates'];
+                $visible_labels = [
+                    'all'            => __('All', 'bonus-hunt-guesser'),
+                    'guests'         => __('Guests', 'bonus-hunt-guesser'),
+                    'logged_in'      => __('Logged In', 'bonus-hunt-guesser'),
+                    'affiliates'     => __('Affiliates', 'bonus-hunt-guesser'),
+                    'non_affiliates' => __('Non Affiliates', 'bonus-hunt-guesser'),
+                ];
+                $sel = $ad ? ($ad->visible_to ?? 'all') : 'all';
+                foreach ( $visible_opts as $o ) {
+                    $label = $visible_labels[ $o ] ?? $o;
+                    echo '<option value="' . esc_attr( $o ) . '" ' . selected( $sel, $o, false ) . '>' . esc_html( $label ) . '</option>';
                 }
               ?>
             </select>
