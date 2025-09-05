@@ -236,13 +236,18 @@ class BHG_Shortcodes {
 		if ( $pages > 1 ) {
                         $base = wp_validate_redirect( wp_unslash( $_SERVER['REQUEST_URI'] ), home_url( '/' ) );
                         $base = esc_url_raw( remove_query_arg( 'page', $base ) );
-			echo '<div class="bhg-pagination">';
-			for ( $p = 1; $p <= $pages; $p++ ) {
-$class = $p == $page ? ' class="bhg-current-page"' : '';
-echo '<a' . $class . ' href="' . esc_url( add_query_arg( array( 'page' => $p ), $base ) ) . '">' . (int) $p . '</a> ';
-			}
-			echo '</div>';
-		}
+                        echo '<div class="bhg-pagination">';
+                        for ( $p = 1; $p <= $pages; $p++ ) {
+                                $class = $p == $page ? 'bhg-current-page' : '';
+                                printf(
+                                        '<a class="%1$s" href="%2$s">%3$s</a> ',
+                                        esc_attr( $class ),
+                                        esc_url( add_query_arg( array( 'page' => $p ), $base ) ),
+                                        esc_html( $p )
+                                );
+                        }
+                        echo '</div>';
+                }
 
 			   return ob_get_clean();
 	   }
@@ -332,9 +337,9 @@ echo '<a' . $class . ' href="' . esc_url( add_query_arg( array( 'page' => $p ), 
 					   echo '<td>' . esc_html( $row->title ) . '</td>';
 					   $guess_cell = esc_html( number_format_i18n( (float) $row->guess, 2 ) );
 					   if ( $show_aff ) {
-							   $guess_cell = bhg_render_affiliate_dot( $user_id, (int) $row->affiliate_site_id ) . $guess_cell;
-					   }
-					   echo '<td>' . $guess_cell . '</td>';
+                                           $guess_cell = bhg_render_affiliate_dot( $user_id, (int) $row->affiliate_site_id ) . $guess_cell;
+                                           }
+                                           echo '<td>' . wp_kses_post( $guess_cell ) . '</td>';
 					   echo '<td>';
                                            echo isset( $row->final_balance ) ? esc_html( number_format_i18n( (float) $row->final_balance, 2 ) ) : esc_html__( '&mdash;', 'bonus-hunt-guesser' );
 					   echo '</td>';
@@ -497,13 +502,13 @@ echo '<a' . $class . ' href="' . esc_url( add_query_arg( array( 'page' => $p ), 
 			   foreach ( $hunts as $hunt ) {
 					   echo '<div class="bhg-leaderboard-wrap">';
 					   echo '<h3>' . esc_html( $hunt->title ) . '</h3>';
-					   $html = $this->leaderboard_shortcode( array( 'hunt_id' => (int) $hunt->id ) );
-					   if ( ! $show_aff ) {
-							   $html = preg_replace( '/<span class="bhg-aff-dot[^>]*><\/span>/', '', $html );
-					   }
-					   echo $html;
-					   echo '</div>';
-			   }
+                                           $html = $this->leaderboard_shortcode( array( 'hunt_id' => (int) $hunt->id ) );
+                                           if ( ! $show_aff ) {
+                                                           $html = preg_replace( '/<span class="bhg-aff-dot[^>]*><\/span>/', '', $html );
+                                           }
+                                           echo wp_kses_post( $html );
+                                           echo '</div>';
+                           }
 			   return ob_get_clean();
 	   }
 
@@ -591,9 +596,9 @@ echo '<h3>' . esc_html(ucfirst($tournament->type)) . '</h3>';
 echo '<table class="bhg-leaderboard">';
 echo '<thead><tr>';
 echo '<th>#</th>';
-echo '<th><a href="' . $toggle('username') . '">' . esc_html__('Username', 'bonus-hunt-guesser') . '</a></th>';
-echo '<th><a href="' . $toggle('wins') . '">' . esc_html__('Wins', 'bonus-hunt-guesser') . '</a></th>';
-echo '<th><a href="' . $toggle('last_win_at') . '">' . esc_html__('Last win', 'bonus-hunt-guesser') . '</a></th>';
+echo '<th><a href="' . esc_url( $toggle( 'username' ) ) . '">' . esc_html__( 'Username', 'bonus-hunt-guesser' ) . '</a></th>';
+echo '<th><a href="' . esc_url( $toggle( 'wins' ) ) . '">' . esc_html__( 'Wins', 'bonus-hunt-guesser' ) . '</a></th>';
+echo '<th><a href="' . esc_url( $toggle( 'last_win_at' ) ) . '">' . esc_html__( 'Last win', 'bonus-hunt-guesser' ) . '</a></th>';
 echo '</tr></thead><tbody>';
 
 			$pos = 1;
@@ -712,7 +717,7 @@ echo '<td>' . esc_html(ucfirst($row->type)) . '</td>';
 echo '<td>' . esc_html(mysql2date(get_option('date_format'), $row->start_date)) . '</td>';
 echo '<td>' . esc_html(mysql2date(get_option('date_format'), $row->end_date)) . '</td>';
 echo '<td>' . esc_html($row->status) . '</td>';
-echo '<td><a href="' . $detail_url . '">' . esc_html__('Show details','bonus-hunt-guesser') . '</a></td>';
+echo '<td><a href="' . esc_url( $detail_url ) . '">' . esc_html__( 'Show details', 'bonus-hunt-guesser' ) . '</a></td>';
 			echo '</tr>';
 		}
 
@@ -881,38 +886,36 @@ echo '<td><a href="' . $detail_url . '">' . esc_html__('Show details','bonus-hun
 		);
 
 		ob_start();
-		echo '<ul class="bhg-tabs">';
-		$first = true;
-		foreach ($periods as $key => $info) {
-			$active = $first ? ' class="active"' : '';
-			echo '<li' . $active . '><a href="#bhg-tab-' . esc_attr($key) . '">' . esc_html($info['label']) . '</a></li>';
-			$first = false;
-		}
-		if ($hunts) {
+                echo '<ul class="bhg-tabs">';
+                $first = true;
+                foreach ( $periods as $key => $info ) {
+                        echo '<li' . ( $first ? ' class="active"' : '' ) . '><a href="#bhg-tab-' . esc_attr( $key ) . '">' . esc_html( $info['label'] ) . '</a></li>';
+                        $first = false;
+                }
+                if ($hunts) {
 			echo '<li><a href="#bhg-tab-hunts">' . esc_html__('Bonus Hunts', 'bonus-hunt-guesser') . '</a></li>';
 		}
 		echo '</ul>';
 
-		$first = true;
-		foreach ($periods as $key => $info) {
-			$active = $first ? ' active' : '';
-			echo '<div id="bhg-tab-' . esc_attr($key) . '" class="bhg-tab-pane' . $active . '">';
-			$rows = isset($results[$key]) ? $results[$key] : array();
-			if (!$rows) {
-				echo '<p>' . esc_html__('No data yet.', 'bonus-hunt-guesser') . '</p>';
-			} else {
-				echo '<table class="bhg-leaderboard"><thead><tr><th>#</th><th>' . esc_html__('User', 'bonus-hunt-guesser') . '</th><th>' . esc_html__('Wins', 'bonus-hunt-guesser') . '</th></tr></thead><tbody>';
-				$pos = 1;
-				foreach ($rows as $r) {
+                $first = true;
+                foreach ( $periods as $key => $info ) {
+                        echo '<div id="bhg-tab-' . esc_attr( $key ) . '" class="bhg-tab-pane' . ( $first ? ' active' : '' ) . '">';
+                        $rows = isset( $results[ $key ] ) ? $results[ $key ] : array();
+                        if ( ! $rows ) {
+                                echo '<p>' . esc_html__( 'No data yet.', 'bonus-hunt-guesser' ) . '</p>';
+                        } else {
+                                echo '<table class="bhg-leaderboard"><thead><tr><th>#</th><th>' . esc_html__( 'User', 'bonus-hunt-guesser' ) . '</th><th>' . esc_html__( 'Wins', 'bonus-hunt-guesser' ) . '</th></tr></thead><tbody>';
+                                $pos = 1;
+                                foreach ( $rows as $r ) {
                                        /* translators: %d: user ID. */
                                        $user_label = $r->user_login ? $r->user_login : sprintf( __( 'user#%d', 'bonus-hunt-guesser' ), (int) $r->user_id );
-					echo '<tr><td>' . (int) $pos++ . '</td><td>' . esc_html($user_label) . '</td><td>' . (int) $r->total_wins . '</td></tr>';
-				}
-				echo '</tbody></table>';
-			}
-			echo '</div>';
-			$first = false;
-		}
+                                        echo '<tr><td>' . (int) $pos++ . '</td><td>' . esc_html( $user_label ) . '</td><td>' . (int) $r->total_wins . '</td></tr>';
+                                }
+                                echo '</tbody></table>';
+                        }
+                        echo '</div>';
+                        $first = false;
+                }
 
 		if ( $hunts ) {
                        $base = wp_validate_redirect( wp_unslash( $_SERVER['REQUEST_URI'] ), home_url( '/' ) );
@@ -920,9 +923,9 @@ echo '<td><a href="' . $detail_url . '">' . esc_html__('Show details','bonus-hun
 			echo '<div id="bhg-tab-hunts" class="bhg-tab-pane">';
 			echo '<ul class="bhg-hunt-history">';
 			foreach ( $hunts as $hunt ) {
-				$url = esc_url( add_query_arg( 'hunt_id', (int) $hunt->id, $base ) );
-				echo '<li><a href="' . $url . '">' . esc_html( $hunt->title ) . '</a></li>';
-			}
+                                $url = add_query_arg( 'hunt_id', (int) $hunt->id, $base );
+                                echo '<li><a href="' . esc_url( $url ) . '">' . esc_html( $hunt->title ) . '</a></li>';
+                        }
 			echo '</ul>';
 			echo '</div>';
 		}
