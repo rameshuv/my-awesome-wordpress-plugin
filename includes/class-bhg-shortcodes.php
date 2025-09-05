@@ -36,7 +36,8 @@ class BHG_Shortcodes {
             return '';
         }
 
-        $redirect = home_url( add_query_arg( [], wp_unslash( $_SERVER['REQUEST_URI'] ) ) );
+        $base     = home_url( wp_unslash( $_SERVER['REQUEST_URI'] ) );
+        $redirect = add_query_arg( array(), $base );
 
         return '<p>' . esc_html__( 'Please log in to continue.', 'bonus-hunt-guesser' ) . '</p>'
              . '<p><a class="button button-primary" href="' . esc_url( wp_login_url( $redirect ) ) . '">' . esc_html__( 'Log in', 'bonus-hunt-guesser' ) . '</a></p>';
@@ -74,7 +75,8 @@ class BHG_Shortcodes {
         $hunt_id = (int) $atts['hunt_id'];
 
         if ( ! is_user_logged_in() ) {
-            $redirect = home_url( add_query_arg( [], wp_unslash( $_SERVER['REQUEST_URI'] ) ) );
+            $base     = home_url( wp_unslash( $_SERVER['REQUEST_URI'] ) );
+            $redirect = add_query_arg( array(), $base );
 
             return '<p>' . esc_html__( 'Please log in to submit your guess.', 'bonus-hunt-guesser' ) . '</p>'
                  . '<p><a class="button button-primary" href="' . esc_url( wp_login_url( $redirect ) ) . '">' . esc_html__( 'Log in', 'bonus-hunt-guesser' ) . '</a></p>';
@@ -206,12 +208,13 @@ class BHG_Shortcodes {
         echo '</tbody></table>';
         echo '<style>.bhg-aff-dot{display:inline-block;width:10px;height:10px;border-radius:50%;vertical-align:middle;margin-left:6px}.bhg-aff-green{background:#1f9d55}.bhg-aff-red{background:#e3342f}</style>';
 
-        $pages = (int)ceil($total / $per);
-        if ($pages > 1) {
+        $pages = (int) ceil( $total / $per );
+        if ( $pages > 1 ) {
+            $base = remove_query_arg( 'page', home_url( wp_unslash( $_SERVER['REQUEST_URI'] ) ) );
             echo '<div class="bhg-pagination">';
-            for ($p=1; $p <= $pages; $p++) {
+            for ( $p = 1; $p <= $pages; $p++ ) {
                 $is = $p == $page ? ' style="font-weight:bold;"' : '';
-                echo '<a'.$is.' href="' . esc_url(add_query_arg(array('page'=>$p))) . '">' . (int)$p . '</a> ';
+                echo '<a' . $is . ' href="' . esc_url( add_query_arg( array( 'page' => $p ), $base ) ) . '">' . (int) $p . '</a> ';
             }
             echo '</div>';
         }
@@ -548,12 +551,13 @@ class BHG_Shortcodes {
             $first = false;
         }
 
-        if ($hunts) {
+        if ( $hunts ) {
+            $base = remove_query_arg( 'hunt_id', home_url( wp_unslash( $_SERVER['REQUEST_URI'] ) ) );
             echo '<div id="bhg-tab-hunts" class="bhg-tab-pane">';
             echo '<ul class="bhg-hunt-history">';
-            foreach ($hunts as $hunt) {
-                $url = esc_url(add_query_arg('hunt_id', (int) $hunt->id));
-                echo '<li><a href="' . $url . '">' . esc_html($hunt->title) . '</a></li>';
+            foreach ( $hunts as $hunt ) {
+                $url = esc_url( add_query_arg( 'hunt_id', (int) $hunt->id, $base ) );
+                echo '<li><a href="' . $url . '">' . esc_html( $hunt->title ) . '</a></li>';
             }
             echo '</ul>';
             echo '</div>';
