@@ -169,7 +169,7 @@ class BHG_Admin {
         check_admin_referer( 'bhg_delete_guess' );
         global $wpdb;
         $guesses_table = $wpdb->prefix . 'bhg_guesses';
-        $guess_id      = isset( $_POST['guess_id'] ) ? (int) $_POST['guess_id'] : 0;
+        $guess_id      = isset( $_POST['guess_id'] ) ? absint( wp_unslash( $_POST['guess_id'] ) ) : 0;
         if ( $guess_id ) {
             $wpdb->delete( $guesses_table, [ 'id' => $guess_id ], [ '%d' ] );
         }
@@ -188,15 +188,15 @@ class BHG_Admin {
         global $wpdb;
         $hunts_table = $wpdb->prefix . 'bhg_bonus_hunts';
 
-        $id             = isset($_POST['id']) ? (int) $_POST['id'] : 0;
-        $title          = isset($_POST['title']) ? sanitize_text_field(wp_unslash($_POST['title'])) : '';
-        $starting       = isset($_POST['starting_balance']) ? (float) $_POST['starting_balance'] : 0;
-        $num_bonuses    = isset($_POST['num_bonuses']) ? (int) $_POST['num_bonuses'] : 0;
-        $prizes         = isset($_POST['prizes']) ? wp_kses_post(wp_unslash($_POST['prizes'])) : '';
-        $winners_count  = isset($_POST['winners_count']) ? max(1, (int) $_POST['winners_count']) : 3;
-        $affiliate_site = isset($_POST['affiliate_site_id']) ? (int) $_POST['affiliate_site_id'] : 0;
-        $final_balance  = (isset($_POST['final_balance']) && $_POST['final_balance'] !== '') ? (float) $_POST['final_balance'] : null;
-        $status         = isset($_POST['status']) ? sanitize_text_field($_POST['status']) : 'open';
+        $id             = isset( $_POST['id'] ) ? absint( wp_unslash( $_POST['id'] ) ) : 0;
+        $title          = isset( $_POST['title'] ) ? sanitize_text_field( wp_unslash( $_POST['title'] ) ) : '';
+        $starting       = isset( $_POST['starting_balance'] ) ? floatval( wp_unslash( $_POST['starting_balance'] ) ) : 0;
+        $num_bonuses    = isset( $_POST['num_bonuses'] ) ? absint( wp_unslash( $_POST['num_bonuses'] ) ) : 0;
+        $prizes         = isset( $_POST['prizes'] ) ? wp_kses_post( wp_unslash( $_POST['prizes'] ) ) : '';
+        $winners_count  = isset( $_POST['winners_count'] ) ? max( 1, absint( wp_unslash( $_POST['winners_count'] ) ) ) : 3;
+        $affiliate_site = isset( $_POST['affiliate_site_id'] ) ? absint( wp_unslash( $_POST['affiliate_site_id'] ) ) : 0;
+        $final_balance  = ( isset( $_POST['final_balance'] ) && $_POST['final_balance'] !== '' ) ? floatval( wp_unslash( $_POST['final_balance'] ) ) : null;
+        $status         = isset( $_POST['status'] ) ? sanitize_text_field( wp_unslash( $_POST['status'] ) ) : 'open';
 
         $data = [
             'title'            => $title,
@@ -292,7 +292,7 @@ class BHG_Admin {
         }
         check_admin_referer( 'bhg_close_hunt' );
 
-        $hunt_id            = isset( $_POST['hunt_id'] ) ? (int) $_POST['hunt_id'] : 0;
+        $hunt_id            = isset( $_POST['hunt_id'] ) ? absint( wp_unslash( $_POST['hunt_id'] ) ) : 0;
         $final_balance_raw  = isset( $_POST['final_balance'] ) ? sanitize_text_field( wp_unslash( $_POST['final_balance'] ) ) : '';
 
         if ( '' === $final_balance_raw || ! is_numeric( $final_balance_raw ) || (float) $final_balance_raw < 0 ) {
@@ -321,13 +321,13 @@ class BHG_Admin {
         global $wpdb;
         $table = $wpdb->prefix . 'bhg_ads';
 
-        $id       = isset($_POST['id']) ? (int) $_POST['id'] : 0;
-        $title    = isset($_POST['title']) ? sanitize_text_field(wp_unslash($_POST['title'])) : '';
-        $content  = isset($_POST['content']) ? wp_kses_post(wp_unslash($_POST['content'])) : '';
-        $link     = isset($_POST['link_url']) ? esc_url_raw(wp_unslash($_POST['link_url'])) : '';
-        $place    = isset($_POST['placement']) ? sanitize_text_field($_POST['placement']) : 'none';
-        $visible  = isset($_POST['visible_to']) ? sanitize_text_field($_POST['visible_to']) : 'all';
-        $targets  = isset($_POST['target_pages']) ? sanitize_text_field(wp_unslash($_POST['target_pages'])) : '';
+        $id       = isset( $_POST['id'] ) ? absint( wp_unslash( $_POST['id'] ) ) : 0;
+        $title    = isset( $_POST['title'] ) ? sanitize_text_field( wp_unslash( $_POST['title'] ) ) : '';
+        $content  = isset( $_POST['content'] ) ? wp_kses_post( wp_unslash( $_POST['content'] ) ) : '';
+        $link     = isset( $_POST['link_url'] ) ? esc_url_raw( wp_unslash( $_POST['link_url'] ) ) : '';
+        $place    = isset( $_POST['placement'] ) ? sanitize_text_field( wp_unslash( $_POST['placement'] ) ) : 'none';
+        $visible  = isset( $_POST['visible_to'] ) ? sanitize_text_field( wp_unslash( $_POST['visible_to'] ) ) : 'all';
+        $targets  = isset( $_POST['target_pages'] ) ? sanitize_text_field( wp_unslash( $_POST['target_pages'] ) ) : '';
         $active   = isset($_POST['active']) ? 1 : 0;
 
         $data = [
@@ -368,7 +368,7 @@ class BHG_Admin {
         }
         global $wpdb;
         $t  = $wpdb->prefix . 'bhg_tournaments';
-        $id = isset( $_POST['id'] ) ? (int) $_POST['id'] : 0;
+        $id = isset( $_POST['id'] ) ? absint( wp_unslash( $_POST['id'] ) ) : 0;
         $data = [
             'title'       => isset( $_POST['title'] ) ? sanitize_text_field( wp_unslash( $_POST['title'] ) ) : '',
             'description' => isset( $_POST['description'] ) ? wp_kses_post( wp_unslash( $_POST['description'] ) ) : '',
@@ -408,10 +408,10 @@ class BHG_Admin {
         check_admin_referer( 'bhg_save_affiliate' );
         global $wpdb;
         $table = $wpdb->prefix . 'bhg_affiliates';
-        $id    = isset($_POST['id']) ? (int) $_POST['id'] : 0;
-        $name  = isset($_POST['name']) ? sanitize_text_field(wp_unslash($_POST['name'])) : '';
-        $url   = isset($_POST['url']) ? esc_url_raw(wp_unslash($_POST['url'])) : '';
-        $status= isset($_POST['status']) ? sanitize_text_field(wp_unslash($_POST['status'])) : 'active';
+        $id    = isset( $_POST['id'] ) ? absint( wp_unslash( $_POST['id'] ) ) : 0;
+        $name  = isset( $_POST['name'] ) ? sanitize_text_field( wp_unslash( $_POST['name'] ) ) : '';
+        $url   = isset( $_POST['url'] ) ? esc_url_raw( wp_unslash( $_POST['url'] ) ) : '';
+        $status= isset( $_POST['status'] ) ? sanitize_text_field( wp_unslash( $_POST['status'] ) ) : 'active';
 
         $data = ['name'=>$name, 'url'=>$url, 'status'=>$status, 'updated_at'=> current_time('mysql')];
         $format = ['%s','%s','%s','%s'];
@@ -436,8 +436,10 @@ class BHG_Admin {
         check_admin_referer( 'bhg_delete_affiliate' );
         global $wpdb;
         $table = $wpdb->prefix . 'bhg_affiliates';
-        $id = isset($_POST['id']) ? (int) $_POST['id'] : 0;
-        if ($id) { $wpdb->delete($table, ['id'=>$id], ['%d']); }
+        $id = isset( $_POST['id'] ) ? absint( wp_unslash( $_POST['id'] ) ) : 0;
+        if ( $id ) {
+            $wpdb->delete( $table, [ 'id' => $id ], [ '%d' ] );
+        }
         wp_safe_redirect(admin_url('admin.php?page=bhg-affiliates'));
         exit;
     }
@@ -451,8 +453,8 @@ class BHG_Admin {
         }
         check_admin_referer( 'bhg_save_settings' );
         $opts = [
-            'allow_guess_edit_until_close' => isset($_POST['allow_guess_edit_until_close']) ? 'yes' : 'no',
-            'guesses_max' => isset($_POST['guesses_max']) ? max(1, (int) $_POST['guesses_max']) : 1,
+            'allow_guess_edit_until_close' => isset( $_POST['allow_guess_edit_until_close'] ) ? 'yes' : 'no',
+            'guesses_max' => isset( $_POST['guesses_max'] ) ? max( 1, absint( wp_unslash( $_POST['guesses_max'] ) ) ) : 1,
         ];
         foreach ($opts as $k => $v) {
             update_option('bhg_' . $k, $v, false);
@@ -469,7 +471,7 @@ class BHG_Admin {
             wp_die( esc_html__( 'No permission', 'bonus-hunt-guesser' ) );
         }
         check_admin_referer( 'bhg_save_user_meta' );
-        $user_id = isset( $_POST['user_id'] ) ? (int) $_POST['user_id'] : 0;
+        $user_id = isset( $_POST['user_id'] ) ? absint( wp_unslash( $_POST['user_id'] ) ) : 0;
         if ( $user_id ) {
             $real_name    = isset( $_POST['bhg_real_name'] ) ? sanitize_text_field( wp_unslash( $_POST['bhg_real_name'] ) ) : '';
             $is_affiliate = isset( $_POST['bhg_is_affiliate'] ) ? 1 : 0;
