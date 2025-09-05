@@ -727,11 +727,15 @@ add_action('wp_ajax_nopriv_bhg_load_leaderboard', 'bhg_load_leaderboard_ajax');
 function bhg_load_leaderboard_ajax() {
     check_ajax_referer('bhg_public_nonce', 'nonce');
     
-    if (!isset($_POST['timeframe'])) {
-        wp_send_json_error('Invalid timeframe');
+    if ( ! isset( $_POST['timeframe'] ) ) {
+        wp_send_json_error( __( 'Invalid timeframe', 'bonus-hunt-guesser' ) );
     }
-    
-    $timeframe = sanitize_text_field($_POST['timeframe']);
+
+    $timeframe = sanitize_text_field( wp_unslash( $_POST['timeframe'] ) );
+    $allowed_timeframes = array( 'overall', 'monthly', 'yearly', 'alltime' );
+    if ( ! in_array( $timeframe, $allowed_timeframes, true ) ) {
+        wp_send_json_error( __( 'Invalid timeframe', 'bonus-hunt-guesser' ) );
+    }
     
     // Generate leaderboard HTML based on timeframe
     $html = bhg_generate_leaderboard_html($timeframe);
