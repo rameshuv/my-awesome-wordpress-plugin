@@ -3,7 +3,7 @@
  * Plugin Name: Bonus Hunt Guesser
  * Plugin URI: https://yourdomain.com/
  * Description: Comprehensive bonus hunt management system with tournaments, leaderboards, and user guessing functionality
- * Version: 8.0.07
+ * Version: 8.0.08
  * Author: Bonus Hunt Guesser Development Team
  * Text Domain: bonus-hunt-guesser
  * Domain Path: /languages
@@ -105,7 +105,7 @@ if (!defined('ABSPATH')) {
 }
 
 // Define plugin constants
-define('BHG_VERSION','8.0.07');
+define('BHG_VERSION','8.0.08');
 define('BHG_MIN_WP', '6.3.5');
 define('BHG_PLUGIN_FILE', __FILE__);
 define('BHG_PLUGIN_DIR', plugin_dir_path(__FILE__));
