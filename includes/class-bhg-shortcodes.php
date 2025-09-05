@@ -491,7 +491,20 @@ class BHG_Shortcodes {
                return ob_get_clean();
        }
 
-       /** [bhg_tournaments] list + details (via ?bhg_tournament_id=ID) */
+       /**
+        * [bhg_tournaments] List tournaments or show details.
+        *
+        * Attributes:
+        * - status    (string) Filter by tournament status (active|closed).
+        * - tournament(int)    Specific tournament ID.
+        * - website   (int)    Affiliate website ID.
+        * - timeline  (string) Tournament type (weekly|monthly|yearly|quarterly|alltime).
+        *
+        * Details view is available via ?bhg_tournament_id=ID.
+        *
+        * @param array $atts Shortcode attributes.
+        * @return string HTML output.
+        */
        public function tournaments_shortcode($atts) {
                global $wpdb;
 
@@ -575,60 +588,81 @@ class BHG_Shortcodes {
 			return ob_get_clean();
 		}
 
-		// Otherwise list tournaments with filters
-		$a = shortcode_atts(array('period' => 'all', 'status' => 'active'), $atts, 'bhg_tournaments');
-		$t = $wpdb->prefix . 'bhg_tournaments';
-		$where = array();
-		$args  = array();
+               // Otherwise list tournaments with filters
+               $a = shortcode_atts(
+                       array(
+                               'status'    => 'active',
+                               'tournament'=> 0,
+                               'website'   => 0,
+                               'timeline'  => '',
+                       ),
+                       $atts,
+                       'bhg_tournaments'
+               );
 
-		if (in_array($a['period'], array('weekly','monthly','yearly'), true)) {
-			$where[] = "type=%s";
-			$args[]  = $a['period'];
-		}
-		if (in_array($a['status'], array('active','closed'), true)) {
-			$where[] = "status=%s";
-			$args[]  = $a['status'];
-		}
+               $t          = $wpdb->prefix . 'bhg_tournaments';
+               $where      = array();
+               $args       = array();
+               $status     = isset( $_GET['bhg_status'] ) ? sanitize_key( $_GET['bhg_status'] ) : sanitize_key( $a['status'] );
+               $timeline   = isset( $_GET['bhg_timeline'] ) ? sanitize_key( $_GET['bhg_timeline'] ) : sanitize_key( $a['timeline'] );
+               $tournament = absint( $a['tournament'] );
+               $website    = absint( $a['website'] );
 
-		$sql = "SELECT * FROM {$t}";
-		if ($where) {
-			$sql .= " WHERE " . implode(" AND ", $where);
-		}
-		$sql .= " ORDER BY start_date DESC, id DESC";
+               if ( $tournament > 0 ) {
+                       $where[] = 'id = %d';
+                       $args[]  = $tournament;
+               }
+               if ( in_array( $status, array( 'active', 'closed' ), true ) ) {
+                       $where[] = 'status = %s';
+                       $args[]  = $status;
+               }
+               if ( in_array( $timeline, array( 'weekly', 'monthly', 'yearly', 'quarterly', 'alltime' ), true ) ) {
+                       $where[] = 'type = %s';
+                       $args[]  = $timeline;
+               }
+               if ( $website > 0 ) {
+                       $where[] = 'affiliate_site_id = %d';
+                       $args[]  = $website;
+               }
 
-		$rows = $args ? $wpdb->get_results( $wpdb->prepare( $sql, ...$args ) ) : $wpdb->get_results( $sql );
-		if (!$rows) {
-			return '<p>' . esc_html__('No tournaments found.', 'bonus-hunt-guesser') . '</p>';
-		}
+               $sql = "SELECT * FROM {$t}";
+               if ( $where ) {
+                       $sql .= ' WHERE ' . implode( ' AND ', $where );
+               }
+               $sql .= ' ORDER BY start_date DESC, id DESC';
 
-		$current_url = (isset($_SERVER['REQUEST_URI']) ? esc_url_raw(wp_unslash($_SERVER['REQUEST_URI'])) : home_url('/'));
+               $rows = $args ? $wpdb->get_results( $wpdb->prepare( $sql, $args ) ) : $wpdb->get_results( $sql );
+               if (!$rows) {
+                       return '<p>' . esc_html__('No tournaments found.', 'bonus-hunt-guesser') . '</p>';
+               }
+                $current_url = (isset($_SERVER['REQUEST_URI']) ? esc_url_raw(wp_unslash($_SERVER['REQUEST_URI'])) : home_url('/'));
 
-		ob_start();
-		echo '<form method="get" class="bhg-tournament-filters" style="margin-bottom:10px;">';
-		foreach ( $_GET as $raw_key => $v ) {
-			$key = sanitize_key( $raw_key );
-			if ( $key === 'bhg_period' || $key === 'bhg_status' || $key === 'bhg_tournament_id' ) {
-				continue;
-			}
-			echo '<input type="hidden" name="' . esc_attr( $key ) . '" value="' . esc_attr( is_array( $v ) ? reset( $v ) : $v ) . '">';
-		}
-		echo '<label style="margin-right:8px;">' . esc_html__('Period:', 'bonus-hunt-guesser') . ' ';
-		echo '<select name="bhg_period">';
-		$periods = array('all'=>__('All','bonus-hunt-guesser'),'weekly'=>__('Weekly','bonus-hunt-guesser'),'monthly'=>__('Monthly','bonus-hunt-guesser'),'yearly'=>__('Yearly','bonus-hunt-guesser'));
-		$period_key = isset($_GET['bhg_period']) ? sanitize_key($_GET['bhg_period']) : $a['period'];
-		foreach ($periods as $key=>$label) {
-			echo '<option value="' . esc_attr($key) . '"' . selected($period_key, $key, false) . '>' . esc_html($label) . '</option>';
-		}
-		echo '</select></label>';
+                ob_start();
+                echo '<form method="get" class="bhg-tournament-filters" style="margin-bottom:10px;">';
+                foreach ( $_GET as $raw_key => $v ) {
+                        $key = sanitize_key( $raw_key );
+                        if ( $key === 'bhg_timeline' || $key === 'bhg_status' || $key === 'bhg_tournament_id' ) {
+                                continue;
+                        }
+                        echo '<input type="hidden" name="' . esc_attr( $key ) . '" value="' . esc_attr( is_array( $v ) ? reset( $v ) : $v ) . '">';
+                }
+                echo '<label style="margin-right:8px;">' . esc_html__( 'Timeline:', 'bonus-hunt-guesser' ) . ' ';
+                echo '<select name="bhg_timeline">';
+                $timelines = array( 'all' => __( 'All', 'bonus-hunt-guesser' ), 'weekly' => __( 'Weekly', 'bonus-hunt-guesser' ), 'monthly' => __( 'Monthly', 'bonus-hunt-guesser' ), 'yearly' => __( 'Yearly', 'bonus-hunt-guesser' ), 'quarterly' => __( 'Quarterly', 'bonus-hunt-guesser' ), 'alltime' => __( 'All-Time', 'bonus-hunt-guesser' ) );
+                $timeline_key = isset( $_GET['bhg_timeline'] ) ? sanitize_key( $_GET['bhg_timeline'] ) : $timeline;
+                foreach ( $timelines as $key => $label ) {
+                        echo '<option value="' . esc_attr( $key ) . '"' . selected( $timeline_key, $key, false ) . '>' . esc_html( $label ) . '</option>';
+                }
+                echo '</select></label>';
 
-		echo '<label>' . esc_html__('Status:', 'bonus-hunt-guesser') . ' ';
-		echo '<select name="bhg_status">';
-		$statuses = array('active'=>__('Active','bonus-hunt-guesser'),'closed'=>__('Closed','bonus-hunt-guesser'),'all'=>__('All','bonus-hunt-guesser'));
-		$status_key = isset($_GET['bhg_status']) ? sanitize_key($_GET['bhg_status']) : $a['status'];
-		foreach ($statuses as $key=>$label) {
-			echo '<option value="' . esc_attr($key) . '"' . selected($status_key, $key, false) . '>' . esc_html($label) . '</option>';
-		}
-		echo '</select></label> ';
+                echo '<label>' . esc_html__( 'Status:', 'bonus-hunt-guesser' ) . ' ';
+                echo '<select name="bhg_status">';
+                $statuses = array( 'active' => __( 'Active', 'bonus-hunt-guesser' ), 'closed' => __( 'Closed', 'bonus-hunt-guesser' ), 'all' => __( 'All', 'bonus-hunt-guesser' ) );
+                $status_key = isset( $_GET['bhg_status'] ) ? sanitize_key( $_GET['bhg_status'] ) : $status;
+                foreach ( $statuses as $key => $label ) {
+                        echo '<option value="' . esc_attr( $key ) . '"' . selected( $status_key, $key, false ) . '>' . esc_html( $label ) . '</option>';
+                }
+                echo '</select></label> ';
 
 		echo '<button class="button" type="submit" style="margin-left:8px;">'.esc_html__('Filter','bonus-hunt-guesser').'</button>';
 		echo '</form>';
