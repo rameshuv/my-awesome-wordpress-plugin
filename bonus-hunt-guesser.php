@@ -12,6 +12,10 @@
  * License: GPLv2 or later
  */
 
+if ( ! defined( 'ABSPATH' ) ) {
+    exit;
+}
+
 // Helper: parse human-entered money-like strings into float
 if ( ! function_exists( 'bhg_parse_amount' ) ) {
     /**
@@ -95,14 +99,9 @@ if ( ! function_exists( 'bhg_parse_amount' ) ) {
         return null;
     }
 }
+
 // Ensure canonical DB class is loaded
 require_once __DIR__ . '/includes/class-bhg-db.php';
-
-
-// Prevent direct access
-if (!defined('ABSPATH')) {
-    exit;
-}
 
 // Define plugin constants
 define('BHG_VERSION','8.0.08');
