@@ -129,11 +129,13 @@ class BHG_Admin {
             'updated_at'       => current_time('mysql'),
         ];
 
+        $format = ['%s','%f','%d','%s','%d','%d','%f','%s','%s'];
         if ($id) {
-            $wpdb->update($hunts_table, $data, ['id' => $id]);
+            $wpdb->update($hunts_table, $data, ['id' => $id], $format, ['%d']);
         } else {
             $data['created_at'] = current_time('mysql');
-            $wpdb->insert($hunts_table, $data);
+            $format[] = '%s';
+            $wpdb->insert($hunts_table, $data, $format);
             $id = (int) $wpdb->insert_id;
         }
 
@@ -226,8 +228,14 @@ class BHG_Admin {
             'updated_at'   => current_time('mysql'),
         ];
 
-        if ($id) { $wpdb->update($table, $data, ['id' => $id]); }
-        else { $data['created_at'] = current_time('mysql'); $wpdb->insert($table, $data); }
+        $format = ['%s','%s','%s','%s','%s','%s','%d','%s'];
+        if ($id) {
+            $wpdb->update($table, $data, ['id' => $id], $format, ['%d']);
+        } else {
+            $data['created_at'] = current_time('mysql');
+            $format[] = '%s';
+            $wpdb->insert($table, $data, $format);
+        }
 
         wp_redirect(admin_url('admin.php?page=bhg-ads')); exit;
     }
@@ -254,11 +262,13 @@ class BHG_Admin {
         'updated_at'  => current_time('mysql')
     ];
     try {
+        $format = ['%s','%s','%s','%s','%s','%s','%s'];
         if ($id > 0) {
-            $wpdb->update($t, $data, ['id'=>$id]);
+            $wpdb->update($t, $data, ['id'=>$id], $format, ['%d']);
         } else {
             $data['created_at'] = current_time('mysql');
-            $wpdb->insert($t, $data);
+            $format[] = '%s';
+            $wpdb->insert($t, $data, $format);
         }
         wp_redirect(add_query_arg('bhg_msg','t_saved', admin_url('admin.php?page=bhg-tournaments')));
         exit;
@@ -279,11 +289,13 @@ public function handle_save_affiliate() {
         $status= isset($_POST['status']) ? sanitize_text_field(wp_unslash($_POST['status'])) : 'active';
 
         $data = ['name'=>$name, 'url'=>$url, 'status'=>$status, 'updated_at'=> current_time('mysql')];
+        $format = ['%s','%s','%s','%s'];
         if ($id) {
-            $wpdb->update($table, $data, ['id'=>$id]);
+            $wpdb->update($table, $data, ['id'=>$id], $format, ['%d']);
         } else {
             $data['created_at'] = current_time('mysql');
-            $wpdb->insert($table, $data);
+            $format[] = '%s';
+            $wpdb->insert($table, $data, $format);
         }
         wp_redirect(admin_url('admin.php?page=bhg-affiliates'));
         exit;
