@@ -26,7 +26,7 @@ $rows = $wpdb->get_results(
     </tr></thead>
     <tbody>
     <?php $pos=1; foreach($rows as $r): $wcount = (int)$hunt->winners_count; if ($wcount < 1) $wcount = 3; $isWinner = $pos <= $wcount; ?>
-      <tr <?php if($isWinner) echo 'style="background:#d1fae5;"'; ?>>
+      <tr <?php if($isWinner) echo 'class="bhg-winner-row"'; ?>>
         <td><?php echo (int)$pos; ?></td>
         <td><?php echo esc_html($r->display_name); ?></td>
         <td><?php echo esc_html(number_format_i18n((float)$r->guess,2)); ?></td>
