@@ -44,7 +44,7 @@ if ($view === 'list') :
           <td>
             <a class="button" href="<?php echo esc_url(add_query_arg(['view'=>'edit','id'=>(int)$h->id])); ?>"><?php echo esc_html__('Edit', 'bonus-hunt-guesser'); ?></a>
             <?php if ($h->status === 'closed' && $h->final_balance !== null) : ?>
-              <a class="button button-primary" href="<?php echo esc_url(admin_url('admin.php?page=bhg-bonus-hunts-results&hunt_id='.(int)$h->id)); ?>"><?php echo esc_html__('Results', 'bonus-hunt-guesser'); ?></a>
+              <a class="button button-primary" href="<?php echo esc_url(admin_url('admin.php?page=bhg-bonus-hunts-results&id='.(int)$h->id)); ?>"><?php echo esc_html__('Results', 'bonus-hunt-guesser'); ?></a>
             <?php endif; ?>
           </td>
         </tr>

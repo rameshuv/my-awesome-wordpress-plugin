@@ -4,14 +4,14 @@ if (!defined('ABSPATH')) exit;
 /**
  * Helper functions for hunts and guesses used by admin dashboard, list and results.
  * DB tables assumed:
- *  - {$wpdb->prefix}bhg_hunts (id, title, start_balance, final_balance, winners_limit, status, closed_at)
+ *  - {$wpdb->prefix}bhg_bonus_hunts (id, title, starting_balance, final_balance, winners_count, status, closed_at)
  *  - {$wpdb->prefix}bhg_guesses (id, hunt_id, user_id, guess, created_at)
  */
 
 if (!function_exists('bhg_get_hunt')) {
     function bhg_get_hunt($hunt_id){
         global $wpdb;
-        $t = $wpdb->prefix . 'bhg_hunts';
+        $t = $wpdb->prefix . 'bhg_bonus_hunts';
         return $wpdb->get_row($wpdb->prepare("SELECT * FROM $t WHERE id=%d", (int)$hunt_id));
     }
 }
@@ -19,8 +19,8 @@ if (!function_exists('bhg_get_hunt')) {
 if (!function_exists('bhg_get_latest_closed_hunts')) {
     function bhg_get_latest_closed_hunts($limit = 3){
         global $wpdb;
-        $t = $wpdb->prefix . 'bhg_hunts';
-        $sql = $wpdb->prepare("SELECT id, title, start_balance, final_balance, winners_limit, closed_at
+        $t = $wpdb->prefix . 'bhg_bonus_hunts';
+        $sql = $wpdb->prepare("SELECT id, title, starting_balance, final_balance, winners_count, closed_at
                                FROM $t
                                WHERE status = %s
                                ORDER BY closed_at DESC
@@ -33,11 +33,11 @@ if (!function_exists('bhg_get_top_winners_for_hunt')) {
     function bhg_get_top_winners_for_hunt($hunt_id, $winners_limit = 3){
         global $wpdb;
         $t_g = $wpdb->prefix . 'bhg_guesses';
-        $t_h = $wpdb->prefix . 'bhg_hunts';
+        $t_h = $wpdb->prefix . 'bhg_bonus_hunts';
 
-        $hunt = $wpdb->get_row($wpdb->prepare("SELECT final_balance, winners_limit FROM $t_h WHERE id=%d", (int)$hunt_id));
+        $hunt = $wpdb->get_row($wpdb->prepare("SELECT final_balance, winners_count FROM $t_h WHERE id=%d", (int)$hunt_id));
         if (!$hunt || $hunt->final_balance === null) return array();
-        $limit = $winners_limit ?: (int) $hunt->winners_limit ?: 3;
+        $limit = $winners_limit ?: (int) $hunt->winners_count ?: 3;
 
         $sql = $wpdb->prepare(
             "SELECT g.user_id, g.guess, ABS(g.guess - %f) AS diff
@@ -55,7 +55,7 @@ if (!function_exists('bhg_get_all_ranked_guesses')) {
     function bhg_get_all_ranked_guesses($hunt_id){
         global $wpdb;
         $t_g = $wpdb->prefix . 'bhg_guesses';
-        $t_h = $wpdb->prefix . 'bhg_hunts';
+        $t_h = $wpdb->prefix . 'bhg_bonus_hunts';
         $hunt = $wpdb->get_row($wpdb->prepare("SELECT final_balance FROM $t_h WHERE id=%d", (int)$hunt_id));
         if (!$hunt || $hunt->final_balance === null) return array();
 
