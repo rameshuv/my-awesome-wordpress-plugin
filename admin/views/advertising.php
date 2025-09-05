@@ -28,23 +28,23 @@ if ( 'delete' === $action && $ad_id && isset( $_GET['_wpnonce'] ) ) {
 
 // Fetch ads
 $ads = $wpdb->get_results(
-        "SELECT * FROM {$table} ORDER BY id DESC"
+		"SELECT * FROM {$table} ORDER BY id DESC"
 );
 
 $placement_labels = [
-        'none'      => __( 'None', 'bonus-hunt-guesser' ),
-        'footer'    => __( 'Footer', 'bonus-hunt-guesser' ),
-        'bottom'    => __( 'Bottom', 'bonus-hunt-guesser' ),
-        'sidebar'   => __( 'Sidebar', 'bonus-hunt-guesser' ),
-        'shortcode' => __( 'Shortcode', 'bonus-hunt-guesser' ),
+		'none'      => __( 'None', 'bonus-hunt-guesser' ),
+		'footer'    => __( 'Footer', 'bonus-hunt-guesser' ),
+		'bottom'    => __( 'Bottom', 'bonus-hunt-guesser' ),
+		'sidebar'   => __( 'Sidebar', 'bonus-hunt-guesser' ),
+		'shortcode' => __( 'Shortcode', 'bonus-hunt-guesser' ),
 ];
 
 $visible_labels = [
-        'all'            => __( 'All', 'bonus-hunt-guesser' ),
-        'guests'         => __( 'Guests', 'bonus-hunt-guesser' ),
-        'logged_in'      => __( 'Logged In', 'bonus-hunt-guesser' ),
-        'affiliates'     => __( 'Affiliates', 'bonus-hunt-guesser' ),
-        'non_affiliates' => __( 'Non Affiliates', 'bonus-hunt-guesser' ),
+		'all'            => __( 'All', 'bonus-hunt-guesser' ),
+		'guests'         => __( 'Guests', 'bonus-hunt-guesser' ),
+		'logged_in'      => __( 'Logged In', 'bonus-hunt-guesser' ),
+		'affiliates'     => __( 'Affiliates', 'bonus-hunt-guesser' ),
+		'non_affiliates' => __( 'Non Affiliates', 'bonus-hunt-guesser' ),
 ];
 ?>
 <div class="wrap">
@@ -69,14 +69,14 @@ $visible_labels = [
 		<tr>
 		  <td><?php echo (int)$ad->id; ?></td>
 		  <td><?php echo isset($ad->title) && $ad->title !== '' ? esc_html($ad->title) : wp_kses_post(wp_trim_words($ad->content, 12)); ?></td>
-                  <td><?php
-                        $pl = isset( $ad->placement ) ? ( $placement_labels[ $ad->placement ] ?? $ad->placement ) : $placement_labels['none'];
-                        echo esc_html( $pl );
-                  ?></td>
-                  <td><?php
-                        $vis = isset( $ad->visible_to ) ? ( $visible_labels[ $ad->visible_to ] ?? $ad->visible_to ) : $visible_labels['all'];
-                        echo esc_html( $vis );
-                  ?></td>
+				  <td><?php
+						$pl = isset( $ad->placement ) ? ( $placement_labels[ $ad->placement ] ?? $ad->placement ) : $placement_labels['none'];
+						echo esc_html( $pl );
+				  ?></td>
+				  <td><?php
+						$vis = isset( $ad->visible_to ) ? ( $visible_labels[ $ad->visible_to ] ?? $ad->visible_to ) : $visible_labels['all'];
+						echo esc_html( $vis );
+				  ?></td>
 		  <td><?php echo (int)$ad->active === 1 ? esc_html__('Yes','bonus-hunt-guesser') : esc_html__('No','bonus-hunt-guesser'); ?></td>
 		  <td>
 			<a class="button" href="<?php echo esc_url(add_query_arg(['edit'=> (int)$ad->id])); ?>"><?php echo esc_html__('Edit', 'bonus-hunt-guesser'); ?></a>
@@ -89,12 +89,12 @@ $visible_labels = [
 
   <h2 style="margin-top:2em"><?php echo $edit_id ? esc_html__('Edit Ad', 'bonus-hunt-guesser') : esc_html__('Add Ad', 'bonus-hunt-guesser'); ?></h2>
   <?php
-        $ad = null;
-        if ( $edit_id ) {
-                $ad = $wpdb->get_row(
-                        $wpdb->prepare( "SELECT * FROM {$table} WHERE id = %d", $edit_id )
-                );
-        }
+		$ad = null;
+		if ( $edit_id ) {
+				$ad = $wpdb->get_row(
+						$wpdb->prepare( "SELECT * FROM {$table} WHERE id = %d", $edit_id )
+				);
+		}
   ?>
   <form method="post" action="<?php echo esc_url(admin_url('admin-post.php')); ?>" style="max-width:800px">
 	<?php wp_nonce_field('bhg_save_ad'); ?>
@@ -122,12 +122,12 @@ $visible_labels = [
 		  <td>
 			<select id="bhg_ad_place" name="placement">
 			  <?php
-                                $placement_opts = array_keys( $placement_labels );
-                                $sel            = $ad ? ( $ad->placement ?? 'none' ) : 'none';
-                                foreach ( $placement_opts as $o ) {
-                                        $label = $placement_labels[ $o ] ?? $o;
-                                        echo '<option value="' . esc_attr( $o ) . '" ' . selected( $sel, $o, false ) . '>' . esc_html( $label ) . '</option>';
-                                }
+								$placement_opts = array_keys( $placement_labels );
+								$sel            = $ad ? ( $ad->placement ?? 'none' ) : 'none';
+								foreach ( $placement_opts as $o ) {
+										$label = $placement_labels[ $o ] ?? $o;
+										echo '<option value="' . esc_attr( $o ) . '" ' . selected( $sel, $o, false ) . '>' . esc_html( $label ) . '</option>';
+								}
 			  ?>
 			</select>
 		  </td>
@@ -137,12 +137,12 @@ $visible_labels = [
 		  <td>
 			<select id="bhg_ad_vis" name="visible_to">
 			  <?php
-                                $visible_opts = array_keys( $visible_labels );
-                                $sel          = $ad ? ( $ad->visible_to ?? 'all' ) : 'all';
-                                foreach ( $visible_opts as $o ) {
-                                        $label = $visible_labels[ $o ] ?? $o;
-                                        echo '<option value="' . esc_attr( $o ) . '" ' . selected( $sel, $o, false ) . '>' . esc_html( $label ) . '</option>';
-                                }
+								$visible_opts = array_keys( $visible_labels );
+								$sel          = $ad ? ( $ad->visible_to ?? 'all' ) : 'all';
+								foreach ( $visible_opts as $o ) {
+										$label = $visible_labels[ $o ] ?? $o;
+										echo '<option value="' . esc_attr( $o ) . '" ' . selected( $sel, $o, false ) . '>' . esc_html( $label ) . '</option>';
+								}
 			  ?>
 			</select>
 		  </td>

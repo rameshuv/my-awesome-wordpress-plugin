@@ -39,44 +39,44 @@ class BHG_Shortcodes {
 			return '';
 		}
 
-                $base     = wp_validate_redirect( wp_unslash( $_SERVER['REQUEST_URI'] ), home_url( '/' ) );
-                $redirect = esc_url_raw( add_query_arg( array(), $base ) );
+				$base     = wp_validate_redirect( wp_unslash( $_SERVER['REQUEST_URI'] ), home_url( '/' ) );
+				$redirect = esc_url_raw( add_query_arg( array(), $base ) );
 
 		return '<p>' . esc_html__( 'Please log in to continue.', 'bonus-hunt-guesser' ) . '</p>'
 			 . '<p><a class="button button-primary" href="' . esc_url( wp_login_url( $redirect ) ) . '">' . esc_html__( 'Log in', 'bonus-hunt-guesser' ) . '</a></p>';
 	}
 
 	/** [bhg_active_hunt] — list all open hunts */
-        public function active_hunt_shortcode($atts) {
-                global $wpdb;
-               $hunts = $wpdb->get_results(
-                       $wpdb->prepare(
-                               "SELECT * FROM {$wpdb->prefix}bhg_bonus_hunts WHERE status=%s ORDER BY created_at DESC",
-                               'open'
-                       )
-               );
-                if (!$hunts) {
-                        return '<div class="bhg-active-hunt"><p>' . esc_html__('No active bonus hunts at the moment.', 'bonus-hunt-guesser') . '</p></div>';
-                }
+		public function active_hunt_shortcode($atts) {
+				global $wpdb;
+			   $hunts = $wpdb->get_results(
+					   $wpdb->prepare(
+							   "SELECT * FROM {$wpdb->prefix}bhg_bonus_hunts WHERE status=%s ORDER BY created_at DESC",
+							   'open'
+					   )
+			   );
+				if (!$hunts) {
+						return '<div class="bhg-active-hunt"><p>' . esc_html__('No active bonus hunts at the moment.', 'bonus-hunt-guesser') . '</p></div>';
+				}
 
-               wp_enqueue_style(
-                       'bhg-shortcodes',
-                       BHG_PLUGIN_URL . 'assets/css/bhg-shortcodes.css',
-                       array(),
-                       defined( 'BHG_VERSION' ) ? BHG_VERSION : null
-               );
+			   wp_enqueue_style(
+					   'bhg-shortcodes',
+					   BHG_PLUGIN_URL . 'assets/css/bhg-shortcodes.css',
+					   array(),
+					   defined( 'BHG_VERSION' ) ? BHG_VERSION : null
+			   );
 
-               ob_start();
-               echo '<div class="bhg-active-hunts">';
-               foreach ($hunts as $hunt) {
-                       echo '<div class="bhg-hunt-card">';
-                       echo '<h3>' . esc_html($hunt->title) . '</h3>';
-                       echo '<ul class="bhg-hunt-meta">';
-                       echo '<li><strong>' . esc_html__('Starting Balance', 'bonus-hunt-guesser') . ':</strong> ' . esc_html(number_format_i18n((float)$hunt->starting_balance, 2)) . '</li>';
-                       echo '<li><strong>' . esc_html__('Number of Bonuses', 'bonus-hunt-guesser') . ':</strong> ' . (int)$hunt->num_bonuses . '</li>';
-                       if (!empty($hunt->prizes)) {
-                               echo '<li><strong>' . esc_html__('Prizes', 'bonus-hunt-guesser') . ':</strong> ' . wp_kses_post($hunt->prizes) . '</li>';
-                       }
+			   ob_start();
+			   echo '<div class="bhg-active-hunts">';
+			   foreach ($hunts as $hunt) {
+					   echo '<div class="bhg-hunt-card">';
+					   echo '<h3>' . esc_html($hunt->title) . '</h3>';
+					   echo '<ul class="bhg-hunt-meta">';
+					   echo '<li><strong>' . esc_html__('Starting Balance', 'bonus-hunt-guesser') . ':</strong> ' . esc_html(number_format_i18n((float)$hunt->starting_balance, 2)) . '</li>';
+					   echo '<li><strong>' . esc_html__('Number of Bonuses', 'bonus-hunt-guesser') . ':</strong> ' . (int)$hunt->num_bonuses . '</li>';
+					   if (!empty($hunt->prizes)) {
+							   echo '<li><strong>' . esc_html__('Prizes', 'bonus-hunt-guesser') . ':</strong> ' . wp_kses_post($hunt->prizes) . '</li>';
+					   }
 			echo '</ul>';
 			echo '</div>';
 		}
@@ -90,20 +90,20 @@ class BHG_Shortcodes {
 		$hunt_id = (int) $atts['hunt_id'];
 
 		if ( ! is_user_logged_in() ) {
-                        $base     = wp_validate_redirect( wp_unslash( $_SERVER['REQUEST_URI'] ), home_url( '/' ) );
-                        $redirect = esc_url_raw( add_query_arg( array(), $base ) );
+						$base     = wp_validate_redirect( wp_unslash( $_SERVER['REQUEST_URI'] ), home_url( '/' ) );
+						$redirect = esc_url_raw( add_query_arg( array(), $base ) );
 
 			return '<p>' . esc_html__( 'Please log in to submit your guess.', 'bonus-hunt-guesser' ) . '</p>'
 				 . '<p><a class="button button-primary" href="' . esc_url( wp_login_url( $redirect ) ) . '">' . esc_html__( 'Log in', 'bonus-hunt-guesser' ) . '</a></p>';
 		}
 
-               global $wpdb;
-               $open_hunts = $wpdb->get_results(
-                       $wpdb->prepare(
-                               "SELECT id, title FROM {$wpdb->prefix}bhg_bonus_hunts WHERE status=%s ORDER BY created_at DESC",
-                               'open'
-                       )
-               );
+			   global $wpdb;
+			   $open_hunts = $wpdb->get_results(
+					   $wpdb->prepare(
+							   "SELECT id, title FROM {$wpdb->prefix}bhg_bonus_hunts WHERE status=%s ORDER BY created_at DESC",
+							   'open'
+					   )
+			   );
 
 		if ($hunt_id <= 0) {
 			if (!$open_hunts) {
@@ -119,19 +119,19 @@ class BHG_Shortcodes {
 		$existing_id = $hunt_id > 0 ? (int)$wpdb->get_var($wpdb->prepare("SELECT id FROM {$table} WHERE user_id=%d AND hunt_id=%d", $user_id, $hunt_id)) : 0;
 		$existing_guess = $existing_id ? (float) $wpdb->get_var($wpdb->prepare("SELECT guess FROM {$table} WHERE id=%d", $existing_id)) : '';
 
-               $settings = get_option('bhg_plugin_settings');
-               $min = isset($settings['min_guess_amount']) ? (float)$settings['min_guess_amount'] : 0;
-               $max = isset($settings['max_guess_amount']) ? (float)$settings['max_guess_amount'] : 100000;
+			   $settings = get_option('bhg_plugin_settings');
+			   $min = isset($settings['min_guess_amount']) ? (float)$settings['min_guess_amount'] : 0;
+			   $max = isset($settings['max_guess_amount']) ? (float)$settings['max_guess_amount'] : 100000;
 
-               wp_enqueue_style(
-                       'bhg-shortcodes',
-                       BHG_PLUGIN_URL . 'assets/css/bhg-shortcodes.css',
-                       array(),
-                       defined( 'BHG_VERSION' ) ? BHG_VERSION : null
-               );
+			   wp_enqueue_style(
+					   'bhg-shortcodes',
+					   BHG_PLUGIN_URL . 'assets/css/bhg-shortcodes.css',
+					   array(),
+					   defined( 'BHG_VERSION' ) ? BHG_VERSION : null
+			   );
 
-               ob_start(); ?>
-               <form class="bhg-guess-form" method="post" action="<?php echo esc_url(admin_url('admin-post.php')); ?>">
+			   ob_start(); ?>
+			   <form class="bhg-guess-form" method="post" action="<?php echo esc_url(admin_url('admin-post.php')); ?>">
 			<input type="hidden" name="action" value="bhg_submit_guess">
 			<?php wp_nonce_field('bhg_submit_guess', 'bhg_nonce'); ?>
 
@@ -172,17 +172,17 @@ class BHG_Shortcodes {
 
 		global $wpdb;
 		$hunt_id = (int)$a['hunt_id'];
-               if ($hunt_id <= 0) {
-                       $hunt_id = (int) $wpdb->get_var(
-                               $wpdb->prepare(
-                                       "SELECT id FROM {$wpdb->prefix}bhg_bonus_hunts ORDER BY created_at DESC LIMIT %d",
-                                       1
-                               )
-                       );
-                       if ($hunt_id <= 0) {
-                               return '<p>' . esc_html__('No hunts found.', 'bonus-hunt-guesser') . '</p>';
-                       }
-               }
+			   if ($hunt_id <= 0) {
+					   $hunt_id = (int) $wpdb->get_var(
+							   $wpdb->prepare(
+									   "SELECT id FROM {$wpdb->prefix}bhg_bonus_hunts ORDER BY created_at DESC LIMIT %d",
+									   1
+							   )
+					   );
+					   if ($hunt_id <= 0) {
+							   return '<p>' . esc_html__('No hunts found.', 'bonus-hunt-guesser') . '</p>';
+					   }
+			   }
 
 		$g = $wpdb->prefix . 'bhg_guesses';
 		$u = $wpdb->users;
@@ -236,8 +236,8 @@ class BHG_Shortcodes {
 				? (int)get_user_meta((int)$r->user_id, 'bhg_affiliate_website_' . $site_id, true)
 				: (int)get_user_meta((int)$r->user_id, 'bhg_is_affiliate', true);
 			$aff = $is_aff ? 'green' : 'red';
-                       /* translators: %d: user ID. */
-                       $user_label = $r->user_login ? $r->user_login : sprintf( __( 'user#%d', 'bonus-hunt-guesser' ), (int) $r->user_id );
+					   /* translators: %d: user ID. */
+					   $user_label = $r->user_login ? $r->user_login : sprintf( __( 'user#%d', 'bonus-hunt-guesser' ), (int) $r->user_id );
 
 			echo '<tr>';
 			echo '<td data-column="position">' . (int)$pos++ . '</td>';
@@ -249,20 +249,20 @@ class BHG_Shortcodes {
 
 		$pages = (int) ceil( $total / $per );
 		if ( $pages > 1 ) {
-                        $base = wp_validate_redirect( wp_unslash( $_SERVER['REQUEST_URI'] ), home_url( '/' ) );
-                        $base = esc_url_raw( remove_query_arg( 'page', $base ) );
-                        echo '<div class="bhg-pagination">';
-                        for ( $p = 1; $p <= $pages; $p++ ) {
-                                $class = $p == $page ? 'bhg-current-page' : '';
-                                printf(
-                                        '<a class="%1$s" href="%2$s">%3$s</a> ',
-                                        esc_attr( $class ),
-                                        esc_url( add_query_arg( array( 'page' => $p ), $base ) ),
-                                        esc_html( $p )
-                                );
-                        }
-                        echo '</div>';
-                }
+						$base = wp_validate_redirect( wp_unslash( $_SERVER['REQUEST_URI'] ), home_url( '/' ) );
+						$base = esc_url_raw( remove_query_arg( 'page', $base ) );
+						echo '<div class="bhg-pagination">';
+						for ( $p = 1; $p <= $pages; $p++ ) {
+								$class = $p == $page ? 'bhg-current-page' : '';
+								printf(
+										'<a class="%1$s" href="%2$s">%3$s</a> ',
+										esc_attr( $class ),
+										esc_url( add_query_arg( array( 'page' => $p ), $base ) ),
+										esc_html( $p )
+								);
+						}
+						echo '</div>';
+				}
 
 			   return ob_get_clean();
 	   }
@@ -352,11 +352,11 @@ class BHG_Shortcodes {
 					   echo '<td>' . esc_html( $row->title ) . '</td>';
 					   $guess_cell = esc_html( number_format_i18n( (float) $row->guess, 2 ) );
 					   if ( $show_aff ) {
-                                           $guess_cell = bhg_render_affiliate_dot( $user_id, (int) $row->affiliate_site_id ) . $guess_cell;
-                                           }
-                                           echo '<td>' . wp_kses_post( $guess_cell ) . '</td>';
+										   $guess_cell = bhg_render_affiliate_dot( $user_id, (int) $row->affiliate_site_id ) . $guess_cell;
+										   }
+										   echo '<td>' . wp_kses_post( $guess_cell ) . '</td>';
 					   echo '<td>';
-                                           echo isset( $row->final_balance ) ? esc_html( number_format_i18n( (float) $row->final_balance, 2 ) ) : esc_html__( '&mdash;', 'bonus-hunt-guesser' );
+										   echo isset( $row->final_balance ) ? esc_html( number_format_i18n( (float) $row->final_balance, 2 ) ) : esc_html__( '&mdash;', 'bonus-hunt-guesser' );
 					   echo '</td>';
 					   echo '</tr>';
 			   }
@@ -442,12 +442,12 @@ class BHG_Shortcodes {
 					   echo '<td>' . esc_html( $row->title ) . '</td>';
 					   echo '<td>' . esc_html( number_format_i18n( (float) $row->starting_balance, 2 ) ) . '</td>';
 					   echo '<td>';
-                                           echo isset( $row->final_balance ) ? esc_html( number_format_i18n( (float) $row->final_balance, 2 ) ) : esc_html__( '&mdash;', 'bonus-hunt-guesser' );
-                                           echo '</td>';
-                                           echo '<td>' . esc_html( $row->status ) . '</td>';
-                                           if ( $show_aff ) {
-                                                           echo '<td>' . ( $row->aff_name ? esc_html( $row->aff_name ) : esc_html__( '—', 'bonus-hunt-guesser' ) ) . '</td>';
-                                           }
+										   echo isset( $row->final_balance ) ? esc_html( number_format_i18n( (float) $row->final_balance, 2 ) ) : esc_html__( '&mdash;', 'bonus-hunt-guesser' );
+										   echo '</td>';
+										   echo '<td>' . esc_html( $row->status ) . '</td>';
+										   if ( $show_aff ) {
+														   echo '<td>' . ( $row->aff_name ? esc_html( $row->aff_name ) : esc_html__( '—', 'bonus-hunt-guesser' ) ) . '</td>';
+										   }
 					   echo '</tr>';
 			   }
 			   echo '</tbody></table>';
@@ -517,13 +517,13 @@ class BHG_Shortcodes {
 			   foreach ( $hunts as $hunt ) {
 					   echo '<div class="bhg-leaderboard-wrap">';
 					   echo '<h3>' . esc_html( $hunt->title ) . '</h3>';
-                                           $html = $this->leaderboard_shortcode( array( 'hunt_id' => (int) $hunt->id ) );
-                                           if ( ! $show_aff ) {
-                                                           $html = preg_replace( '/<span class="bhg-aff-dot[^>]*><\/span>/', '', $html );
-                                           }
-                                           echo wp_kses_post( $html );
-                                           echo '</div>';
-                           }
+										   $html = $this->leaderboard_shortcode( array( 'hunt_id' => (int) $hunt->id ) );
+										   if ( ! $show_aff ) {
+														   $html = preg_replace( '/<span class="bhg-aff-dot[^>]*><\/span>/', '', $html );
+										   }
+										   echo wp_kses_post( $html );
+										   echo '</div>';
+						   }
 			   return ob_get_clean();
 	   }
 
@@ -541,15 +541,15 @@ class BHG_Shortcodes {
 		* @param array $atts Shortcode attributes.
 		* @return string HTML output.
 		*/
-       public function tournaments_shortcode($atts) {
-                          global $wpdb;
+	   public function tournaments_shortcode($atts) {
+						  global $wpdb;
 
-               wp_enqueue_style(
-                       'bhg-shortcodes',
-                       BHG_PLUGIN_URL . 'assets/css/bhg-shortcodes.css',
-                       array(),
-                       defined( 'BHG_VERSION' ) ? BHG_VERSION : null
-               );
+			   wp_enqueue_style(
+					   'bhg-shortcodes',
+					   BHG_PLUGIN_URL . 'assets/css/bhg-shortcodes.css',
+					   array(),
+					   defined( 'BHG_VERSION' ) ? BHG_VERSION : null
+			   );
 
 		// If a specific tournament ID is requested, render details
 		$details_id = isset($_GET['bhg_tournament_id']) ? absint($_GET['bhg_tournament_id']) : 0;
@@ -621,10 +621,10 @@ foreach ($rows as $row) {
 echo '<tr>';
 echo '<td>' . (int)$pos++ . '</td>';
 echo '<td>' . esc_html( $row->user_login ?: sprintf(
-                                       /* translators: %d: user ID. */
-                                       __( 'user#%d', 'bonus-hunt-guesser' ),
-                                       (int) $row->user_id
-                               ) ) . '</td>';
+									   /* translators: %d: user ID. */
+									   __( 'user#%d', 'bonus-hunt-guesser' ),
+									   (int) $row->user_id
+							   ) ) . '</td>';
 echo '<td>' . (int)$row->wins . '</td>';
 echo '<td>' . ( $row->last_win_date ? esc_html( mysql2date( get_option( 'date_format' ), $row->last_win_date ) ) : esc_html__( '—', 'bonus-hunt-guesser' ) ) . '</td>';
 				echo '</tr>';
@@ -682,9 +682,9 @@ echo '<td>' . ( $row->last_win_date ? esc_html( mysql2date( get_option( 'date_fo
 			   if (!$rows) {
 					   return '<p>' . esc_html__('No tournaments found.', 'bonus-hunt-guesser') . '</p>';
 			   }
-                               $current_url = isset( $_SERVER['REQUEST_URI'] )
-                                       ? esc_url_raw( wp_validate_redirect( wp_unslash( $_SERVER['REQUEST_URI'] ), home_url( '/' ) ) )
-                                       : home_url( '/' );
+							   $current_url = isset( $_SERVER['REQUEST_URI'] )
+									   ? esc_url_raw( wp_validate_redirect( wp_unslash( $_SERVER['REQUEST_URI'] ), home_url( '/' ) ) )
+									   : home_url( '/' );
 
 				ob_start();
 echo '<form method="get" class="bhg-tournament-filters">';
@@ -757,25 +757,25 @@ echo '<td><a href="' . esc_url( $detail_url ) . '">' . esc_html__( 'Show details
 			)
 		);
 
-               if ( ! $hunts ) {
-                       return '<p>' . esc_html__( 'No closed hunts yet.', 'bonus-hunt-guesser' ) . '</p>';
-               }
+			   if ( ! $hunts ) {
+					   return '<p>' . esc_html__( 'No closed hunts yet.', 'bonus-hunt-guesser' ) . '</p>';
+			   }
 
-               wp_enqueue_style(
-                       'bhg-shortcodes',
-                       BHG_PLUGIN_URL . 'assets/css/bhg-shortcodes.css',
-                       array(),
-                       defined( 'BHG_VERSION' ) ? BHG_VERSION : null
-               );
+			   wp_enqueue_style(
+					   'bhg-shortcodes',
+					   BHG_PLUGIN_URL . 'assets/css/bhg-shortcodes.css',
+					   array(),
+					   defined( 'BHG_VERSION' ) ? BHG_VERSION : null
+			   );
 
-               ob_start();
-               echo '<div class="bhg-winner-notifications">';
-               foreach ( $hunts as $hunt ) {
-                        $winners = function_exists( 'bhg_get_top_winners_for_hunt' )
-                                ? bhg_get_top_winners_for_hunt( $hunt->id, (int) $hunt->winners_count )
-                                : array();
+			   ob_start();
+			   echo '<div class="bhg-winner-notifications">';
+			   foreach ( $hunts as $hunt ) {
+						$winners = function_exists( 'bhg_get_top_winners_for_hunt' )
+								? bhg_get_top_winners_for_hunt( $hunt->id, (int) $hunt->winners_count )
+								: array();
 
-                       echo '<div class="bhg-winner">';
+					   echo '<div class="bhg-winner">';
 			echo '<p><strong>' . esc_html( $hunt->title ) . '</strong></p>';
 			if ( $hunt->final_balance !== null ) {
 				echo '<p><em>' . esc_html__( 'Final', 'bonus-hunt-guesser' ) . ':</em> ' . esc_html( number_format_i18n( (float) $hunt->final_balance, 2 ) ) . '</p>';
@@ -786,7 +786,7 @@ echo '<td><a href="' . esc_url( $detail_url ) . '">' . esc_html__( 'Show details
 				foreach ( $winners as $w ) {
 					$u  = get_userdata( (int) $w->user_id );
 					$nm = $u ? $u->user_login : sprintf( __( 'User #%d', 'bonus-hunt-guesser' ), (int) $w->user_id );
-                                        echo '<li>' . esc_html( $nm ) . ' ' . esc_html__( '—', 'bonus-hunt-guesser' ) . ' ' . esc_html( number_format_i18n( (float) $w->guess, 2 ) ) . ' (' . esc_html( number_format_i18n( (float) $w->diff, 2 ) ) . ')</li>';
+										echo '<li>' . esc_html( $nm ) . ' ' . esc_html__( '—', 'bonus-hunt-guesser' ) . ' ' . esc_html( number_format_i18n( (float) $w->guess, 2 ) ) . ' (' . esc_html( number_format_i18n( (float) $w->diff, 2 ) ) . ')</li>';
 				}
 				echo '</ul>';
 			}
@@ -879,18 +879,18 @@ echo '<td><a href="' . esc_url( $detail_url ) . '">' . esc_html__( 'Show details
 						GROUP BY u.ID, u.user_login
 						ORDER BY total_wins DESC, u.user_login ASC
 						LIMIT %d";
-                                $results[$key] = $wpdb->get_results( $wpdb->prepare( $sql, 50 ) );
+								$results[$key] = $wpdb->get_results( $wpdb->prepare( $sql, 50 ) );
 			}
 		}
 
-               $hunts_tbl = $wpdb->prefix . 'bhg_bonus_hunts';
-               $hunts = $wpdb->get_results(
-                       $wpdb->prepare(
-                               "SELECT id, title FROM {$hunts_tbl} WHERE status=%s ORDER BY created_at DESC LIMIT %d",
-                               'closed',
-                               50
-                       )
-               );
+			   $hunts_tbl = $wpdb->prefix . 'bhg_bonus_hunts';
+			   $hunts = $wpdb->get_results(
+					   $wpdb->prepare(
+							   "SELECT id, title FROM {$hunts_tbl} WHERE status=%s ORDER BY created_at DESC LIMIT %d",
+							   'closed',
+							   50
+					   )
+			   );
 
 		wp_enqueue_style(
 			'bhg-shortcodes',
@@ -907,46 +907,46 @@ echo '<td><a href="' . esc_url( $detail_url ) . '">' . esc_html__( 'Show details
 		);
 
 		ob_start();
-                echo '<ul class="bhg-tabs">';
-                $first = true;
-                foreach ( $periods as $key => $info ) {
-                        echo '<li' . ( $first ? ' class="active"' : '' ) . '><a href="#bhg-tab-' . esc_attr( $key ) . '">' . esc_html( $info['label'] ) . '</a></li>';
-                        $first = false;
-                }
-                if ($hunts) {
+				echo '<ul class="bhg-tabs">';
+				$first = true;
+				foreach ( $periods as $key => $info ) {
+						echo '<li' . ( $first ? ' class="active"' : '' ) . '><a href="#bhg-tab-' . esc_attr( $key ) . '">' . esc_html( $info['label'] ) . '</a></li>';
+						$first = false;
+				}
+				if ($hunts) {
 			echo '<li><a href="#bhg-tab-hunts">' . esc_html__('Bonus Hunts', 'bonus-hunt-guesser') . '</a></li>';
 		}
 		echo '</ul>';
 
-                $first = true;
-                foreach ( $periods as $key => $info ) {
-                        echo '<div id="bhg-tab-' . esc_attr( $key ) . '" class="bhg-tab-pane' . ( $first ? ' active' : '' ) . '">';
-                        $rows = isset( $results[ $key ] ) ? $results[ $key ] : array();
-                        if ( ! $rows ) {
-                                echo '<p>' . esc_html__( 'No data yet.', 'bonus-hunt-guesser' ) . '</p>';
-                        } else {
-                                echo '<table class="bhg-leaderboard"><thead><tr><th>#</th><th>' . esc_html__( 'User', 'bonus-hunt-guesser' ) . '</th><th>' . esc_html__( 'Wins', 'bonus-hunt-guesser' ) . '</th></tr></thead><tbody>';
-                                $pos = 1;
-                                foreach ( $rows as $r ) {
-                                       /* translators: %d: user ID. */
-                                       $user_label = $r->user_login ? $r->user_login : sprintf( __( 'user#%d', 'bonus-hunt-guesser' ), (int) $r->user_id );
-                                        echo '<tr><td>' . (int) $pos++ . '</td><td>' . esc_html( $user_label ) . '</td><td>' . (int) $r->total_wins . '</td></tr>';
-                                }
-                                echo '</tbody></table>';
-                        }
-                        echo '</div>';
-                        $first = false;
-                }
+				$first = true;
+				foreach ( $periods as $key => $info ) {
+						echo '<div id="bhg-tab-' . esc_attr( $key ) . '" class="bhg-tab-pane' . ( $first ? ' active' : '' ) . '">';
+						$rows = isset( $results[ $key ] ) ? $results[ $key ] : array();
+						if ( ! $rows ) {
+								echo '<p>' . esc_html__( 'No data yet.', 'bonus-hunt-guesser' ) . '</p>';
+						} else {
+								echo '<table class="bhg-leaderboard"><thead><tr><th>#</th><th>' . esc_html__( 'User', 'bonus-hunt-guesser' ) . '</th><th>' . esc_html__( 'Wins', 'bonus-hunt-guesser' ) . '</th></tr></thead><tbody>';
+								$pos = 1;
+								foreach ( $rows as $r ) {
+									   /* translators: %d: user ID. */
+									   $user_label = $r->user_login ? $r->user_login : sprintf( __( 'user#%d', 'bonus-hunt-guesser' ), (int) $r->user_id );
+										echo '<tr><td>' . (int) $pos++ . '</td><td>' . esc_html( $user_label ) . '</td><td>' . (int) $r->total_wins . '</td></tr>';
+								}
+								echo '</tbody></table>';
+						}
+						echo '</div>';
+						$first = false;
+				}
 
 		if ( $hunts ) {
-                       $base = wp_validate_redirect( wp_unslash( $_SERVER['REQUEST_URI'] ), home_url( '/' ) );
-                       $base = esc_url_raw( remove_query_arg( 'hunt_id', $base ) );
+					   $base = wp_validate_redirect( wp_unslash( $_SERVER['REQUEST_URI'] ), home_url( '/' ) );
+					   $base = esc_url_raw( remove_query_arg( 'hunt_id', $base ) );
 			echo '<div id="bhg-tab-hunts" class="bhg-tab-pane">';
 			echo '<ul class="bhg-hunt-history">';
 			foreach ( $hunts as $hunt ) {
-                                $url = add_query_arg( 'hunt_id', (int) $hunt->id, $base );
-                                echo '<li><a href="' . esc_url( $url ) . '">' . esc_html( $hunt->title ) . '</a></li>';
-                        }
+								$url = add_query_arg( 'hunt_id', (int) $hunt->id, $base );
+								echo '<li><a href="' . esc_url( $url ) . '">' . esc_html( $hunt->title ) . '</a></li>';
+						}
 			echo '</ul>';
 			echo '</div>';
 		}

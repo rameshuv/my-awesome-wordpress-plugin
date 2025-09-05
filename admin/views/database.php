@@ -83,7 +83,7 @@ function bhg_insert_demo_data() {
 	$wpdb->insert(
 		$wpdb->prefix . 'bhg_bonus_hunts',
 		array(
-                        'title' => __( 'Demo Bonus Hunt', 'bonus-hunt-guesser' ),
+						'title' => __( 'Demo Bonus Hunt', 'bonus-hunt-guesser' ),
 			'starting_balance' => 2000,
 			'number_of_bonuses' => 10,
 			'status' => 'active',

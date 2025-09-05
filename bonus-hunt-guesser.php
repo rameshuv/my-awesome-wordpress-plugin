@@ -229,51 +229,51 @@ add_action( 'wp_enqueue_scripts', 'bhg_enqueue_public_assets' );
  * @return void
  */
 function bhg_enqueue_public_assets() {
-        $settings  = get_option( 'bhg_plugin_settings', [] );
-        $min_guess = isset( $settings['min_guess_amount'] ) ? (float) $settings['min_guess_amount'] : 0;
-        $max_guess = isset( $settings['max_guess_amount'] ) ? (float) $settings['max_guess_amount'] : 100000;
+		$settings  = get_option( 'bhg_plugin_settings', [] );
+		$min_guess = isset( $settings['min_guess_amount'] ) ? (float) $settings['min_guess_amount'] : 0;
+		$max_guess = isset( $settings['max_guess_amount'] ) ? (float) $settings['max_guess_amount'] : 100000;
 
-        wp_register_style(
-                'bhg-public',
-                BHG_PLUGIN_URL . 'assets/css/public.css',
-                array(),
-                defined( 'BHG_VERSION' ) ? BHG_VERSION : null
-        );
+		wp_register_style(
+				'bhg-public',
+				BHG_PLUGIN_URL . 'assets/css/public.css',
+				array(),
+				defined( 'BHG_VERSION' ) ? BHG_VERSION : null
+		);
 
-        wp_register_script(
-                'bhg-public',
-                BHG_PLUGIN_URL . 'assets/js/public.js',
-                array( 'jquery' ),
-                defined( 'BHG_VERSION' ) ? BHG_VERSION : null,
-                true
-        );
+		wp_register_script(
+				'bhg-public',
+				BHG_PLUGIN_URL . 'assets/js/public.js',
+				array( 'jquery' ),
+				defined( 'BHG_VERSION' ) ? BHG_VERSION : null,
+				true
+		);
 
-        $guess_range = sprintf(
-                __( 'Guess must be between %1$s and %2$s.', 'bonus-hunt-guesser' ),
-                bhg_format_currency( $min_guess ),
-                bhg_format_currency( $max_guess )
-        );
+		$guess_range = sprintf(
+				__( 'Guess must be between %1$s and %2$s.', 'bonus-hunt-guesser' ),
+				bhg_format_currency( $min_guess ),
+				bhg_format_currency( $max_guess )
+		);
 
-        wp_localize_script(
-                'bhg-public',
-                'bhg_public_ajax',
-                array(
-                        'ajax_url'         => admin_url( 'admin-ajax.php' ),
-                        'nonce'            => wp_create_nonce( 'bhg_public_nonce' ),
-                        'is_logged_in'     => is_user_logged_in(),
-                        'min_guess_amount' => $min_guess,
-                        'max_guess_amount' => $max_guess,
-                        'i18n'             => array(
-                                'guess_required'     => __( 'Please enter a guess.', 'bonus-hunt-guesser' ),
-                                'guess_numeric'      => __( 'Please enter a valid number.', 'bonus-hunt-guesser' ),
-                                'guess_range'        => $guess_range,
-                                'guess_submitted'    => __( 'Your guess has been submitted!', 'bonus-hunt-guesser' ),
-                                'ajax_error'         => __( 'An error occurred. Please try again.', 'bonus-hunt-guesser' ),
-                                'affiliate_user'     => __( 'Affiliate', 'bonus-hunt-guesser' ),
-                                'non_affiliate_user' => __( 'Non-affiliate', 'bonus-hunt-guesser' ),
-                        ),
-                )
-        );
+		wp_localize_script(
+				'bhg-public',
+				'bhg_public_ajax',
+				array(
+						'ajax_url'         => admin_url( 'admin-ajax.php' ),
+						'nonce'            => wp_create_nonce( 'bhg_public_nonce' ),
+						'is_logged_in'     => is_user_logged_in(),
+						'min_guess_amount' => $min_guess,
+						'max_guess_amount' => $max_guess,
+						'i18n'             => array(
+								'guess_required'     => __( 'Please enter a guess.', 'bonus-hunt-guesser' ),
+								'guess_numeric'      => __( 'Please enter a valid number.', 'bonus-hunt-guesser' ),
+								'guess_range'        => $guess_range,
+								'guess_submitted'    => __( 'Your guess has been submitted!', 'bonus-hunt-guesser' ),
+								'ajax_error'         => __( 'An error occurred. Please try again.', 'bonus-hunt-guesser' ),
+								'affiliate_user'     => __( 'Affiliate', 'bonus-hunt-guesser' ),
+								'non_affiliate_user' => __( 'Non-affiliate', 'bonus-hunt-guesser' ),
+						),
+				)
+		);
 
 	wp_enqueue_style( 'bhg-public' );
 	wp_enqueue_script( 'bhg-public' );
@@ -351,7 +351,7 @@ function bhg_handle_settings_save() {
 	}
 
 	// Verify nonce
-        if ( ! isset( $_POST['bhg_settings_nonce'] ) || ! wp_verify_nonce( wp_unslash( $_POST['bhg_settings_nonce'] ), 'bhg_save_settings_nonce' ) ) {
+		if ( ! isset( $_POST['bhg_settings_nonce'] ) || ! wp_verify_nonce( wp_unslash( $_POST['bhg_settings_nonce'] ), 'bhg_save_settings_nonce' ) ) {
 		wp_safe_redirect( esc_url_raw( admin_url( 'admin.php?page=bhg_settings&error=nonce_failed' ) ) );
 		exit;
 	}
@@ -359,22 +359,22 @@ function bhg_handle_settings_save() {
 	// Sanitize and validate data
 	$settings = array();
 
-        if ( isset( $_POST['bhg_default_tournament_period'] ) ) {
-                $period = sanitize_text_field( wp_unslash( $_POST['bhg_default_tournament_period'] ) );
+		if ( isset( $_POST['bhg_default_tournament_period'] ) ) {
+				$period = sanitize_text_field( wp_unslash( $_POST['bhg_default_tournament_period'] ) );
 		if ( in_array( $period, array( 'weekly', 'monthly', 'quarterly', 'yearly', 'alltime' ) ) ) {
 			$settings['default_tournament_period'] = $period;
 		}
 	}
 
-        if ( isset( $_POST['bhg_max_guess_amount'] ) ) {
-                $max = floatval( wp_unslash( $_POST['bhg_max_guess_amount'] ) );
+		if ( isset( $_POST['bhg_max_guess_amount'] ) ) {
+				$max = floatval( wp_unslash( $_POST['bhg_max_guess_amount'] ) );
 		if ( $max >= 0 ) {
 			$settings['max_guess_amount'] = $max;
 		}
 	}
 
-        if ( isset( $_POST['bhg_min_guess_amount'] ) ) {
-                $min = floatval( wp_unslash( $_POST['bhg_min_guess_amount'] ) );
+		if ( isset( $_POST['bhg_min_guess_amount'] ) ) {
+				$min = floatval( wp_unslash( $_POST['bhg_min_guess_amount'] ) );
 		if ( $min >= 0 ) {
 			$settings['min_guess_amount'] = $min;
 		}
@@ -387,20 +387,20 @@ function bhg_handle_settings_save() {
 		exit;
 	}
 
-        if ( isset( $_POST['bhg_allow_guess_changes'] ) ) {
-                $allow = sanitize_text_field( wp_unslash( $_POST['bhg_allow_guess_changes'] ) );
+		if ( isset( $_POST['bhg_allow_guess_changes'] ) ) {
+				$allow = sanitize_text_field( wp_unslash( $_POST['bhg_allow_guess_changes'] ) );
 		if ( in_array( $allow, array( 'yes', 'no' ) ) ) {
 			$settings['allow_guess_changes'] = $allow;
 		}
 	}
 
-        if ( isset( $_POST['bhg_ads_enabled'] ) ) {
-                $ads_enabled           = sanitize_text_field( wp_unslash( $_POST['bhg_ads_enabled'] ) );
+		if ( isset( $_POST['bhg_ads_enabled'] ) ) {
+				$ads_enabled           = sanitize_text_field( wp_unslash( $_POST['bhg_ads_enabled'] ) );
 		$settings['ads_enabled'] = $ads_enabled === '1' ? 1 : 0;
 	}
 
-        if ( isset( $_POST['bhg_email_from'] ) ) {
-                $email_from = sanitize_email( wp_unslash( $_POST['bhg_email_from'] ) );
+		if ( isset( $_POST['bhg_email_from'] ) ) {
+				$email_from = sanitize_email( wp_unslash( $_POST['bhg_email_from'] ) );
 		if ( $email_from ) {
 			$settings['email_from'] = $email_from;
 		}
@@ -569,36 +569,36 @@ function bhg_should_show_ad( $visibility ) {
  * @return array List of ad rows.
  */
 function bhg_build_ads_query( $table, $placement = 'footer' ) {
-        global $wpdb;
+		global $wpdb;
 
-        $allowed_tables = array( $wpdb->prefix . 'bhg_ads' );
-        if ( ! in_array( $table, $allowed_tables, true ) ) {
-                return array();
-        }
+		$allowed_tables = array( $wpdb->prefix . 'bhg_ads' );
+		if ( ! in_array( $table, $allowed_tables, true ) ) {
+				return array();
+		}
 
-        $query = $wpdb->prepare(
-                "SELECT * FROM `{$table}` WHERE placement = %s AND active = %d",
-                $placement,
-                1
-        );
+		$query = $wpdb->prepare(
+				"SELECT * FROM `{$table}` WHERE placement = %s AND active = %d",
+				$placement,
+				1
+		);
 
-        $rows = $wpdb->get_results( $query );
-        if ( did_action( 'wp' ) && function_exists( 'get_queried_object_id' ) ) {
-                $pid = (int) get_queried_object_id();
-                if ( $pid && is_array( $rows ) ) {
-                        $rows = array_filter(
-                                $rows,
-                                function( $r ) use ( $pid ) {
-                                        if ( empty( $r->target_pages ) ) {
-                                                return true;
-                                        }
-                                        $ids = array_filter( array_map( 'intval', array_map( 'trim', explode( ',', $r->target_pages ) ) ) );
-                                        return in_array( $pid, $ids, true );
-                                }
-                        );
-                }
-        }
-        return $rows;
+		$rows = $wpdb->get_results( $query );
+		if ( did_action( 'wp' ) && function_exists( 'get_queried_object_id' ) ) {
+				$pid = (int) get_queried_object_id();
+				if ( $pid && is_array( $rows ) ) {
+						$rows = array_filter(
+								$rows,
+								function( $r ) use ( $pid ) {
+										if ( empty( $r->target_pages ) ) {
+												return true;
+										}
+										$ids = array_filter( array_map( 'intval', array_map( 'trim', explode( ',', $r->target_pages ) ) ) );
+										return in_array( $pid, $ids, true );
+								}
+						);
+				}
+		}
+		return $rows;
 }
 
 // AJAX handler for loading leaderboard data
@@ -725,8 +725,8 @@ function bhg_generate_leaderboard_html( $timeframe ) {
 
 	$pos = $offset + 1;
 	foreach ( $rows as $row ) {
-               /* translators: %d: user ID. */
-               $user_label = $row->user_login ? $row->user_login : sprintf( __( 'user#%d', 'bonus-hunt-guesser' ), (int) $row->user_id );
+			   /* translators: %d: user ID. */
+			   $user_label = $row->user_login ? $row->user_login : sprintf( __( 'user#%d', 'bonus-hunt-guesser' ), (int) $row->user_id );
 		echo '<tr>';
 		echo '<td>' . (int) $pos++ . '</td>';
 		echo '<td>' . esc_html( $user_label ) . '</td>';

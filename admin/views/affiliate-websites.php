@@ -14,8 +14,8 @@ $row = $edit_id ? $wpdb->get_row($wpdb->prepare("SELECT * FROM `$table` WHERE id
 $rows = $wpdb->get_results( "SELECT * FROM `$table` ORDER BY id DESC" );
 
 $status_labels = [
-        'active'   => __( 'Active', 'bonus-hunt-guesser' ),
-        'inactive' => __( 'Inactive', 'bonus-hunt-guesser' ),
+		'active'   => __( 'Active', 'bonus-hunt-guesser' ),
+		'inactive' => __( 'Inactive', 'bonus-hunt-guesser' ),
 ];
 ?>
 <div class="wrap">
@@ -40,7 +40,7 @@ $status_labels = [
 		  <td><?php echo (int)$r->id; ?></td>
 		  <td><?php echo esc_html($r->name); ?></td>
 		  <td><?php echo esc_html($r->url); ?></td>
-                  <td><?php echo esc_html( $status_labels[ $r->status ] ?? $r->status ); ?></td>
+				  <td><?php echo esc_html( $status_labels[ $r->status ] ?? $r->status ); ?></td>
 		  <td>
 			<a class="button" href="<?php echo esc_url(add_query_arg(['edit'=>(int)$r->id])); ?>"><?php esc_html_e('Edit','bonus-hunt-guesser'); ?></a>
 			<form method="post" action="<?php echo esc_url(admin_url('admin-post.php')); ?>" style="display:inline" onsubmit="return confirm('<?php echo esc_js(__('Delete this affiliate?', 'bonus-hunt-guesser')); ?>');">
@@ -73,9 +73,9 @@ $status_labels = [
 		<th><label for="aff_status"><?php esc_html_e('Status','bonus-hunt-guesser'); ?></label></th>
 		<td>
 		  <select id="aff_status" name="status">
-                        <?php $opts = array_keys( $status_labels ); $cur = $row->status ?? 'active'; foreach ( $opts as $o ) : ?>
-                          <option value="<?php echo esc_attr( $o ); ?>" <?php selected( $cur, $o ); ?>><?php echo esc_html( $status_labels[ $o ] ); ?></option>
-                        <?php endforeach; ?>
+						<?php $opts = array_keys( $status_labels ); $cur = $row->status ?? 'active'; foreach ( $opts as $o ) : ?>
+						  <option value="<?php echo esc_attr( $o ); ?>" <?php selected( $cur, $o ); ?>><?php echo esc_html( $status_labels[ $o ] ); ?></option>
+						<?php endforeach; ?>
 		  </select>
 		</td>
 	  </tr>
