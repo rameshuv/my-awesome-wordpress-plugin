@@ -747,7 +747,114 @@ function bhg_load_leaderboard_ajax() {
  * @return string Generated HTML.
  */
 function bhg_generate_leaderboard_html( $timeframe ) {
-    return '<div class="bhg-leaderboard" data-timeframe="' . esc_attr( $timeframe ) . '">Leaderboard content for ' . esc_html( $timeframe ) . '</div>';
+    global $wpdb;
+
+    $per_page = 20;
+    $paged    = isset( $_POST['paged'] ) ? max( 1, (int) $_POST['paged'] ) : 1;
+    $offset   = ( $paged - 1 ) * $per_page;
+
+    $start_date = '';
+    $now        = current_time( 'timestamp' );
+    switch ( strtolower( $timeframe ) ) {
+        case 'monthly':
+            $start_date = gmdate( 'Y-m-01 00:00:00', $now );
+            break;
+        case 'yearly':
+            $start_date = gmdate( 'Y-01-01 00:00:00', $now );
+            break;
+        case 'overall':
+            $start_date = gmdate( 'Y-m-d H:i:s', $now - 30 * DAY_IN_SECONDS );
+            break;
+        case 'all-time':
+        case 'all_time':
+        default:
+            $start_date = '';
+            break;
+    }
+
+    $g = $wpdb->prefix . 'bhg_guesses';
+    $h = $wpdb->prefix . 'bhg_bonus_hunts';
+    $u = $wpdb->users;
+
+    $where = "h.status='closed' AND h.final_balance IS NOT NULL";
+    $args  = array();
+    if ( $start_date ) {
+        $where .= " AND h.updated_at >= %s";
+        $args[] = $start_date;
+    }
+
+    $sql_total = "
+        SELECT COUNT(*) FROM (
+            SELECT g.user_id
+            FROM {$g} g
+            INNER JOIN {$h} h ON h.id = g.hunt_id
+            WHERE {$where} AND NOT EXISTS (
+                SELECT 1 FROM {$g} g2
+                WHERE g2.hunt_id = g.hunt_id
+                  AND ABS(g2.guess - h.final_balance) < ABS(g.guess - h.final_balance)
+            )
+            GROUP BY g.user_id
+        ) t";
+
+    if ( $args ) {
+        $total = (int) $wpdb->get_var( $wpdb->prepare( $sql_total, $args ) );
+    } else {
+        $total = (int) $wpdb->get_var( $sql_total );
+    }
+
+    $sql = "
+        SELECT g.user_id, u.user_login, COUNT(*) AS wins
+        FROM {$g} g
+        INNER JOIN {$h} h ON h.id = g.hunt_id
+        INNER JOIN {$u} u ON u.ID = g.user_id
+        WHERE {$where} AND NOT EXISTS (
+            SELECT 1 FROM {$g} g2
+            WHERE g2.hunt_id = g.hunt_id
+              AND ABS(g2.guess - h.final_balance) < ABS(g.guess - h.final_balance)
+        )
+        GROUP BY g.user_id, u.user_login
+        ORDER BY wins DESC, u.user_login ASC
+        LIMIT %d OFFSET %d";
+
+    $args_query   = $args;
+    $args_query[] = $per_page;
+    $args_query[] = $offset;
+    $rows         = $wpdb->get_results( $wpdb->prepare( $sql, $args_query ) );
+
+    if ( ! $rows ) {
+        return '<p>' . esc_html__( 'No data available.', 'bonus-hunt-guesser' ) . '</p>';
+    }
+
+    ob_start();
+    echo '<table class="bhg-leaderboard bhg-table" data-timeframe="' . esc_attr( $timeframe ) . '">';
+    echo '<thead><tr>';
+    echo '<th class="sortable" data-sort="position">' . esc_html__( 'Position', 'bonus-hunt-guesser' ) . '</th>';
+    echo '<th class="sortable" data-sort="username">' . esc_html__( 'User', 'bonus-hunt-guesser' ) . '</th>';
+    echo '<th class="sortable" data-sort="wins">' . esc_html__( 'Wins', 'bonus-hunt-guesser' ) . '</th>';
+    echo '</tr></thead><tbody>';
+
+    $pos = $offset + 1;
+    foreach ( $rows as $row ) {
+        $user_label = $row->user_login ? $row->user_login : 'user#' . (int) $row->user_id;
+        echo '<tr>';
+        echo '<td>' . (int) $pos++ . '</td>';
+        echo '<td>' . esc_html( $user_label ) . '</td>';
+        echo '<td>' . (int) $row->wins . '</td>';
+        echo '</tr>';
+    }
+    echo '</tbody></table>';
+
+    $pages = (int) ceil( $total / $per_page );
+    if ( $pages > 1 ) {
+        echo '<div class="bhg-pagination">';
+        for ( $p = 1; $p <= $pages; $p++ ) {
+            $current = $p === $paged ? ' class="current"' : '';
+            echo '<a href="#" data-page="' . (int) $p . '"' . $current . '>' . (int) $p . '</a> ';
+        }
+        echo '</div>';
+    }
+
+    return ob_get_clean();
 }
 
 // Helper function to check if user is affiliate
