@@ -30,8 +30,8 @@ class BHG_Demo {
         global $wpdb;
 
         // Wipe demo data
-        $wpdb->query("DELETE FROM {$wpdb->prefix}bhg_bonus_hunts WHERE title LIKE '%(Demo)%'");
-        $wpdb->query("DELETE FROM {$wpdb->prefix}bhg_tournaments WHERE title LIKE '%(Demo)%'");
+        $wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->prefix}bhg_bonus_hunts WHERE title LIKE '%(Demo)%'" ) );
+        $wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->prefix}bhg_tournaments WHERE title LIKE '%(Demo)%'" ) );
 
         // Insert demo hunt
         $wpdb->insert("{$wpdb->prefix}bhg_bonus_hunts",[

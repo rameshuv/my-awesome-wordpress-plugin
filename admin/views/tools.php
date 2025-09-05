@@ -6,11 +6,11 @@ if ( ! defined( 'ABSPATH' ) ) { exit; }
 
   <?php
   global $wpdb;
-  $hunts = (int)$wpdb->get_var("SELECT COUNT(*) FROM {$wpdb->prefix}bhg_bonus_hunts");
-  $guesses = (int)$wpdb->get_var("SELECT COUNT(*) FROM {$wpdb->prefix}bhg_guesses");
-  $users = (int)$wpdb->get_var("SELECT COUNT(*) FROM {$wpdb->users}");
-  $ads = (int)$wpdb->get_var("SELECT COUNT(*) FROM {$wpdb->prefix}bhg_ads");
-  $tournaments = (int)$wpdb->get_var("SELECT COUNT(*) FROM {$wpdb->prefix}bhg_tournaments");
+  $hunts = (int)$wpdb->get_var( $wpdb->prepare("SELECT COUNT(*) FROM {$wpdb->prefix}bhg_bonus_hunts") );
+  $guesses = (int)$wpdb->get_var( $wpdb->prepare("SELECT COUNT(*) FROM {$wpdb->prefix}bhg_guesses") );
+  $users = (int)$wpdb->get_var( $wpdb->prepare("SELECT COUNT(*) FROM {$wpdb->users}") );
+  $ads = (int)$wpdb->get_var( $wpdb->prepare("SELECT COUNT(*) FROM {$wpdb->prefix}bhg_ads") );
+  $tournaments = (int)$wpdb->get_var( $wpdb->prepare("SELECT COUNT(*) FROM {$wpdb->prefix}bhg_tournaments") );
   ?>
 
   <div class="card" style="max-width:900px;padding:16px;margin-top:12px;">

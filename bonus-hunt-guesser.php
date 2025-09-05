@@ -851,7 +851,7 @@ function bhg_generate_leaderboard_html( $timeframe ) {
     if ( $args ) {
         $total = (int) $wpdb->get_var( $wpdb->prepare( $sql_total, $args ) );
     } else {
-        $total = (int) $wpdb->get_var( $sql_total );
+        $total = (int) $wpdb->get_var( $wpdb->prepare( $sql_total ) );
     }
 
     $sql = "
