@@ -6,13 +6,13 @@ if (!current_user_can('manage_options')) {
 
 $paged    = max(1, isset($_GET['paged']) ? (int) $_GET['paged'] : 1);
 $per_page = 30;
-$search   = isset($_GET['s']) ? sanitize_text_field($_GET['s']) : '';
+$search   = isset( $_GET['s'] ) ? sanitize_text_field( wp_unslash( $_GET['s'] ) ) : '';
 $allowed_orderby = ['user_login', 'display_name', 'user_email'];
-$orderby         = isset($_GET['orderby']) ? sanitize_key($_GET['orderby']) : 'user_login';
+$orderby         = isset( $_GET['orderby'] ) ? sanitize_key( wp_unslash( $_GET['orderby'] ) ) : 'user_login';
 if ( ! in_array( $orderby, $allowed_orderby, true ) ) {
 	$orderby = 'user_login';
 }
-$order = ( isset( $_GET['order'] ) && strtolower( $_GET['order'] ) === 'desc' ) ? 'DESC' : 'ASC';
+$order = ( isset( $_GET['order'] ) && 'desc' === strtolower( sanitize_key( wp_unslash( $_GET['order'] ) ) ) ) ? 'DESC' : 'ASC';
 
 $args = [
 	'number'   => $per_page,
