@@ -360,11 +360,12 @@ function bhg_handle_settings_save() {
 		wp_die( esc_html__( 'You do not have sufficient permissions to perform this action.', 'bonus-hunt-guesser' ) );
 	}
 
-	// Verify nonce
-	if ( ! isset( $_POST['bhg_settings_nonce'] ) || ! wp_verify_nonce( wp_unslash( $_POST['bhg_settings_nonce'] ), 'bhg_save_settings_nonce' ) ) {
-		wp_safe_redirect( esc_url_raw( admin_url( 'admin.php?page=bhg_settings&error=nonce_failed' ) ) );
-		exit;
-	}
+// Verify nonce
+$nonce = isset( $_POST['bhg_nonce'] ) ? sanitize_text_field( wp_unslash( $_POST['bhg_nonce'] ) ) : '';
+if ( ! $nonce || ! wp_verify_nonce( $nonce, 'bhg_save_settings' ) ) {
+wp_safe_redirect( esc_url_raw( admin_url( 'admin.php?page=bhg_settings&error=nonce_failed' ) ) );
+exit;
+}
 
 	// Sanitize and validate data
 	$settings = array();
