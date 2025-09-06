@@ -110,15 +110,16 @@ if ( ! function_exists( 'bhg_t' ) ) {
 		 * @param string $default_value  Default text if not found.
 		 * @return string Unsanitized translation value.
 		 */
-	function bhg_t( $key, $default_value = '' ) {
-		global $wpdb;
-		static $cache = array();
+        function bhg_t( $key, $default_value = '' ) {
+                global $wpdb;
+                $p = $wpdb->prefix;
+                static $cache = array();
 
 		if ( isset( $cache[ $key ] ) ) {
 			return $cache[ $key ];
 		}
 
-		$table = esc_sql( $wpdb->prefix . 'bhg_translations' );
+                $table = esc_sql( "{$p}bhg_translations" );
 		$row   = $wpdb->get_row(
 			$wpdb->prepare(
 				"SELECT tvalue FROM {$table} WHERE tkey = %s", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
@@ -306,10 +307,11 @@ if ( ! function_exists( 'bhg_seed_default_translations_if_empty' ) ) {
 	 *
 	 * @return void
 	 */
-	function bhg_seed_default_translations_if_empty() {
-		global $wpdb;
+        function bhg_seed_default_translations_if_empty() {
+                global $wpdb;
+                $p = $wpdb->prefix;
 
-		$table = $wpdb->prefix . 'bhg_translations';
+                $table = $p . 'bhg_translations';
 
 		foreach ( bhg_get_default_translations() as $tkey => $tvalue ) {
 			$tkey = trim( (string) $tkey );
@@ -482,10 +484,11 @@ if ( ! function_exists( 'bhg_render_affiliate_dot' ) ) {
  * @return string
  */
 function bhg_render_ads( $placement = 'footer', $hunt_id = 0 ) {
-	global $wpdb;
+        global $wpdb;
+        $p = $wpdb->prefix;
 
-	$tbl       = esc_sql( $wpdb->prefix . 'bhg_ads' );
-	$placement = sanitize_text_field( $placement );
+        $tbl       = esc_sql( "{$p}bhg_ads" );
+        $placement = sanitize_text_field( $placement );
 
 	$rows = $wpdb->get_results(
 		$wpdb->prepare(
@@ -495,9 +498,9 @@ function bhg_render_ads( $placement = 'footer', $hunt_id = 0 ) {
 	);
 
 	$hunt_site_id = 0;
-	if ( $hunt_id ) {
-		$hunts_tbl    = esc_sql( $wpdb->prefix . 'bhg_bonus_hunts' );
-		$hunt_site_id = (int) $wpdb->get_var(
+        if ( $hunt_id ) {
+                $hunts_tbl    = esc_sql( "{$p}bhg_bonus_hunts" );
+                $hunt_site_id = (int) $wpdb->get_var(
 			$wpdb->prepare(
 				"SELECT affiliate_site_id FROM {$hunts_tbl} WHERE id=%d", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 				(int) $hunt_id
