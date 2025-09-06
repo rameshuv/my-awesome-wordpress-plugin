@@ -92,8 +92,8 @@ if ( ! class_exists( 'BHG_Menus' ) ) {
 			$slug = 'bhg';
 
 			add_menu_page(
-				__( 'Bonus Hunt', 'bonus-hunt-guesser' ),
-				__( 'Bonus Hunt', 'bonus-hunt-guesser' ),
+				__( 'Bonus Hunt Guesser', 'bonus-hunt-guesser' ),
+				__( 'Bonus Hunt Guesser', 'bonus-hunt-guesser' ),
 				$cap,
 				$slug,
 				array( $this, 'render_dashboard' ),
