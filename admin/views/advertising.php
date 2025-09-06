@@ -95,25 +95,25 @@ $visible_labels = array(
 								?>
 					</td>
 <td><?php echo 1 === (int) $ad->active ? esc_html__( 'Yes', 'bonus-hunt-guesser' ) : esc_html__( 'No', 'bonus-hunt-guesser' ); ?></td>
-			<td>
-			<a class="button" href="<?php echo esc_url( add_query_arg( array( 'edit' => (int) $ad->id ) ) ); ?>"><?php echo esc_html__( 'Edit', 'bonus-hunt-guesser' ); ?></a>
-			<a class="button-link-delete" href="
-				<?php
-				echo esc_url(
-					wp_nonce_url(
-						add_query_arg(
-							array(
-								'action' => 'delete',
-								'id'     => (int) $ad->id,
-							)
-						),
-						'bhg_delete_ad'
-					)
-				);
-				?>
-												" onclick="return confirm('<?php echo esc_js( __( 'Delete this ad?', 'bonus-hunt-guesser' ) ); ?>');"><?php echo esc_html__( 'Remove', 'bonus-hunt-guesser' ); ?></a>
-			</td>
-		</tr>
+                       <td>
+                       <a class="button" href="<?php echo esc_url( add_query_arg( array( 'edit' => (int) $ad->id ) ) ); ?>"><?php echo esc_html__( 'Edit', 'bonus-hunt-guesser' ); ?></a>
+                       <a class="button button-link-delete" href="
+                               <?php
+                               echo esc_url(
+                                       wp_nonce_url(
+                                               add_query_arg(
+                                                       array(
+                                                               'action' => 'delete',
+                                                               'id'     => (int) $ad->id,
+                                                       )
+                                               ),
+                                               'bhg_delete_ad'
+                                       )
+                               );
+                               ?>
+                               " onclick="return confirm('<?php echo esc_js( __( 'Delete this ad?', 'bonus-hunt-guesser' ) ); ?>');"><?php echo esc_html__( 'Remove', 'bonus-hunt-guesser' ); ?></a>
+                       </td>
+               </tr>
 					<?php
 		endforeach;
 endif;
