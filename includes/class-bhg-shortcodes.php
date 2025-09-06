@@ -13,12 +13,41 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 if ( ! class_exists( 'BHG_Shortcodes' ) ) {
 
-	class BHG_Shortcodes {
+       class BHG_Shortcodes {
 
-		/**
-		 * Register plugin shortcodes.
-		 */
-		public function __construct() {
+               /**
+                * Allowed column mappings for leaderboard queries.
+                *
+                * @var array<string, string>
+                */
+               private const LEADERBOARD_COLUMNS = array(
+                       'guess'    => 'g.guess',
+                       'user'     => 'u.user_login',
+                       'position' => 'g.id', // Stable proxy.
+                       'wins'     => 'tr.wins',
+               );
+
+               /**
+                * Allowed column mappings for user guess queries.
+                *
+                * @var array<string, string>
+                */
+               private const USER_GUESS_COLUMNS = array(
+                       'guess' => 'g.guess',
+                       'user'  => 'u.user_login',
+               );
+
+               /**
+                * Allowed SQL order directions.
+                *
+                * @var string[]
+                */
+               private const ORDER_DIRECTIONS = array( 'asc', 'desc' );
+
+               /**
+                * Register plugin shortcodes.
+                */
+               public function __construct() {
 			// Register shortcodes once.
 			add_shortcode( 'bhg_active_hunt', array( $this, 'active_hunt_shortcode' ) );
 			add_shortcode( 'bhg_guess_form', array( $this, 'guess_form_shortcode' ) );
@@ -205,24 +234,19 @@ if ( ! class_exists( 'BHG_Shortcodes' ) ) {
 			$g         = $wpdb->prefix . 'bhg_guesses';
 			$u         = $wpdb->users;
 			$results   = $wpdb->prefix . 'bhg_tournament_results';
-			$fields    = array_map( 'trim', explode( ',', $a['fields'] ) );
-			$show_wins = in_array( 'wins', $fields, true );
+                       $fields    = array_map( 'trim', explode( ',', $a['fields'] ) );
+                       $show_wins = in_array( 'wins', $fields, true );
 
-                       $allowed_orderby = array(
-                               'guess'    => 'g.guess',
-                               'user'     => 'u.user_login',
-                               'position' => 'g.id', // Stable proxy.
-                               'wins'     => 'tr.wins',
-                       );
-                       $allowed_order   = array( 'asc', 'desc' );
+                       $allowed_orderby = self::LEADERBOARD_COLUMNS;
+                       $allowed_order   = self::ORDER_DIRECTIONS;
 
-                       $rank_key   = sanitize_key( $a['ranking'] ? $a['ranking'] : $a['orderby'] );
+                       $rank_key    = sanitize_key( $a['ranking'] ? $a['ranking'] : $a['orderby'] );
                        $orderby_key = array_key_exists( $rank_key, $allowed_orderby ) ? $rank_key : 'guess';
                        $orderby     = esc_sql( $allowed_orderby[ $orderby_key ] ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- column is whitelisted
 
                        $order_key = strtolower( sanitize_key( $a['order'] ) );
-                       $order     = in_array( $order_key, $allowed_order, true ) ? $order_key : 'asc';
-                       $order     = esc_sql( strtoupper( $order ) ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- order direction is whitelisted
+                       $order_key = in_array( $order_key, $allowed_order, true ) ? $order_key : 'asc';
+                       $order     = esc_sql( strtoupper( $order_key ) ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- order direction is whitelisted
 
 			$page   = max( 1, (int) $a['page'] );
 			$per    = max( 1, (int) $a['per_page'] );
@@ -380,19 +404,16 @@ if ( ! class_exists( 'BHG_Shortcodes' ) ) {
 				$params[] = $website;
 			}
 
-                       $allowed_orderby = array(
-                               'guess' => 'g.guess',
-                               'user'  => 'u.user_login',
-                       );
-                       $allowed_order   = array( 'asc', 'desc' );
+                       $allowed_orderby = self::USER_GUESS_COLUMNS;
+                       $allowed_order   = self::ORDER_DIRECTIONS;
 
                        $orderby_param = sanitize_key( $a['orderby'] );
                        $orderby_key   = array_key_exists( $orderby_param, $allowed_orderby ) ? $orderby_param : 'guess';
                        $orderby       = esc_sql( $allowed_orderby[ $orderby_key ] ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- column is whitelisted
 
                        $order_key = strtolower( sanitize_key( $a['order'] ) );
-                       $order     = in_array( $order_key, $allowed_order, true ) ? $order_key : 'desc';
-                       $order     = esc_sql( strtoupper( $order ) ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- order direction is whitelisted
+                       $order_key = in_array( $order_key, $allowed_order, true ) ? $order_key : 'desc';
+                       $order     = esc_sql( strtoupper( $order_key ) ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- order direction is whitelisted
 
 			$limit_sql = '';
 			if ( 'recent' === strtolower( $a['timeline'] ) ) {
@@ -654,12 +675,12 @@ if ( ! class_exists( 'BHG_Shortcodes' ) ) {
 				}
 
                        // Sortable results (whitelisted).
-                                $allowed_orderby = array(
-                                        'wins'        => 'r.wins',
-                                        'username'    => 'u.user_login',
-                                        'last_win_at' => 'r.last_win_date',
-                                );
-                                $allowed_order = array( 'asc', 'desc' );
+                               $allowed_orderby = array(
+                                       'wins'        => 'r.wins',
+                                       'username'    => 'u.user_login',
+                                       'last_win_at' => 'r.last_win_date',
+                               );
+                               $allowed_order = self::ORDER_DIRECTIONS;
 
                                 $orderby      = isset( $_GET['orderby'] ) ? strtolower( sanitize_key( $_GET['orderby'] ) ) : 'wins';
                                 $orderby      = array_key_exists( $orderby, $allowed_orderby ) ? $orderby : 'wins';
