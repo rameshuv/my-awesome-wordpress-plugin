@@ -1,20 +1,28 @@
 <?php
+/**
+ * Admin view for editing a bonus hunt and its participants.
+ *
+ * @package Bonus_Hunt_Guesser
+ */
+
 if ( ! defined( 'ABSPATH' ) ) {
-	exit;
+		exit;
 }
 
 if ( ! current_user_can( 'manage_options' ) ) {
-	wp_die( esc_html__( 'You do not have sufficient permissions to access this page.', 'bonus-hunt-guesser' ) ); }
+		wp_die( esc_html__( 'You do not have sufficient permissions to access this page.', 'bonus-hunt-guesser' ) );
+}
 
 $hunt_id = absint( wp_unslash( $_GET['id'] ?? '' ) );
 if ( ! $hunt_id ) {
-	wp_die( esc_html__( 'Missing hunt id', 'bonus-hunt-guesser' ) ); }
+		wp_die( esc_html__( 'Missing hunt id', 'bonus-hunt-guesser' ) );
+}
 
 check_admin_referer( 'bhg_edit_hunt_' . $hunt_id, 'bhg_nonce' );
 
-// Handle delete guess action
-if ( isset( $_POST['bhg_remove_guess'] ) && isset( $_POST['bhg_remove_guess_nonce'] ) && wp_verify_nonce( $_POST['bhg_remove_guess_nonce'], 'bhg_remove_guess_action' ) ) {
-	$guess_id = (int) ( $_POST['guess_id'] ?? 0 );
+// Handle delete guess action.
+if ( isset( $_POST['bhg_remove_guess'], $_POST['bhg_remove_guess_nonce'] ) && wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['bhg_remove_guess_nonce'] ) ), 'bhg_remove_guess_action' ) ) {
+		$guess_id = isset( $_POST['guess_id'] ) ? absint( wp_unslash( $_POST['guess_id'] ) ) : 0;
 	if ( $guess_id > 0 && function_exists( 'bhg_remove_guess' ) ) {
 		bhg_remove_guess( $guess_id );
 		echo '<div class="notice notice-success is-dismissible"><p>' . esc_html__( 'Guess removed.', 'bonus-hunt-guesser' ) . '</p></div>';
@@ -27,22 +35,25 @@ if ( ! function_exists( 'bhg_get_hunt' ) || ! function_exists( 'bhg_get_hunt_par
 
 $hunt = bhg_get_hunt( $hunt_id );
 if ( ! $hunt ) {
-	wp_die( esc_html__( 'Hunt not found', 'bonus-hunt-guesser' ) ); }
+		wp_die( esc_html__( 'Hunt not found', 'bonus-hunt-guesser' ) );
+}
 
-$paged    = max( 1, absint( wp_unslash( $_GET['ppaged'] ?? '' ) ) );
-$per_page = 30;
-$data     = bhg_get_hunt_participants( $hunt_id, $paged, $per_page );
-$rows     = $data['rows'];
-$total    = (int) $data['total'];
-$pages    = max( 1, (int) ceil( $total / $per_page ) );
+$current_page   = max( 1, absint( wp_unslash( $_GET['ppaged'] ?? '' ) ) );
+$items_per_page = 30;
+$data           = bhg_get_hunt_participants( $hunt_id, $current_page, $items_per_page );
+$rows           = $data['rows'];
+$total          = (int) $data['total'];
+$total_pages    = max( 1, (int) ceil( $total / $items_per_page ) );
 ?>
 <div class="wrap">
-	<h1><?php echo esc_html( sprintf( __( 'Edit Hunt — %s', 'bonus-hunt-guesser' ), $hunt->title ) ); ?></h1>
+<?php // translators: %s: Hunt title. ?>
+<h1><?php echo esc_html( sprintf( __( 'Edit Hunt — %s', 'bonus-hunt-guesser' ), $hunt->title ) ); ?></h1>
 
 	<!-- Your existing edit form for the hunt would be above this line -->
 
 	<h2 style="margin-top:2em;"><?php esc_html_e( 'Participants', 'bonus-hunt-guesser' ); ?></h2>
-	<p><?php echo esc_html( sprintf( _n( '%s participant', '%s participants', $total, 'bonus-hunt-guesser' ), number_format_i18n( $total ) ) ); ?></p>
+		<?php // translators: %s: Number of participants. ?>
+		<p><?php echo esc_html( sprintf( _n( '%s participant', '%s participants', $total, 'bonus-hunt-guesser' ), number_format_i18n( $total ) ) ); ?></p>
 
 	<table class="widefat striped">
 	<thead>
@@ -80,22 +91,22 @@ $pages    = max( 1, (int) ceil( $total / $per_page ) );
 	</tbody>
 	</table>
 
-	<?php if ( $pages > 1 ) : ?>
+		<?php if ( $total_pages > 1 ) : ?>
 	<div class="tablenav">
 		<div class="tablenav-pages">
-		<?php
-			$base = remove_query_arg( 'ppaged' );
-		for ( $i = 1; $i <= $pages; $i++ ) {
-				$url   = add_query_arg( 'ppaged', $i, $base );
-				$class = $i === $paged ? 'page-numbers current' : 'page-numbers';
+			<?php
+						$base = remove_query_arg( 'ppaged' );
+			for ( $i = 1; $i <= $total_pages; $i++ ) {
+							$url   = add_query_arg( 'ppaged', $i, $base );
+							$class = ( $i === $current_page ) ? 'page-numbers current' : 'page-numbers';
 				printf(
 					'<a class="%1$s" href="%2$s">%3$s</a> ',
 					esc_attr( $class ),
 					esc_url( $url ),
 					esc_html( $i )
 				);
-		}
-		?>
+			}
+			?>
 			</div>
 		</div>
 	<?php endif; ?>

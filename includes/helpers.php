@@ -5,6 +5,8 @@
  * @package Bonus_Hunt_Guesser
  */
 
+// phpcs:disable WordPress.DB.DirectDatabaseQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Direct queries with dynamic table names are required.
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
@@ -64,24 +66,26 @@ function bhg_admin_cap() {
 add_filter(
 	'login_redirect',
 	/**
-	 * @param string           $redirect_to            Default redirect.
-	 * @param string           $requested_redirect_to  Requested redirect.
-	 * @param WP_User|WP_Error $user                   User or error.
-	 * @return string
-	 */
-	function ( $redirect_to, $requested_redirect_to, $user ) {
-		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
-		$r = isset( $_GET['bhg_redirect'] ) ? wp_unslash( $_GET['bhg_redirect'] ) : '';
-		if ( ! empty( $r ) ) {
-			$safe      = esc_url_raw( $r );
-			$home_host = wp_parse_url( home_url(), PHP_URL_HOST );
-			$r_host    = wp_parse_url( $safe, PHP_URL_HOST );
-			if ( ! $r_host || $r_host === $home_host ) {
-				return $safe;
+		 * Redirect users back to a validated URL when a custom redirect is provided.
+		 *
+		 * @param string           $redirect_to           Default redirect.
+		 * @param string           $_requested_redirect_to Requested redirect. Unused.
+		 * @param WP_User|WP_Error $_user                  User or error. Unused.
+		 * @return string
+		 */
+		function ( $redirect_to, $_requested_redirect_to, $_user ) {
+				unset( $_requested_redirect_to, $_user );
+                // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+				$r = isset( $_GET['bhg_redirect'] ) ? esc_url_raw( wp_unslash( $_GET['bhg_redirect'] ) ) : '';
+			if ( ! empty( $r ) ) {
+					$home_host = wp_parse_url( home_url(), PHP_URL_HOST );
+					$r_host    = wp_parse_url( $r, PHP_URL_HOST );
+				if ( ! $r_host || $r_host === $home_host ) {
+						return $r;
+				}
 			}
-		}
-		return $redirect_to;
-	},
+				return $redirect_to;
+		},
 	10,
 	3
 );
@@ -96,17 +100,17 @@ function bhg_is_frontend() {
 }
 
 if ( ! function_exists( 'bhg_t' ) ) {
-	/**
-	 * Retrieve a translation value from the database.
-	 *
-	 * The returned string is unsanitized and may contain HTML. Escape the
-	 * value on output using {@see bhg_t_esc_html()} or {@see bhg_t_esc_attr()}.
-	 *
-	 * @param string $key     Translation key.
-	 * @param string $default Default text if not found.
-	 * @return string Unsanitized translation value.
-	 */
-	function bhg_t( $key, $default = '' ) {
+		/**
+		 * Retrieve a translation value from the database.
+		 *
+		 * The returned string is unsanitized and may contain HTML. Escape the
+		 * value on output using {@see bhg_t_esc_html()} or {@see bhg_t_esc_attr()}.
+		 *
+		 * @param string $key            Translation key.
+		 * @param string $default_value  Default text if not found.
+		 * @return string Unsanitized translation value.
+		 */
+	function bhg_t( $key, $default_value = '' ) {
 		global $wpdb;
 		static $cache = array();
 
@@ -127,33 +131,33 @@ if ( ! function_exists( 'bhg_t' ) ) {
 			return $row->tvalue;
 		}
 
-		return $default;
+			return $default_value;
 	}
 }
 
 if ( ! function_exists( 'bhg_t_esc_html' ) ) {
-	/**
-	 * Retrieve a translation and escape it for safe HTML output.
-	 *
-	 * @param string $key     Translation key.
-	 * @param string $default Default text if not found.
-	 * @return string Escaped translation for HTML context.
-	 */
-	function bhg_t_esc_html( $key, $default = '' ) {
-		return esc_html( bhg_t( $key, $default ) );
+		/**
+		 * Retrieve a translation and escape it for safe HTML output.
+		 *
+		 * @param string $key           Translation key.
+		 * @param string $default_value Default text if not found.
+		 * @return string Escaped translation for HTML context.
+		 */
+	function bhg_t_esc_html( $key, $default_value = '' ) {
+			return esc_html( bhg_t( $key, $default_value ) );
 	}
 }
 
 if ( ! function_exists( 'bhg_t_esc_attr' ) ) {
-	/**
-	 * Retrieve a translation and escape it for an HTML attribute.
-	 *
-	 * @param string $key     Translation key.
-	 * @param string $default Default text if not found.
-	 * @return string Escaped translation for attribute context.
-	 */
-	function bhg_t_esc_attr( $key, $default = '' ) {
-		return esc_attr( bhg_t( $key, $default ) );
+		/**
+		 * Retrieve a translation and escape it for an HTML attribute.
+		 *
+		 * @param string $key           Translation key.
+		 * @param string $default_value Default text if not found.
+		 * @return string Escaped translation for attribute context.
+		 */
+	function bhg_t_esc_attr( $key, $default_value = '' ) {
+			return esc_attr( bhg_t( $key, $default_value ) );
 	}
 }
 
@@ -708,12 +712,12 @@ if ( ! function_exists( 'bhg_reset_demo_and_seed' ) ) {
 			);
 
 			foreach ( (array) $closed as $row ) {
-				$ts       = $row->closed_at ? strtotime( $row->closed_at ) : time();
-				$iso_year = date( 'o', $ts );
-				$week     = str_pad( date( 'W', $ts ), 2, '0', STR_PAD_LEFT );
-				$week_key = $iso_year . '-W' . $week;
-				$month_key = date( 'Y-m', $ts );
-				$year_key  = date( 'Y', $ts );
+				$ts                        = $row->closed_at ? strtotime( $row->closed_at ) : time();
+								$iso_year  = gmdate( 'o', $ts );
+								$week      = str_pad( gmdate( 'W', $ts ), 2, '0', STR_PAD_LEFT );
+								$week_key  = $iso_year . '-W' . $week;
+								$month_key = gmdate( 'Y-m', $ts );
+								$year_key  = gmdate( 'Y', $ts );
 
 				$ensure = function ( $type, $period ) use ( $wpdb, $t_tbl ) {
 					$now   = current_time( 'mysql', 1 );
@@ -722,11 +726,11 @@ if ( ! function_exists( 'bhg_reset_demo_and_seed' ) ) {
 
 					if ( 'weekly' === $type ) {
 						// Approximate ISO week range.
-						$start = date( 'Y-m-d', strtotime( $period . '-1' ) );
-						$end   = date( 'Y-m-d', strtotime( $period . '-7' ) );
+												$start = gmdate( 'Y-m-d', strtotime( $period . '-1' ) );
+												$end   = gmdate( 'Y-m-d', strtotime( $period . '-7' ) );
 					} elseif ( 'monthly' === $type ) {
-						$start = $period . '-01';
-						$end   = date( 'Y-m-t', strtotime( $start ) );
+						$start                       = $period . '-01';
+												$end = gmdate( 'Y-m-t', strtotime( $start ) );
 					} elseif ( 'yearly' === $type ) {
 						$start = $period . '-01-01';
 						$end   = $period . '-12-31';
