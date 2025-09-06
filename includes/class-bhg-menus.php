@@ -74,7 +74,6 @@ if ( ! class_exists( 'BHG_Menus' ) ) {
 				wp_enqueue_script( 'bhg-admin', BHG_PLUGIN_URL . 'assets/js/admin.js', array( 'jquery' ), defined( 'BHG_VERSION' ) ? BHG_VERSION : null, true );
 			}
 		}
-
 		/**
 		 * Register admin menus.
 		 *
@@ -263,9 +262,4 @@ if ( ! class_exists( 'BHG_Menus' ) ) {
 			);
 		}
 	}
-}
-
-// Bootstrap once.
-if ( class_exists( 'BHG_Menus' ) ) {
-	BHG_Menus::get_instance()->init();
 }
