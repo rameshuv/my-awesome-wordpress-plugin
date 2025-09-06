@@ -69,7 +69,7 @@ $base     = remove_query_arg( 'ppaged' );
 				</tr>
 				<tr>
 					<th scope="row"><label for="bhg_winners"><?php echo esc_html__( 'Number of Winners', 'bonus-hunt-guesser' ); ?></label></th>
-					<td><input type="number" min="1" max="25" id="bhg_winners" name="winners_count" value="<?php echo esc_attr( $hunt->winners_count ?: 3 ); ?>"></td>
+                                    <td><input type="number" min="1" max="25" id="bhg_winners" name="winners_count" value="<?php echo esc_attr( $hunt->winners_count ? $hunt->winners_count : 3 ); ?>"></td>
 				</tr>
 				<tr>
 					<th scope="row"><label for="bhg_final"><?php echo esc_html__( 'Final Balance', 'bonus-hunt-guesser' ); ?></label></th>

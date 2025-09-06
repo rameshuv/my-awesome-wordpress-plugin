@@ -192,7 +192,7 @@ class BHG_Admin {
 		if ( $guess_id ) {
 			$wpdb->delete( $guesses_table, array( 'id' => $guess_id ), array( '%d' ) );
 		}
-		wp_safe_redirect( wp_get_referer() ?: admin_url( 'admin.php?page=bhg-bonus-hunts' ) );
+                wp_safe_redirect( wp_get_referer() ? wp_get_referer() : admin_url( 'admin.php?page=bhg-bonus-hunts' ) );
 		exit;
 	}
 
@@ -291,7 +291,7 @@ class BHG_Admin {
 					);
 					wp_mail(
 						$u->user_email,
-						sprintf( __( 'Results for %s', 'bonus-hunt-guesser' ), $hunt_title ?: 'Bonus Hunt' ),
+                                                sprintf( __( 'Results for %s', 'bonus-hunt-guesser' ), $hunt_title ? $hunt_title : 'Bonus Hunt' ),
 						$body
 					);
 				}
