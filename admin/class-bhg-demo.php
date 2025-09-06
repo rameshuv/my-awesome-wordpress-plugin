@@ -27,34 +27,13 @@ class BHG_Demo {
 	 * @return void
 	 */
 	public function reseed() {
+		if ( ! current_user_can( 'manage_options' ) ) {
+			wp_die( esc_html__( 'You do not have sufficient permissions to access this page.', 'bonus-hunt-guesser' ) );
+		}
+
 		check_admin_referer( 'bhg_demo_reseed' );
-		global $wpdb;
 
-		// Wipe demo data.
-		$hunts_table = $wpdb->prefix . 'bhg_bonus_hunts';
-		$wpdb->query( $wpdb->prepare( 'DELETE FROM %i WHERE title LIKE %s', $hunts_table, '%(Demo)%' ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
-		$tours_table = $wpdb->prefix . 'bhg_tournaments';
-		$wpdb->query( $wpdb->prepare( 'DELETE FROM %i WHERE title LIKE %s', $tours_table, '%(Demo)%' ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
-
-		// Insert demo hunt.
-                $wpdb->insert(
-                        $hunts_table,
-			array(
-				'title'            => 'Sample Hunt (Demo)',
-				'starting_balance' => 1000,
-				'num_bonuses'      => 5,
-				'status'           => 'open',
-			)
-		);
-
-		// Insert demo tournament.
-                $wpdb->insert(
-                        $tours_table,
-			array(
-				'title'  => 'August Tournament (Demo)',
-				'status' => 'active',
-			)
-		);
+		bhg_reset_demo_and_seed();
 
 		wp_safe_redirect( admin_url( 'admin.php?page=bhg-tools&demo_reset=1' ) );
 		exit;
