@@ -14,7 +14,7 @@
  * @package Bonus_Hunt_Guesser
  */
 
-// phpcs:ignoreFile -- Legacy bootstrap file pending comprehensive refactor.
+/* phpcs:disable -- Legacy bootstrap file pending comprehensive refactor. */
 
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -936,7 +936,9 @@ if ( ! function_exists( 'bhg_self_heal_db' ) ) {
 		}
 	}
 		add_action( 'admin_init', 'bhg_self_heal_db' );
-		register_activation_hook( __FILE__, 'bhg_self_heal_db' );
+register_activation_hook( __FILE__, 'bhg_self_heal_db' );
 }
+
+/* phpcs:enable */
 
 
