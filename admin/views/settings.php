@@ -53,7 +53,7 @@ if ( ! empty( $error ) ) {
 	
 	<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>">
 		<input type="hidden" name="action" value="bhg_save_settings">
-		<?php wp_nonce_field( 'bhg_save_settings_nonce', 'bhg_settings_nonce' ); ?>
+               <?php wp_nonce_field( 'bhg_save_settings', 'bhg_nonce' ); ?>
 
 		<table class="form-table">
 			<tr>
