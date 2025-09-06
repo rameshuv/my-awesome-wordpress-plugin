@@ -44,7 +44,8 @@ if ( ! class_exists( 'BHG_Bonus_Hunts_Controller' ) ) {
 		 * @return void
 		 */
 		public function init() {
-			add_action( 'admin_init', array( $this, 'handle_form_submissions' ) );
+				add_action( 'admin_init', array( $this, 'handle_form_submissions' ) );
+				add_action( 'admin_post_bhg_delete_guess', array( $this, 'delete_guess' ) );
 		}
 
 		/**
@@ -154,9 +155,40 @@ if ( ! class_exists( 'BHG_Bonus_Hunts_Controller' ) ) {
 					break;
 			}
 
-			$url = esc_url_raw( add_query_arg( 'message', $message, wp_get_referer() ) );
-			wp_safe_redirect( $url );
-			exit;
+						$url = esc_url_raw( add_query_arg( 'message', $message, wp_get_referer() ) );
+						wp_safe_redirect( $url );
+						exit;
+		}
+
+				/**
+				 * Delete a guess submitted for a hunt.
+				 *
+				 * @return void
+				 */
+		public function delete_guess() {
+			if ( ! current_user_can( 'manage_options' ) ) {
+						wp_die( esc_html__( 'You do not have sufficient permissions to access this page.', 'bonus-hunt-guesser' ) );
+			}
+
+				$nonce = isset( $_GET['_wpnonce'] ) ? sanitize_text_field( wp_unslash( $_GET['_wpnonce'] ) ) : '';
+			if ( ! wp_verify_nonce( $nonce, 'bhg_delete_guess' ) ) {
+							wp_die( esc_html__( 'Security check failed', 'bonus-hunt-guesser' ) );
+			}
+
+							$guess_id = isset( $_GET['guess_id'] ) ? absint( $_GET['guess_id'] ) : 0;
+
+							global $wpdb;
+							$table   = $wpdb->prefix . 'bhg_guesses';
+							$deleted = false;
+
+			if ( $guess_id > 0 ) {
+				$deleted = $wpdb->delete( $table, array( 'id' => $guess_id ), array( '%d' ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching -- Table name is static and deletion queries are acceptable without caching.
+			}
+
+							$message = $deleted ? 'guess_deleted' : 'error';
+							$url     = esc_url_raw( add_query_arg( 'message', $message, wp_get_referer() ) );
+							wp_safe_redirect( $url );
+							exit;
 		}
 	}
 }
