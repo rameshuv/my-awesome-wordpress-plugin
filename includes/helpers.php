@@ -552,36 +552,35 @@ function bhg_render_ads( $placement = 'footer', $hunt_id = 0 ) {
 }
 
 if ( ! function_exists( 'bhg_reset_demo_and_seed' ) ) {
-	/**
-	 * Reset demo tables and seed sample data.
-	 *
-	 * Administrative utility for creating sample plugin data. Callers must
-	 * verify capabilities and nonces (e.g., via current_user_can() and
-	 * check_admin_referer()) before invoking.
-	 *
-	 * @return bool
-	 */
-	function bhg_reset_demo_and_seed() {
-		global $wpdb;
-		$p = $wpdb->prefix;
+        /**
+         * Reset demo tables and seed sample data.
+         *
+         * Administrative utility for creating sample plugin data. Validates the
+         * current user's capabilities and the tools page nonce before running.
+         *
+         * @return bool False when capability checks fail.
+         */
+        function bhg_reset_demo_and_seed() {
+                if ( ! current_user_can( 'manage_options' ) ) {
+                        return false;
+                }
 
-		if ( ! current_user_can( 'manage_options' ) ) {
-			return false;
-		}
+                check_admin_referer( 'bhg_demo_reseed_action', 'bhg_nonce' );
 
-		check_admin_referer( 'bhg_reset_demo_and_seed' );
+                global $wpdb;
+                $p = $wpdb->prefix;
 
-		// Ensure tables exist before touching.
-		$tables = array(
-			esc_sql( "{$p}bhg_guesses" ),
-			esc_sql( "{$p}bhg_bonus_hunts" ),
-			esc_sql( "{$p}bhg_tournaments" ),
-			esc_sql( "{$p}bhg_tournament_results" ),
-			esc_sql( "{$p}bhg_hunt_winners" ),
-			esc_sql( "{$p}bhg_ads" ),
-			esc_sql( "{$p}bhg_translations" ),
-			esc_sql( "{$p}bhg_affiliate_websites" ),
-		);
+                // Ensure tables exist before touching.
+                $tables = array(
+                        esc_sql( "{$p}bhg_guesses" ),
+                        esc_sql( "{$p}bhg_bonus_hunts" ),
+                        esc_sql( "{$p}bhg_tournaments" ),
+                        esc_sql( "{$p}bhg_tournament_results" ),
+                        esc_sql( "{$p}bhg_hunt_winners" ),
+                        esc_sql( "{$p}bhg_ads" ),
+                        esc_sql( "{$p}bhg_translations" ),
+                        esc_sql( "{$p}bhg_affiliate_websites" ),
+                );
 
 		// Delete rows (safer than TRUNCATE on some hosts).
 		foreach ( $tables as $tbl ) {
