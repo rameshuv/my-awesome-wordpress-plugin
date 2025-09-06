@@ -3,12 +3,10 @@
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
+$bonus_hunts     = $bonus_hunts ?? array();
+$affiliate_sites = $affiliate_sites ?? array();
 
 
-// Set up dependencies for display.
-$bhg_db          = new BHG_DB();
-$bonus_hunts     = $bhg_db->get_all_bonus_hunts();
-$affiliate_sites = $bhg_db->get_affiliate_websites();
 
 // Display status messages
 if ( isset( $_GET['message'] ) ) {
