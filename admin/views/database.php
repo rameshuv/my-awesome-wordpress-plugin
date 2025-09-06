@@ -1,6 +1,13 @@
 <?php
+/**
+ * Database tools admin view.
+ *
+ * @package Bonus_Hunt_Guesser
+ * @since 1.0.0
+ */
+
 if ( ! defined( 'ABSPATH' ) ) {
-	exit;
+      exit;
 }
 
 

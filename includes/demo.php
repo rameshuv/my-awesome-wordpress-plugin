@@ -1,4 +1,11 @@
 <?php
+/**
+ * Demo data management functions.
+ *
+ * @package Bonus_Hunt_Guesser
+ * @since 1.0.0
+ */
+
 if ( ! defined( 'ABSPATH' ) ) {
         exit;
 }
