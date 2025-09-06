@@ -135,6 +135,15 @@ if ( ! class_exists( 'BHG_Bonus_Hunts_Controller' ) ) {
 						)
 					);
 
+					if ( $result && 'closed' === $status && null !== $final_balance ) {
+						if ( class_exists( 'BHG_Models' ) ) {
+							$winner_ids = BHG_Models::close_hunt( $id, $final_balance );
+							if ( function_exists( 'bhg_send_hunt_results_email' ) ) {
+								bhg_send_hunt_results_email( $id, $winner_ids );
+							}
+						}
+					}
+
 					$message = $result ? 'updated' : 'error';
 					break;
 
