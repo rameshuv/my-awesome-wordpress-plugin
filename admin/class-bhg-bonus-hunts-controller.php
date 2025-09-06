@@ -48,6 +48,21 @@ if ( ! class_exists( 'BHG_Bonus_Hunts_Controller' ) ) {
 		}
 
 		/**
+		 * Retrieve data for bonus hunt admin views.
+		 *
+		 * @return array
+		 */
+		public function get_admin_view_vars() {
+			$db = new BHG_DB();
+
+			return array(
+				'bonus_hunts'     => $db->get_all_bonus_hunts(),
+				'affiliate_sites' => $db->get_affiliate_websites(),
+			);
+		}
+
+
+		/**
 		 * Handle bonus hunt form submissions.
 		 *
 		 * @return void
