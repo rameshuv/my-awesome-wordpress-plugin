@@ -15,7 +15,7 @@ if ( ! current_user_can( 'manage_options' ) ) {
 }
 
 global $wpdb;
-$table = $wpdb->prefix . 'bhg_translations';
+$table = esc_sql( $wpdb->prefix . 'bhg_translations' );
 
 if ( function_exists( 'bhg_seed_default_translations_if_empty' ) ) {
 	bhg_seed_default_translations_if_empty();
@@ -52,7 +52,7 @@ if ( isset( $_SERVER['REQUEST_METHOD'] ) && 'POST' === $_SERVER['REQUEST_METHOD'
 }
 
 // Fetch rows.
-$rows = $wpdb->get_results( "SELECT tkey, tvalue FROM {$wpdb->prefix}bhg_translations ORDER BY tkey ASC" );
+$rows = $wpdb->get_results( "SELECT tkey, tvalue FROM {$table} ORDER BY tkey ASC" ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 ?>
 <div class="wrap">
 	<h1><?php esc_html_e( 'Translations', 'bonus-hunt-guesser' ); ?></h1>

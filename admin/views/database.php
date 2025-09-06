@@ -50,7 +50,7 @@ function bhg_database_cleanup() {
         foreach ( bhg_get_allowed_tables() as $slug ) {
                 $table = esc_sql( $wpdb->prefix . $slug );
                 if ( $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $table ) ) === $table ) {
-                        $wpdb->query( "TRUNCATE TABLE `{$table}`" );
+                        $wpdb->query( "TRUNCATE TABLE `{$table}`" ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
                 }
         }
 
@@ -65,7 +65,7 @@ function bhg_database_optimize() {
         foreach ( bhg_get_allowed_tables() as $slug ) {
                 $table = esc_sql( $wpdb->prefix . $slug );
                 if ( $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $table ) ) === $table ) {
-                        $wpdb->query( "OPTIMIZE TABLE `{$table}`" );
+                        $wpdb->query( "OPTIMIZE TABLE `{$table}`" ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
                 }
         }
 }
@@ -138,7 +138,7 @@ function bhg_insert_demo_data() {
                         foreach ( bhg_get_allowed_tables() as $table ) {
                                 $table_name = esc_sql( $wpdb->prefix . $table );
                                 $exists     = $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $table_name ) ) === $table_name;
-                                $row_count  = $exists ? (int) $wpdb->get_var( "SELECT COUNT(*) FROM `{$table_name}`" ) : 0;
+                                $row_count  = $exists ? (int) $wpdb->get_var( "SELECT COUNT(*) FROM `{$table_name}`" ) : 0; // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 
                                 echo '<tr>';
                                 echo '<td>' . esc_html( $table_name ) . '</td>';

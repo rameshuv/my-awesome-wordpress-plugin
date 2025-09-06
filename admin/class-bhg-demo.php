@@ -30,13 +30,15 @@ class BHG_Demo {
 		check_admin_referer( 'bhg_demo_reseed' );
 		global $wpdb;
 
-		// Wipe demo data.
-		$wpdb->query( "DELETE FROM {$wpdb->prefix}bhg_bonus_hunts WHERE title LIKE '%(Demo)%'" ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
-		$wpdb->query( "DELETE FROM {$wpdb->prefix}bhg_tournaments WHERE title LIKE '%(Demo)%'" ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
+                // Wipe demo data.
+                $hunts_table = esc_sql( $wpdb->prefix . 'bhg_bonus_hunts' );
+                $wpdb->query( $wpdb->prepare( "DELETE FROM {$hunts_table} WHERE title LIKE %s", '%(Demo)%' ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+                $tours_table = esc_sql( $wpdb->prefix . 'bhg_tournaments' );
+                $wpdb->query( $wpdb->prepare( "DELETE FROM {$tours_table} WHERE title LIKE %s", '%(Demo)%' ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 
 		// Insert demo hunt.
-		$wpdb->insert(
-			"{$wpdb->prefix}bhg_bonus_hunts",
+                $wpdb->insert(
+                        $hunts_table,
 			array(
 				'title'            => 'Sample Hunt (Demo)',
 				'starting_balance' => 1000,
@@ -46,8 +48,8 @@ class BHG_Demo {
 		);
 
 		// Insert demo tournament.
-		$wpdb->insert(
-			"{$wpdb->prefix}bhg_tournaments",
+                $wpdb->insert(
+                        $tours_table,
 			array(
 				'title'  => 'August Tournament (Demo)',
 				'status' => 'active',

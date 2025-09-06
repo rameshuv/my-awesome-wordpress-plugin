@@ -8,12 +8,16 @@ if ( ! defined( 'ABSPATH' ) ) {
 	<h1><?php echo esc_html__( 'BHG Tools', 'bonus-hunt-guesser' ); ?></h1>
 
 	<?php
-	global $wpdb;
-	$hunts       = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$wpdb->prefix}bhg_bonus_hunts" );
-	$guesses     = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$wpdb->prefix}bhg_guesses" );
-	$users       = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$wpdb->users}" );
-	$ads         = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$wpdb->prefix}bhg_ads" );
-	$tournaments = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$wpdb->prefix}bhg_tournaments" );
+        global $wpdb;
+        $hunts_table = esc_sql( $wpdb->prefix . 'bhg_bonus_hunts' );
+        $guesses_table = esc_sql( $wpdb->prefix . 'bhg_guesses' );
+        $ads_table = esc_sql( $wpdb->prefix . 'bhg_ads' );
+        $tours_table = esc_sql( $wpdb->prefix . 'bhg_tournaments' );
+        $hunts       = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$hunts_table}" ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+        $guesses     = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$guesses_table}" ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+        $users       = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$wpdb->users}" ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+        $ads         = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$ads_table}" ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+        $tournaments = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$tours_table}" ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 	?>
 
 	<div class="card" style="max-width:900px;padding:16px;margin-top:12px;">
