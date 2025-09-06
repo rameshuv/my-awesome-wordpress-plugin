@@ -200,15 +200,19 @@ class BHG_Admin {
 			wp_die( esc_html__( 'No permission', 'bonus-hunt-guesser' ) );
 		}
 		check_admin_referer( 'bhg_delete_guess' );
-				global $wpdb;
-				$guesses_table = esc_sql( $wpdb->prefix . 'bhg_guesses' );
-				$guess_id      = isset( $_POST['guess_id'] ) ? absint( wp_unslash( $_POST['guess_id'] ) ) : 0;
-		if ( 0 !== $guess_id ) {
-				$wpdb->delete( $guesses_table, array( 'id' => $guess_id ), array( '%d' ) );
-		}
-				wp_safe_redirect( wp_get_referer() ? wp_get_referer() : admin_url( 'admin.php?page=bhg-bonus-hunts' ) );
-		exit;
-	}
+global $wpdb;
+$guesses_table = esc_sql( $wpdb->prefix . 'bhg_guesses' );
+$guess_id      = isset( $_POST['guess_id'] ) ? absint( wp_unslash( $_POST['guess_id'] ) ) : 0;
+if ( 0 !== $guess_id ) {
+$hunt_id = (int) $wpdb->get_var( $wpdb->prepare( "SELECT hunt_id FROM $guesses_table WHERE id = %d", $guess_id ) );
+$wpdb->delete( $guesses_table, array( 'id' => $guess_id ), array( '%d' ) );
+if ( $hunt_id ) {
+bhg_flush_hunt_cache( $hunt_id );
+}
+}
+wp_safe_redirect( wp_get_referer() ? wp_get_referer() : admin_url( 'admin.php?page=bhg-bonus-hunts' ) );
+exit;
+}
 
 	/**
 	 * Handle creation and updating of a bonus hunt.
@@ -253,7 +257,8 @@ class BHG_Admin {
 				$id = (int) $wpdb->insert_id;
 		}
 
-				wp_cache_delete( "bhg_hunt_title_{$id}", 'bhg' );
+wp_cache_delete( "bhg_hunt_title_{$id}", 'bhg' );
+bhg_flush_hunt_cache( $id );
 
 		if ( 'closed' === $status && null !== $final_balance ) {
 				$winners = BHG_Models::close_hunt( $id, $final_balance );
