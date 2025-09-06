@@ -281,21 +281,22 @@ if ( ! class_exists( 'BHG_Shortcodes' ) ) {
 				return ob_get_clean();
 		}
 
-			/**
-			 * Display guesses submitted by a user.
-			 *
-			 * @param array $atts Shortcode attributes.
-			 * @return string HTML output.
-			 */
+		/**
+		 * Display guesses for a specific hunt.
+		 *
+		 * @param array $atts Shortcode attributes.
+		 * @return string HTML output.
+		 */
 		public function user_guesses_shortcode( $atts ) {
 			$a = shortcode_atts(
 				array(
-					'id'       => 0,
+					'hunt_id'  => 0,
+					'user_id'  => 0,
 					'aff'      => 'yes',
 					'website'  => 0,
 					'status'   => '',
 					'timeline' => '',
-					'orderby'  => 'hunt',
+					'orderby'  => 'guess',
 					'order'    => 'DESC',
 				),
 				$atts,
@@ -304,76 +305,93 @@ if ( ! class_exists( 'BHG_Shortcodes' ) ) {
 
 			global $wpdb;
 
-			$user_id = (int) $a['id'];
-			if ( $user_id <= 0 ) {
-					$user_id = get_current_user_id();
+			$hunt_id = (int) $a['hunt_id'];
+			if ( $hunt_id <= 0 ) {
+				$hunt_id = (int) $wpdb->get_var(
+					$wpdb->prepare(
+						"SELECT id FROM {$wpdb->prefix}bhg_bonus_hunts WHERE status=%s ORDER BY created_at DESC LIMIT %d",
+						'open',
+						1
+					)
+				);
+				if ( $hunt_id <= 0 ) {
+					return '<p>' . esc_html__( 'No hunt specified.', 'bonus-hunt-guesser' ) . '</p>';
+				}
 			}
-			if ( $user_id <= 0 ) {
-					return '<p>' . esc_html__( 'No user specified.', 'bonus-hunt-guesser' ) . '</p>';
-			}
+
+			$user_id = (int) $a['user_id'];
 
 			$g = $wpdb->prefix . 'bhg_guesses';
 			$h = $wpdb->prefix . 'bhg_bonus_hunts';
+			$u = $wpdb->users;
 
-			$where  = array( 'g.user_id = %d' );
-			$params = array( $user_id );
+			$where  = array( 'g.hunt_id = %d' );
+			$params = array( $hunt_id );
+
+			if ( $user_id > 0 ) {
+				$where[]  = 'g.user_id = %d';
+				$params[] = $user_id;
+			}
 
 			if ( in_array( $a['status'], array( 'open', 'closed' ), true ) ) {
-					$where[]  = 'h.status = %s';
-					$params[] = $a['status'];
+				$where[]  = 'h.status = %s';
+				$params[] = $a['status'];
 			}
 
 			$website = (int) $a['website'];
 			if ( $website > 0 ) {
-					$where[]  = 'h.affiliate_site_id = %d';
-					$params[] = $website;
+				$where[]  = 'h.affiliate_site_id = %d';
+				$params[] = $website;
 			}
 
 			$order       = strtoupper( $a['order'] ) === 'ASC' ? 'ASC' : 'DESC';
 			$orderby_map = array(
 				'guess' => 'g.guess',
-				'hunt'  => 'h.created_at',
+				'user'  => 'u.user_login',
 			);
-			$orderby_key = isset( $orderby_map[ $a['orderby'] ] ) ? $a['orderby'] : 'hunt';
+			$orderby_key = isset( $orderby_map[ $a['orderby'] ] ) ? $a['orderby'] : 'guess';
 			$orderby     = $orderby_map[ $orderby_key ];
 
 			$limit_sql = '';
 			if ( 'recent' === strtolower( $a['timeline'] ) ) {
-					$limit_sql = ' LIMIT 10';
+				$limit_sql = ' LIMIT 10';
 			}
 
-			$sql = "SELECT g.guess, h.title, h.final_balance, h.affiliate_site_id
-					   FROM {$g} g INNER JOIN {$h} h ON h.id = g.hunt_id
-					   WHERE " . implode( ' AND ', $where ) . "
-					   ORDER BY {$orderby} {$order}{$limit_sql}";
+			$sql = "SELECT g.guess, g.user_id, u.user_login, h.final_balance, h.affiliate_site_id"
+			. " FROM {$g} g"
+			. " LEFT JOIN {$u} u ON u.ID = g.user_id"
+			. " INNER JOIN {$h} h ON h.id = g.hunt_id"
+			. ' WHERE ' . implode( ' AND ', $where )
+			. " ORDER BY {$orderby} {$order}{$limit_sql}";
 
-						$prepared = call_user_func_array( array( $wpdb, 'prepare' ), array_merge( array( $sql ), $params ) );
-						$rows     = $wpdb->get_results( $prepared );
+			$prepared = call_user_func_array( array( $wpdb, 'prepare' ), array_merge( array( $sql ), $params ) );
+			$rows     = $wpdb->get_results( $prepared );
 			if ( ! $rows ) {
-					return '<p>' . esc_html__( 'No guesses found.', 'bonus-hunt-guesser' ) . '</p>';
+				return '<p>' . esc_html__( 'No guesses found.', 'bonus-hunt-guesser' ) . '</p>';
 			}
 
 			$show_aff = filter_var( $a['aff'], FILTER_VALIDATE_BOOLEAN );
 
 			ob_start();
 			echo '<table class="bhg-user-guesses"><thead><tr>';
-			echo '<th>' . esc_html__( 'Hunt', 'bonus-hunt-guesser' ) . '</th>';
+			echo '<th>' . esc_html__( 'User', 'bonus-hunt-guesser' ) . '</th>';
 			echo '<th>' . esc_html__( 'Guess', 'bonus-hunt-guesser' ) . '</th>';
 			echo '<th>' . esc_html__( 'Final', 'bonus-hunt-guesser' ) . '</th>';
 			echo '</tr></thead><tbody>';
 
 			foreach ( $rows as $row ) {
-					echo '<tr>';
-					echo '<td>' . esc_html( $row->title ) . '</td>';
-					$guess_cell = esc_html( number_format_i18n( (float) $row->guess, 2 ) );
+				echo '<tr>';
+				$user_label = $row->user_login ? $row->user_login : sprintf( __( 'user#%d', 'bonus-hunt-guesser' ), (int) $row->user_id );
+				echo '<td>' . esc_html( $user_label ) . '</td>';
+				$guess_cell = esc_html( number_format_i18n( (float) $row->guess, 2 ) );
 				if ( $show_aff ) {
-									$guess_cell = bhg_render_affiliate_dot( $user_id, (int) $row->affiliate_site_id ) . $guess_cell;
+				$guess_cell = bhg_render_affiliate_dot( (int) $row->user_id, (int) $row->affiliate_site_id ) . $guess_cell;
 				}
-										echo '<td>' . wp_kses_post( $guess_cell ) . '</td>';
-					echo '<td>';
-										echo isset( $row->final_balance ) ? esc_html( number_format_i18n( (float) $row->final_balance, 2 ) ) : esc_html__( '&mdash;', 'bonus-hunt-guesser' );
-					echo '</td>';
-					echo '</tr>';
+				echo '<td>' . wp_kses_post( $guess_cell ) . '</td>';
+				echo '<td>';
+				echo isset( $row->final_balance ) ? esc_html( number_format_i18n( (float) $row->final_balance, 2 ) ) : esc_html__( '&mdash;', 'bonus-hunt-guesser' );
+				echo '</td>';
+				echo '</tr>';
 			}
 			echo '</tbody></table>';
 			return ob_get_clean();
