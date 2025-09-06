@@ -38,13 +38,13 @@ if ( 'list' === $view ) :
 		$per_page     = 30;
 		$offset       = ( $current_page - 1 ) * $per_page;
 
-		$hunts = $wpdb->get_results(
-			$wpdb->prepare(
-				"SELECT * FROM {$hunts_table} ORDER BY id DESC LIMIT %d OFFSET %d",
-				$per_page,
-				$offset
-			)
-		);
+                $hunts = $wpdb->get_results(
+                        $wpdb->prepare(
+                                "SELECT id, title, starting_balance, final_balance, winners_count, status FROM {$hunts_table} ORDER BY id DESC LIMIT %d OFFSET %d",
+                                $per_page,
+                                $offset
+                        )
+                );
 
 		$status_labels = array(
 			'open'   => __( 'Open', 'bonus-hunt-guesser' ),
@@ -161,9 +161,9 @@ endif;
 /** CLOSE VIEW */
 if ( 'close' === $view ) :
 		$id = isset( $_GET['id'] ) ? (int) wp_unslash( $_GET['id'] ) : 0;
-	$hunt   = $wpdb->get_row(
-		$wpdb->prepare( "SELECT * FROM {$hunts_table} WHERE id = %d", $id )
-	);
+        $hunt   = $wpdb->get_row(
+                $wpdb->prepare( "SELECT id, title, status FROM {$hunts_table} WHERE id = %d", $id )
+        );
 	if ( ! $hunt || 'open' !== $hunt->status ) :
 		echo '<div class="notice notice-error"><p>' . esc_html__( 'Invalid hunt.', 'bonus-hunt-guesser' ) . '</p></div>';
 	else :

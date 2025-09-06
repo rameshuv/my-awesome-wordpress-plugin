@@ -594,11 +594,11 @@ function bhg_build_ads_query( $table, $placement = 'footer' ) {
 			return array();
 	}
 
-		$query = $wpdb->prepare(
-			"SELECT * FROM `{$table}` WHERE placement = %s AND active = %d",
-			$placement,
-			1
-		);
+                $query = $wpdb->prepare(
+                        "SELECT id, title, content, link_url, placement, visible_to, target_pages, active FROM `{$table}` WHERE placement = %s AND active = %d",
+                        $placement,
+                        1
+                );
 
 		$rows = $wpdb->get_results( $query );
 	if ( did_action( 'wp' ) && function_exists( 'get_queried_object_id' ) ) {
