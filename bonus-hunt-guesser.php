@@ -1,4 +1,4 @@
-		<?php
+<?php
 /**
  * Plugin Name: Bonus Hunt Guesser
  * Plugin URI: https://yourdomain.com/
