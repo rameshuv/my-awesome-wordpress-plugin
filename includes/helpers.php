@@ -707,10 +707,10 @@ $wpdb->delete( $tbl, array( 1 => 1 ), array( '%d' ) ); // phpcs:ignore WordPress
 
 		if ( $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $t_tbl ) ) === $t_tbl ) {
 			// Wipe results only.
-			if ( $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $r_tbl ) ) === $r_tbl ) {
+                        if ( $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $r_tbl ) ) === $r_tbl ) {
                                // Delete all rows from the results table.
-                               $wpdb->delete( $r_tbl, '1=1' ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
-			}
+                               $wpdb->delete( $r_tbl, array( 1 => 1 ), array( '%d' ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery -- table name is dynamic and sanitized above.
+                        }
 
 			$closed = $wpdb->get_results(
 				$wpdb->prepare(
