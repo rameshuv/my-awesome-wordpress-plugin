@@ -3,6 +3,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
+
 if ( ! class_exists( 'BHG_Login_Redirect' ) ) {
 	class BHG_Login_Redirect {
 

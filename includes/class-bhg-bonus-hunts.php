@@ -1,6 +1,8 @@
 <?php
 if ( ! defined( 'ABSPATH' ) ) {
-	exit; }
+	exit;
+}
+
 
 /**
  * Bonus hunt data helpers.

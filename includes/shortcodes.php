@@ -3,6 +3,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
+
 /**
  * BHG Shortcodes
  * Implements all required frontend shortcodes with full DB wiring.

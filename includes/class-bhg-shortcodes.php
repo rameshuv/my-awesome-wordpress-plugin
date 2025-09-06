@@ -6,7 +6,9 @@
  * It registers the required shortcodes on `init` and avoids "public function outside class" parse errors.
  */
 if ( ! defined( 'ABSPATH' ) ) {
-	exit; }
+	exit;
+}
+
 
 if ( ! class_exists( 'BHG_Shortcodes' ) ) {
 
