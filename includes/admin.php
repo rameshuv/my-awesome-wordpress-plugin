@@ -1,6 +1,17 @@
 <?php
+/**
+ * Register admin-post handlers for the Bonus Hunt Guesser plugin.
+ *
+ * This file hooks into the WordPress admin-post actions to handle saving and
+ * closing bonus hunts and managing affiliate websites.
+ *
+ * @package BonusHuntGuesser
+ *
+ * @phpcs:disable
+ */
+
 if ( ! defined( 'ABSPATH' ) ) {
-	exit;
+        exit;
 }
 
 
