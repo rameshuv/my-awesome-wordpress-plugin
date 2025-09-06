@@ -1,5 +1,4 @@
 <?php
-// phpcs:ignoreFile -- Legacy view requires refactoring for WordPress coding standards.
 /**
  * Demo tools view.
  *

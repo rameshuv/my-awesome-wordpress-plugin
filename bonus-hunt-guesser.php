@@ -16,7 +16,6 @@
  * @package Bonus_Hunt_Guesser
  */
 
-// phpcs:ignoreFile -- Legacy file requires refactoring for WordPress coding standards.
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
