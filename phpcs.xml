@@ -9,7 +9,7 @@
 <file>includes</file>
 <exclude-pattern>vendor/*</exclude-pattern>
 <exclude-pattern>wpcs/*</exclude-pattern>
-<exclude-pattern>includes/db.php</exclude-pattern>
+<exclude-pattern>includes/deprecated-db.php</exclude-pattern>
 <exclude-pattern>includes/helpers.php</exclude-pattern>
 <exclude-pattern>admin/views/*</exclude-pattern>
 </ruleset>
