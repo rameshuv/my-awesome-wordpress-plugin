@@ -5,27 +5,27 @@ if ( ! defined( 'ABSPATH' ) ) {
 class BHG_DB {
 
 	// Static wrapper to support legacy static calls.
-	public static function migrate() {
-				$db = new self();
-				$db->create_tables();
+        public static function migrate() {
+                $db = new self();
+                $db->create_tables();
 
-							   global $wpdb;
-							   $tours_table    = $wpdb->prefix . 'bhg_tournaments';
-							   $allowed_tables = array( $wpdb->prefix . 'bhg_tournaments' );
-							   if ( ! in_array( $tours_table, $allowed_tables, true ) ) {
-									   wp_die( esc_html__( 'Invalid table.', 'bonus-hunt-guesser' ) );
-							   }
+                global $wpdb;
+                $tours_table    = esc_sql( $wpdb->prefix . 'bhg_tournaments' );
+                $allowed_tables = array( esc_sql( $wpdb->prefix . 'bhg_tournaments' ) );
+                if ( ! in_array( $tours_table, $allowed_tables, true ) ) {
+                        wp_die( esc_html__( 'Invalid table.', 'bonus-hunt-guesser' ) );
+                }
 
-				// Drop legacy "period" column and related index if they exist.
-				if ( $db->column_exists( $tours_table, 'period' ) ) {
-						// Remove unique index first if present.
-						if ( $db->index_exists( $tours_table, 'type_period' ) ) {
-																dbDelta( "ALTER TABLE `{$tours_table}` DROP INDEX type_period" );
-						}
+                // Drop legacy "period" column and related index if they exist.
+                if ( $db->column_exists( $tours_table, 'period' ) ) {
+                        // Remove unique index first if present.
+                        if ( $db->index_exists( $tours_table, 'type_period' ) ) {
+                                dbDelta( sprintf( 'ALTER TABLE `%s` DROP INDEX type_period', $tours_table ) );
+                        }
 
-												dbDelta( "ALTER TABLE `{$tours_table}` DROP COLUMN period" );
-				}
-		}
+                        dbDelta( sprintf( 'ALTER TABLE `%s` DROP COLUMN period', $tours_table ) );
+                }
+        }
 
 	public function create_tables() {
 		global $wpdb;
@@ -33,18 +33,18 @@ class BHG_DB {
 
 		$charset_collate = $wpdb->get_charset_collate();
 
-							   $hunts_table  = $wpdb->prefix . 'bhg_bonus_hunts';
-							   $guesses_table = $wpdb->prefix . 'bhg_guesses';
-							   $tours_table  = $wpdb->prefix . 'bhg_tournaments';
-							   $tres_table   = $wpdb->prefix . 'bhg_tournament_results';
-							   $ads_table    = $wpdb->prefix . 'bhg_ads';
-							   $trans_table  = $wpdb->prefix . 'bhg_translations';
-							   $aff_table    = $wpdb->prefix . 'bhg_affiliates';
+                $hunts_table   = esc_sql( $wpdb->prefix . 'bhg_bonus_hunts' );
+                $guesses_table = esc_sql( $wpdb->prefix . 'bhg_guesses' );
+                $tours_table   = esc_sql( $wpdb->prefix . 'bhg_tournaments' );
+                $tres_table    = esc_sql( $wpdb->prefix . 'bhg_tournament_results' );
+                $ads_table     = esc_sql( $wpdb->prefix . 'bhg_ads' );
+                $trans_table   = esc_sql( $wpdb->prefix . 'bhg_translations' );
+                $aff_table     = esc_sql( $wpdb->prefix . 'bhg_affiliates' );
 
 		$sql = array();
 
 		// Bonus Hunts
-		$sql[] = "CREATE TABLE {$hunts_table} (
+                $sql[] = "CREATE TABLE `{$hunts_table}` (
 			id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
 			title VARCHAR(190) NOT NULL,
 			starting_balance DECIMAL(12,2) NOT NULL DEFAULT 0.00,
@@ -62,7 +62,7 @@ class BHG_DB {
 		) {$charset_collate};";
 
 		// Guesses
-		$sql[] = "CREATE TABLE {$guesses_table} (
+                $sql[] = "CREATE TABLE `{$guesses_table}` (
 			id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
 			hunt_id BIGINT UNSIGNED NOT NULL,
 			user_id BIGINT UNSIGNED NOT NULL,
@@ -74,7 +74,7 @@ class BHG_DB {
 		) {$charset_collate};";
 
 				// Tournaments
-				$sql[] = "CREATE TABLE {$tours_table} (
+                                $sql[] = "CREATE TABLE `{$tours_table}` (
 						id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
 						title VARCHAR(190) NOT NULL,
 						description TEXT NULL,
@@ -90,7 +90,7 @@ class BHG_DB {
 				) {$charset_collate};";
 
 				// Tournament Results
-				$sql[] = "CREATE TABLE {$tres_table} (
+                                $sql[] = "CREATE TABLE `{$tres_table}` (
 						id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
 						tournament_id BIGINT UNSIGNED NOT NULL,
 						user_id BIGINT UNSIGNED NOT NULL,
@@ -102,7 +102,7 @@ class BHG_DB {
 				) {$charset_collate};";
 
 				// Ads
-				$sql[] = "CREATE TABLE {$ads_table} (
+                                $sql[] = "CREATE TABLE `{$ads_table}` (
 			id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
 			title VARCHAR(190) NOT NULL,
 			content TEXT NULL,
@@ -119,7 +119,7 @@ class BHG_DB {
 		) {$charset_collate};";
 
 		// Translations
-		$sql[] = "CREATE TABLE {$trans_table} (
+                $sql[] = "CREATE TABLE `{$trans_table}` (
 			id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
 			tkey VARCHAR(190) NOT NULL,
 			tvalue LONGTEXT NULL,
@@ -131,7 +131,7 @@ class BHG_DB {
 		) {$charset_collate};";
 
 		// Affiliates
-		$sql[] = "CREATE TABLE {$aff_table} (
+                $sql[] = "CREATE TABLE `{$aff_table}` (
 			id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
 			name VARCHAR(190) NOT NULL,
 			url VARCHAR(255) NULL,
@@ -188,12 +188,12 @@ class BHG_DB {
 																dbDelta( $alter );
 														}
 												}
-												if ( ! $this->index_exists( $tres_table, 'tournament_id' ) ) {
-														dbDelta( "ALTER TABLE `{$tres_table}` ADD KEY tournament_id (tournament_id)" );
-												}
-												if ( ! $this->index_exists( $tres_table, 'user_id' ) ) {
-														dbDelta( "ALTER TABLE `{$tres_table}` ADD KEY user_id (user_id)" );
-												}
+                                                                                                if ( ! $this->index_exists( $tres_table, 'tournament_id' ) ) {
+                                                                                                                dbDelta( sprintf( 'ALTER TABLE `%s` ADD KEY tournament_id (tournament_id)', $tres_table ) );
+                                                                                                }
+                                                                                                if ( ! $this->index_exists( $tres_table, 'user_id' ) ) {
+                                                                                                                dbDelta( sprintf( 'ALTER TABLE `%s` ADD KEY user_id (user_id)', $tres_table ) );
+                                                                                                }
 
 						// Ads columns
 						$aneed = array(
@@ -227,9 +227,9 @@ class BHG_DB {
 														}
 												}
 												// Ensure unique index
-												if ( ! $this->index_exists( $trans_table, 'tkey_locale' ) ) {
-																dbDelta( "ALTER TABLE `{$trans_table}` ADD UNIQUE KEY tkey_locale (tkey, locale)" );
-												}
+                                                                                                if ( ! $this->index_exists( $trans_table, 'tkey_locale' ) ) {
+                                                                                                                               dbDelta( sprintf( 'ALTER TABLE `%s` ADD UNIQUE KEY tkey_locale (tkey, locale)', $trans_table ) );
+                                                                                                }
 
 						// Affiliates columns / unique index
 						$afneed = array(
@@ -244,9 +244,9 @@ class BHG_DB {
 																				dbDelta( $alter );
 														}
 												}
-												if ( ! $this->index_exists( $aff_table, 'name_unique' ) ) {
-																dbDelta( "ALTER TABLE `{$aff_table}` ADD UNIQUE KEY name_unique (name)" );
-												}
+                                                                                                if ( ! $this->index_exists( $aff_table, 'name_unique' ) ) {
+                                                                                                                               dbDelta( sprintf( 'ALTER TABLE `%s` ADD UNIQUE KEY name_unique (name)', $aff_table ) );
+                                                                                                }
 		} catch ( Throwable $e ) {
 			if ( defined( 'WP_DEBUG' ) && WP_DEBUG && function_exists( 'error_log' ) ) {
 				error_log( '[BHG] Schema ensure error: ' . $e->getMessage() );
