@@ -11,8 +11,8 @@ if ( ! current_user_can( 'manage_options' ) ) {
 }
 
 global $wpdb;
-$hunts_table    = $wpdb->prefix . 'bhg_bonus_hunts';
-$guesses_table  = $wpdb->prefix . 'bhg_guesses';
+$hunts_table	= $wpdb->prefix . 'bhg_bonus_hunts';
+$guesses_table	= $wpdb->prefix . 'bhg_guesses';
 $allowed_tables = array(
 	$wpdb->prefix . 'bhg_bonus_hunts',
 	$wpdb->prefix . 'bhg_guesses',
@@ -34,7 +34,7 @@ if ( 'edit' === $view ) {
 if ( 'list' === $view ) :
 		$current_page = max( 1, isset( $_GET['paged'] ) ? (int) wp_unslash( $_GET['paged'] ) : 1 );
 		$per_page     = 30;
-		$offset       = ( $current_page - 1 ) * $per_page;
+		$offset	      = ( $current_page - 1 ) * $per_page;
 
 				$hunts = $wpdb->get_results(
 						$wpdb->prepare(
@@ -45,11 +45,11 @@ if ( 'list' === $view ) :
 				);
 
 		$status_labels = array(
-			'open'   => __( 'Open', 'bonus-hunt-guesser' ),
+			'open'	 => __( 'Open', 'bonus-hunt-guesser' ),
 			'closed' => __( 'Closed', 'bonus-hunt-guesser' ),
 		);
 
-		$total    = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$hunts_table}" );
+		$total	  = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$hunts_table}" );
 		$base_url = remove_query_arg( array( 'paged' ) );
 		?>
 <div class="wrap">
@@ -142,11 +142,11 @@ endif;
 			echo '<div class="tablenav"><div class="tablenav-pages">';
 			echo paginate_links(
 				array(
-					'base'      => add_query_arg( 'paged', '%#%', $base_url ),
+					'base'	    => add_query_arg( 'paged', '%#%', $base_url ),
 					'format'    => '',
 					'prev_text' => '&laquo;',
 					'next_text' => '&raquo;',
-					'total'     => $total_pages,
+					'total'	    => $total_pages,
 					'current'   => $current_page,
 				)
 			);
@@ -230,11 +230,10 @@ if ( $view === 'add' ) :
 			if ( ! in_array( $aff_table, $allowed_tables, true ) ) {
 				wp_die( esc_html__( 'Invalid table.', 'bonus-hunt-guesser' ) );
 			}
-			$aff_table = esc_sql( $aff_table );
-			$affs      = $wpdb->get_results(
+			$affs = $wpdb->get_results(
 				"SELECT id, name FROM {$aff_table} ORDER BY name ASC"
 			);
-			$sel       = isset( $hunt->affiliate_site_id ) ? (int) $hunt->affiliate_site_id : 0;
+			$sel  = isset( $hunt->affiliate_site_id ) ? (int) $hunt->affiliate_site_id : 0;
 			?>
 			<select id="bhg_affiliate" name="affiliate_site_id">
 				<option value="0"><?php echo esc_html__( 'None', 'bonus-hunt-guesser' ); ?></option>
