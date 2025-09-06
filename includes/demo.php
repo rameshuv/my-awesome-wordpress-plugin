@@ -124,16 +124,16 @@ function bhg_seed_demo_on_activation() {
 		}
 	}
 
-               // Compute winner for the closed hunt (closest)
-              $rows = $wpdb->get_results(
-                      $wpdb->prepare(
-                              "SELECT user_id, guess_amount FROM {$guesses} WHERE hunt_id = %d",
-                              $closed_id
-                      )
-              );
-		$final       = 2420.00;
-		$winner_id   = 0;
-		$winner_diff = null;
+				// Compute winner for the closed hunt (closest)
+				$rows = $wpdb->get_results(
+					$wpdb->prepare(
+						"SELECT user_id, guess_amount FROM {$guesses} WHERE hunt_id = %d",
+						$closed_id
+					)
+				);
+		$final        = 2420.00;
+		$winner_id    = 0;
+		$winner_diff  = null;
 	foreach ( $rows as $row ) {
 		$diff = abs( floatval( $row->guess_amount ) - $final );
 		if ( $winner_diff === null || $diff < $winner_diff ) {

@@ -57,7 +57,7 @@ function bhg_admin_cap() {
 add_filter(
 	'login_redirect',
 	function ( $redirect_to, $requested_redirect_to, $user ) {
-$r = isset( $_GET['bhg_redirect'] ) ? wp_unslash( $_GET['bhg_redirect'] ) : '';
+		$r = isset( $_GET['bhg_redirect'] ) ? wp_unslash( $_GET['bhg_redirect'] ) : '';
 		if ( ! empty( $r ) ) {
 			$safe      = esc_url_raw( $r );
 			$home_host = wp_parse_url( home_url(), PHP_URL_HOST );
@@ -82,16 +82,20 @@ function bhg_is_frontend() {
 }
 
 if ( ! function_exists( 'bhg_t' ) ) {
-	/**
-	 * Retrieve a translation value from the database.
-	 *
-	 * @param string $key     Translation key.
-	 * @param string $default Default text if not found.
-	 * @return string
-	 */
+		/**
+		 * Retrieve a translation value from the database.
+		 *
+		 * The returned string is unsanitized and may contain HTML. Escape the
+		 * value on output using {@see bhg_t_esc_html()} or
+		 * {@see bhg_t_esc_attr()}.
+		 *
+		 * @param string $key     Translation key.
+		 * @param string $default Default text if not found.
+		 * @return string Unsanitized translation value.
+		 */
 	function bhg_t( $key, $default = '' ) {
-		global $wpdb;
-		static $cache = array();
+			global $wpdb;
+			static $cache = array();
 
 		if ( isset( $cache[ $key ] ) ) {
 			return $cache[ $key ];
@@ -111,16 +115,40 @@ if ( ! function_exists( 'bhg_t' ) ) {
 	}
 }
 
+if ( ! function_exists( 'bhg_t_esc_html' ) ) {
+	/**
+	 * Retrieve a translation and escape it for safe HTML output.
+	 *
+	 * @param string $key     Translation key.
+	 * @param string $default Default text if not found.
+	 * @return string Escaped translation for HTML context.
+	 */
+	function bhg_t_esc_html( $key, $default = '' ) {
+		return esc_html( bhg_t( $key, $default ) );
+	}
+}
+
+if ( ! function_exists( 'bhg_t_esc_attr' ) ) {
+	/**
+	 * Retrieve a translation and escape it for an HTML attribute.
+	 *
+	 * @param string $key     Translation key.
+	 * @param string $default Default text if not found.
+	 * @return string Escaped translation for attribute context.
+	 */
+	function bhg_t_esc_attr( $key, $default = '' ) {
+		return esc_attr( bhg_t( $key, $default ) );
+	}
+}
+
 if ( ! function_exists( 'bhg_get_default_translations' ) ) {
 	/**
 	 * Retrieve default translation key/value pairs.
 	 *
 	 * @return array
 	 */
-function bhg_get_default_translations() {
-return apply_filters(
-'bhg_default_translations',
-array(
+	function bhg_get_default_translations() {
+		return array(
 			'welcome_message'             => 'Welcome!',
 			'goodbye_message'             => 'Goodbye!',
 			'menu_dashboard'              => 'Dashboard',
@@ -246,11 +274,10 @@ array(
 			'sc_final_balance'            => 'Final Balance',
 			'sc_status'                   => 'Status',
 			'sc_affiliate'                => 'Affiliate',
-'sc_position'                 => 'Position',
-'sc_user'                     => 'User',
-)
-);
-}
+			'sc_position'                 => 'Position',
+			'sc_user'                     => 'User',
+		);
+	}
 }
 
 if ( ! function_exists( 'bhg_seed_default_translations_if_empty' ) ) {
@@ -264,78 +291,24 @@ if ( ! function_exists( 'bhg_seed_default_translations_if_empty' ) ) {
 
 		$table = $wpdb->prefix . 'bhg_translations';
 
-foreach ( bhg_get_default_translations() as $tkey => $tvalue ) {
-$tkey = trim( (string) $tkey );
-if ( '' === $tkey ) {
-continue; // Skip invalid keys.
-}
+		foreach ( bhg_get_default_translations() as $tkey => $tvalue ) {
+			$tkey = trim( (string) $tkey );
+			if ( '' === $tkey ) {
+				continue; // Skip invalid keys.
+			}
 
-$exists = $wpdb->get_var(
-$wpdb->prepare( "SELECT 1 FROM $table WHERE tkey = %s", $tkey )
-);
-
-if ( $exists ) {
-continue; // Do not overwrite existing entries.
-}
-
-$wpdb->insert(
-$table,
-array(
-'tkey'   => $tkey,
-'tvalue' => $tvalue,
-'locale' => get_locale(),
-),
-array( '%s', '%s', '%s' )
-);
-}
+			$wpdb->replace(
+				$table,
+				array(
+					'tkey'   => $tkey,
+					'tvalue' => $tvalue,
+					'locale' => get_locale(),
+				),
+				array( '%s', '%s', '%s' )
+			);
+		}
 	}
 }
-
-if ( ! function_exists( 'bhg_collect_translation_strings' ) ) {
-/**
- * Collect user-facing strings from shortcode and admin files.
- *
- * @param array $defaults Existing defaults.
- * @return array
- */
-function bhg_collect_translation_strings( $defaults ) {
-$base_dir  = dirname( __DIR__ );
-$scan_dirs = array(
-$base_dir . '/includes',
-$base_dir . '/admin',
-);
-
-foreach ( $scan_dirs as $dir ) {
-if ( ! is_dir( $dir ) ) {
-continue;
-}
-
-$iterator = new RecursiveIteratorIterator(
-new RecursiveDirectoryIterator( $dir, FilesystemIterator::SKIP_DOTS )
-);
-
-foreach ( $iterator as $file ) {
-if ( 'php' !== strtolower( $file->getExtension() ) ) {
-continue;
-}
-
-$content = file_get_contents( $file->getPathname() );
-if ( preg_match_all( "/(?:__|_e|esc_html__|esc_html_e)\\(\\s*'([^']+)'/u", $content, $matches ) ) {
-foreach ( $matches[1] as $text ) {
-$key = 'auto_' . sanitize_key( $text );
-if ( '' === $key || isset( $defaults[ $key ] ) ) {
-continue;
-}
-$defaults[ $key ] = $text;
-}
-}
-}
-}
-
-return $defaults;
-}
-}
-add_filter( 'bhg_default_translations', 'bhg_collect_translation_strings' );
 
 /**
  * Format an amount as currency.

@@ -11,8 +11,8 @@ if ( ! current_user_can( 'manage_options' ) ) {
 }
 
 global $wpdb;
-$hunts_table	= $wpdb->prefix . 'bhg_bonus_hunts';
-$guesses_table	= $wpdb->prefix . 'bhg_guesses';
+$hunts_table    = $wpdb->prefix . 'bhg_bonus_hunts';
+$guesses_table  = $wpdb->prefix . 'bhg_guesses';
 $allowed_tables = array(
 	$wpdb->prefix . 'bhg_bonus_hunts',
 	$wpdb->prefix . 'bhg_guesses',
@@ -34,22 +34,22 @@ if ( 'edit' === $view ) {
 if ( 'list' === $view ) :
 		$current_page = max( 1, isset( $_GET['paged'] ) ? (int) wp_unslash( $_GET['paged'] ) : 1 );
 		$per_page     = 30;
-		$offset	      = ( $current_page - 1 ) * $per_page;
+		$offset       = ( $current_page - 1 ) * $per_page;
 
 				$hunts = $wpdb->get_results(
-						$wpdb->prepare(
-								"SELECT id, title, starting_balance, final_balance, winners_count, status FROM {$hunts_table} ORDER BY id DESC LIMIT %d OFFSET %d",
-								$per_page,
-								$offset
-						)
+					$wpdb->prepare(
+						"SELECT id, title, starting_balance, final_balance, winners_count, status FROM {$hunts_table} ORDER BY id DESC LIMIT %d OFFSET %d",
+						$per_page,
+						$offset
+					)
 				);
 
 		$status_labels = array(
-			'open'	 => __( 'Open', 'bonus-hunt-guesser' ),
+			'open'   => __( 'Open', 'bonus-hunt-guesser' ),
 			'closed' => __( 'Closed', 'bonus-hunt-guesser' ),
 		);
 
-		$total	  = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$hunts_table}" );
+		$total    = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$hunts_table}" );
 		$base_url = remove_query_arg( array( 'paged' ) );
 		?>
 <div class="wrap">
@@ -113,14 +113,14 @@ if ( 'list' === $view ) :
 												<?php if ( 'open' === $h->status ) : ?>
 														<?php
 														$close_url = wp_nonce_url(
-																add_query_arg(
-																		array(
-																				'view' => 'close',
-																				'id'   => (int) $h->id,
-																		)
-																),
-																'bhg_close_hunt_' . (int) $h->id,
-																'bhg_nonce'
+															add_query_arg(
+																array(
+																	'view' => 'close',
+																	'id'   => (int) $h->id,
+																)
+															),
+															'bhg_close_hunt_' . (int) $h->id,
+															'bhg_nonce'
 														);
 														?>
 														<a class="button" href="<?php echo esc_url( $close_url ); ?>"><?php echo esc_html__( 'Close Hunt', 'bonus-hunt-guesser' ); ?></a>
@@ -142,11 +142,11 @@ endif;
 			echo '<div class="tablenav"><div class="tablenav-pages">';
 			echo paginate_links(
 				array(
-					'base'	    => add_query_arg( 'paged', '%#%', $base_url ),
+					'base'      => add_query_arg( 'paged', '%#%', $base_url ),
 					'format'    => '',
 					'prev_text' => '&laquo;',
 					'next_text' => '&raquo;',
-					'total'	    => $total_pages,
+					'total'     => $total_pages,
 					'current'   => $current_page,
 				)
 			);
@@ -161,20 +161,20 @@ endif;
 if ( 'close' === $view ) :
 				$id    = isset( $_GET['id'] ) ? absint( wp_unslash( $_GET['id'] ) ) : 0;
 				$nonce = isset( $_GET['bhg_nonce'] ) ? sanitize_text_field( wp_unslash( $_GET['bhg_nonce'] ) ) : '';
-		if ( ! $id || ! $nonce || ! wp_verify_nonce( $nonce, 'bhg_close_hunt_' . $id ) ) :
-				echo '<div class="notice notice-error"><p>' . esc_html__( 'Invalid request.', 'bonus-hunt-guesser' ) . '</p></div>';
+	if ( ! $id || ! $nonce || ! wp_verify_nonce( $nonce, 'bhg_close_hunt_' . $id ) ) :
+			echo '<div class="notice notice-error"><p>' . esc_html__( 'Invalid request.', 'bonus-hunt-guesser' ) . '</p></div>';
 		else :
 				$hunt = $wpdb->get_row(
-						$wpdb->prepare( "SELECT id, title, status FROM {$hunts_table} WHERE id = %d", $id )
+					$wpdb->prepare( "SELECT id, title, status FROM {$hunts_table} WHERE id = %d", $id )
 				);
-				if ( ! $hunt || 'open' !== $hunt->status ) :
-						echo '<div class="notice notice-error"><p>' . esc_html__( 'Invalid hunt.', 'bonus-hunt-guesser' ) . '</p></div>';
+			if ( ! $hunt || 'open' !== $hunt->status ) :
+					echo '<div class="notice notice-error"><p>' . esc_html__( 'Invalid hunt.', 'bonus-hunt-guesser' ) . '</p></div>';
 				else :
-				?>
+					?>
 <div class="wrap">
 	<h1 class="wp-heading-inline"><?php echo esc_html__( 'Close Bonus Hunt', 'bonus-hunt-guesser' ); ?> <?php echo esc_html__( '—', 'bonus-hunt-guesser' ); ?> <?php echo esc_html( $hunt->title ); ?></h1>
 	<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" class="bhg-max-width-400 bhg-margin-top-small">
-		<?php wp_nonce_field( 'bhg_close_hunt' ); ?>
+					<?php wp_nonce_field( 'bhg_close_hunt' ); ?>
 	<input type="hidden" name="action" value="bhg_close_hunt" />
 	<input type="hidden" name="hunt_id" value="<?php echo (int) $hunt->id; ?>" />
 	<table class="form-table" role="presentation">
@@ -185,10 +185,10 @@ if ( 'close' === $view ) :
 		</tr>
 		</tbody>
 	</table>
-		<?php submit_button( __( 'Close Hunt', 'bonus-hunt-guesser' ) ); ?>
+					<?php submit_button( __( 'Close Hunt', 'bonus-hunt-guesser' ) ); ?>
 	</form>
 </div>
-				<?php
+					<?php
 		endif;
 		endif;
 endif;

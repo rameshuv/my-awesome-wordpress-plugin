@@ -14,7 +14,7 @@ if ( ! function_exists( 'bhg_get_hunt' ) ) {
 		global $wpdb;
 				$t = $wpdb->prefix . 'bhg_bonus_hunts';
 				return $wpdb->get_row( $wpdb->prepare( "SELECT id, title, starting_balance, final_balance, winners_count, status, closed_at FROM $t WHERE id=%d", (int) $hunt_id ) );
-		}
+	}
 }
 
 if ( ! function_exists( 'bhg_get_latest_closed_hunts' ) ) {

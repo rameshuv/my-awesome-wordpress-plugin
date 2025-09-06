@@ -87,29 +87,29 @@ class BHG_Bonus_Hunts {
 		if ( ! $hunt ) {
 			return array(); }
 
-				if ( null !== $hunt->final_balance ) {
-						return $wpdb->get_results(
-								$wpdb->prepare(
-										"SELECT g.id, g.user_id, g.guess, g.created_at, u.display_name, ABS(g.guess - %f) AS diff
+		if ( null !== $hunt->final_balance ) {
+				return $wpdb->get_results(
+					$wpdb->prepare(
+						"SELECT g.id, g.user_id, g.guess, g.created_at, u.display_name, ABS(g.guess - %f) AS diff
 										 FROM `$guesses_table` g
 										 LEFT JOIN `$wpdb->users` u ON u.ID = g.user_id
 										 WHERE g.hunt_id = %d
 										 ORDER BY diff ASC, g.id ASC",
-										$hunt->final_balance,
-										$hunt_id
-								)
-						);
-				}
+						$hunt->final_balance,
+						$hunt_id
+					)
+				);
+		}
 
 				return $wpdb->get_results(
-						$wpdb->prepare(
-								"SELECT g.id, g.user_id, g.guess, g.created_at, u.display_name, NULL AS diff
+					$wpdb->prepare(
+						"SELECT g.id, g.user_id, g.guess, g.created_at, u.display_name, NULL AS diff
 								 FROM `$guesses_table` g
 								 LEFT JOIN `$wpdb->users` u ON u.ID = g.user_id
 								 WHERE g.hunt_id = %d
 								 ORDER BY g.id ASC",
-								$hunt_id
-						)
+						$hunt_id
+					)
 				);
-		}
+	}
 }
