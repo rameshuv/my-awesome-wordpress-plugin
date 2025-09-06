@@ -6,22 +6,22 @@ class BHG_DB {
 
 	// Static wrapper to support legacy static calls.
 	public static function migrate() {
-		$db = new self();
-		$db->create_tables();
+                $db = new self();
+                $db->create_tables();
 
-				global $wpdb;
-				$tours_table = esc_sql( $wpdb->prefix . 'bhg_tournaments' );
+                                global $wpdb;
+                                $tours_table = esc_sql( $wpdb->prefix . 'bhg_tournaments' );
 
-		// Drop legacy "period" column and related index if they exist.
-		if ( $db->column_exists( $tours_table, 'period' ) ) {
-			// Remove unique index first if present.
-			if ( $db->index_exists( $tours_table, 'type_period' ) ) {
-								$wpdb->query( "ALTER TABLE `{$tours_table}` DROP INDEX type_period" ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.DirectDatabaseQuery.SchemaChange,WordPress.DB.PreparedSQL.NotPrepared,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-			}
+                // Drop legacy "period" column and related index if they exist.
+                if ( $db->column_exists( $tours_table, 'period' ) ) {
+                        // Remove unique index first if present.
+                        if ( $db->index_exists( $tours_table, 'type_period' ) ) {
+                                                                dbDelta( "ALTER TABLE `{$tours_table}` DROP INDEX type_period" );
+                        }
 
-						$wpdb->query( "ALTER TABLE `{$tours_table}` DROP COLUMN period" ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.DirectDatabaseQuery.SchemaChange,WordPress.DB.PreparedSQL.NotPrepared,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-		}
-	}
+                                                dbDelta( "ALTER TABLE `{$tours_table}` DROP COLUMN period" );
+                }
+        }
 
 	public function create_tables() {
 		global $wpdb;
@@ -145,17 +145,17 @@ class BHG_DB {
 		// Idempotent ensure for columns/indexes
 		try {
 			// Hunts: winners_count, affiliate_site_id
-			$need = array(
-				'winners_count'     => "ALTER TABLE `{$hunts_table}` ADD COLUMN winners_count INT UNSIGNED NOT NULL DEFAULT 3",
-				'affiliate_site_id' => "ALTER TABLE `{$hunts_table}` ADD COLUMN affiliate_site_id BIGINT UNSIGNED NULL",
-				'final_balance'     => "ALTER TABLE `{$hunts_table}` ADD COLUMN final_balance DECIMAL(12,2) NULL",
-				'status'            => "ALTER TABLE `{$hunts_table}` ADD COLUMN status VARCHAR(20) NOT NULL DEFAULT 'open'",
-			);
-			foreach ( $need as $c => $alter ) {
-				if ( ! $this->column_exists( $hunts_table, $c ) ) {
-										$wpdb->query( $alter ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.DirectDatabaseQuery.SchemaChange,WordPress.DB.PreparedSQL.NotPrepared,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-				}
-			}
+                        $need = array(
+                                'winners_count'     => "ALTER TABLE `{$hunts_table}` ADD COLUMN winners_count INT UNSIGNED NOT NULL DEFAULT 3",
+                                'affiliate_site_id' => "ALTER TABLE `{$hunts_table}` ADD COLUMN affiliate_site_id BIGINT UNSIGNED NULL",
+                                'final_balance'     => "ALTER TABLE `{$hunts_table}` ADD COLUMN final_balance DECIMAL(12,2) NULL",
+                                'status'            => "ALTER TABLE `{$hunts_table}` ADD COLUMN status VARCHAR(20) NOT NULL DEFAULT 'open'",
+                        );
+                        foreach ( $need as $c => $alter ) {
+                                if ( ! $this->column_exists( $hunts_table, $c ) ) {
+                                                                                dbDelta( $alter );
+                                }
+                        }
 
 			// Tournaments: make sure common columns exist
 			$tneed = array(
@@ -165,31 +165,31 @@ class BHG_DB {
 				'start_date'  => "ALTER TABLE `{$tours_table}` ADD COLUMN start_date DATE NULL",
 				'end_date'    => "ALTER TABLE `{$tours_table}` ADD COLUMN end_date DATE NULL",
 				'status'      => "ALTER TABLE `{$tours_table}` ADD COLUMN status VARCHAR(20) NOT NULL DEFAULT 'active'",
-			);
-			foreach ( $tneed as $c => $alter ) {
-				if ( ! $this->column_exists( $tours_table, $c ) ) {
-																		$wpdb->query( $alter ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.DirectDatabaseQuery.SchemaChange,WordPress.DB.PreparedSQL.NotPrepared,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-				}
-			}
+                        );
+                        foreach ( $tneed as $c => $alter ) {
+                                if ( ! $this->column_exists( $tours_table, $c ) ) {
+                                        dbDelta( $alter );
+                                }
+                        }
 
 						// Tournament results columns
-						$trrneed = array(
-							'tournament_id' => "ALTER TABLE `{$tres_table}` ADD COLUMN tournament_id BIGINT UNSIGNED NOT NULL",
-							'user_id'       => "ALTER TABLE `{$tres_table}` ADD COLUMN user_id BIGINT UNSIGNED NOT NULL",
-							'wins'          => "ALTER TABLE `{$tres_table}` ADD COLUMN wins INT UNSIGNED NOT NULL DEFAULT 0",
-							'last_win_date' => "ALTER TABLE `{$tres_table}` ADD COLUMN last_win_date DATETIME NULL",
-						);
-						foreach ( $trrneed as $c => $alter ) {
-							if ( ! $this->column_exists( $tres_table, $c ) ) {
-																			$wpdb->query( $alter ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.DirectDatabaseQuery.SchemaChange,WordPress.DB.PreparedSQL.NotPrepared,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-							}
-						}
-						if ( ! $this->index_exists( $tres_table, 'tournament_id' ) ) {
-																$wpdb->query( "ALTER TABLE `{$tres_table}` ADD KEY tournament_id (tournament_id)" ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.DirectDatabaseQuery.SchemaChange,WordPress.DB.PreparedSQL.NotPrepared,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-						}
-						if ( ! $this->index_exists( $tres_table, 'user_id' ) ) {
-																$wpdb->query( "ALTER TABLE `{$tres_table}` ADD KEY user_id (user_id)" ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.DirectDatabaseQuery.SchemaChange,WordPress.DB.PreparedSQL.NotPrepared,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-						}
+                                                $trrneed = array(
+                                                        'tournament_id' => "ALTER TABLE `{$tres_table}` ADD COLUMN tournament_id BIGINT UNSIGNED NOT NULL",
+                                                        'user_id'       => "ALTER TABLE `{$tres_table}` ADD COLUMN user_id BIGINT UNSIGNED NOT NULL",
+                                                        'wins'          => "ALTER TABLE `{$tres_table}` ADD COLUMN wins INT UNSIGNED NOT NULL DEFAULT 0",
+                                                        'last_win_date' => "ALTER TABLE `{$tres_table}` ADD COLUMN last_win_date DATETIME NULL",
+                                                );
+                                                foreach ( $trrneed as $c => $alter ) {
+                                                        if ( ! $this->column_exists( $tres_table, $c ) ) {
+                                                                dbDelta( $alter );
+                                                        }
+                                                }
+                                                if ( ! $this->index_exists( $tres_table, 'tournament_id' ) ) {
+                                                        dbDelta( "ALTER TABLE `{$tres_table}` ADD KEY tournament_id (tournament_id)" );
+                                                }
+                                                if ( ! $this->index_exists( $tres_table, 'user_id' ) ) {
+                                                        dbDelta( "ALTER TABLE `{$tres_table}` ADD KEY user_id (user_id)" );
+                                                }
 
 						// Ads columns
 						$aneed = array(
@@ -202,12 +202,12 @@ class BHG_DB {
 							'active'       => "ALTER TABLE `{$ads_table}` ADD COLUMN active TINYINT(1) NOT NULL DEFAULT 1",
 							'created_at'   => "ALTER TABLE `{$ads_table}` ADD COLUMN created_at DATETIME NULL",
 							'updated_at'   => "ALTER TABLE `{$ads_table}` ADD COLUMN updated_at DATETIME NULL",
-						);
-						foreach ( $aneed as $c => $alter ) {
-							if ( ! $this->column_exists( $ads_table, $c ) ) {
-										$wpdb->query( $alter ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.DirectDatabaseQuery.SchemaChange,WordPress.DB.PreparedSQL.NotPrepared,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-							}
-						}
+                                                );
+                                                foreach ( $aneed as $c => $alter ) {
+                                                        if ( ! $this->column_exists( $ads_table, $c ) ) {
+                                                                                dbDelta( $alter );
+                                                        }
+                                                }
 
 						// Translations columns
 						$trneed = array(
@@ -216,16 +216,16 @@ class BHG_DB {
 							'locale'     => "ALTER TABLE `{$trans_table}` ADD COLUMN locale VARCHAR(20) NOT NULL DEFAULT 'en_US'",
 							'created_at' => "ALTER TABLE `{$trans_table}` ADD COLUMN created_at DATETIME NULL",
 							'updated_at' => "ALTER TABLE `{$trans_table}` ADD COLUMN updated_at DATETIME NULL",
-						);
-						foreach ( $trneed as $c => $alter ) {
-							if ( ! $this->column_exists( $trans_table, $c ) ) {
-										$wpdb->query( $alter ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.DirectDatabaseQuery.SchemaChange,WordPress.DB.PreparedSQL.NotPrepared,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-							}
-						}
-						// Ensure unique index
-						if ( ! $this->index_exists( $trans_table, 'tkey_locale' ) ) {
-								$wpdb->query( "ALTER TABLE `{$trans_table}` ADD UNIQUE KEY tkey_locale (tkey, locale)" ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.DirectDatabaseQuery.SchemaChange,WordPress.DB.PreparedSQL.NotPrepared,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-						}
+                                                );
+                                                foreach ( $trneed as $c => $alter ) {
+                                                        if ( ! $this->column_exists( $trans_table, $c ) ) {
+                                                                                dbDelta( $alter );
+                                                        }
+                                                }
+                                                // Ensure unique index
+                                                if ( ! $this->index_exists( $trans_table, 'tkey_locale' ) ) {
+                                                                dbDelta( "ALTER TABLE `{$trans_table}` ADD UNIQUE KEY tkey_locale (tkey, locale)" );
+                                                }
 
 						// Affiliates columns / unique index
 						$afneed = array(
@@ -234,15 +234,15 @@ class BHG_DB {
 							'status'     => "ALTER TABLE `{$aff_table}` ADD COLUMN status VARCHAR(20) NOT NULL DEFAULT 'active'",
 							'created_at' => "ALTER TABLE `{$aff_table}` ADD COLUMN created_at DATETIME NULL",
 							'updated_at' => "ALTER TABLE `{$aff_table}` ADD COLUMN updated_at DATETIME NULL",
-						);
-						foreach ( $afneed as $c => $alter ) {
-							if ( ! $this->column_exists( $aff_table, $c ) ) {
-										$wpdb->query( $alter ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.DirectDatabaseQuery.SchemaChange,WordPress.DB.PreparedSQL.NotPrepared,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-							}
-						}
-						if ( ! $this->index_exists( $aff_table, 'name_unique' ) ) {
-								$wpdb->query( "ALTER TABLE `{$aff_table}` ADD UNIQUE KEY name_unique (name)" ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.DirectDatabaseQuery.SchemaChange,WordPress.DB.PreparedSQL.NotPrepared,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-						}
+                                                );
+                                                foreach ( $afneed as $c => $alter ) {
+                                                        if ( ! $this->column_exists( $aff_table, $c ) ) {
+                                                                                dbDelta( $alter );
+                                                        }
+                                                }
+                                                if ( ! $this->index_exists( $aff_table, 'name_unique' ) ) {
+                                                                dbDelta( "ALTER TABLE `{$aff_table}` ADD UNIQUE KEY name_unique (name)" );
+                                                }
 		} catch ( Throwable $e ) {
 			if ( function_exists( 'error_log' ) ) {
 				error_log( '[BHG] Schema ensure error: ' . $e->getMessage() );
@@ -260,8 +260,8 @@ class BHG_DB {
 	private function column_exists( $table, $column ) {
 		global $wpdb;
 
-		$table  = esc_sql( $table );
-		$column = esc_sql( $column );
+                $table  = esc_sql( $table );
+                $column = esc_sql( $column );
 
 				$wpdb->last_error = '';
 				$exists           = $wpdb->get_var(
@@ -273,12 +273,11 @@ class BHG_DB {
 					)
 				);
 
-		if ( $wpdb->last_error ) {
-						$wpdb->last_error = '';
-						$exists           = $wpdb->get_var(
-							$wpdb->prepare( "SHOW COLUMNS FROM `{$table}` LIKE %s", $column ) // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
-						);
-		}
+                if ( $wpdb->last_error ) {
+                                                $wpdb->last_error = '';
+                                                $sql              = sprintf( 'SHOW COLUMNS FROM `%s` LIKE %%s', $table );
+                                                $exists           = $wpdb->get_var( $wpdb->prepare( $sql, $column ) );
+                }
 
 		return ! empty( $exists );
 	}
@@ -293,8 +292,8 @@ class BHG_DB {
 	private function index_exists( $table, $index ) {
 		global $wpdb;
 
-		$table = esc_sql( $table );
-		$index = esc_sql( $index );
+                $table = esc_sql( $table );
+                $index = esc_sql( $index );
 
 				$wpdb->last_error = '';
 				$exists           = $wpdb->get_var(
@@ -306,12 +305,11 @@ class BHG_DB {
 					)
 				);
 
-		if ( $wpdb->last_error ) {
-						$wpdb->last_error = '';
-						$exists           = $wpdb->get_var(
-							$wpdb->prepare( "SHOW INDEX FROM `{$table}` WHERE Key_name=%s", $index ) // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
-						);
-		}
+                if ( $wpdb->last_error ) {
+                                                $wpdb->last_error = '';
+                                                $sql              = sprintf( 'SHOW INDEX FROM `%s` WHERE Key_name=%%s', $table );
+                                                $exists           = $wpdb->get_var( $wpdb->prepare( $sql, $index ) );
+                }
 
 		return ! empty( $exists );
 	}
