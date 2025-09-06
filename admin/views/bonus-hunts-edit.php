@@ -76,7 +76,7 @@ $base     = remove_query_arg( 'ppaged' );
 				</tr>
 				<tr>
 					<th scope="row"><label for="bhg_final"><?php echo esc_html__( 'Final Balance', 'bonus-hunt-guesser' ); ?></label></th>
-					<td><input type="number" step="0.01" min="0" id="bhg_final" name="final_balance" value="<?php echo esc_attr( $hunt->final_balance ); ?>" placeholder="<?php echo esc_attr( esc_html__( '—', 'bonus-hunt-guesser' ) ); ?>"></td>
+                                       <td><input type="number" step="0.01" min="0" id="bhg_final" name="final_balance" value="<?php echo esc_attr( $hunt->final_balance ); ?>" placeholder="<?php echo esc_attr( esc_html__( '-', 'bonus-hunt-guesser' ) ); ?>"></td>
 				</tr>
 				<tr>
 					<th scope="row"><label for="bhg_status"><?php echo esc_html__( 'Status', 'bonus-hunt-guesser' ); ?></label></th>
@@ -116,7 +116,7 @@ $base     = remove_query_arg( 'ppaged' );
 				<tr>
 					<td><a href="<?php echo esc_url( admin_url( 'user-edit.php?user_id=' . (int) $r->user_id ) ); ?>"><?php echo esc_html( $name ); ?></a></td>
 					<td><?php echo esc_html( number_format_i18n( (float) $r->guess, 2 ) ); ?></td>
-                                       <td><?php echo $r->created_at ? esc_html( date_i18n( get_option( 'date_format' ) . ' ' . get_option( 'time_format' ), strtotime( $r->created_at ) ) ) : esc_html__( '—', 'bonus-hunt-guesser' ); ?></td>
+                                       <td><?php echo $r->created_at ? esc_html( date_i18n( get_option( 'date_format' ) . ' ' . get_option( 'time_format' ), strtotime( $r->created_at ) ) ) : esc_html__( '-', 'bonus-hunt-guesser' ); ?></td>
                                        <td>
                                                <?php
                                                $delete_url = wp_nonce_url(

@@ -57,7 +57,7 @@ if ( $winner_count < 1 ) {
         foreach ( $rows as $r ) :
                 $is_winner = $pos <= $winner_count;
                 ?>
-                                <tr <?php echo $is_winner ? 'class="bhg-winner-row"' : ''; ?>>
+                                <tr<?php echo $is_winner ? ' class="bhg-winner-row"' : ''; ?>>
                 <td><?php echo (int) $pos; ?></td>
                 <td><?php echo esc_html( $r->display_name ); ?></td>
                 <td><?php echo esc_html( number_format_i18n( (float) $r->guess, 2 ) ); ?></td>
