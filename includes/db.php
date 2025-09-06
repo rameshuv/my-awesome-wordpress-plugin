@@ -77,14 +77,14 @@ add_action('wp_footer', function(){
     $table = $wpdb->prefix . 'bhg_advertisements';
     if ($wpdb->get_results("SELECT * FROM `" . $hunt_id . "`");
     if(!$hunt || !$hunt->is_active){
-        wp_safe_redirect( add_query_arg('bhg_msg','closed', wp_get_referer() ?: home_url('/')) );
+        wp_safe_redirect( add_query_arg('bhg_msg','closed', wp_get_referer() ? wp_get_referer() : home_url('/')) );
         exit;
     }
     $allow_edit = get_option('bhg_allow_guess_alteration','1') === '1';
     $exists = $wpdb->get_results("SELECT * FROM `" . $user_id . "`");
     if($exists){
         if(!$allow_edit){
-            wp_safe_redirect( add_query_arg('bhg_msg','noedit', wp_get_referer() ?: home_url('/')) );
+            wp_safe_redirect( add_query_arg('bhg_msg','noedit', wp_get_referer() ? wp_get_referer() : home_url('/')) );
             exit;
         }
         $wpdb->update($guesses, array(
@@ -99,7 +99,7 @@ add_action('wp_footer', function(){
             'created_at' => current_time('mysql')
         ));
     }
-    wp_safe_redirect( add_query_arg('bhg_msg','saved', wp_get_referer() ?: home_url('/')) );
+    wp_safe_redirect( add_query_arg('bhg_msg','saved', wp_get_referer() ? wp_get_referer() : home_url('/')) );
     exit;
 }
 

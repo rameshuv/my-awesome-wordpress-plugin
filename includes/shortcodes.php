@@ -22,7 +22,7 @@ add_shortcode(
 		// Basic profile
 		ob_start(); ?>
 	<div class="bhg-box">
-		<h3><?php echo esc_html( $u->display_name ?: $u->user_login ); ?></h3>
+                <h3><?php echo esc_html( $u->display_name ? $u->display_name : $u->user_login ); ?></h3>
 		<p><?php echo esc_html( $u->user_email ); ?></p>
 		<?php
 		if ( function_exists( 'bhg_get_affiliate_sites' ) ) :
@@ -59,7 +59,7 @@ add_shortcode(
 			<h4><?php esc_html_e( 'Your Hunts', 'bonus-hunt-guesser' ); ?></h4>
 			<ul class="bhg-list">
 			<?php foreach ( $rows as $r ) : ?>
-				<li><?php echo esc_html( $r->title ?: ( '#' . $r->id ) ); ?> — <?php echo esc_html( ucfirst( $r->status ) ); ?></li>
+                                <li><?php echo esc_html( $r->title ? $r->title : ( '#' . $r->id ) ); ?> — <?php echo esc_html( ucfirst( $r->status ) ); ?></li>
 			<?php endforeach; ?>
 			</ul>
 		<?php endif; ?>
@@ -100,7 +100,7 @@ add_shortcode(
 		<?php if ( $rows ) : ?>
 			<ul class="bhg-list">
 				<?php foreach ( $rows as $r ) : ?>
-					<li><?php echo esc_html( $r->title ?: ( '#' . $r->id ) ); ?></li>
+                                        <li><?php echo esc_html( $r->title ? $r->title : ( '#' . $r->id ) ); ?></li>
 				<?php endforeach; ?>
 			</ul>
 		<?php else : ?>
@@ -153,9 +153,9 @@ add_shortcode(
 				<tbody>
 					<?php foreach ( $rows as $r ) : ?>
 						<tr>
-							<td><?php echo esc_html( $r->hunt_title ?: ( '#' . $r->hunt_id ) ); ?></td>
+                                                        <td><?php echo esc_html( $r->hunt_title ? $r->hunt_title : ( '#' . $r->hunt_id ) ); ?></td>
 							<td><?php echo esc_html( number_format_i18n( $r->guess, 2 ) ); ?></td>
-							<td><?php echo esc_html( ucfirst( $r->hunt_status ?: 'open' ) ); ?></td>
+                                                        <td><?php echo esc_html( ucfirst( $r->hunt_status ? $r->hunt_status : 'open' ) ); ?></td>
 							<td><?php echo esc_html( date_i18n( get_option( 'date_format' ) . ' ' . get_option( 'time_format' ), strtotime( $r->created_at ) ) ); ?></td>
 						</tr>
 					<?php endforeach; ?>
@@ -224,10 +224,10 @@ add_shortcode(
 				$u = isset( $r->user_id ) && $r->user_id ? get_userdata( $r->user_id ) : null;
 				?>
 				<li>
-					<strong><?php echo esc_html( $r->title ?: ( '#' . $r->hunt_id ) ); ?></strong>
+                                        <strong><?php echo esc_html( $r->title ? $r->title : ( '#' . $r->hunt_id ) ); ?></strong>
 					
 					<?php if ( $u ) : ?>
-						— <?php echo esc_html( $u->display_name ?: $u->user_login ); ?>
+                                                — <?php echo esc_html( $u->display_name ? $u->display_name : $u->user_login ); ?>
 						<?php if ( ! empty( $r->position ) ) : ?>
 							(<?php echo intval( $r->position ); ?>)
 						<?php endif; ?>

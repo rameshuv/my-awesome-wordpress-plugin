@@ -706,8 +706,8 @@ if ( ! class_exists( 'BHG_Shortcodes' ) ) {
 					echo '<tr>';
 					echo '<td>' . (int) $pos++ . '</td>';
 					echo '<td>' . esc_html(
-						$row->user_login ?: sprintf(
-										/* translators: %d: user ID. */
+                                            $row->user_login ? $row->user_login : sprintf(
+                                                    /* translators: %d: user ID. */
 							__( 'user#%d', 'bonus-hunt-guesser' ),
 							(int) $row->user_id
 						)
