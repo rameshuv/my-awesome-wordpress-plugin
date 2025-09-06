@@ -561,14 +561,13 @@ if ( ! function_exists( 'bhg_reset_demo_and_seed' ) ) {
 	 *
 	 * @return bool
 	 */
-	function bhg_reset_demo_and_seed() {
-		global $wpdb;
+       function bhg_reset_demo_and_seed() {
+               global $wpdb;
+               $p = $wpdb->prefix;
 
-		$p = $wpdb->prefix;
-
-		if ( ! current_user_can( 'manage_options' ) ) {
-			return false;
-		}
+               if ( ! current_user_can( 'manage_options' ) ) {
+                       return false;
+               }
 
 		check_admin_referer( 'bhg_reset_demo_and_seed' );
 
