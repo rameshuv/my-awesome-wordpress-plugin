@@ -18,9 +18,15 @@ if ( ! class_exists( 'BHG_Menus' ) ) {
 
 		private function __construct() {}
 
+		/**
+		 * Initialize the menus class.
+		 *
+		 * @return void
+		 */
 		public function init() {
 			if ( $this->initialized ) {
-				return; }
+				return;
+			}
 			$this->initialized = true;
 
 			add_action( 'admin_menu', array( $this, 'admin_menu' ) );
@@ -28,6 +34,13 @@ if ( ! class_exists( 'BHG_Menus' ) ) {
 			add_action( 'init', array( $this, 'register_locations' ), 5 );
 		}
 
+		/**
+		 * Enqueue admin assets.
+		 *
+		 * @param string $hook Current admin page hook.
+		 *
+		 * @return void
+		 */
 		public function assets( $hook ) {
 			if ( strpos( $hook, 'bhg' ) !== false ) {
 				wp_enqueue_style( 'bhg-admin', BHG_PLUGIN_URL . 'assets/css/admin.css', array(), defined( 'BHG_VERSION' ) ? BHG_VERSION : null );
@@ -35,6 +48,11 @@ if ( ! class_exists( 'BHG_Menus' ) ) {
 			}
 		}
 
+		/**
+		 * Register admin menus.
+		 *
+		 * @return void
+		 */
 		public function admin_menu() {
 			// Prevent duplicate top-level menu
 			global $menu;
@@ -68,16 +86,30 @@ if ( ! class_exists( 'BHG_Menus' ) ) {
 			add_submenu_page( $slug, __( 'Tools', 'bonus-hunt-guesser' ), __( 'Tools', 'bonus-hunt-guesser' ), $cap, 'bhg-tools', array( $this, 'render_tools' ) );
 		}
 
+		/**
+		 * Get the capability required to access admin pages.
+		 *
+		 * @return void
+		 */
 		private function admin_capability() {
 			return apply_filters( 'bhg_admin_capability', 'manage_options' );
 		}
 
+		/**
+		 * Render a specified admin view.
+		 *
+		 * @param string $view View name.
+		 * @param array  $vars Variables to pass to the view.
+		 *
+		 * @return void
+		 */
 		public function view( $view, $vars = array() ) {
 			if ( ! current_user_can( $this->admin_capability() ) ) {
 				wp_die( __( 'You do not have sufficient permissions to access this page.', 'bonus-hunt-guesser' ) );
 			}
 			if ( is_array( $vars ) ) {
-				extract( $vars ); }
+				extract( $vars );
+			}
 
 			$header_path = BHG_PLUGIN_DIR . 'admin/views/header.php';
 			if ( file_exists( $header_path ) ) {
@@ -88,8 +120,8 @@ if ( ! class_exists( 'BHG_Menus' ) ) {
 			if ( file_exists( $view_path ) ) {
 				include $view_path;
 			} else {
-				echo '<div class="wrap"><h2>' . esc_html__( 'View Not Found', 'bonus-hunt-guesser' ) . '</h2>';
-				echo '<p>' . sprintf( esc_html__( 'The requested view "%s" was not found.', 'bonus-hunt-guesser' ), esc_html( $view ) ) . '</p></div>';
+				echo '<div class=\'wrap\'><h2>' . esc_html__( 'View Not Found', 'bonus-hunt-guesser' ) . '</h2>';
+				echo '<p>' . sprintf( esc_html__( 'The requested view &quot;%s&quot; was not found.', 'bonus-hunt-guesser' ), esc_html( $view ) ) . '</p></div>';
 			}
 		}
 
@@ -174,6 +206,11 @@ if ( ! class_exists( 'BHG_Menus' ) ) {
 			$this->view( 'tools' );
 		}
 
+		/**
+		 * Register navigation menu locations.
+		 *
+		 * @return void
+		 */
 		public function register_locations() {
 			static $done = false;
 			if ( $done ) {
@@ -188,7 +225,8 @@ if ( ! class_exists( 'BHG_Menus' ) ) {
 				)
 			);
 		}
-	}}
+	}
+}
 
 // Bootstrap once
 if ( class_exists( 'BHG_Menus' ) ) {
