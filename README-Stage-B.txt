@@ -1,6 +1,6 @@
 Bonus Hunt Guesser — Stage B Patch
 Generated: 2025-09-05T03:18:38.706805
-Requires at least: 5.5.5
+Requires at least: 6.3.5
 
 WHAT THIS PATCH DELIVERS
 - Adds "Results" button to the hunts list (Admin → Bonus Hunts).

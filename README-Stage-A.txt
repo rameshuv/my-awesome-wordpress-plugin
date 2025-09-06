@@ -1,6 +1,6 @@
 Bonus Hunt Guesser — Stage A Patch
 Generated: 2025-09-05T03:13:45.120802
-Requires at least: 5.5.5
+Requires at least: 6.3.5
 
 WHAT THIS PATCH DELIVERS
 - Fixes parse error in admin/views/translations.php
