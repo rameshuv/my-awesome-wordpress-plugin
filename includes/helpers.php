@@ -82,16 +82,20 @@ function bhg_is_frontend() {
 }
 
 if ( ! function_exists( 'bhg_t' ) ) {
-	/**
-	 * Retrieve a translation value from the database.
-	 *
-	 * @param string $key     Translation key.
-	 * @param string $default Default text if not found.
-	 * @return string
-	 */
+		/**
+		 * Retrieve a translation value from the database.
+		 *
+		 * The returned string is unsanitized and may contain HTML. Escape the
+		 * value on output using {@see bhg_t_esc_html()} or
+		 * {@see bhg_t_esc_attr()}.
+		 *
+		 * @param string $key     Translation key.
+		 * @param string $default Default text if not found.
+		 * @return string Unsanitized translation value.
+		 */
 	function bhg_t( $key, $default = '' ) {
-		global $wpdb;
-		static $cache = array();
+			global $wpdb;
+			static $cache = array();
 
 		if ( isset( $cache[ $key ] ) ) {
 			return $cache[ $key ];
@@ -108,6 +112,32 @@ if ( ! function_exists( 'bhg_t' ) ) {
 		}
 
 		return $default;
+	}
+}
+
+if ( ! function_exists( 'bhg_t_esc_html' ) ) {
+	/**
+	 * Retrieve a translation and escape it for safe HTML output.
+	 *
+	 * @param string $key     Translation key.
+	 * @param string $default Default text if not found.
+	 * @return string Escaped translation for HTML context.
+	 */
+	function bhg_t_esc_html( $key, $default = '' ) {
+		return esc_html( bhg_t( $key, $default ) );
+	}
+}
+
+if ( ! function_exists( 'bhg_t_esc_attr' ) ) {
+	/**
+	 * Retrieve a translation and escape it for an HTML attribute.
+	 *
+	 * @param string $key     Translation key.
+	 * @param string $default Default text if not found.
+	 * @return string Escaped translation for attribute context.
+	 */
+	function bhg_t_esc_attr( $key, $default = '' ) {
+		return esc_attr( bhg_t( $key, $default ) );
 	}
 }
 
