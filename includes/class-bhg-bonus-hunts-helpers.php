@@ -217,6 +217,56 @@ if ( ! function_exists( 'bhg_remove_guess' ) ) {
 	}
 }
 
+if ( ! function_exists( 'bhg_send_hunt_results_email' ) ) {
+	/**
+	 * Send results email to all participants of a hunt.
+	 *
+	 * @param int   $hunt_id    Hunt ID.
+	 * @param array $winner_ids Optional. Array of winning user IDs.
+	 * @return void
+	 */
+	function bhg_send_hunt_results_email( $hunt_id, $winner_ids = array() ) {
+		$hunt = bhg_get_hunt( $hunt_id );
+		if ( ! $hunt ) {
+			return;
+		}
+
+		/* translators: %s: hunt title */
+		$subject = sprintf( __( 'Results for %s', 'bonus-hunt-guesser' ), $hunt->title );
+		$subject = apply_filters( 'bhg_email_subject', $subject, $hunt );
+		$subject = sanitize_text_field( $subject );
+
+		$winner_names = array();
+		foreach ( (array) $winner_ids as $wid ) {
+			$user = get_userdata( (int) $wid );
+			if ( $user ) {
+				$winner_names[] = $user->display_name;
+			}
+		}
+		$winners_text = $winner_names ? implode( ', ', $winner_names ) : '';
+
+		$body = sprintf(
+			/* translators: 1: hunt title, 2: final balance, 3: winner names */
+			__( 'The hunt "%1$s" finished with a final balance of %2$s. Winners: %3$s', 'bonus-hunt-guesser' ),
+			$hunt->title,
+			number_format_i18n( (float) $hunt->final_balance, 2 ),
+			$winners_text
+		);
+		$body = apply_filters( 'bhg_email_body', $body, $hunt, $winner_ids );
+		$body = wp_kses_post( $body );
+
+		$rows = bhg_get_all_ranked_guesses( $hunt_id );
+		$sent = array();
+		foreach ( $rows as $row ) {
+			$user = get_userdata( (int) $row->user_id );
+			if ( $user && $user->user_email && ! in_array( $user->ID, $sent, true ) ) {
+				wp_mail( $user->user_email, $subject, $body );
+				$sent[] = $user->ID;
+			}
+		}
+	}
+}
+
 if ( ! function_exists( 'bhg_flush_hunt_cache' ) ) {
 	/**
 	 * Clear cached data for a specific hunt.
