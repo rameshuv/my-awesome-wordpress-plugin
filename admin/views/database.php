@@ -78,8 +78,8 @@ function bhg_database_cleanup() {
 		$table = $wpdb->prefix . $slug;
 
 		if ( $table === $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $table ) ) ) {
-			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-			$wpdb->query( "TRUNCATE TABLE `{$table}`" );
+                        // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.NotPrepared -- Table name comes from a predefined whitelist and maintenance queries require direct execution.
+                        $wpdb->query( "TRUNCATE TABLE `{$table}`" );
 		}
 	}
 
@@ -99,8 +99,8 @@ function bhg_database_optimize() {
 		$table = $wpdb->prefix . $slug;
 
 		if ( $table === $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $table ) ) ) {
-			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-			$wpdb->query( "OPTIMIZE TABLE `{$table}`" );
+                        // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.NotPrepared -- Table name comes from a predefined whitelist and maintenance queries require direct execution.
+                        $wpdb->query( "OPTIMIZE TABLE `{$table}`" );
 		}
 	}
 }
@@ -186,8 +186,8 @@ function bhg_insert_demo_data() {
 
 				$exists = ( $table_name === $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $table_name ) ) );
 
-				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.DirectDatabaseQuery.NoCaching
-				$row_count = $exists ? (int) $wpdb->get_var( "SELECT COUNT(*) FROM `{$table_name}`" ) : 0;
+                                // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared,WordPress.DB.DirectDatabaseQuery.NoCaching -- Table name is derived from prefix and checked against whitelist.
+                                $row_count = $exists ? (int) $wpdb->get_var( "SELECT COUNT(*) FROM `{$table_name}`" ) : 0;
 
 				echo '<tr>';
 				echo '<td>' . esc_html( $table_name ) . '</td>';

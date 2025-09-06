@@ -14,7 +14,7 @@ $edit_id = absint( wp_unslash( $_GET['edit'] ?? '' ) );
 $row     = $edit_id ? $wpdb->get_row( $wpdb->prepare( "SELECT id, name, url, status FROM `$table` WHERE id=%d", $edit_id ) ) : null;
 
 // List
-$rows = $wpdb->get_results( "SELECT id, name, url, status FROM `$table` ORDER BY id DESC" );
+$rows = $wpdb->get_results( "SELECT id, name, url, status FROM `$table` ORDER BY id DESC" ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- Table name uses prefix and query has no placeholders.
 
 $status_labels = array(
 	'active'   => __( 'Active', 'bonus-hunt-guesser' ),

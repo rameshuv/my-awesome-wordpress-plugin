@@ -31,8 +31,8 @@ if ( 'delete' === $action && $ad_id && isset( $_GET['_wpnonce'] ) ) {
 
 // Fetch ads
 $ads = $wpdb->get_results(
-	"SELECT id, title, content, placement, visible_to, active FROM {$table} ORDER BY id DESC"
-);
+        "SELECT id, title, content, placement, visible_to, active FROM {$table} ORDER BY id DESC"
+); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- Table name is sanitized above and query has no user-provided values.
 
 $placement_labels = array(
 	'none'      => __( 'None', 'bonus-hunt-guesser' ),

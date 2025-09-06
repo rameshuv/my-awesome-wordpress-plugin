@@ -52,7 +52,7 @@ if ( isset( $_SERVER['REQUEST_METHOD'] ) && 'POST' === $_SERVER['REQUEST_METHOD'
 }
 
 // Fetch rows.
-$rows = $wpdb->get_results( "SELECT tkey, tvalue FROM {$table} ORDER BY tkey ASC" ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+$rows = $wpdb->get_results( "SELECT tkey, tvalue FROM {$table} ORDER BY tkey ASC" ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table name is fixed and query does not include user input.
 ?>
 <div class="wrap">
 	<h1><?php esc_html_e( 'Translations', 'bonus-hunt-guesser' ); ?></h1>

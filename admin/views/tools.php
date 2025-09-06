@@ -13,11 +13,11 @@ if ( ! defined( 'ABSPATH' ) ) {
         $guesses_table = esc_sql( $wpdb->prefix . 'bhg_guesses' );
         $ads_table = esc_sql( $wpdb->prefix . 'bhg_ads' );
         $tours_table = esc_sql( $wpdb->prefix . 'bhg_tournaments' );
-        $hunts       = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$hunts_table}" ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-        $guesses     = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$guesses_table}" ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-        $users       = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$wpdb->users}" ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-        $ads         = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$ads_table}" ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-        $tournaments = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$tours_table}" ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+        $hunts       = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$hunts_table}" ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- Table names are hardcoded with prefix and require no placeholders.
+        $guesses     = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$guesses_table}" ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- Table names are hardcoded with prefix and require no placeholders.
+        $users       = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$wpdb->users}" ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- WordPress users table is known and query has no dynamic parts.
+        $ads         = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$ads_table}" ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- Table names are hardcoded with prefix and require no placeholders.
+        $tournaments = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$tours_table}" ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- Table names are hardcoded with prefix and require no placeholders.
 	?>
 
 	<div class="card" style="max-width:900px;padding:16px;margin-top:12px;">
