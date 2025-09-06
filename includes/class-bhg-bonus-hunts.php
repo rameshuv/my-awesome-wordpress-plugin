@@ -1,5 +1,6 @@
 <?php
-if ( ! defined( 'ABSPATH' ) ) { exit; }
+if ( ! defined( 'ABSPATH' ) ) {
+	exit; }
 
 /**
  * Bonus hunt data helpers.
@@ -83,7 +84,8 @@ class BHG_Bonus_Hunts {
 		$guesses_table = $wpdb->prefix . 'bhg_guesses';
 		$hunt          = self::get_hunt( $hunt_id );
 
-		if ( ! $hunt ) { return array(); }
+		if ( ! $hunt ) {
+			return array(); }
 
 		if ( null !== $hunt->final_balance ) {
 			return $wpdb->get_results(

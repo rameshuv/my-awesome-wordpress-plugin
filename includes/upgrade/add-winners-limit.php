@@ -1,9 +1,10 @@
 <?php
-if ( ! defined( 'ABSPATH' ) ) { exit; }
+if ( ! defined( 'ABSPATH' ) ) {
+	exit; }
 
-function bhg_upgrade_add_winners_limit_column(){
+function bhg_upgrade_add_winners_limit_column() {
 	global $wpdb;
-	$hunts = $wpdb->prefix . 'bhg_bonus_hunts';
+	$hunts           = $wpdb->prefix . 'bhg_bonus_hunts';
 	$charset_collate = $wpdb->get_charset_collate();
 
 	require_once ABSPATH . 'wp-admin/includes/upgrade.php';
