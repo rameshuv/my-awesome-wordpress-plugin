@@ -19,22 +19,27 @@ if ( ! class_exists( 'BHG_Shortcodes' ) ) {
                 *
                 * @var array<string, string>
                 */
-               private const LEADERBOARD_COLUMNS = array(
-                       'guess'    => 'g.guess',
-                       'user'     => 'u.user_login',
-                       'position' => 'g.id', // Stable proxy.
-                       'wins'     => 'tr.wins',
-               );
+              private const LEADERBOARD_COLUMNS = array(
+                      // Provide both user-friendly keys and raw column names.
+                      'id'         => 'g.id',
+                      'position'   => 'g.id', // Legacy alias.
+                      'guess'      => 'g.guess',
+                      'user'       => 'u.user_login', // Legacy alias.
+                      'user_login' => 'u.user_login',
+                      'wins'       => 'tr.wins',
+              );
 
                /**
                 * Allowed column mappings for user guess queries.
                 *
                 * @var array<string, string>
                 */
-               private const USER_GUESS_COLUMNS = array(
-                       'guess' => 'g.guess',
-                       'user'  => 'u.user_login',
-               );
+              private const USER_GUESS_COLUMNS = array(
+                      'id'         => 'g.id',
+                      'guess'      => 'g.guess',
+                      'user'       => 'u.user_login', // Legacy alias.
+                      'user_login' => 'u.user_login',
+              );
 
                /**
                 * Allowed SQL order directions.
