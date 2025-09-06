@@ -85,32 +85,30 @@ $rows = $wpdb->get_results( "SELECT tkey, tvalue FROM {$table} ORDER BY tkey ASC
 	<p class="submit"><button type="submit" name="bhg_save_translation" id="bhg_save_translation" class="button button-primary"><?php esc_html_e( 'Save', 'bonus-hunt-guesser' ); ?></button></p>
 	</form>
 
-	<h2><?php esc_html_e( 'Existing keys', 'bonus-hunt-guesser' ); ?></h2>
-	<table class="widefat striped">
-	<thead><tr><th><?php esc_html_e( 'Key', 'bonus-hunt-guesser' ); ?></th><th><?php esc_html_e( 'Value', 'bonus-hunt-guesser' ); ?></th><th><?php esc_html_e( 'Actions', 'bonus-hunt-guesser' ); ?></th></tr></thead>
-	<tbody>
-	<?php
-	if ( $rows ) :
-		foreach ( $rows as $r ) :
-			?>
-	<tr<?php echo in_array( $r->tkey, $default_keys, true ) ? ' class="bhg-default-row"' : ''; ?>>
-	<td><code><?php echo esc_html( $r->tkey ); ?></code></td>
-	<td><?php echo esc_html( $r->tvalue ); ?></td>
-	<td><a href="#" class="bhg-edit-translation" onclick="bhgEditTranslation('<?php echo esc_js( $r->tkey ); ?>','<?php echo esc_js( $r->tvalue ); ?>');return false;"><?php esc_html_e( 'Edit', 'bonus-hunt-guesser' ); ?></a></td>
-	</tr>
-			<?php endforeach; else : ?>
-	<tr><td colspan="3"><?php esc_html_e( 'No translations yet.', 'bonus-hunt-guesser' ); ?></td></tr>
-	<?php endif; ?>
-	</tbody>
-	</table>
-	<script>
-	function bhgEditTranslation( key, value ) {
-	document.getElementById( 'tkey' ).value = key;
-	document.getElementById( 'tvalue' ).value = value;
-	document.getElementById( 'bhg_save_translation' ).textContent = '<?php echo esc_js( __( 'Update', 'bonus-hunt-guesser' ) ); ?>';
-	}
-	document.getElementById( 'tkey' ).addEventListener( 'input', function() {
-	document.getElementById( 'bhg_save_translation' ).textContent = '<?php echo esc_js( __( 'Save', 'bonus-hunt-guesser' ) ); ?>';
-	} );
-	</script>
+		<h2><?php esc_html_e( 'Existing keys', 'bonus-hunt-guesser' ); ?></h2>
+		<table class="widefat striped">
+		<thead><tr><th><?php esc_html_e( 'Key', 'bonus-hunt-guesser' ); ?></th><th><?php esc_html_e( 'Value', 'bonus-hunt-guesser' ); ?></th><th><?php esc_html_e( 'Save', 'bonus-hunt-guesser' ); ?></th></tr></thead>
+		<tbody>
+		<?php
+		if ( $rows ) :
+			foreach ( $rows as $r ) :
+				?>
+		<tr<?php echo in_array( $r->tkey, $default_keys, true ) ? ' class="bhg-default-row"' : ''; ?>>
+		<td><code><?php echo esc_html( $r->tkey ); ?></code></td>
+		<td>
+				<form method="post">
+						<?php wp_nonce_field( 'bhg_save_translation_action', 'bhg_nonce' ); ?>
+						<input type="hidden" name="tkey" value="<?php echo esc_attr( $r->tkey ); ?>" />
+						<input type="text" name="tvalue" value="<?php echo esc_attr( $r->tvalue ); ?>" class="regular-text" />
+		</td>
+		<td>
+						<button type="submit" name="bhg_save_translation" class="button button-secondary"><?php esc_html_e( 'Update', 'bonus-hunt-guesser' ); ?></button>
+				</form>
+		</td>
+		</tr>
+						<?php endforeach; else : ?>
+		<tr><td colspan="3"><?php esc_html_e( 'No translations yet.', 'bonus-hunt-guesser' ); ?></td></tr>
+		<?php endif; ?>
+		</tbody>
+		</table>
 </div>
