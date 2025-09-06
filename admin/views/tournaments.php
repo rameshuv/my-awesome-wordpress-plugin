@@ -6,12 +6,14 @@
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
-		exit;
+				exit;
 }
 
 if ( ! current_user_can( 'manage_options' ) ) {
-		wp_die( esc_html__( 'You do not have sufficient permissions to access this page.', 'bonus-hunt-guesser' ) );
+				wp_die( esc_html__( 'You do not have sufficient permissions to access this page.', 'bonus-hunt-guesser' ) );
 }
+
+// phpcs:disable WordPress.DB.DirectDatabaseQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Queries use dynamic, sanitized table names.
 global $wpdb;
 $table          = $wpdb->prefix . 'bhg_tournaments';
 $allowed_tables = array( $wpdb->prefix . 'bhg_tournaments' );
@@ -32,11 +34,7 @@ $row     = $edit_id
 								: null;
 
 $rows = $wpdb->get_results(
-        $wpdb->prepare(
-                "SELECT id, title, type, start_date, end_date, status FROM {$table} WHERE %d = %d ORDER BY id DESC",
-                1,
-                1
-        )
+	"SELECT id, title, type, start_date, end_date, status FROM {$table} ORDER BY id DESC" // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 );
 
 $labels = array(
