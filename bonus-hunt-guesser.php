@@ -362,10 +362,7 @@ function bhg_handle_settings_save() {
 	}
 
 	// Verify nonce
-	if ( ! isset( $_POST['bhg_settings_nonce'] ) || ! wp_verify_nonce( wp_unslash( $_POST['bhg_settings_nonce'] ), 'bhg_save_settings_nonce' ) ) {
-		wp_safe_redirect( esc_url_raw( admin_url( 'admin.php?page=bhg_settings&error=nonce_failed' ) ) );
-		exit;
-	}
+	check_admin_referer( 'bhg_save_settings', 'bhg_nonce' );
 
 	// Sanitize and validate data
 	$settings = array();
