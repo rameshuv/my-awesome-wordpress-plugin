@@ -1,6 +1,7 @@
 <?php
 if ( ! defined( 'ABSPATH' ) ) {
-	exit; }
+    exit;
+}
 
 add_action(
 	'admin_post_bhg_save_hunt',

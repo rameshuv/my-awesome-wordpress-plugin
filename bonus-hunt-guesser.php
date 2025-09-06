@@ -14,8 +14,8 @@
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
-	exit;
-		}
+    exit;
+}
 
 // Helper: parse human-entered money-like strings into float
 if ( ! function_exists( 'bhg_parse_amount' ) ) {

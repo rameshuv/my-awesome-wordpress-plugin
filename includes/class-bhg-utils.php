@@ -8,7 +8,7 @@
 // phpcs:disable WordPress.Files.FileOrganization
 
 if ( ! defined( 'ABSPATH' ) ) {
-	exit;
+    exit;
 }
 
 /**

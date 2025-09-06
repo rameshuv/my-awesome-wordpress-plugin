@@ -1,6 +1,7 @@
 <?php
 if ( ! defined( 'ABSPATH' ) ) {
-	exit; }
+    exit;
+}
 
 /**
  * Admin view for managing bonus hunts.

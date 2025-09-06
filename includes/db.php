@@ -1,7 +1,9 @@
 <?php
 // Deprecated: Do not include. Replaced by includes/class-bhg-db.php
 <?php
-if (!defined('ABSPATH')) { exit; }
+if ( ! defined( 'ABSPATH' ) ) {
+    exit;
+}
 
 function bhg_install_tables() {
     global $wpdb;

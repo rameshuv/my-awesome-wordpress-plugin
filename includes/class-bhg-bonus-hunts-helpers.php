@@ -1,6 +1,7 @@
 <?php
 if ( ! defined( 'ABSPATH' ) ) {
-	exit; }
+    exit;
+}
 
 /**
  * Helper functions for hunts and guesses used by admin dashboard, list and results.

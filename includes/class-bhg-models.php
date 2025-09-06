@@ -1,6 +1,7 @@
 <?php
 if ( ! defined( 'ABSPATH' ) ) {
-	exit; }
+    exit;
+}
 
 /**
  * Data layer utilities for Bonus Hunt Guesser.
