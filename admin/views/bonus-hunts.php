@@ -20,10 +20,8 @@ $allowed_tables = array(
 	$wpdb->users,
 );
 if ( ! in_array( $hunts_table, $allowed_tables, true ) || ! in_array( $guesses_table, $allowed_tables, true ) ) {
-	wp_die( esc_html__( 'Invalid table.', 'bonus-hunt-guesser' ) );
+        wp_die( esc_html__( 'Invalid table.', 'bonus-hunt-guesser' ) );
 }
-$hunts_table   = esc_sql( $hunts_table );
-$guesses_table = esc_sql( $guesses_table );
 
 $view = isset( $_GET['view'] ) ? sanitize_text_field( wp_unslash( $_GET['view'] ) ) : 'list';
 
