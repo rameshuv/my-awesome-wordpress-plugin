@@ -87,7 +87,8 @@ class BHG_Bonus_Hunts {
 		$hunt          = self::get_hunt( $hunt_id );
 
 		if ( ! $hunt ) {
-			return array(); }
+			return array();
+		}
 
 		if ( null !== $hunt->final_balance ) {
 				return $wpdb->get_results(
