@@ -5,8 +5,15 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 
 add_action(
-	'admin_post_bhg_save_hunt',
-	function () {
+        'admin_post_bhg_save_hunt',
+        /**
+         * Handle saving a bonus hunt from the admin interface.
+         *
+         * Requires the capability returned by bhg_admin_cap().
+         *
+         * @return void
+         */
+        function () {
 		if ( ! current_user_can( bhg_admin_cap() ) ) {
 			wp_die( esc_html__( 'Forbidden', 'bonus-hunt-guesser' ), 403 );
 		}
@@ -27,8 +34,15 @@ add_action(
 );
 
 add_action(
-	'admin_post_bhg_close_hunt',
-	function () {
+        'admin_post_bhg_close_hunt',
+        /**
+         * Process closing a bonus hunt and notify participants.
+         *
+         * Requires the capability returned by bhg_admin_cap().
+         *
+         * @return void
+         */
+        function () {
 		if ( ! current_user_can( bhg_admin_cap() ) ) {
 			wp_die( esc_html__( 'Forbidden', 'bonus-hunt-guesser' ), 403 );
 		}
@@ -78,8 +92,15 @@ add_action(
 );
 
 add_action(
-	'admin_post_bhg_add_affiliate',
-	function () {
+        'admin_post_bhg_add_affiliate',
+        /**
+         * Add a new affiliate website entry.
+         *
+         * Requires the capability returned by bhg_admin_cap().
+         *
+         * @return void
+         */
+        function () {
 		if ( ! current_user_can( bhg_admin_cap() ) ) {
 			wp_die( esc_html__( 'Forbidden', 'bonus-hunt-guesser' ), 403 );
 		}
@@ -108,8 +129,15 @@ add_action(
 
 
 add_action(
-	'admin_post_bhg_save_translations',
-	function () {
+        'admin_post_bhg_save_translations',
+        /**
+         * Save custom translation strings for the plugin.
+         *
+         * Requires the capability returned by bhg_admin_cap().
+         *
+         * @return void
+         */
+        function () {
 		if ( ! current_user_can( bhg_admin_cap() ) ) {
 			wp_die( esc_html__( 'Forbidden', 'bonus-hunt-guesser' ), 403 );
 		}
@@ -130,8 +158,15 @@ add_action(
 );
 
 add_action(
-	'admin_post_bhg_save_ads',
-	function () {
+        'admin_post_bhg_save_ads',
+        /**
+         * Persist advertising configuration settings.
+         *
+         * Requires the capability returned by bhg_admin_cap().
+         *
+         * @return void
+         */
+        function () {
 		if ( ! current_user_can( bhg_admin_cap() ) ) {
 			wp_die( esc_html__( 'Forbidden', 'bonus-hunt-guesser' ), 403 );
 		}
@@ -165,8 +200,15 @@ add_action(
  * Save affiliate flags and site assignments for users.
  */
 add_action(
-	'admin_post_bhg_save_user_affiliates',
-	function () {
+        'admin_post_bhg_save_user_affiliates',
+        /**
+         * Save affiliate flags and site assignments for users.
+         *
+         * Requires the capability returned by bhg_admin_cap().
+         *
+         * @return void
+         */
+        function () {
 		// Verify capability and nonce.
 		if ( ! current_user_can( bhg_admin_cap() ) ) {
 			wp_die( esc_html__( 'Forbidden', 'bonus-hunt-guesser' ), 403 );
@@ -181,12 +223,18 @@ add_action(
 		$is_affiliate = array_fill_keys( array_map( 'intval', array_keys( $is_aff_raw ) ), true );
 
 		$sites_raw = isset( $_POST['site'] ) ? (array) $_POST['site'] : array();
-		$sites     = array_map(
-			static function ( $site_ids ) {
-				return array_map( 'intval', (array) $site_ids );
-			},
-			$sites_raw
-		);
+                $sites     = array_map(
+                        /**
+                         * Convert provided site IDs to integers.
+                         *
+                         * @param array $site_ids Site IDs from the request.
+                         * @return array Integer site IDs.
+                         */
+                        static function ( $site_ids ) {
+                                return array_map( 'intval', (array) $site_ids );
+                        },
+                        $sites_raw
+                );
 
 		$users = get_users(
 			array(
