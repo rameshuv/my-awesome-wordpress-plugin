@@ -241,7 +241,17 @@ function bhg_seed_demo_on_activation() {
 		),
 	);
 	foreach ( $pages as $p ) {
-		if ( ! get_page_by_title( $p['title'] ) ) {
+		$page_query = new WP_Query(
+			array(
+				'post_type'      => 'page',
+				'title'          => $p['title'],
+				'post_status'    => 'any',
+				'posts_per_page' => 1,
+				'no_found_rows'  => true,
+				'fields'         => 'ids',
+			)
+		);
+		if ( ! $page_query->have_posts() ) {
 			wp_insert_post(
 				array(
 					'post_title'   => $p['title'],
@@ -251,6 +261,7 @@ function bhg_seed_demo_on_activation() {
 				)
 			);
 		}
+		wp_reset_postdata();
 	}
 
 	update_option( 'bhg_demo_seeded', 1 );
