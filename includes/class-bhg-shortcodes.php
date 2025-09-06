@@ -235,7 +235,7 @@ if ( ! class_exists( 'BHG_Shortcodes' ) ) {
 				}
 				$select .= ', tr.wins';
 			}
-                        $sql  = 'SELECT ' . $select . $joins . $where . " ORDER BY {$orderby} {$order} LIMIT %d OFFSET %d";
+						$sql  = 'SELECT ' . $select . $joins . $where . " ORDER BY {$orderby} {$order} LIMIT %d OFFSET %d";
 			$rows = $wpdb->get_results( $wpdb->prepare( $sql, $per, $offset ) );
 
 			wp_enqueue_style(
