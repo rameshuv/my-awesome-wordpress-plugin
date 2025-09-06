@@ -115,16 +115,23 @@ $base     = remove_query_arg( 'ppaged' );
 				<tr>
 					<td><a href="<?php echo esc_url( admin_url( 'user-edit.php?user_id=' . (int) $r->user_id ) ); ?>"><?php echo esc_html( $name ); ?></a></td>
 					<td><?php echo esc_html( number_format_i18n( (float) $r->guess, 2 ) ); ?></td>
-					<td><?php echo $r->created_at ? esc_html( date_i18n( get_option( 'date_format' ) . ' ' . get_option( 'time_format' ), strtotime( $r->created_at ) ) ) : esc_html__( '—', 'bonus-hunt-guesser' ); ?></td>
-					<td>
-						<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" onsubmit="return confirm('<?php echo esc_js( __( 'Delete this guess?', 'bonus-hunt-guesser' ) ); ?>');" class="bhg-inline-form">
-							<?php wp_nonce_field( 'bhg_delete_guess' ); ?>
-							<input type="hidden" name="action" value="bhg_delete_guess">
-							<input type="hidden" name="guess_id" value="<?php echo (int) $r->id; ?>">
-							<button type="submit" class="button-link-delete"><?php esc_html_e( 'Remove', 'bonus-hunt-guesser' ); ?></button>
-						</form>
-					</td>
-				</tr>
+                                       <td><?php echo $r->created_at ? esc_html( date_i18n( get_option( 'date_format' ) . ' ' . get_option( 'time_format' ), strtotime( $r->created_at ) ) ) : esc_html__( '—', 'bonus-hunt-guesser' ); ?></td>
+                                       <td>
+                                               <?php
+                                               $delete_url = wp_nonce_url(
+                                                       add_query_arg(
+                                                               array(
+                                                                       'action'   => 'bhg_delete_guess',
+                                                                       'guess_id' => (int) $r->id,
+                                                               ),
+                                                               admin_url( 'admin-post.php' )
+                                                       ),
+                                                       'bhg_delete_guess'
+                                               );
+                                               ?>
+                                               <a href="<?php echo esc_url( $delete_url ); ?>" class="button-link-delete" onclick="return confirm('<?php echo esc_js( __( 'Delete this guess?', 'bonus-hunt-guesser' ) ); ?>');"><?php esc_html_e( 'Remove', 'bonus-hunt-guesser' ); ?></a>
+                                       </td>
+                                </tr>
 							<?php
 			endforeach;
 endif;

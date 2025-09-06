@@ -205,7 +205,7 @@ class BHG_Admin {
         global $wpdb;
 
         $guesses_table = esc_sql( $wpdb->prefix . 'bhg_guesses' ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- table name.
-        $guess_id      = isset( $_POST['guess_id'] ) ? absint( wp_unslash( $_POST['guess_id'] ) ) : 0;
+        $guess_id      = isset( $_REQUEST['guess_id'] ) ? absint( wp_unslash( $_REQUEST['guess_id'] ) ) : 0;
 
         if ( 0 !== $guess_id ) {
             // Get the hunt ID associated with the guess for cache clearing.
