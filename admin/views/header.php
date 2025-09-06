@@ -8,8 +8,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 if ( ! current_user_can( 'manage_options' ) ) {
 	wp_die( __( 'You do not have sufficient permissions to access this page.', 'bonus-hunt-guesser' ) );
 }
-
-global $wpdb;
 $bhg_db  = new BHG_DB();
 $message = '';
 

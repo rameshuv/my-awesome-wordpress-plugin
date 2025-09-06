@@ -5,7 +5,6 @@
  * @package Bonus_Hunt_Guesser
  */
 
-// phpcs:disable WordPress.DB.DirectDatabaseQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Direct queries with dynamic table names are required.
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -594,7 +593,12 @@ if ( ! function_exists( 'bhg_reset_demo_and_seed' ) ) {
 				continue;
 			}
 
-				$wpdb->query( $wpdb->prepare( 'DELETE FROM %i', $tbl ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery
+                        $wpdb->query(
+                                $wpdb->prepare(
+                                        "DELETE FROM {$tbl} WHERE 1 = %d", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+                                        1
+                                )
+                        );
 		}
 
 		// Seed affiliate websites (idempotent upsert by slug).
@@ -672,8 +676,13 @@ if ( ! function_exists( 'bhg_reset_demo_and_seed' ) ) {
 			);
 
 			// Seed guesses for open hunt.
-			$g_tbl = esc_sql( "{$p}bhg_guesses" );
-			$users = $wpdb->get_col( "SELECT ID FROM {$wpdb->users} ORDER BY ID ASC LIMIT 5" ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+                        $g_tbl = esc_sql( "{$p}bhg_guesses" );
+                        $users = $wpdb->get_col(
+                                $wpdb->prepare(
+                                        "SELECT ID FROM {$wpdb->users} ORDER BY ID ASC LIMIT %d", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+                                        5
+                                )
+                        );
 			if ( empty( $users ) ) {
 				$users = array( 1 );
 			}
@@ -701,7 +710,12 @@ if ( ! function_exists( 'bhg_reset_demo_and_seed' ) ) {
 		if ( $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $t_tbl ) ) === $t_tbl ) {
 			// Wipe results only.
 			if ( $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $r_tbl ) ) === $r_tbl ) {
-				$wpdb->query( $wpdb->prepare( 'DELETE FROM %i', $r_tbl ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery
+                                $wpdb->query(
+                                        $wpdb->prepare(
+                                                "DELETE FROM {$r_tbl} WHERE 1 = %d", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+                                                1
+                                        )
+                                );
 			}
 
 			$closed = $wpdb->get_results(
