@@ -110,11 +110,11 @@ class BHG_Users_Table extends WP_List_Table {
 	 * Prepare table items.
 	 */
 	public function prepare_items() {
-				$paged     = max( 1, absint( wp_unslash( $_GET['paged'] ?? '' ) ) );
-				$orderby   = sanitize_key( wp_unslash( $_GET['orderby'] ?? 'username' ) );
-				$order_raw = sanitize_key( wp_unslash( $_GET['order'] ?? '' ) );
-				$order     = in_array( $order_raw, array( 'asc', 'desc' ), true ) ? strtoupper( $order_raw ) : 'ASC';
-				$search    = sanitize_text_field( wp_unslash( $_GET['s'] ?? '' ) );
+		$paged     = max( 1, absint( wp_unslash( $_GET['paged'] ?? '' ) ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		$orderby   = sanitize_key( wp_unslash( $_GET['orderby'] ?? 'username' ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		$order_raw = sanitize_key( wp_unslash( $_GET['order'] ?? '' ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		$order     = in_array( $order_raw, array( 'asc', 'desc' ), true ) ? strtoupper( $order_raw ) : 'ASC';
+		$search    = sanitize_text_field( wp_unslash( $_GET['s'] ?? '' ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 
 		// Whitelist orderby.
 		$allowed = array( 'username', 'email', 'role', 'guesses', 'wins' );
@@ -169,7 +169,7 @@ class BHG_Users_Table extends WP_List_Table {
 			$placeholders = implode( ',', array_fill( 0, count( $ids ), '%d' ) );
 			$sql_g        = "SELECT user_id, COUNT(*) c FROM `$g_table` WHERE user_id IN ($placeholders) GROUP BY user_id";
 			$prepared     = call_user_func_array( array( $wpdb, 'prepare' ), array_merge( array( $sql_g ), $ids ) );
-			$g_counts     = $wpdb->get_results( $prepared ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+			$g_counts     = $wpdb->get_results( $prepared ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.NotPrepared
 			foreach ( (array) $g_counts as $row ) {
 				$uid = (int) $row->user_id;
 				if ( isset( $items[ $uid ] ) ) {
@@ -178,12 +178,12 @@ class BHG_Users_Table extends WP_List_Table {
 			}
 
 			// Wins per user (if table exists).
-			$exists = $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $w_table ) );
+			$exists = $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $w_table ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 			if ( $exists ) {
 				$placeholders = implode( ',', array_fill( 0, count( $ids ), '%d' ) );
 				$sql_w        = "SELECT user_id, SUM(wins) c FROM `$w_table` WHERE user_id IN ($placeholders) GROUP BY user_id";
 				$prepared_w   = call_user_func_array( array( $wpdb, 'prepare' ), array_merge( array( $sql_w ), $ids ) );
-				$w_counts     = $wpdb->get_results( $prepared_w ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+				$w_counts     = $wpdb->get_results( $prepared_w ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.NotPrepared
 				foreach ( (array) $w_counts as $row ) {
 					$uid = (int) $row->user_id;
 					if ( isset( $items[ $uid ] ) ) {
