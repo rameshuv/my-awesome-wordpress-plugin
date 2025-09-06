@@ -6,25 +6,10 @@
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
-	exit;
+        exit;
 }
 
-if ( ! current_user_can( 'manage_options' ) ) {
-	wp_die(
-		esc_html__( 'You do not have sufficient permissions to access this page.', 'bonus-hunt-guesser' )
-	);
-}
-
-if ( ! function_exists( 'bhg_get_latest_closed_hunts' ) ) {
-	wp_die(
-		esc_html__(
-			'Helper function bhg_get_latest_closed_hunts() missing. Please include class-bhg-bonus-hunts.php helpers.',
-			'bonus-hunt-guesser'
-		)
-	);
-}
-
-$hunts = bhg_get_latest_closed_hunts( 3 );
+$hunts = isset( $hunts ) && is_array( $hunts ) ? $hunts : array();
 ?>
 
 <div class="wrap bhg-wrap bhg-admin">
