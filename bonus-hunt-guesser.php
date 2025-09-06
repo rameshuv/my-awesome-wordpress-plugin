@@ -7,7 +7,7 @@
  * Author: Bonus Hunt Guesser Development Team
  * Text Domain: bonus-hunt-guesser
  * Domain Path: /languages
- * Requires at least: 6.3.5
+ * Requires at least: 5.5.5
  * Requires PHP: 7.4
  * License: GPLv2 or later
  */
@@ -105,7 +105,7 @@ require_once __DIR__ . '/includes/class-bhg-db.php';
 
 // Define plugin constants
 define( 'BHG_VERSION', '8.0.08' );
-define( 'BHG_MIN_WP', '6.3.5' );
+define( 'BHG_MIN_WP', '5.5.5' );
 define( 'BHG_PLUGIN_FILE', __FILE__ );
 define( 'BHG_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 define( 'BHG_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
