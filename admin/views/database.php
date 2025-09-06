@@ -27,6 +27,10 @@ if ( isset( $_POST['bhg_nonce'] ) ) {
 }
 
 if ( 'db_cleanup' === $post_action && isset( $_POST['bhg_db_cleanup'] ) ) {
+	if ( ! current_user_can( 'manage_options' ) ) {
+		wp_die( esc_html__( 'You do not have sufficient permissions to perform this action.', 'bonus-hunt-guesser' ) );
+	}
+
 	if ( ! $bhg_nonce || ! wp_verify_nonce( $bhg_nonce, 'bhg_db_cleanup_action' ) ) {
 		wp_die( esc_html__( 'Security check failed.', 'bonus-hunt-guesser' ) );
 	}
@@ -35,6 +39,10 @@ if ( 'db_cleanup' === $post_action && isset( $_POST['bhg_db_cleanup'] ) ) {
 	bhg_database_cleanup();
 	$cleanup_completed = true;
 } elseif ( 'db_optimize' === $post_action && isset( $_POST['bhg_db_optimize'] ) ) {
+	if ( ! current_user_can( 'manage_options' ) ) {
+		wp_die( esc_html__( 'You do not have sufficient permissions to perform this action.', 'bonus-hunt-guesser' ) );
+	}
+
 	if ( ! $bhg_nonce || ! wp_verify_nonce( $bhg_nonce, 'bhg_db_optimize_action' ) ) {
 		wp_die( esc_html__( 'Security check failed.', 'bonus-hunt-guesser' ) );
 	}
@@ -76,10 +84,11 @@ function bhg_database_cleanup() {
 
 	foreach ( bhg_get_allowed_tables() as $slug ) {
 		$table = $wpdb->prefix . $slug;
+		$table = esc_sql( $table );
 
 		if ( $table === $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $table ) ) ) {
-                        // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.NotPrepared -- Table name comes from a predefined whitelist and maintenance queries require direct execution.
-                        $wpdb->query( "TRUNCATE TABLE `{$table}`" );
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching -- Table name comes from a predefined whitelist, escaped via esc_sql(), and maintenance queries require direct execution.
+			$wpdb->query( sprintf( 'TRUNCATE TABLE `%s`', $table ) );
 		}
 	}
 
@@ -97,10 +106,11 @@ function bhg_database_optimize() {
 
 	foreach ( bhg_get_allowed_tables() as $slug ) {
 		$table = $wpdb->prefix . $slug;
+		$table = esc_sql( $table );
 
 		if ( $table === $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $table ) ) ) {
-                        // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.NotPrepared -- Table name comes from a predefined whitelist and maintenance queries require direct execution.
-                        $wpdb->query( "OPTIMIZE TABLE `{$table}`" );
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching -- Table name comes from a predefined whitelist, escaped via esc_sql(), and maintenance queries require direct execution.
+			$wpdb->query( sprintf( 'OPTIMIZE TABLE `%s`', $table ) );
 		}
 	}
 }
@@ -186,8 +196,8 @@ function bhg_insert_demo_data() {
 
 				$exists = ( $table_name === $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $table_name ) ) );
 
-                                // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared,WordPress.DB.DirectDatabaseQuery.NoCaching -- Table name is derived from prefix and checked against whitelist.
-                                $row_count = $exists ? (int) $wpdb->get_var( "SELECT COUNT(*) FROM `{$table_name}`" ) : 0;
+				// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared,WordPress.DB.DirectDatabaseQuery.NoCaching -- Table name is derived from prefix and checked against whitelist.
+				$row_count = $exists ? (int) $wpdb->get_var( "SELECT COUNT(*) FROM `{$table_name}`" ) : 0;
 
 				echo '<tr>';
 				echo '<td>' . esc_html( $table_name ) . '</td>';
