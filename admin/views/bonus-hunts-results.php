@@ -1,6 +1,8 @@
 <?php
 if ( ! defined( 'ABSPATH' ) ) {
-	exit; }
+    exit;
+}
+
 if ( ! current_user_can( 'manage_options' ) ) {
 	wp_die( esc_html__( 'Insufficient permissions', 'bonus-hunt-guesser' ) );
 }

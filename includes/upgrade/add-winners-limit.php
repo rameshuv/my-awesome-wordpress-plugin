@@ -1,6 +1,7 @@
 <?php
 if ( ! defined( 'ABSPATH' ) ) {
-	exit; }
+    exit;
+}
 
 function bhg_upgrade_add_winners_limit_column() {
 	global $wpdb;
