@@ -53,9 +53,9 @@ $hunts = bhg_get_latest_closed_hunts( 3 );
 								?>
 								<li class="bhg-winner winner-<?php echo (int) $i + 1; ?>">
 									<span class="dashicons dashicons-awards bhg-icon" aria-hidden="true"></span>
-									<?php echo esc_html( $nm ); ?>
-									<?php esc_html_e( '—', 'bonus-hunt-guesser' ); ?>
-									<?php echo esc_html( number_format_i18n( (float) $w->guess, 2 ) ); ?>
+									<span class="bhg-winner-name"><?php echo esc_html( $nm ); ?></span>
+									<span class="bhg-winner-sep"><?php esc_html_e( '—', 'bonus-hunt-guesser' ); ?></span>
+									<span class="bhg-winner-guess"><?php echo esc_html( number_format_i18n( (float) $w->guess, 2 ) ); ?></span>
 									<span class="bhg-diff">
 										(<?php esc_html_e( 'diff', 'bonus-hunt-guesser' ); ?>
 										<?php echo esc_html( number_format_i18n( (float) $w->diff, 2 ) ); ?>)
