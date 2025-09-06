@@ -6,11 +6,7 @@
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
-                exit;
-}
-
-if ( ! current_user_can( 'manage_options' ) ) {
-	wp_die( esc_html__( 'You do not have sufficient permissions to access this page.', 'bonus-hunt-guesser' ) );
+        exit;
 }
 
 global $wpdb;
@@ -29,7 +25,7 @@ if ( ! in_array( $hunts_table, $allowed_tables, true ) || ! in_array( $guesses_t
 $hunts_table   = esc_sql( $hunts_table ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- Table name escaped with esc_sql.
 $guesses_table = esc_sql( $guesses_table ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- Table name escaped with esc_sql.
 
-$view = isset( $_GET['view'] ) ? sanitize_text_field( wp_unslash( $_GET['view'] ) ) : 'list';
+$view = isset( $view ) ? $view : 'list';
 
 if ( 'edit' === $view ) {
 		require __DIR__ . '/bonus-hunts-edit.php';

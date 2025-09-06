@@ -168,7 +168,8 @@ if ( ! class_exists( 'BHG_Menus' ) ) {
 		 * @return void
 		 */
 		public function render_dashboard() {
-			$this->view( 'dashboard' );
+			$hunts = function_exists( 'bhg_get_latest_closed_hunts' ) ? bhg_get_latest_closed_hunts( 3 ) : array();
+			$this->view( 'dashboard', array( 'hunts' => $hunts ) );
 		}
 
 		/**
@@ -177,7 +178,8 @@ if ( ! class_exists( 'BHG_Menus' ) ) {
 		 * @return void
 		 */
 		public function render_bonus_hunts() {
-			$this->view( 'bonus-hunts' );
+			$view = isset( $_GET['view'] ) ? sanitize_text_field( wp_unslash( $_GET['view'] ) ) : 'list'; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			$this->view( 'bonus-hunts', array( 'view' => $view ) );
 		}
 
 		/**
