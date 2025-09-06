@@ -225,7 +225,7 @@ if ( ! class_exists( 'BHG_Shortcodes' ) ) {
 				return '<p>' . esc_html__( 'No guesses yet.', 'bonus-hunt-guesser' ) . '</p>';
 			}
 
-			$select = 'g.id, g.user_id, g.guess, g.created_at, u.user_login, h.affiliate_site_id';
+			$select = 'SELECT g.id, g.user_id, g.guess, g.created_at, u.user_login, h.affiliate_site_id';
 			$joins  = " FROM {$g} g LEFT JOIN {$u} u ON u.ID = g.user_id LEFT JOIN {$wpdb->prefix}bhg_bonus_hunts h ON h.id = g.hunt_id";
 			$where  = $wpdb->prepare( ' WHERE g.hunt_id=%d', $hunt_id );
 			if ( $show_wins || (int) $a['tournament'] > 0 || 'wins' === $orderby_key ) {
