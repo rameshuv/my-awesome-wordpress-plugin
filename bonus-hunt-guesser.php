@@ -599,10 +599,10 @@ function bhg_build_ads_query( $table, $placement = 'footer' ) {
 
 		$cache_key = 'bhg_ads_' . md5( $query );
 		$rows      = wp_cache_get( $cache_key, 'bhg' );
-		if ( false === $rows ) {
-			$rows = $wpdb->get_results( $query ); // Query against custom table.
-			wp_cache_set( $cache_key, $rows, 'bhg', HOUR_IN_SECONDS );
-		}
+	if ( false === $rows ) {
+		$rows = $wpdb->get_results( $query ); // Query against custom table.
+		wp_cache_set( $cache_key, $rows, 'bhg', HOUR_IN_SECONDS );
+	}
 	if ( did_action( 'wp' ) && function_exists( 'get_queried_object_id' ) ) {
 			$pid = (int) get_queried_object_id();
 		if ( $pid && is_array( $rows ) ) {
@@ -714,9 +714,9 @@ function bhg_generate_leaderboard_html( $timeframe ) {
 			$total    = (int) $wpdb->get_var( $prepared ); // Query against custom tables.
 		} else {
 			$total = (int) $wpdb->get_var( $sql_total ); // Query against custom tables.
-}
+		}
 		wp_cache_set( $cache_key_total, $total, 'bhg', 5 * MINUTE_IN_SECONDS );
-}
+	}
 
 	$sql = "
 		SELECT g.user_id, u.user_login, COUNT(*) AS wins
@@ -732,16 +732,16 @@ function bhg_generate_leaderboard_html( $timeframe ) {
 		ORDER BY wins DESC, u.user_login ASC
 		LIMIT %d OFFSET %d";
 
-		$args_query    = $args;
-		$args_query[]  = $per_page;
-		$args_query[]  = $offset;
+		$args_query     = $args;
+		$args_query[]   = $per_page;
+		$args_query[]   = $offset;
 		$cache_key_rows = 'bhg_leaderboard_rows_' . md5( $sql . maybe_serialize( $args_query ) );
 		$rows           = wp_cache_get( $cache_key_rows, 'bhg' );
-		if ( false === $rows ) {
-			$prepared = call_user_func_array( array( $wpdb, 'prepare' ), array_merge( array( $sql ), $args_query ) );
-			$rows     = $wpdb->get_results( $prepared ); // Query against custom tables.
-			wp_cache_set( $cache_key_rows, $rows, 'bhg', 5 * MINUTE_IN_SECONDS );
-		}
+	if ( false === $rows ) {
+		$prepared = call_user_func_array( array( $wpdb, 'prepare' ), array_merge( array( $sql ), $args_query ) );
+		$rows     = $wpdb->get_results( $prepared ); // Query against custom tables.
+		wp_cache_set( $cache_key_rows, $rows, 'bhg', 5 * MINUTE_IN_SECONDS );
+	}
 
 	if ( ! $rows ) {
 		return '<p>' . esc_html__( 'No data available.', 'bonus-hunt-guesser' ) . '</p>';
