@@ -261,8 +261,8 @@ class BHG_DB {
 	 *
 	 * @return array
 	 */
-	private function get_allowed_tables() {
-		global $wpdb;
+        private function get_allowed_tables() {
+                global $wpdb;
 
 		return array(
 			$wpdb->prefix . 'bhg_bonus_hunts',
@@ -271,9 +271,162 @@ class BHG_DB {
 			$wpdb->prefix . 'bhg_tournament_results',
 			$wpdb->prefix . 'bhg_ads',
 			$wpdb->prefix . 'bhg_translations',
-			$wpdb->prefix . 'bhg_affiliates',
-		);
-	}
+                        $wpdb->prefix . 'bhg_affiliates',
+                );
+        }
+
+       /**
+        * Retrieve all bonus hunts.
+        *
+        * @return array
+        */
+       public function get_all_bonus_hunts() {
+               global $wpdb;
+
+               $table = esc_sql( $wpdb->prefix . 'bhg_bonus_hunts' );
+               if ( ! in_array( $table, $this->get_allowed_tables(), true ) ) {
+                       return array();
+               }
+
+               $sql = "SELECT * FROM `{$table}` WHERE 1 = %d ORDER BY created_at DESC";
+
+               return $wpdb->get_results( $wpdb->prepare( $sql, 1 ), ARRAY_A );
+       }
+
+       /**
+        * Create a new bonus hunt.
+        *
+        * @param array $data Bonus hunt data.
+        * @return int|false
+        */
+       public function create_bonus_hunt( $data ) {
+               global $wpdb;
+
+               $table = esc_sql( $wpdb->prefix . 'bhg_bonus_hunts' );
+               if ( ! in_array( $table, $this->get_allowed_tables(), true ) ) {
+                       return false;
+               }
+
+               $defaults = array(
+                       'title'             => '',
+                       'starting_balance'  => 0,
+                       'num_bonuses'       => 0,
+                       'prizes'            => '',
+                       'status'            => 'open',
+                       'affiliate_site_id' => 0,
+                       'created_by'        => 0,
+                       'created_at'        => current_time( 'mysql' ),
+               );
+
+               $data = wp_parse_args( $data, $defaults );
+
+               $inserted = $wpdb->insert(
+                       $table,
+                       $data,
+                       array(
+                               '%s',
+                               '%f',
+                               '%d',
+                               '%s',
+                               '%s',
+                               '%d',
+                               '%d',
+                               '%s',
+                       )
+               );
+
+               if ( ! $inserted ) {
+                       return false;
+               }
+
+               return $wpdb->insert_id;
+       }
+
+       /**
+        * Update an existing bonus hunt.
+        *
+        * @param int   $id   Hunt ID.
+        * @param array $data Fields to update.
+        * @return int|false
+        */
+       public function update_bonus_hunt( $id, $data ) {
+               global $wpdb;
+
+               $table = esc_sql( $wpdb->prefix . 'bhg_bonus_hunts' );
+               if ( ! in_array( $table, $this->get_allowed_tables(), true ) ) {
+                       return false;
+               }
+
+               $formats = array(
+                       'title'             => '%s',
+                       'starting_balance'  => '%f',
+                       'num_bonuses'       => '%d',
+                       'prizes'            => '%s',
+                       'status'            => '%s',
+                       'final_balance'     => '%f',
+                       'affiliate_site_id' => '%d',
+                       'updated_at'        => '%s',
+               );
+
+               $data['updated_at'] = current_time( 'mysql' );
+               $data               = array_intersect_key( $data, $formats );
+
+               if ( empty( $data ) ) {
+                       return false;
+               }
+
+               $format = array();
+               foreach ( $data as $key => $value ) {
+                       $format[] = $formats[ $key ];
+               }
+
+               return $wpdb->update(
+                       $table,
+                       $data,
+                       array( 'id' => $id ),
+                       $format,
+                       array( '%d' )
+               );
+       }
+
+       /**
+        * Delete a bonus hunt.
+        *
+        * @param int $id Hunt ID.
+        * @return int|false
+        */
+       public function delete_bonus_hunt( $id ) {
+               global $wpdb;
+
+               $table = esc_sql( $wpdb->prefix . 'bhg_bonus_hunts' );
+               if ( ! in_array( $table, $this->get_allowed_tables(), true ) ) {
+                       return false;
+               }
+
+               return $wpdb->delete(
+                       $table,
+                       array( 'id' => $id ),
+                       array( '%d' )
+               );
+       }
+
+       /**
+        * Get affiliate websites.
+        *
+        * @return array
+        */
+       public function get_affiliate_websites() {
+               global $wpdb;
+
+               $table = esc_sql( $wpdb->prefix . 'bhg_affiliates' );
+               if ( ! in_array( $table, $this->get_allowed_tables(), true ) ) {
+                       return array();
+               }
+
+               $sql = "SELECT id, name FROM `{$table}` WHERE status = %s ORDER BY name";
+
+               return $wpdb->get_results( $wpdb->prepare( $sql, 'active' ) );
+       }
 
 	/**
 	 * Check if a column exists, falling back when information_schema is not accessible.
