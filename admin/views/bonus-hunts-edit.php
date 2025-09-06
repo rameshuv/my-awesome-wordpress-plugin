@@ -33,7 +33,15 @@ $pages    = max( 1, (int) ceil( $total / $per_page ) );
 $base     = remove_query_arg( 'ppaged' );
 ?>
 <div class="wrap">
-	<h1 class="wp-heading-inline"><?php echo esc_html__( 'Edit Bonus Hunt', 'bonus-hunt-guesser' ); ?> <?php echo esc_html__( '—', 'bonus-hunt-guesser' ); ?> <?php echo esc_html( $hunt->title ); ?></h1>
+        <?php
+        $message = isset( $_GET['message'] ) ? sanitize_text_field( wp_unslash( $_GET['message'] ) ) : '';
+        if ( 'guess_deleted' === $message ) {
+                echo '<div class="notice notice-success is-dismissible"><p>' . esc_html__( 'Guess removed successfully.', 'bonus-hunt-guesser' ) . '</p></div>';
+        } elseif ( 'error' === $message ) {
+                echo '<div class="notice notice-error is-dismissible"><p>' . esc_html__( 'An error occurred. Please try again.', 'bonus-hunt-guesser' ) . '</p></div>';
+        }
+        ?>
+        <h1 class="wp-heading-inline"><?php echo esc_html__( 'Edit Bonus Hunt', 'bonus-hunt-guesser' ); ?> <?php echo esc_html__( '—', 'bonus-hunt-guesser' ); ?> <?php echo esc_html( $hunt->title ); ?></h1>
 
 	<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" class="bhg-max-width-900 bhg-margin-top-small">
 		<?php wp_nonce_field( 'bhg_save_hunt' ); ?>
