@@ -29,7 +29,7 @@ if ( 'delete' === $action && $ad_id && isset( $_GET['_wpnonce'] ) ) {
 
 // Fetch ads
 $ads = $wpdb->get_results(
-	"SELECT * FROM {$table} ORDER BY id DESC"
+        "SELECT id, title, content, placement, visible_to, active FROM {$table} ORDER BY id DESC"
 );
 
 $placement_labels = array(
@@ -116,9 +116,9 @@ endif;
 	<?php
 		$ad = null;
 	if ( $edit_id ) {
-			$ad = $wpdb->get_row(
-				$wpdb->prepare( "SELECT * FROM {$table} WHERE id = %d", $edit_id )
-			);
+                        $ad = $wpdb->get_row(
+                                $wpdb->prepare( "SELECT id, title, content, link_url, placement, visible_to, target_pages, active FROM {$table} WHERE id = %d", $edit_id )
+                        );
 	}
 	?>
 	<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" style="max-width:800px">

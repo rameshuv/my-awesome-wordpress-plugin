@@ -9,10 +9,10 @@ $table = $wpdb->prefix . 'bhg_affiliates';
 
 // Load for edit
 $edit_id = isset( $_GET['edit'] ) ? (int) $_GET['edit'] : 0;
-$row     = $edit_id ? $wpdb->get_row( $wpdb->prepare( "SELECT * FROM `$table` WHERE id=%d", $edit_id ) ) : null;
+$row     = $edit_id ? $wpdb->get_row( $wpdb->prepare( "SELECT id, name, url, status FROM `$table` WHERE id=%d", $edit_id ) ) : null;
 
 // List
-$rows = $wpdb->get_results( "SELECT * FROM `$table` ORDER BY id DESC" );
+$rows = $wpdb->get_results( "SELECT id, name, url, status FROM `$table` ORDER BY id DESC" );
 
 $status_labels = array(
 	'active'   => __( 'Active', 'bonus-hunt-guesser' ),

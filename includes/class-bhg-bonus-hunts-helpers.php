@@ -12,9 +12,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 if ( ! function_exists( 'bhg_get_hunt' ) ) {
 	function bhg_get_hunt( $hunt_id ) {
 		global $wpdb;
-		$t = $wpdb->prefix . 'bhg_bonus_hunts';
-		return $wpdb->get_row( $wpdb->prepare( "SELECT * FROM $t WHERE id=%d", (int) $hunt_id ) );
-	}
+                $t = $wpdb->prefix . 'bhg_bonus_hunts';
+                return $wpdb->get_row( $wpdb->prepare( "SELECT id, title, starting_balance, final_balance, winners_count, status, closed_at FROM $t WHERE id=%d", (int) $hunt_id ) );
+        }
 }
 
 if ( ! function_exists( 'bhg_get_latest_closed_hunts' ) ) {

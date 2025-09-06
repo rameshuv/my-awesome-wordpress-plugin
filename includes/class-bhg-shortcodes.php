@@ -50,12 +50,12 @@ if ( ! class_exists( 'BHG_Shortcodes' ) ) {
 		/** [bhg_active_hunt] — list all open hunts */
 		public function active_hunt_shortcode( $atts ) {
 				global $wpdb;
-				$hunts = $wpdb->get_results(
-					$wpdb->prepare(
-						"SELECT * FROM {$wpdb->prefix}bhg_bonus_hunts WHERE status=%s ORDER BY created_at DESC",
-						'open'
-					)
-				);
+                                $hunts = $wpdb->get_results(
+                                        $wpdb->prepare(
+                                                "SELECT id, title, starting_balance, num_bonuses, prizes FROM {$wpdb->prefix}bhg_bonus_hunts WHERE status=%s ORDER BY created_at DESC",
+                                                'open'
+                                        )
+                                );
 			if ( ! $hunts ) {
 					return '<div class="bhg-active-hunt"><p>' . esc_html__( 'No active bonus hunts at the moment.', 'bonus-hunt-guesser' ) . '</p></div>';
 			}
@@ -215,18 +215,18 @@ if ( ! class_exists( 'BHG_Shortcodes' ) ) {
 			}
 
 			$rows = $wpdb->get_results(
-				$wpdb->prepare(
-					"SELECT g.*, u.user_login, h.affiliate_site_id
-			 FROM {$g} g
-			 LEFT JOIN {$u} u ON u.ID = g.user_id
-			 LEFT JOIN {$wpdb->prefix}bhg_bonus_hunts h ON h.id = g.hunt_id
-			 WHERE g.hunt_id=%d
-			 ORDER BY {$orderby} {$order} LIMIT %d OFFSET %d",
-					$hunt_id,
-					$per,
-					$offset
-				)
-			);
+                                $wpdb->prepare(
+                                        "SELECT g.id, g.user_id, g.guess, g.created_at, u.user_login, h.affiliate_site_id
+                         FROM {$g} g
+                         LEFT JOIN {$u} u ON u.ID = g.user_id
+                         LEFT JOIN {$wpdb->prefix}bhg_bonus_hunts h ON h.id = g.hunt_id
+                         WHERE g.hunt_id=%d
+                         ORDER BY {$orderby} {$order} LIMIT %d OFFSET %d",
+                                        $hunt_id,
+                                        $per,
+                                        $offset
+                                )
+                        );
 
 			wp_enqueue_style(
 				'bhg-shortcodes',
@@ -713,7 +713,7 @@ if ( ! class_exists( 'BHG_Shortcodes' ) ) {
 					$args[]  = $website;
 			}
 
-				$sql = "SELECT * FROM {$t}";
+                                $sql = "SELECT id, type, start_date, end_date, status FROM {$t}";
 			if ( $where ) {
 					$sql .= ' WHERE ' . implode( ' AND ', $where );
 			}
