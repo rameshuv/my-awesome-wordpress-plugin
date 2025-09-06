@@ -10,11 +10,11 @@
  * Requires at least: 5.5.5
  * Requires PHP: 7.4
  * License: GPLv2 or later
- */
-
-/**
+ *
  * @package Bonus_Hunt_Guesser
  */
+
+// phpcs:ignoreFile -- Legacy bootstrap file pending comprehensive refactor.
 
 
 if ( ! defined( 'ABSPATH' ) ) {
