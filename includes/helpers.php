@@ -561,14 +561,14 @@ if ( ! function_exists( 'bhg_reset_demo_and_seed' ) ) {
          * @return bool False when capability checks fail.
          */
         function bhg_reset_demo_and_seed() {
+                global $wpdb;
+                $p = $wpdb->prefix;
+
                 if ( ! current_user_can( 'manage_options' ) ) {
                         return false;
                 }
 
                 check_admin_referer( 'bhg_demo_reseed_action', 'bhg_nonce' );
-
-                global $wpdb;
-                $p = $wpdb->prefix;
 
                 // Ensure tables exist before touching.
                 $tables = array(
