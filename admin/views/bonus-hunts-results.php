@@ -8,16 +8,16 @@ global $wpdb;
 $hunt_id = isset( $_GET['id'] ) ? (int) $_GET['id'] : 0;
 $hunts   = $wpdb->prefix . 'bhg_bonus_hunts';
 $guesses = $wpdb->prefix . 'bhg_guesses';
-$hunt    = $wpdb->get_row( $wpdb->prepare( "SELECT id, title, final_balance, winners_count FROM `$hunts` WHERE id=%d", $hunt_id ) );
+$hunt    = $wpdb->get_row( $wpdb->prepare( "SELECT id, title, final_balance, winners_count FROM `$hunts` WHERE id=%d", $hunt_id ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.NoCaching -- Custom table query.
 if ( ! $hunt ) {
 	echo '<div class="wrap"><h1>' . esc_html__( 'Hunt not found', 'bonus-hunt-guesser' ) . '</h1></div>';
 	return; }
-$rows = $wpdb->get_results(
-	$wpdb->prepare(
-		"SELECT g.id, g.user_id, g.guess, u.display_name, ABS(g.guess - %f) as diff FROM `$guesses` g JOIN `$wpdb->users` u ON u.ID=g.user_id WHERE g.hunt_id=%d ORDER BY diff ASC, g.id ASC",
-		(float) $hunt->final_balance,
-		$hunt_id
-	)
+$rows = $wpdb->get_results( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.NoCaching -- Custom table query.
+        $wpdb->prepare(
+                "SELECT g.id, g.user_id, g.guess, u.display_name, ABS(g.guess - %f) as diff FROM `$guesses` g JOIN `$wpdb->users` u ON u.ID=g.user_id WHERE g.hunt_id=%d ORDER BY diff ASC, g.id ASC",
+                (float) $hunt->final_balance,
+                $hunt_id
+        )
 );
 ?>
 <div class="wrap">
