@@ -1,13 +1,15 @@
 <?php
 if ( ! defined( 'ABSPATH' ) ) {
-	exit; }
+	exit;
+}
+
 if ( ! current_user_can( 'manage_options' ) ) {
 		wp_die( esc_html__( 'You do not have sufficient permissions to access this page.', 'bonus-hunt-guesser' ) );
 }
 
 global $wpdb;
 
-$id   = isset( $_GET['id'] ) ? (int) wp_unslash( $_GET['id'] ) : 0;
+$id   = absint( wp_unslash( $_GET['id'] ?? '' ) );
 $hunt = bhg_get_hunt( $id );
 if ( ! $hunt ) {
 		echo '<div class="notice notice-error"><p>' . esc_html__( 'Invalid hunt', 'bonus-hunt-guesser' ) . '</p></div>';
@@ -19,10 +21,10 @@ if ( isset( $allowed_tables ) && ! in_array( $aff_table, $allowed_tables, true )
 		wp_die( esc_html__( 'Invalid table.', 'bonus-hunt-guesser' ) );
 }
 $aff_table = esc_sql( $aff_table );
-$affs      = $wpdb->get_results( "SELECT id, name FROM {$aff_table} ORDER BY name ASC" );
+$affs      = $wpdb->get_results( "SELECT id, name FROM {$aff_table} ORDER BY name ASC" ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- Table name is sanitized and query uses no dynamic values.
 $sel       = isset( $hunt->affiliate_site_id ) ? (int) $hunt->affiliate_site_id : 0;
 
-$paged    = max( 1, isset( $_GET['ppaged'] ) ? (int) wp_unslash( $_GET['ppaged'] ) : 1 );
+$paged    = max( 1, absint( wp_unslash( $_GET['ppaged'] ?? '' ) ) );
 $per_page = 30;
 $data     = bhg_get_hunt_participants( $id, $paged, $per_page );
 $rows     = $data['rows'];
@@ -31,7 +33,15 @@ $pages    = max( 1, (int) ceil( $total / $per_page ) );
 $base     = remove_query_arg( 'ppaged' );
 ?>
 <div class="wrap">
-	<h1 class="wp-heading-inline"><?php echo esc_html__( 'Edit Bonus Hunt', 'bonus-hunt-guesser' ); ?> <?php echo esc_html__( '—', 'bonus-hunt-guesser' ); ?> <?php echo esc_html( $hunt->title ); ?></h1>
+        <?php
+        $message = isset( $_GET['message'] ) ? sanitize_text_field( wp_unslash( $_GET['message'] ) ) : '';
+        if ( 'guess_deleted' === $message ) {
+                echo '<div class="notice notice-success is-dismissible"><p>' . esc_html__( 'Guess removed successfully.', 'bonus-hunt-guesser' ) . '</p></div>';
+        } elseif ( 'error' === $message ) {
+                echo '<div class="notice notice-error is-dismissible"><p>' . esc_html__( 'An error occurred. Please try again.', 'bonus-hunt-guesser' ) . '</p></div>';
+        }
+        ?>
+        <h1 class="wp-heading-inline"><?php echo esc_html__( 'Edit Bonus Hunt', 'bonus-hunt-guesser' ); ?> <?php echo esc_html__( '—', 'bonus-hunt-guesser' ); ?> <?php echo esc_html( $hunt->title ); ?></h1>
 
 	<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" class="bhg-max-width-900 bhg-margin-top-small">
 		<?php wp_nonce_field( 'bhg_save_hunt' ); ?>
@@ -69,11 +79,11 @@ $base     = remove_query_arg( 'ppaged' );
 				</tr>
 				<tr>
 					<th scope="row"><label for="bhg_winners"><?php echo esc_html__( 'Number of Winners', 'bonus-hunt-guesser' ); ?></label></th>
-					<td><input type="number" min="1" max="25" id="bhg_winners" name="winners_count" value="<?php echo esc_attr( $hunt->winners_count ?: 3 ); ?>"></td>
+									<td><input type="number" min="1" max="25" id="bhg_winners" name="winners_count" value="<?php echo esc_attr( $hunt->winners_count ? $hunt->winners_count : 3 ); ?>"></td>
 				</tr>
 				<tr>
 					<th scope="row"><label for="bhg_final"><?php echo esc_html__( 'Final Balance', 'bonus-hunt-guesser' ); ?></label></th>
-					<td><input type="number" step="0.01" min="0" id="bhg_final" name="final_balance" value="<?php echo esc_attr( $hunt->final_balance ); ?>" placeholder="<?php echo esc_attr( esc_html__( '—', 'bonus-hunt-guesser' ) ); ?>"></td>
+                                       <td><input type="number" step="0.01" min="0" id="bhg_final" name="final_balance" value="<?php echo esc_attr( $hunt->final_balance ); ?>" placeholder="<?php echo esc_attr( esc_html__( '-', 'bonus-hunt-guesser' ) ); ?>"></td>
 				</tr>
 				<tr>
 					<th scope="row"><label for="bhg_status"><?php echo esc_html__( 'Status', 'bonus-hunt-guesser' ); ?></label></th>
@@ -113,16 +123,23 @@ $base     = remove_query_arg( 'ppaged' );
 				<tr>
 					<td><a href="<?php echo esc_url( admin_url( 'user-edit.php?user_id=' . (int) $r->user_id ) ); ?>"><?php echo esc_html( $name ); ?></a></td>
 					<td><?php echo esc_html( number_format_i18n( (float) $r->guess, 2 ) ); ?></td>
-					<td><?php echo $r->created_at ? esc_html( date_i18n( get_option( 'date_format' ) . ' ' . get_option( 'time_format' ), strtotime( $r->created_at ) ) ) : esc_html__( '—', 'bonus-hunt-guesser' ); ?></td>
-					<td>
-						<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" onsubmit="return confirm('<?php echo esc_js( __( 'Delete this guess?', 'bonus-hunt-guesser' ) ); ?>');" class="bhg-inline-form">
-							<?php wp_nonce_field( 'bhg_delete_guess' ); ?>
-							<input type="hidden" name="action" value="bhg_delete_guess">
-							<input type="hidden" name="guess_id" value="<?php echo (int) $r->id; ?>">
-							<button type="submit" class="button-link-delete"><?php esc_html_e( 'Remove', 'bonus-hunt-guesser' ); ?></button>
-						</form>
-					</td>
-				</tr>
+                                       <td><?php echo $r->created_at ? esc_html( date_i18n( get_option( 'date_format' ) . ' ' . get_option( 'time_format' ), strtotime( $r->created_at ) ) ) : esc_html__( '-', 'bonus-hunt-guesser' ); ?></td>
+                                       <td>
+                                               <?php
+                                               $delete_url = wp_nonce_url(
+                                                       add_query_arg(
+                                                               array(
+                                                                       'action'   => 'bhg_delete_guess',
+                                                                       'guess_id' => (int) $r->id,
+                                                               ),
+                                                               admin_url( 'admin-post.php' )
+                                                       ),
+                                                       'bhg_delete_guess'
+                                               );
+                                               ?>
+                                               <a href="<?php echo esc_url( $delete_url ); ?>" class="button-link-delete" onclick="return confirm('<?php echo esc_js( __( 'Delete this guess?', 'bonus-hunt-guesser' ) ); ?>');"><?php esc_html_e( 'Remove', 'bonus-hunt-guesser' ); ?></a>
+                                       </td>
+                                </tr>
 							<?php
 			endforeach;
 endif;

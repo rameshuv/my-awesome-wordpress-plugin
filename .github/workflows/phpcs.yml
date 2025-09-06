@@ -1,24 +1,19 @@
 name: PHPCS
 
-on:
-  push:
-  pull_request:
+on: [push, pull_request]
 
 jobs:
   phpcs:
     runs-on: ubuntu-latest
-
     steps:
-      - uses: actions/checkout@v4
-
-      - uses: shivammathur/setup-php@v2
+      - uses: actions/checkout@v3
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
         with:
           php-version: '7.4'
-          tools: composer
+          extensions: mbstring, xml
           coverage: none
-
-      - name: Install Composer deps (including dev)
-        run: composer install --no-interaction --prefer-dist --no-progress
-
+      - name: Install dependencies
+        run: composer install --no-interaction --no-progress
       - name: Run PHPCS
-        run: vendor/bin/phpcs -p -s
+        run: composer phpcs

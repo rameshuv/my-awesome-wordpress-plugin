@@ -1,6 +1,5 @@
 <?php
-if ( ! defined( 'ABSPATH' ) ) {
-	exit; }
+if ( ! defined( 'ABSPATH' ) ) { exit; }
 
 /**
  * Bonus hunt data helpers.
@@ -69,7 +68,7 @@ class BHG_Bonus_Hunts {
 		global $wpdb;
 		$hunts_table = $wpdb->prefix . 'bhg_bonus_hunts';
 
-				return $wpdb->get_row( $wpdb->prepare( "SELECT id, title, starting_balance, num_bonuses, prizes, affiliate_site_id, winners_count, final_balance, status, created_at, updated_at, closed_at FROM `$hunts_table` WHERE id=%d", (int) $hunt_id ) );
+		return $wpdb->get_row( $wpdb->prepare( "SELECT * FROM `$hunts_table` WHERE id=%d", (int) $hunt_id ) );
 	}
 
 	/**
@@ -84,32 +83,31 @@ class BHG_Bonus_Hunts {
 		$guesses_table = $wpdb->prefix . 'bhg_guesses';
 		$hunt          = self::get_hunt( $hunt_id );
 
-		if ( ! $hunt ) {
-			return array(); }
+		if ( ! $hunt ) { return array(); }
 
 		if ( null !== $hunt->final_balance ) {
-				return $wpdb->get_results(
-					$wpdb->prepare(
-						"SELECT g.id, g.user_id, g.guess, g.created_at, u.display_name, ABS(g.guess - %f) AS diff
-										 FROM `$guesses_table` g
-										 LEFT JOIN `$wpdb->users` u ON u.ID = g.user_id
-										 WHERE g.hunt_id = %d
-										 ORDER BY diff ASC, g.id ASC",
-						$hunt->final_balance,
-						$hunt_id
-					)
-				);
+			return $wpdb->get_results(
+				$wpdb->prepare(
+					"SELECT g.*, u.display_name, ABS(g.guess - %f) AS diff
+					 FROM `$guesses_table` g
+					 LEFT JOIN `$wpdb->users` u ON u.ID = g.user_id
+					 WHERE g.hunt_id = %d
+					 ORDER BY diff ASC, g.id ASC",
+					$hunt->final_balance,
+					$hunt_id
+				)
+			);
 		}
 
-				return $wpdb->get_results(
-					$wpdb->prepare(
-						"SELECT g.id, g.user_id, g.guess, g.created_at, u.display_name, NULL AS diff
-								 FROM `$guesses_table` g
-								 LEFT JOIN `$wpdb->users` u ON u.ID = g.user_id
-								 WHERE g.hunt_id = %d
-								 ORDER BY g.id ASC",
-						$hunt_id
-					)
-				);
+		return $wpdb->get_results(
+			$wpdb->prepare(
+				"SELECT g.*, u.display_name, NULL AS diff
+				 FROM `$guesses_table` g
+				 LEFT JOIN `$wpdb->users` u ON u.ID = g.user_id
+				 WHERE g.hunt_id = %d
+				 ORDER BY g.id ASC",
+				$hunt_id
+			)
+		);
 	}
 }
