@@ -14,7 +14,7 @@ if ( ! $hunt ) {
 	return; }
 $rows = $wpdb->get_results(
 	$wpdb->prepare(
-                "SELECT g.id, g.user_id, g.guess, u.display_name, ABS(g.guess - %f) as diff FROM `$guesses` g JOIN `$wpdb->users` u ON u.ID=g.user_id WHERE g.hunt_id=%d ORDER BY diff ASC, g.id ASC",
+				"SELECT g.id, g.user_id, g.guess, u.display_name, ABS(g.guess - %f) as diff FROM `$guesses` g JOIN `$wpdb->users` u ON u.ID=g.user_id WHERE g.hunt_id=%d ORDER BY diff ASC, g.id ASC",
 		(float) $hunt->final_balance,
 		$hunt_id
 	)

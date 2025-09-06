@@ -14,8 +14,8 @@ $table = esc_sql( $table );
 
 $edit_id = isset( $_GET['edit'] ) ? (int) wp_unslash( $_GET['edit'] ) : 0;
 $row     = $edit_id
-        ? $wpdb->get_row( $wpdb->prepare( "SELECT id, title, description, type, start_date, end_date, status FROM {$table} WHERE id = %d", $edit_id ) )
-        : null;
+		? $wpdb->get_row( $wpdb->prepare( "SELECT id, title, description, type, start_date, end_date, status FROM {$table} WHERE id = %d", $edit_id ) )
+		: null;
 
 $rows = $wpdb->get_results( "SELECT id, title, type, start_date, end_date, status FROM {$table} ORDER BY id DESC" );
 
