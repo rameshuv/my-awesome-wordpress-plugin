@@ -360,11 +360,12 @@ function bhg_handle_settings_save() {
 		wp_die( esc_html__( 'You do not have sufficient permissions to perform this action.', 'bonus-hunt-guesser' ) );
 	}
 
-	// Verify nonce
-	if ( ! isset( $_POST['bhg_settings_nonce'] ) || ! wp_verify_nonce( wp_unslash( $_POST['bhg_settings_nonce'] ), 'bhg_save_settings_nonce' ) ) {
-		wp_safe_redirect( esc_url_raw( admin_url( 'admin.php?page=bhg_settings&error=nonce_failed' ) ) );
-		exit;
-	}
+// Verify nonce
+$nonce = isset( $_POST['bhg_nonce'] ) ? sanitize_text_field( wp_unslash( $_POST['bhg_nonce'] ) ) : '';
+if ( ! $nonce || ! wp_verify_nonce( $nonce, 'bhg_save_settings' ) ) {
+wp_safe_redirect( esc_url_raw( admin_url( 'admin.php?page=bhg_settings&error=nonce_failed' ) ) );
+exit;
+}
 
 	// Sanitize and validate data
 	$settings = array();
@@ -509,20 +510,21 @@ function bhg_handle_submit_guess() {
 		if ( $allow_edit && $count > 0 ) {
 			$gid = (int) $wpdb->get_var( $wpdb->prepare( "SELECT id FROM `$g_tbl` WHERE hunt_id=%d AND user_id=%d ORDER BY id DESC LIMIT 1", $hunt_id, $user_id ) );
 			if ( $gid ) {
-				$wpdb->update(
-					$g_tbl,
-					array(
-						'guess'      => $guess,
-						'updated_at' => current_time( 'mysql' ),
-					),
-					array( 'id' => $gid )
-				);
-				if ( wp_doing_ajax() ) {
-					wp_send_json_success();
-				}
-								wp_safe_redirect( wp_get_referer() ? wp_get_referer() : home_url() );
-				exit;
-			}
+$wpdb->update(
+$g_tbl,
+array(
+'guess'      => $guess,
+'updated_at' => current_time( 'mysql' ),
+),
+array( 'id' => $gid )
+);
+bhg_flush_hunt_cache( $hunt_id );
+if ( wp_doing_ajax() ) {
+wp_send_json_success();
+}
+wp_safe_redirect( wp_get_referer() ? wp_get_referer() : home_url() );
+exit;
+}
 		}
 		if ( wp_doing_ajax() ) {
 			wp_send_json_error( __( 'You have reached the maximum number of guesses.', 'bonus-hunt-guesser' ) );
@@ -531,20 +533,21 @@ function bhg_handle_submit_guess() {
 	}
 
 	// Insert
-	$wpdb->insert(
-		$g_tbl,
-		array(
-			'hunt_id'    => $hunt_id,
-			'user_id'    => $user_id,
-			'guess'      => $guess,
-			'created_at' => current_time( 'mysql' ),
-		),
-		array( '%d', '%d', '%f', '%s' )
-	);
+$wpdb->insert(
+$g_tbl,
+array(
+'hunt_id'    => $hunt_id,
+'user_id'    => $user_id,
+'guess'      => $guess,
+'created_at' => current_time( 'mysql' ),
+),
+array( '%d', '%d', '%f', '%s' )
+);
+bhg_flush_hunt_cache( $hunt_id );
 
-	if ( wp_doing_ajax() ) {
-		wp_send_json_success();
-	}
+if ( wp_doing_ajax() ) {
+wp_send_json_success();
+}
 
 		wp_safe_redirect( wp_get_referer() ? wp_get_referer() : home_url() );
 	exit;

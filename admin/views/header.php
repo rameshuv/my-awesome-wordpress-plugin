@@ -103,7 +103,8 @@ if ( isset( $_POST['bhg_action'] ) ) {
 	}
 
 	// Redirect to avoid form resubmission
-	wp_redirect( add_query_arg( 'message', $message, $_SERVER['REQUEST_URI'] ) );
+	$url = esc_url_raw( add_query_arg( 'message', $message, wp_unslash( $_SERVER['REQUEST_URI'] ) ) );
+	wp_safe_redirect( $url );
 	exit;
 }
 
