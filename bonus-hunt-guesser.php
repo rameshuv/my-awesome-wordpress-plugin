@@ -146,18 +146,18 @@ spl_autoload_register(
 				return;
 		}
 
-		$class_map = array(
-			'BHG_Admin'          => 'admin/class-bhg-admin.php',
-			'BHG_Shortcodes'     => 'includes/class-bhg-shortcodes.php',
-			'BHG_Logger'         => 'includes/class-bhg-logger.php',
-			'BHG_Settings'       => 'includes/class-bhg-settings.php',
-			'BHG_Utils'          => 'includes/class-bhg-utils.php',
-			'BHG_Models'         => 'includes/class-bhg-models.php',
-			'BHG_Front_Menus'    => 'includes/class-bhg-front-menus.php',
-			'BHG_Ads'            => 'includes/class-bhg-ads.php',
-			'BHG_Login_Redirect' => 'includes/class-bhg-login-redirect.php',
-			'BHG_Demo'           => 'admin/class-bhg-demo.php',
-		);
+                $class_map = array(
+                        'BHG_Shortcodes'     => 'includes/class-bhg-shortcodes.php',
+                        'BHG_Logger'         => 'includes/class-bhg-logger.php',
+                        'BHG_Settings'       => 'includes/class-bhg-settings.php',
+                        'BHG_Utils'          => 'includes/class-bhg-utils.php',
+                        'BHG_Models'         => 'includes/class-bhg-models.php',
+                        'BHG_Menus'          => 'includes/class-bhg-menus.php',
+                        'BHG_Front_Menus'    => 'includes/class-bhg-front-menus.php',
+                        'BHG_Ads'            => 'includes/class-bhg-ads.php',
+                        'BHG_Login_Redirect' => 'includes/class-bhg-login-redirect.php',
+                        'BHG_Demo'           => 'admin/class-bhg-demo.php',
+                );
 
 		if ( isset( $class_map[ $class ] ) ) {
 			$file_path = BHG_PLUGIN_DIR . $class_map[ $class ];
@@ -297,15 +297,15 @@ function bhg_init_plugin() {
 	// Load text domain
 	load_plugin_textdomain( 'bonus-hunt-guesser', false, dirname( plugin_basename( __FILE__ ) ) . '/languages/' );
 
-	// Initialize components
-	if ( is_admin() ) {
-		if ( class_exists( 'BHG_Admin' ) ) {
-			new BHG_Admin();
-		}
-		if ( class_exists( 'BHG_Demo' ) ) {
-			new BHG_Demo();
-		}
-	}
+        // Initialize components
+        if ( is_admin() ) {
+                if ( class_exists( 'BHG_Menus' ) ) {
+                        BHG_Menus::get_instance()->init();
+                }
+                if ( class_exists( 'BHG_Demo' ) ) {
+                        new BHG_Demo();
+                }
+        }
 
 	if ( class_exists( 'BHG_Shortcodes' ) ) {
 		new BHG_Shortcodes();
