@@ -35,8 +35,8 @@ if ( 'edit' === $view ) {
 /** LIST VIEW */
 if ( 'list' === $view ) :
 				$current_page = max( 1, absint( wp_unslash( $_GET['paged'] ?? '' ) ) );
-		$per_page     = 30;
-		$offset       = ( $current_page - 1 ) * $per_page;
+		$per_page             = 30;
+		$offset               = ( $current_page - 1 ) * $per_page;
 
 				$hunts = $wpdb->get_results(
 					$wpdb->prepare(
