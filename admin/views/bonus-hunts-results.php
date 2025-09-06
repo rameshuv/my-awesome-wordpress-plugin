@@ -5,7 +5,7 @@ if ( ! current_user_can( 'manage_options' ) ) {
 	wp_die( esc_html__( 'Insufficient permissions', 'bonus-hunt-guesser' ) );
 }
 global $wpdb;
-$hunt_id = isset( $_GET['id'] ) ? (int) $_GET['id'] : 0;
+$hunt_id = absint( wp_unslash( $_GET['id'] ?? '' ) );
 $hunts   = $wpdb->prefix . 'bhg_bonus_hunts';
 $guesses = $wpdb->prefix . 'bhg_guesses';
 $hunt    = $wpdb->get_row( $wpdb->prepare( "SELECT id, title, final_balance, winners_count FROM `$hunts` WHERE id=%d", $hunt_id ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.NoCaching -- Custom table query.

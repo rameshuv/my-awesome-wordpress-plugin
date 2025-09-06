@@ -15,7 +15,7 @@ if ( ! current_user_can( 'manage_options' ) ) {
 
 $notice = '';
 // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-if ( isset( $_GET['demo_reset'] ) && 1 === absint( $_GET['demo_reset'] ) ) {
+if ( 1 === absint( wp_unslash( $_GET['demo_reset'] ?? '' ) ) ) {
 	$notice = __( 'Demo data reseeded.', 'bonus-hunt-guesser' );
 }
 ?>

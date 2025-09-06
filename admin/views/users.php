@@ -5,7 +5,7 @@ if ( ! current_user_can( 'manage_options' ) ) {
 	wp_die( esc_html__( 'You do not have sufficient permissions to access this page.', 'bonus-hunt-guesser' ) );
 }
 
-$paged           = max( 1, isset( $_GET['paged'] ) ? (int) $_GET['paged'] : 1 );
+$paged           = max( 1, absint( wp_unslash( $_GET['paged'] ?? '' ) ) );
 $per_page        = 30;
 $search          = isset( $_GET['s'] ) ? sanitize_text_field( wp_unslash( $_GET['s'] ) ) : '';
 $allowed_orderby = array( 'user_login', 'display_name', 'user_email' );

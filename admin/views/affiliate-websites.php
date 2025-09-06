@@ -8,7 +8,7 @@ global $wpdb;
 $table = $wpdb->prefix . 'bhg_affiliates';
 
 // Load for edit
-$edit_id = isset( $_GET['edit'] ) ? (int) $_GET['edit'] : 0;
+$edit_id = absint( wp_unslash( $_GET['edit'] ?? '' ) );
 $row     = $edit_id ? $wpdb->get_row( $wpdb->prepare( "SELECT id, name, url, status FROM `$table` WHERE id=%d", $edit_id ) ) : null;
 
 // List
