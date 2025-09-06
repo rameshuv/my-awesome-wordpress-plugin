@@ -1,25 +1,37 @@
 <?php
+/**
+ * Admin view for managing tournaments.
+ *
+ * @package Bonus_Hunt_Guesser
+ */
+
 if ( ! defined( 'ABSPATH' ) ) {
-	exit;
+		exit;
 }
 
 if ( ! current_user_can( 'manage_options' ) ) {
-	wp_die( esc_html__( 'You do not have sufficient permissions to access this page.', 'bonus-hunt-guesser' ) );
+		wp_die( esc_html__( 'You do not have sufficient permissions to access this page.', 'bonus-hunt-guesser' ) );
 }
 global $wpdb;
 $table          = $wpdb->prefix . 'bhg_tournaments';
 $allowed_tables = array( $wpdb->prefix . 'bhg_tournaments' );
 if ( ! in_array( $table, $allowed_tables, true ) ) {
-	wp_die( esc_html__( 'Invalid table.', 'bonus-hunt-guesser' ) );
+		wp_die( esc_html__( 'Invalid table.', 'bonus-hunt-guesser' ) );
 }
 $table = esc_sql( $table );
 
-$edit_id = absint( wp_unslash( $_GET['edit'] ?? '' ) );
+$edit_id = absint( wp_unslash( $_GET['edit'] ?? '' ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 $row     = $edit_id
-		? $wpdb->get_row( $wpdb->prepare( "SELECT id, title, description, type, start_date, end_date, status FROM {$table} WHERE id = %d", $edit_id ) )
-		: null;
+								? $wpdb->get_row(
+									$wpdb->prepare(
+                                                // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table name is sanitized above.
+										"SELECT id, title, description, type, start_date, end_date, status FROM {$table} WHERE id = %d",
+										$edit_id
+									)
+								)
+								: null;
 
-$rows = $wpdb->get_results( "SELECT id, title, type, start_date, end_date, status FROM {$table} ORDER BY id DESC" ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- Table name is sanitized above and query has no user input.
+$rows = $wpdb->get_results( "SELECT id, title, type, start_date, end_date, status FROM {$table} ORDER BY id DESC" ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table name is sanitized above and query has no user input.
 
 $labels = array(
 	'weekly'    => __( 'Weekly', 'bonus-hunt-guesser' ),

@@ -190,47 +190,47 @@ class BHG_Admin {
 			echo '<div class="wrap"><h1>' . esc_html__( 'BHG Tools', 'bonus-hunt-guesser' ) . '</h1><p>' . esc_html__( 'No tools UI found.', 'bonus-hunt-guesser' ) . '</p></div>'; }
 	}
 
-    // -------------------- Handlers --------------------
+	// -------------------- Handlers --------------------
 
-    /**
-     * Handle deletion of a guess from the admin screen.
-     */
-    public function handle_delete_guess() {
-        if ( ! current_user_can( 'manage_options' ) ) {
-            wp_die( esc_html__( 'No permission', 'bonus-hunt-guesser' ) );
-        }
+	/**
+	 * Handle deletion of a guess from the admin screen.
+	 */
+	public function handle_delete_guess() {
+		if ( ! current_user_can( 'manage_options' ) ) {
+			wp_die( esc_html__( 'No permission', 'bonus-hunt-guesser' ) );
+		}
 
-        check_admin_referer( 'bhg_delete_guess' );
+		check_admin_referer( 'bhg_delete_guess' );
 
-        global $wpdb;
+		global $wpdb;
 
-        $guesses_table = esc_sql( $wpdb->prefix . 'bhg_guesses' ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- table name.
-        $guess_id      = isset( $_POST['guess_id'] ) ? absint( wp_unslash( $_POST['guess_id'] ) ) : 0;
+		$guesses_table = esc_sql( $wpdb->prefix . 'bhg_guesses' ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- table name.
+		$guess_id      = isset( $_POST['guess_id'] ) ? absint( wp_unslash( $_POST['guess_id'] ) ) : 0;
 
-        if ( 0 !== $guess_id ) {
-            // Get the hunt ID associated with the guess for cache clearing.
-            $hunt_id = (int) $wpdb->get_var(
-                $wpdb->prepare(
-                    "SELECT hunt_id FROM {$guesses_table} WHERE id = %d", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name is escaped above.
-                    $guess_id
-                )
-            );
+		if ( 0 !== $guess_id ) {
+			// Get the hunt ID associated with the guess for cache clearing.
+			$hunt_id = (int) $wpdb->get_var(
+				$wpdb->prepare(
+					"SELECT hunt_id FROM {$guesses_table} WHERE id = %d", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name is escaped above.
+					$guess_id
+				)
+			);
 
-            // Remove the guess from the database.
-            $wpdb->delete(
-                $guesses_table,
-                array( 'id' => $guess_id ),
-                array( '%d' )
-            );
+			// Remove the guess from the database.
+			$wpdb->delete(
+				$guesses_table,
+				array( 'id' => $guess_id ),
+				array( '%d' )
+			);
 
-            if ( $hunt_id ) {
-                bhg_flush_hunt_cache( $hunt_id );
-            }
-        }
+			if ( $hunt_id ) {
+				bhg_flush_hunt_cache( $hunt_id );
+			}
+		}
 
-        wp_safe_redirect( wp_get_referer() ? wp_get_referer() : admin_url( 'admin.php?page=bhg-bonus-hunts' ) );
-        exit;
-    }
+		wp_safe_redirect( wp_get_referer() ? wp_get_referer() : admin_url( 'admin.php?page=bhg-bonus-hunts' ) );
+		exit;
+	}
 
 	/**
 	 * Handle creation and updating of a bonus hunt.
@@ -275,8 +275,8 @@ class BHG_Admin {
 				$id = (int) $wpdb->insert_id;
 		}
 
-wp_cache_delete( "bhg_hunt_title_{$id}", 'bhg' );
-bhg_flush_hunt_cache( $id );
+		wp_cache_delete( "bhg_hunt_title_{$id}", 'bhg' );
+		bhg_flush_hunt_cache( $id );
 
 		if ( 'closed' === $status && null !== $final_balance ) {
 				$winners = BHG_Models::close_hunt( $id, $final_balance );
@@ -434,35 +434,42 @@ bhg_flush_hunt_cache( $id );
 			exit;
 		}
 				global $wpdb;
-				$t  = esc_sql( $wpdb->prefix . 'bhg_tournaments' );
-				$id = isset( $_POST['id'] ) ? absint( wp_unslash( $_POST['id'] ) ) : 0;
-		$data       = array(
-			'title'       => isset( $_POST['title'] ) ? sanitize_text_field( wp_unslash( $_POST['title'] ) ) : '',
-			'description' => isset( $_POST['description'] ) ? wp_kses_post( wp_unslash( $_POST['description'] ) ) : '',
-			'type'        => isset( $_POST['type'] ) ? sanitize_text_field( wp_unslash( $_POST['type'] ) ) : 'weekly',
-			'start_date'  => isset( $_POST['start_date'] ) ? sanitize_text_field( wp_unslash( $_POST['start_date'] ) ) : null,
-			'end_date'    => isset( $_POST['end_date'] ) ? sanitize_text_field( wp_unslash( $_POST['end_date'] ) ) : null,
-			'status'      => isset( $_POST['status'] ) ? sanitize_text_field( wp_unslash( $_POST['status'] ) ) : 'active',
-			'updated_at'  => current_time( 'mysql' ),
-		);
-		try {
-			$format = array( '%s', '%s', '%s', '%s', '%s', '%s', '%s' );
-			if ( 0 < $id ) {
-					$wpdb->update( $t, $data, array( 'id' => $id ), $format, array( '%d' ) );
-			} else {
-					$data['created_at'] = current_time( 'mysql' );
-					$format[]           = '%s';
-					$wpdb->insert( $t, $data, $format );
-			}
-			wp_safe_redirect( add_query_arg( 'bhg_msg', 't_saved', admin_url( 'admin.php?page=bhg-tournaments' ) ) );
-			exit;
-		} catch ( Throwable $e ) {
-			if ( class_exists( 'BHG_Logger' ) ) {
-					BHG_Logger::error( 'tournament save error: ' . $e->getMessage() );
-			}
-			wp_safe_redirect( add_query_arg( 'bhg_msg', 't_error', admin_url( 'admin.php?page=bhg-tournaments' ) ) );
-			exit;
+								$t  = esc_sql( $wpdb->prefix . 'bhg_tournaments' );
+								$id = isset( $_POST['id'] ) ? absint( wp_unslash( $_POST['id'] ) ) : 0;
+
+				$allowed_types = array( 'weekly', 'monthly', 'quarterly', 'yearly', 'alltime' );
+				$type          = isset( $_POST['type'] ) ? sanitize_text_field( wp_unslash( $_POST['type'] ) ) : 'weekly';
+		if ( ! in_array( $type, $allowed_types, true ) ) {
+				$type = 'weekly';
 		}
+
+				$data = array(
+					'title'       => isset( $_POST['title'] ) ? sanitize_text_field( wp_unslash( $_POST['title'] ) ) : '',
+					'description' => isset( $_POST['description'] ) ? wp_kses_post( wp_unslash( $_POST['description'] ) ) : '',
+					'type'        => $type,
+					'start_date'  => isset( $_POST['start_date'] ) ? sanitize_text_field( wp_unslash( $_POST['start_date'] ) ) : null,
+					'end_date'    => isset( $_POST['end_date'] ) ? sanitize_text_field( wp_unslash( $_POST['end_date'] ) ) : null,
+					'status'      => isset( $_POST['status'] ) ? sanitize_text_field( wp_unslash( $_POST['status'] ) ) : 'active',
+					'updated_at'  => current_time( 'mysql' ),
+				);
+				try {
+					$format = array( '%s', '%s', '%s', '%s', '%s', '%s', '%s' );
+					if ( 0 < $id ) {
+							$wpdb->update( $t, $data, array( 'id' => $id ), $format, array( '%d' ) );
+					} else {
+							$data['created_at'] = current_time( 'mysql' );
+							$format[]           = '%s';
+							$wpdb->insert( $t, $data, $format );
+					}
+					wp_safe_redirect( add_query_arg( 'bhg_msg', 't_saved', admin_url( 'admin.php?page=bhg-tournaments' ) ) );
+					exit;
+				} catch ( Throwable $e ) {
+					if ( class_exists( 'BHG_Logger' ) ) {
+							BHG_Logger::error( 'tournament save error: ' . $e->getMessage() );
+					}
+					wp_safe_redirect( add_query_arg( 'bhg_msg', 't_error', admin_url( 'admin.php?page=bhg-tournaments' ) ) );
+					exit;
+				}
 	}
 
 	/**
