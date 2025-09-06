@@ -477,13 +477,13 @@ function bhg_handle_submit_guess() {
 	$max        = isset( $settings['max_guesses'] ) ? (int) $settings['max_guesses'] : 1;
 	$allow_edit = isset( $settings['allow_guess_changes'] ) && $settings['allow_guess_changes'] === 'yes';
 
-        if ( $guess < $min_guess || $guess > $max_guess ) {
-                bhg_log( 'invalid guess after parse: raw=' . print_r( $raw_guess, true ) . ' parsed=' . print_r( $guess, true ) );
-                if ( wp_doing_ajax() ) {
-                        wp_send_json_error( __( 'Invalid guess amount.', 'bonus-hunt-guesser' ) );
-                }
-                wp_die( esc_html__( 'Invalid guess amount.', 'bonus-hunt-guesser' ) );
-        }
+	if ( $guess < $min_guess || $guess > $max_guess ) {
+			bhg_log( 'invalid guess after parse: raw=' . print_r( $raw_guess, true ) . ' parsed=' . print_r( $guess, true ) );
+		if ( wp_doing_ajax() ) {
+				wp_send_json_error( __( 'Invalid guess amount.', 'bonus-hunt-guesser' ) );
+		}
+			wp_die( esc_html__( 'Invalid guess amount.', 'bonus-hunt-guesser' ) );
+	}
 
 	global $wpdb;
 	$hunts = $wpdb->prefix . 'bhg_bonus_hunts';
@@ -593,9 +593,9 @@ function bhg_build_ads_query( $table, $placement = 'footer' ) {
 	}
 
 				$query = $wpdb->prepare(
-						"SELECT id, title, content, link_url, placement, visible_to, target_pages, active FROM `{$table}` WHERE placement = %s AND active = %d",
-						$placement,
-						1
+					"SELECT id, title, content, link_url, placement, visible_to, target_pages, active FROM `{$table}` WHERE placement = %s AND active = %d",
+					$placement,
+					1
 				);
 
 		$rows = $wpdb->get_results( $query );
@@ -843,15 +843,15 @@ if ( ! function_exists( 'bhg_self_heal_db' ) ) {
 		if ( ! class_exists( 'BHG_DB' ) ) {
 			require_once __DIR__ . '/includes/class-bhg-db.php';
 		}
-               try {
-                       $db = new BHG_DB();
-                       $db->create_tables();
-               } catch ( Throwable $e ) {
-                       bhg_log( 'DB self-heal failed: ' . $e->getMessage() );
-               }
-        }
-        add_action( 'admin_init', 'bhg_self_heal_db' );
-        register_activation_hook( __FILE__, 'bhg_self_heal_db' );
+		try {
+				$db = new BHG_DB();
+				$db->create_tables();
+		} catch ( Throwable $e ) {
+				bhg_log( 'DB self-heal failed: ' . $e->getMessage() );
+		}
+	}
+		add_action( 'admin_init', 'bhg_self_heal_db' );
+		register_activation_hook( __FILE__, 'bhg_self_heal_db' );
 }
 
 
