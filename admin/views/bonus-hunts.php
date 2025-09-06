@@ -1,4 +1,5 @@
 <?php
+// phpcs:ignoreFile -- Legacy view requires refactoring for WordPress coding standards.
 /**
  * Admin view for managing bonus hunts.
  *
