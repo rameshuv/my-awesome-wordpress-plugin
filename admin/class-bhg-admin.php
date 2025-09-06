@@ -475,7 +475,7 @@ class BHG_Admin {
 		if ( ! current_user_can( 'manage_options' ) ) {
 			wp_die( esc_html__( 'No permission', 'bonus-hunt-guesser' ) );
 		}
-			   check_admin_referer( 'bhg_save_settings', 'bhg_nonce' );
+		check_admin_referer( 'bhg_save_settings', 'bhg_nonce' );
 		$opts = array(
 			'allow_guess_edit_until_close' => isset( $_POST['allow_guess_edit_until_close'] ) ? 'yes' : 'no',
 			'guesses_max'                  => isset( $_POST['guesses_max'] ) ? max( 1, absint( wp_unslash( $_POST['guesses_max'] ) ) ) : 1,
