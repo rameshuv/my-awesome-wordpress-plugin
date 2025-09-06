@@ -7,7 +7,7 @@ if ( ! current_user_can( 'manage_options' ) ) {
 global $wpdb;
 $t = $wpdb->prefix . 'bhg_hunts';
 
-$paged    = max( 1, isset( $_GET['paged'] ) ? absint( wp_unslash( $_GET['paged'] ) ) : 1 );
+$paged    = max( 1, absint( wp_unslash( $_GET['paged'] ?? '' ) ) );
 $per_page = 20;
 $offset   = ( $paged - 1 ) * $per_page;
 

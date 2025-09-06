@@ -4,7 +4,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 if ( ! current_user_can( 'manage_options' ) ) {
 	wp_die( __( 'You do not have sufficient permissions to access this page.', 'bonus-hunt-guesser' ) ); }
 
-$hunt_id = isset( $_GET['id'] ) ? (int) $_GET['id'] : 0;
+$hunt_id = absint( wp_unslash( $_GET['id'] ?? '' ) );
 if ( ! $hunt_id ) {
 	wp_die( __( 'Missing hunt id', 'bonus-hunt-guesser' ) ); }
 

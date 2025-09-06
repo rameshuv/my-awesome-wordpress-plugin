@@ -12,7 +12,7 @@ if ( ! in_array( $table, $allowed_tables, true ) ) {
 }
 $table = esc_sql( $table );
 
-$edit_id = isset( $_GET['edit'] ) ? (int) wp_unslash( $_GET['edit'] ) : 0;
+$edit_id = absint( wp_unslash( $_GET['edit'] ?? '' ) );
 $row     = $edit_id
 		? $wpdb->get_row( $wpdb->prepare( "SELECT id, title, description, type, start_date, end_date, status FROM {$table} WHERE id = %d", $edit_id ) )
 		: null;

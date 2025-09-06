@@ -7,7 +7,7 @@ if ( ! current_user_can( 'manage_options' ) ) {
 
 global $wpdb;
 
-$id   = isset( $_GET['id'] ) ? (int) wp_unslash( $_GET['id'] ) : 0;
+$id   = absint( wp_unslash( $_GET['id'] ?? '' ) );
 $hunt = bhg_get_hunt( $id );
 if ( ! $hunt ) {
 		echo '<div class="notice notice-error"><p>' . esc_html__( 'Invalid hunt', 'bonus-hunt-guesser' ) . '</p></div>';
@@ -22,7 +22,7 @@ $aff_table = esc_sql( $aff_table );
 $affs      = $wpdb->get_results( "SELECT id, name FROM {$aff_table} ORDER BY name ASC" );
 $sel       = isset( $hunt->affiliate_site_id ) ? (int) $hunt->affiliate_site_id : 0;
 
-$paged    = max( 1, isset( $_GET['ppaged'] ) ? (int) wp_unslash( $_GET['ppaged'] ) : 1 );
+$paged    = max( 1, absint( wp_unslash( $_GET['ppaged'] ?? '' ) ) );
 $per_page = 30;
 $data     = bhg_get_hunt_participants( $id, $paged, $per_page );
 $rows     = $data['rows'];

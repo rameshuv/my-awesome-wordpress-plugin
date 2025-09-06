@@ -4,7 +4,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 if ( ! current_user_can( 'manage_options' ) ) {
 	wp_die( esc_html__( 'You do not have sufficient permissions to access this page.', 'bonus-hunt-guesser' ) ); }
 
-$hunt_id = isset( $_GET['id'] ) ? (int) $_GET['id'] : 0;
+$hunt_id = absint( wp_unslash( $_GET['id'] ?? '' ) );
 if ( ! $hunt_id ) {
 	wp_die( esc_html__( 'Missing hunt id', 'bonus-hunt-guesser' ) ); }
 
@@ -27,7 +27,7 @@ $hunt = bhg_get_hunt( $hunt_id );
 if ( ! $hunt ) {
 	wp_die( esc_html__( 'Hunt not found', 'bonus-hunt-guesser' ) ); }
 
-$paged    = max( 1, isset( $_GET['ppaged'] ) ? (int) $_GET['ppaged'] : 1 );
+$paged    = max( 1, absint( wp_unslash( $_GET['ppaged'] ?? '' ) ) );
 $per_page = 30;
 $data     = bhg_get_hunt_participants( $hunt_id, $paged, $per_page );
 $rows     = $data['rows'];
