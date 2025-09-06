@@ -14,14 +14,13 @@ if ( ! current_user_can( 'manage_options' ) ) {
 				wp_die( esc_html__( 'You do not have sufficient permissions to access this page.', 'bonus-hunt-guesser' ) );
 }
 
-// phpcs:disable WordPress.DB.DirectDatabaseQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Queries use dynamic, sanitized table names.
 global $wpdb;
 $table          = $wpdb->prefix . 'bhg_tournaments';
 $allowed_tables = array( $wpdb->prefix . 'bhg_tournaments' );
 if ( ! in_array( $table, $allowed_tables, true ) ) {
-		wp_die( esc_html__( 'Invalid table.', 'bonus-hunt-guesser' ) );
+                wp_die( esc_html__( 'Invalid table.', 'bonus-hunt-guesser' ) );
 }
-$table = esc_sql( $table );
+$table = esc_sql( $table ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- Table name escaped with esc_sql.
 
 $edit_id = absint( wp_unslash( $_GET['edit'] ?? '' ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 $row     = $edit_id

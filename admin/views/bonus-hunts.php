@@ -27,8 +27,8 @@ if ( ! in_array( $hunts_table, $allowed_tables, true ) || ! in_array( $guesses_t
 				wp_die( esc_html__( 'Invalid table.', 'bonus-hunt-guesser' ) );
 }
 
-$hunts_table   = esc_sql( $hunts_table );
-$guesses_table = esc_sql( $guesses_table );
+$hunts_table   = esc_sql( $hunts_table ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- Table name escaped with esc_sql.
+$guesses_table = esc_sql( $guesses_table ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- Table name escaped with esc_sql.
 
 $view = isset( $_GET['view'] ) ? sanitize_text_field( wp_unslash( $_GET['view'] ) ) : 'list';
 
@@ -253,7 +253,7 @@ if ( 'add' === $view ) :
 			if ( ! in_array( $aff_table, $allowed_tables, true ) ) {
 					wp_die( esc_html__( 'Invalid table.', 'bonus-hunt-guesser' ) );
 			}
-						$aff_table = esc_sql( $aff_table );
+                                               $aff_table = esc_sql( $aff_table ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- Table name escaped with esc_sql.
 						$affs      = $wpdb->get_results(
 							$wpdb->prepare(
                                                                 "SELECT id, name FROM {$aff_table} WHERE %d = %d ORDER BY name ASC", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table name is dynamic and sanitized.
