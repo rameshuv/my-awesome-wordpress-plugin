@@ -110,22 +110,23 @@ if ( 'list' === $view ) :
 				);
 				?>
 									"><?php echo esc_html__( 'Edit', 'bonus-hunt-guesser' ); ?></a>
-						<?php if ( 'open' === $h->status ) : ?>
-							<a class="button" href="
-							<?php
-							echo esc_url(
-								add_query_arg(
-									array(
-										'view' => 'close',
-										'id'   => (int) $h->id,
-									)
-								)
-							);
-							?>
-													"><?php echo esc_html__( 'Close Hunt', 'bonus-hunt-guesser' ); ?></a>
-						<?php elseif ( 'closed' === $h->status && null !== $h->final_balance ) : ?>
-							<a class="button button-primary" href="<?php echo esc_url( admin_url( 'admin.php?page=bhg-bonus-hunts-results&id=' . (int) $h->id ) ); ?>"><?php echo esc_html__( 'Results', 'bonus-hunt-guesser' ); ?></a>
-						<?php endif; ?>
+                                                <?php if ( 'open' === $h->status ) : ?>
+                                                        <?php
+                                                        $close_url = wp_nonce_url(
+                                                                add_query_arg(
+                                                                        array(
+                                                                                'view' => 'close',
+                                                                                'id'   => (int) $h->id,
+                                                                        )
+                                                                ),
+                                                                'bhg_close_hunt_' . (int) $h->id,
+                                                                'bhg_nonce'
+                                                        );
+                                                        ?>
+                                                        <a class="button" href="<?php echo esc_url( $close_url ); ?>"><?php echo esc_html__( 'Close Hunt', 'bonus-hunt-guesser' ); ?></a>
+                                                <?php elseif ( 'closed' === $h->status && null !== $h->final_balance ) : ?>
+                                                        <a class="button button-primary" href="<?php echo esc_url( admin_url( 'admin.php?page=bhg-bonus-hunts-results&id=' . (int) $h->id ) ); ?>"><?php echo esc_html__( 'Results', 'bonus-hunt-guesser' ); ?></a>
+                                                <?php endif; ?>
 			</td>
 		</tr>
 				<?php
@@ -158,14 +159,18 @@ endif;
 <?php
 /** CLOSE VIEW */
 if ( 'close' === $view ) :
-		$id = isset( $_GET['id'] ) ? (int) wp_unslash( $_GET['id'] ) : 0;
-        $hunt   = $wpdb->get_row(
-                $wpdb->prepare( "SELECT id, title, status FROM {$hunts_table} WHERE id = %d", $id )
-        );
-	if ( ! $hunt || 'open' !== $hunt->status ) :
-		echo '<div class="notice notice-error"><p>' . esc_html__( 'Invalid hunt.', 'bonus-hunt-guesser' ) . '</p></div>';
-	else :
-		?>
+                $id    = isset( $_GET['id'] ) ? absint( wp_unslash( $_GET['id'] ) ) : 0;
+                $nonce = isset( $_GET['bhg_nonce'] ) ? sanitize_text_field( wp_unslash( $_GET['bhg_nonce'] ) ) : '';
+        if ( ! $id || ! $nonce || ! wp_verify_nonce( $nonce, 'bhg_close_hunt_' . $id ) ) :
+                echo '<div class="notice notice-error"><p>' . esc_html__( 'Invalid request.', 'bonus-hunt-guesser' ) . '</p></div>';
+        else :
+                $hunt = $wpdb->get_row(
+                        $wpdb->prepare( "SELECT id, title, status FROM {$hunts_table} WHERE id = %d", $id )
+                );
+                if ( ! $hunt || 'open' !== $hunt->status ) :
+                        echo '<div class="notice notice-error"><p>' . esc_html__( 'Invalid hunt.', 'bonus-hunt-guesser' ) . '</p></div>';
+                else :
+                ?>
 <div class="wrap">
 	<h1 class="wp-heading-inline"><?php echo esc_html__( 'Close Bonus Hunt', 'bonus-hunt-guesser' ); ?> <?php echo esc_html__( '—', 'bonus-hunt-guesser' ); ?> <?php echo esc_html( $hunt->title ); ?></h1>
 	<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" class="bhg-max-width-400 bhg-margin-top-small">
@@ -183,8 +188,9 @@ if ( 'close' === $view ) :
 		<?php submit_button( __( 'Close Hunt', 'bonus-hunt-guesser' ) ); ?>
 	</form>
 </div>
-		<?php
-	endif;
+                <?php
+        endif;
+        endif;
 endif;
 ?>
 
