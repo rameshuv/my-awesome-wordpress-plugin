@@ -656,11 +656,11 @@ if ( ! function_exists( 'bhg_reset_demo_and_seed' ) ) {
 				$wpdb->delete( $r_tbl, array( 1 => 1 ), array( '%d' ) );
                         }
                                                 $closed = $wpdb->get_results(
-                                                        $wpdb->prepare(
-                                                                "SELECT winner_user_id, closed_at FROM {$hunts_tbl} WHERE status=%s AND winner_user_id IS NOT NULL",
-                                                                'closed'
-                                                        ) // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-                                                );
+                                                $wpdb->prepare(
+                                                        "SELECT winner_user_id, closed_at FROM {$hunts_tbl} WHERE status=%s AND winner_user_id IS NOT NULL", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+                                                        'closed'
+                                                )
+                                        );
 			foreach ( $closed as $row ) {
 				$ts       = $row->closed_at ? strtotime( $row->closed_at ) : time();
 				$isoYear  = date( 'o', $ts );
@@ -685,11 +685,11 @@ if ( ! function_exists( 'bhg_reset_demo_and_seed' ) ) {
 					}
                                         $id = $wpdb->get_var(
                                                 $wpdb->prepare(
-                                                        "SELECT id FROM {$t_tbl} WHERE type=%s AND start_date=%s AND end_date=%s",
+                                                        "SELECT id FROM {$t_tbl} WHERE type=%s AND start_date=%s AND end_date=%s", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
                                                         $type,
                                                         $start,
                                                         $end
-                                                ) // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+                                                )
                                         );
 					if ( $id ) {
 						return (int) $id;
@@ -718,10 +718,10 @@ if ( ! function_exists( 'bhg_reset_demo_and_seed' ) ) {
                                         if ( $tid && $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $r_tbl ) ) === $r_tbl ) {
                                                 $wpdb->query(
                                                         $wpdb->prepare(
-                                                                "INSERT INTO {$r_tbl} (tournament_id, user_id, wins) VALUES (%d, %d, 1) ON DUPLICATE KEY UPDATE wins = wins + 1",
+                                                                "INSERT INTO {$r_tbl} (tournament_id, user_id, wins) VALUES (%d, %d, 1) ON DUPLICATE KEY UPDATE wins = wins + 1", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
                                                                 $tid,
                                                                 $uids
-                                                        ) // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+                                                        )
                                                 );
                                         }
 					}
