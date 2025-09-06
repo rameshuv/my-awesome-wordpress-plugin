@@ -45,7 +45,7 @@ if ( 'list' === $view ) :
 
 								$hunts = $wpdb->get_results(
 									$wpdb->prepare(
-										"SELECT id, title, starting_balance, final_balance, winners_count, status FROM {$hunts_table} ORDER BY id DESC LIMIT %d OFFSET %d", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+                                                                                "SELECT id, title, starting_balance, final_balance, winners_count, status FROM {$hunts_table} ORDER BY id DESC LIMIT %d OFFSET %d", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table name is dynamic and sanitized.
 										$items_per_page,
 										$offset
 									)
@@ -58,7 +58,7 @@ if ( 'list' === $view ) :
 
                                 $total = (int) $wpdb->get_var(
                                         $wpdb->prepare(
-                                                "SELECT COUNT(*) FROM {$hunts_table} WHERE %d = %d", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+                                                "SELECT COUNT(*) FROM {$hunts_table} WHERE %d = %d", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table name is dynamic and sanitized.
                                                 1,
                                                 1
                                         )
@@ -187,9 +187,9 @@ if ( 'close' === $view ) :
 	if ( ! $hunt_id || ! $nonce || ! wp_verify_nonce( $nonce, 'bhg_close_hunt_' . $hunt_id ) ) :
 		echo '<div class="notice notice-error"><p>' . esc_html__( 'Invalid request.', 'bonus-hunt-guesser' ) . '</p></div>';
 		else :
-								$hunt = $wpdb->get_row(
-									$wpdb->prepare( "SELECT id, title, status FROM {$hunts_table} WHERE id = %d", $hunt_id ) // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-								);
+                                                                $hunt = $wpdb->get_row(
+                                                                        $wpdb->prepare( "SELECT id, title, status FROM {$hunts_table} WHERE id = %d", $hunt_id ) // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table name is dynamic and sanitized.
+                                                                );
 			if ( ! $hunt || 'open' !== $hunt->status ) :
 					echo '<div class="notice notice-error"><p>' . esc_html__( 'Invalid hunt.', 'bonus-hunt-guesser' ) . '</p></div>';
 				else :
@@ -256,7 +256,7 @@ if ( 'add' === $view ) :
 						$aff_table = esc_sql( $aff_table );
 						$affs      = $wpdb->get_results(
 							$wpdb->prepare(
-								"SELECT id, name FROM {$aff_table} WHERE %d = %d ORDER BY name ASC", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+                                                                "SELECT id, name FROM {$aff_table} WHERE %d = %d ORDER BY name ASC", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table name is dynamic and sanitized.
 								1,
 								1
 							)

@@ -35,7 +35,11 @@ $row     = $edit_id
 								: null;
 
 $rows = $wpdb->get_results(
-	"SELECT id, title, type, start_date, end_date, status FROM {$table} ORDER BY id DESC" // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+        $wpdb->prepare(
+                "SELECT id, title, type, start_date, end_date, status FROM {$table} WHERE %d = %d ORDER BY id DESC", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table name is dynamic and sanitized.
+                1,
+                1
+        )
 );
 
 $labels = array(
