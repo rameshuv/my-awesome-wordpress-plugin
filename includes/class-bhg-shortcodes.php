@@ -207,16 +207,21 @@ if ( ! class_exists( 'BHG_Shortcodes' ) ) {
 			$fields    = array_map( 'trim', explode( ',', $a['fields'] ) );
 			$show_wins = in_array( 'wins', $fields, true );
 
-                       $order   = 'DESC' === strtoupper( sanitize_key( $a['order'] ) ) ? 'DESC' : 'ASC';
-                       $map     = array(
+                       $allowed_orderby = array(
                                'guess'    => 'g.guess',
                                'user'     => 'u.user_login',
                                'position' => 'g.id', // Stable proxy.
                                'wins'     => 'tr.wins',
                        );
-                       $rank_key = sanitize_key( $a['ranking'] ? $a['ranking'] : $a['orderby'] );
-                       $orderby_key = array_key_exists( $rank_key, $map ) ? $rank_key : 'guess';
-                       $orderby     = $map[ $orderby_key ];
+                       $allowed_order   = array( 'asc', 'desc' );
+
+                       $rank_key   = sanitize_key( $a['ranking'] ? $a['ranking'] : $a['orderby'] );
+                       $orderby_key = array_key_exists( $rank_key, $allowed_orderby ) ? $rank_key : 'guess';
+                       $orderby     = esc_sql( $allowed_orderby[ $orderby_key ] ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- column is whitelisted
+
+                       $order_key = strtolower( sanitize_key( $a['order'] ) );
+                       $order     = in_array( $order_key, $allowed_order, true ) ? $order_key : 'asc';
+                       $order     = esc_sql( strtoupper( $order ) ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- order direction is whitelisted
 
 			$page   = max( 1, (int) $a['page'] );
 			$per    = max( 1, (int) $a['per_page'] );
@@ -237,7 +242,7 @@ if ( ! class_exists( 'BHG_Shortcodes' ) ) {
 				}
 				$select .= ', tr.wins';
 			}
-			$sql  = $select . $joins . $where . " ORDER BY {$orderby} {$order} LIMIT %d OFFSET %d";
+                        $sql  = $select . $joins . $where . " ORDER BY {$orderby} {$order} LIMIT %d OFFSET %d"; // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- orderby/order sanitized above
 			$rows = $wpdb->get_results( $wpdb->prepare( $sql, $per, $offset ) );
 
 			wp_enqueue_style(
@@ -374,26 +379,31 @@ if ( ! class_exists( 'BHG_Shortcodes' ) ) {
 				$params[] = $website;
 			}
 
-                       $order       = 'ASC' === strtoupper( sanitize_key( $a['order'] ) ) ? 'ASC' : 'DESC';
-                       $orderby_map = array(
+                       $allowed_orderby = array(
                                'guess' => 'g.guess',
                                'user'  => 'u.user_login',
                        );
+                       $allowed_order   = array( 'asc', 'desc' );
+
                        $orderby_param = sanitize_key( $a['orderby'] );
-                       $orderby_key   = isset( $orderby_map[ $orderby_param ] ) ? $orderby_param : 'guess';
-                       $orderby       = $orderby_map[ $orderby_key ];
+                       $orderby_key   = array_key_exists( $orderby_param, $allowed_orderby ) ? $orderby_param : 'guess';
+                       $orderby       = esc_sql( $allowed_orderby[ $orderby_key ] ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- column is whitelisted
+
+                       $order_key = strtolower( sanitize_key( $a['order'] ) );
+                       $order     = in_array( $order_key, $allowed_order, true ) ? $order_key : 'desc';
+                       $order     = esc_sql( strtoupper( $order ) ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- order direction is whitelisted
 
 			$limit_sql = '';
 			if ( 'recent' === strtolower( $a['timeline'] ) ) {
 				$limit_sql = ' LIMIT 10';
 			}
 
-			$sql = 'SELECT g.guess, g.user_id, u.user_login, h.final_balance, h.affiliate_site_id'
-			. " FROM {$g} g"
-			. " LEFT JOIN {$u} u ON u.ID = g.user_id"
-			. " INNER JOIN {$h} h ON h.id = g.hunt_id"
-			. ' WHERE ' . implode( ' AND ', $where )
-			. " ORDER BY {$orderby} {$order}{$limit_sql}";
+                        $sql = 'SELECT g.guess, g.user_id, u.user_login, h.final_balance, h.affiliate_site_id'
+                        . " FROM {$g} g"
+                        . " LEFT JOIN {$u} u ON u.ID = g.user_id"
+                        . " INNER JOIN {$h} h ON h.id = g.hunt_id"
+                        . ' WHERE ' . implode( ' AND ', $where )
+                        . " ORDER BY {$orderby} {$order}{$limit_sql}"; // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- orderby/order sanitized above
 
                        $prepared = $wpdb->prepare( $sql, $params );
                        $rows     = $wpdb->get_results( $prepared );
@@ -643,30 +653,32 @@ if ( ! class_exists( 'BHG_Shortcodes' ) ) {
 				}
 
                        // Sortable results (whitelisted).
-				$orderby = isset( $_GET['orderby'] ) ? strtolower( sanitize_key( $_GET['orderby'] ) ) : 'wins';
-				$order   = isset( $_GET['order'] ) ? strtolower( sanitize_key( $_GET['order'] ) ) : 'desc';
+                                $allowed_orderby = array(
+                                        'wins'        => 'r.wins',
+                                        'username'    => 'u.user_login',
+                                        'last_win_at' => 'r.last_win_date',
+                                );
+                                $allowed_order = array( 'asc', 'desc' );
 
-				$allowed = array(
-					'wins'        => 'r.wins',
-					'username'    => 'u.user_login',
-					'last_win_at' => 'r.last_win_date',
-				);
-				if ( ! isset( $allowed[ $orderby ] ) ) {
-					$orderby = 'wins'; }
-				if ( $order !== 'asc' && $order !== 'desc' ) {
-					$order = 'desc'; }
-				$order_by_sql = $allowed[ $orderby ] . ' ' . strtoupper( $order );
+                                $orderby      = isset( $_GET['orderby'] ) ? strtolower( sanitize_key( $_GET['orderby'] ) ) : 'wins';
+                                $orderby      = array_key_exists( $orderby, $allowed_orderby ) ? $orderby : 'wins';
+                                $order        = isset( $_GET['order'] ) ? strtolower( sanitize_key( $_GET['order'] ) ) : 'desc';
+                                $order        = in_array( $order, $allowed_order, true ) ? $order : 'desc';
 
-				$rows = $wpdb->get_results(
-					$wpdb->prepare(
-						"SELECT r.user_id, r.wins, r.last_win_date, u.user_login
-				 FROM {$r} r
-				 INNER JOIN {$u} u ON u.ID = r.user_id
-				 WHERE r.tournament_id=%d
-				 ORDER BY {$order_by_sql}, r.user_id ASC",
-						$tournament->id
-					)
-				);
+                                $orderby_sql  = esc_sql( $allowed_orderby[ $orderby ] ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- column is whitelisted
+                                $order_sql    = esc_sql( strtoupper( $order ) ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- order direction is whitelisted
+                                $order_by_sql = $orderby_sql . ' ' . $order_sql;
+
+                                $rows = $wpdb->get_results(
+                                        $wpdb->prepare(
+                                                "SELECT r.user_id, r.wins, r.last_win_date, u.user_login
+                                 FROM {$r} r
+                                 INNER JOIN {$u} u ON u.ID = r.user_id
+                                 WHERE r.tournament_id=%d
+                                 ORDER BY {$order_by_sql}, r.user_id ASC", // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- orderby/order sanitized above
+                                                $tournament->id
+                                        )
+                                );
 
 				$base   = remove_query_arg( array( 'orderby', 'order' ) );
 				$toggle = function ( $key ) use ( $orderby, $order, $base ) {
