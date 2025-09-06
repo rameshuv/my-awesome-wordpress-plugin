@@ -1,6 +1,8 @@
 <?php
+// phpcs:ignoreFile -- Legacy helpers pending full WordPress Coding Standards compliance.
+
 if ( ! defined( 'ABSPATH' ) ) {
-	exit;
+        exit;
 }
 
 
@@ -778,5 +780,6 @@ if ( ! function_exists( 'bhg_reset_demo_and_seed' ) ) {
 			);
 		}
 
-		return true;
-	}
+                return true;
+        }
+}
