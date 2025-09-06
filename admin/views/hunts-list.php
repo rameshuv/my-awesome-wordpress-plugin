@@ -23,7 +23,7 @@ $rows  = $wpdb->get_results(
 		$offset
 	)
 );
-$total = (int) $wpdb->get_var( "SELECT COUNT(*) FROM $t" );
+$total = (int) $wpdb->get_var( "SELECT COUNT(*) FROM $t" ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- Table name is derived from prefix and query has no dynamic parts.
 $pages = max( 1, (int) ceil( $total / $per_page ) );
 
 $status_labels = array(

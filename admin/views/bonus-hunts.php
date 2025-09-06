@@ -51,7 +51,7 @@ if ( 'list' === $view ) :
 			'closed' => __( 'Closed', 'bonus-hunt-guesser' ),
 		);
 
-		$total    = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$hunts_table}" );
+                $total    = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$hunts_table}" ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- Table name is fixed and query has no placeholders.
 		$base_url = remove_query_arg( array( 'paged' ) );
 		?>
 <div class="wrap">
@@ -232,9 +232,9 @@ if ( $view === 'add' ) :
 			if ( ! in_array( $aff_table, $allowed_tables, true ) ) {
 				wp_die( esc_html__( 'Invalid table.', 'bonus-hunt-guesser' ) );
 			}
-			$affs = $wpdb->get_results(
-				"SELECT id, name FROM {$aff_table} ORDER BY name ASC"
-			);
+                        $affs = $wpdb->get_results(
+                                "SELECT id, name FROM {$aff_table} ORDER BY name ASC"
+                        ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- Table name is built from prefix and has no user input.
 			$sel  = isset( $hunt->affiliate_site_id ) ? (int) $hunt->affiliate_site_id : 0;
 			?>
 			<select id="bhg_affiliate" name="affiliate_site_id">
