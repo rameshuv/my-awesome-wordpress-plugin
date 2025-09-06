@@ -50,7 +50,7 @@ if ( ! function_exists( 'bhg_insert_demo_data' ) ) {
 			return;
 		}
 
-		$table = $wpdb->prefix . $table_slug;
+		$table = esc_sql( $wpdb->prefix . $table_slug );
 
 		$wpdb->insert( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
 			$table,
@@ -76,11 +76,11 @@ if ( ! function_exists( 'bhg_database_cleanup' ) ) {
 		global $wpdb;
 
 		foreach ( bhg_get_allowed_tables() as $slug ) {
-			$table = $wpdb->prefix . $slug;
+			$table = esc_sql( $wpdb->prefix . $slug );
 
 			if ( $table === $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $table ) ) ) {
 			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.NotPrepared,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table name comes from a predefined whitelist and maintenance queries require direct execution.
-				$wpdb->query( "TRUNCATE TABLE `{$table}`" );
+				$wpdb->query( $wpdb->prepare( 'TRUNCATE TABLE %i', $table ) );
 			}
 		}
 
@@ -98,11 +98,11 @@ if ( ! function_exists( 'bhg_database_optimize' ) ) {
 		global $wpdb;
 
 		foreach ( bhg_get_allowed_tables() as $slug ) {
-			$table = $wpdb->prefix . $slug;
+			$table = esc_sql( $wpdb->prefix . $slug );
 
 			if ( $table === $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $table ) ) ) {
 			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.NotPrepared,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table name comes from a predefined whitelist and maintenance queries require direct execution.
-				$wpdb->query( "OPTIMIZE TABLE `{$table}`" );
+				$wpdb->query( $wpdb->prepare( 'OPTIMIZE TABLE %i', $table ) );
 			}
 		}
 	}
