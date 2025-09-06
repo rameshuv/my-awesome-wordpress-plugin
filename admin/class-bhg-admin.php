@@ -1,4 +1,4 @@
-<?php
+							<?php
 /**
  * Admin functionality for the Bonus Hunt Guesser plugin.
  *
@@ -388,14 +388,18 @@ bhg_flush_hunt_cache( $id );
 				global $wpdb;
 				$table = esc_sql( $wpdb->prefix . 'bhg_ads' );
 
-				$id     = isset( $_POST['id'] ) ? absint( wp_unslash( $_POST['id'] ) ) : 0;
-		$title          = isset( $_POST['title'] ) ? sanitize_text_field( wp_unslash( $_POST['title'] ) ) : '';
-		$content        = isset( $_POST['content'] ) ? wp_kses_post( wp_unslash( $_POST['content'] ) ) : '';
-		$link           = isset( $_POST['link_url'] ) ? esc_url_raw( wp_unslash( $_POST['link_url'] ) ) : '';
-		$place          = isset( $_POST['placement'] ) ? sanitize_text_field( wp_unslash( $_POST['placement'] ) ) : 'none';
-		$visible        = isset( $_POST['visible_to'] ) ? sanitize_text_field( wp_unslash( $_POST['visible_to'] ) ) : 'all';
-		$targets        = isset( $_POST['target_pages'] ) ? sanitize_text_field( wp_unslash( $_POST['target_pages'] ) ) : '';
-				$active = isset( $_POST['active'] ) ? absint( wp_unslash( $_POST['active'] ) ) : 0;
+        $id      = isset( $_POST['id'] ) ? absint( wp_unslash( $_POST['id'] ) ) : 0;
+        $title   = isset( $_POST['title'] ) ? sanitize_text_field( wp_unslash( $_POST['title'] ) ) : '';
+        $content = isset( $_POST['content'] ) ? wp_kses_post( wp_unslash( $_POST['content'] ) ) : '';
+        $link    = isset( $_POST['link_url'] ) ? esc_url_raw( wp_unslash( $_POST['link_url'] ) ) : '';
+        $place   = isset( $_POST['placement'] ) ? sanitize_text_field( wp_unslash( $_POST['placement'] ) ) : 'none';
+        $allowed_places = array( 'none', 'footer', 'bottom', 'sidebar', 'shortcode' );
+        if ( ! in_array( $place, $allowed_places, true ) ) {
+                $place = 'none';
+        }
+        $visible = isset( $_POST['visible_to'] ) ? sanitize_text_field( wp_unslash( $_POST['visible_to'] ) ) : 'all';
+        $targets = isset( $_POST['target_pages'] ) ? sanitize_text_field( wp_unslash( $_POST['target_pages'] ) ) : '';
+        $active  = isset( $_POST['active'] ) ? absint( wp_unslash( $_POST['active'] ) ) : 0;
 
 		$data = array(
 			'title'        => $title,

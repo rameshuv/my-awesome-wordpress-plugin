@@ -1,6 +1,12 @@
 <?php
+/**
+ * Advertising management page.
+ *
+ * @package BonusHuntGuesser
+ */
+
 if ( ! defined( 'ABSPATH' ) ) {
-	exit;
+exit;
 }
 
 if ( ! current_user_can( 'manage_options' ) ) {
@@ -15,12 +21,12 @@ if ( ! in_array( $table, $allowed_tables, true ) ) {
 }
 $table = esc_sql( $table );
 
-$action  = isset( $_GET['action'] ) ? sanitize_key( wp_unslash( $_GET['action'] ) ) : '';
+$current_action = isset( $_GET['action'] ) ? sanitize_key( wp_unslash( $_GET['action'] ) ) : '';
 $ad_id   = isset( $_GET['id'] ) ? absint( wp_unslash( $_GET['id'] ) ) : 0;
 $edit_id = isset( $_GET['edit'] ) ? absint( wp_unslash( $_GET['edit'] ) ) : 0;
 
-// Delete action
-if ( 'delete' === $action && $ad_id && isset( $_GET['_wpnonce'] ) ) {
+// Delete action.
+if ( 'delete' === $current_action && $ad_id && isset( $_GET['_wpnonce'] ) ) {
 	$nonce = sanitize_text_field( wp_unslash( $_GET['_wpnonce'] ) );
 	if ( wp_verify_nonce( $nonce, 'bhg_delete_ad' ) && current_user_can( 'manage_options' ) ) {
 		$wpdb->delete( $table, array( 'id' => $ad_id ), array( '%d' ) );
@@ -29,10 +35,10 @@ if ( 'delete' === $action && $ad_id && isset( $_GET['_wpnonce'] ) ) {
 	}
 }
 
-// Fetch ads
+// Fetch ads.
 $ads = $wpdb->get_results(
-        "SELECT id, title, content, placement, visible_to, active FROM {$table} ORDER BY id DESC"
-); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- Table name is sanitized above and query has no user-provided values.
+"SELECT id, title, content, placement, visible_to, active FROM {$table} ORDER BY id DESC"
+); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.PreparedSQL.NotPrepared -- Table name sanitized above; no user input in query.
 
 $placement_labels = array(
 	'none'      => __( 'None', 'bonus-hunt-guesser' ),
@@ -74,7 +80,7 @@ $visible_labels = array(
 				?>
 		<tr>
 			<td><?php echo (int) $ad->id; ?></td>
-			<td><?php echo isset( $ad->title ) && $ad->title !== '' ? esc_html( $ad->title ) : wp_kses_post( wp_trim_words( $ad->content, 12 ) ); ?></td>
+<td><?php echo isset( $ad->title ) && '' !== $ad->title ? esc_html( $ad->title ) : wp_kses_post( wp_trim_words( $ad->content, 12 ) ); ?></td>
 					<td>
 								<?php
 									$pl = isset( $ad->placement ) ? ( $placement_labels[ $ad->placement ] ?? $ad->placement ) : $placement_labels['none'];
@@ -87,7 +93,7 @@ $visible_labels = array(
 									echo esc_html( $vis );
 								?>
 					</td>
-			<td><?php echo (int) $ad->active === 1 ? esc_html__( 'Yes', 'bonus-hunt-guesser' ) : esc_html__( 'No', 'bonus-hunt-guesser' ); ?></td>
+<td><?php echo 1 === (int) $ad->active ? esc_html__( 'Yes', 'bonus-hunt-guesser' ) : esc_html__( 'No', 'bonus-hunt-guesser' ); ?></td>
 			<td>
 			<a class="button" href="<?php echo esc_url( add_query_arg( array( 'edit' => (int) $ad->id ) ) ); ?>"><?php echo esc_html__( 'Edit', 'bonus-hunt-guesser' ); ?></a>
 			<a class="button-link-delete" href="
@@ -116,12 +122,15 @@ endif;
 
 	<h2 style="margin-top:2em"><?php echo $edit_id ? esc_html__( 'Edit Ad', 'bonus-hunt-guesser' ) : esc_html__( 'Add Ad', 'bonus-hunt-guesser' ); ?></h2>
 	<?php
-		$ad = null;
-	if ( $edit_id ) {
-						$ad = $wpdb->get_row(
-							$wpdb->prepare( "SELECT id, title, content, link_url, placement, visible_to, target_pages, active FROM {$table} WHERE id = %d", $edit_id )
-						);
-	}
+$ad = null;
+if ( 0 !== $edit_id ) {
+$ad = $wpdb->get_row(
+$wpdb->prepare(
+"SELECT id, title, content, link_url, placement, visible_to, target_pages, active FROM {$table} WHERE id = %d",
+$edit_id
+)
+); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table name sanitized above.
+}
 	?>
 	<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" style="max-width:800px">
 	<?php wp_nonce_field( 'bhg_save_ad' ); ?>
