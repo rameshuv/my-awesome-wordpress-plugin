@@ -9,7 +9,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-/* phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared */
 /**
  * Bonus hunt data helpers.
  */
@@ -34,37 +33,26 @@ class BHG_Bonus_Hunts {
 			return $cached;
 		}
 
-		$hunts = $wpdb->get_results( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-			$wpdb->prepare(
-	/* phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared */
-				"SELECT id, title, starting_balance, final_balance, winners_count, closed_at
- FROM `{$hunts_table}`
- WHERE status = %s AND final_balance IS NOT NULL AND closed_at IS NOT NULL
- ORDER BY closed_at DESC
- LIMIT %d",
-				'closed',
-				$limit
-			)
-		);
+				$hunts = $wpdb->get_results( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+					$wpdb->prepare(
+						"SELECT id, title, starting_balance, final_balance, winners_count, closed_at FROM `{$hunts_table}` WHERE status = %s AND final_balance IS NOT NULL AND closed_at IS NOT NULL ORDER BY closed_at DESC LIMIT %d", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table name is dynamic but sanitized.
+						'closed',
+						$limit
+					)
+				);
 
 		$out = array();
 
 		foreach ( (array) $hunts as $h ) {
-			$winners_count = max( 1, (int) $h->winners_count );
-			$winners       = $wpdb->get_results( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-				$wpdb->prepare(
-		/* phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared */
-					"SELECT g.user_id, u.display_name, g.guess, ABS(g.guess - %f) AS diff
- FROM `{$guesses_table}` g
- LEFT JOIN `{$users_table}` u ON u.ID = g.user_id
- WHERE g.hunt_id = %d
- ORDER BY diff ASC, g.id ASC
- LIMIT %d",
-					$h->final_balance,
-					$h->id,
-					$winners_count
-				)
-			);
+			$winners_count       = max( 1, (int) $h->winners_count );
+						$winners = $wpdb->get_results( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+							$wpdb->prepare(
+								"SELECT g.user_id, u.display_name, g.guess, ABS(g.guess - %f) AS diff FROM `{$guesses_table}` g LEFT JOIN `{$users_table}` u ON u.ID = g.user_id WHERE g.hunt_id = %d ORDER BY diff ASC, g.id ASC LIMIT %d", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table names are dynamic but sanitized.
+								$h->final_balance,
+								$h->id,
+								$winners_count
+							)
+						);
 
 			$out[] = array(
 				'hunt'    => $h,
@@ -93,13 +81,12 @@ class BHG_Bonus_Hunts {
 			return $hunt;
 		}
 
-		$hunt = $wpdb->get_row( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-			$wpdb->prepare(
-	/* phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared */
-				"SELECT id, title, starting_balance, num_bonuses, prizes, affiliate_site_id, winners_count, final_balance, status, created_at, updated_at, closed_at FROM `{$hunts_table}` WHERE id=%d",
-				(int) $hunt_id
-			)
-		);
+				$hunt = $wpdb->get_row( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+					$wpdb->prepare(
+						"SELECT id, title, starting_balance, num_bonuses, prizes, affiliate_site_id, winners_count, final_balance, status, created_at, updated_at, closed_at FROM `{$hunts_table}` WHERE id=%d", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table name is dynamic but sanitized.
+						(int) $hunt_id
+					)
+				);
 
 		wp_cache_set( $cache_key, $hunt, 'bhg', HOUR_IN_SECONDS );
 
@@ -130,30 +117,20 @@ class BHG_Bonus_Hunts {
 		}
 
 		if ( null !== $hunt->final_balance ) {
-			$results = $wpdb->get_results( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-				$wpdb->prepare(
-		/* phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared */
-					"SELECT g.id, g.user_id, g.guess, g.created_at, u.display_name, ABS(g.guess - %f) AS diff
- FROM `{$guesses_table}` g
- LEFT JOIN `{$users_table}` u ON u.ID = g.user_id
- WHERE g.hunt_id = %d
- ORDER BY diff ASC, g.id ASC",
-					$hunt->final_balance,
-					$hunt_id
-				)
-			);
+						$results = $wpdb->get_results( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+							$wpdb->prepare(
+								"SELECT g.id, g.user_id, g.guess, g.created_at, u.display_name, ABS(g.guess - %f) AS diff FROM `{$guesses_table}` g LEFT JOIN `{$users_table}` u ON u.ID = g.user_id WHERE g.hunt_id = %d ORDER BY diff ASC, g.id ASC", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table names are dynamic but sanitized.
+								$hunt->final_balance,
+								$hunt_id
+							)
+						);
 		} else {
-			$results = $wpdb->get_results( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-				$wpdb->prepare(
-		/* phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared */
-					"SELECT g.id, g.user_id, g.guess, g.created_at, u.display_name, NULL AS diff
- FROM `{$guesses_table}` g
- LEFT JOIN `{$users_table}` u ON u.ID = g.user_id
- WHERE g.hunt_id = %d
- ORDER BY g.id ASC",
-					$hunt_id
-				)
-			);
+						$results = $wpdb->get_results( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+							$wpdb->prepare(
+								"SELECT g.id, g.user_id, g.guess, g.created_at, u.display_name, NULL AS diff FROM `{$guesses_table}` g LEFT JOIN `{$users_table}` u ON u.ID = g.user_id WHERE g.hunt_id = %d ORDER BY g.id ASC", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table names are dynamic but sanitized.
+								$hunt_id
+							)
+						);
 		}
 
 		wp_cache_set( $cache_key, $results, 'bhg', HOUR_IN_SECONDS );
@@ -161,4 +138,3 @@ class BHG_Bonus_Hunts {
 		return $results;
 	}
 }
-/* phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared */
