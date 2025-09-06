@@ -53,18 +53,20 @@ class BHG_Models {
 
 		// Update hunt status and final details.
 		$now = current_time( 'mysql' );
-		$wpdb->update(
-			$hunts_tbl,
-			array(
-				'status'        => 'closed',
-				'final_balance' => $final_balance,
-				'closed_at'     => $now,
-				'updated_at'    => $now,
-			),
-			array( 'id' => $hunt_id ),
-			array( '%s', '%f', '%s', '%s' ),
-			array( '%d' )
-		);
+                $wpdb->update(
+                        $hunts_tbl,
+                        array(
+                                'status'        => 'closed',
+                                'final_balance' => $final_balance,
+                                'closed_at'     => $now,
+                                'updated_at'    => $now,
+                        ),
+                        array( 'id' => $hunt_id ),
+                        array( '%s', '%f', '%s', '%s' ),
+                        array( '%d' )
+                );
+
+                bhg_flush_hunt_cache( $hunt_id );
 
 		// Fetch winners based on proximity to final balance.
 				$rows = $wpdb->get_results(

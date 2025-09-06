@@ -509,20 +509,21 @@ function bhg_handle_submit_guess() {
 		if ( $allow_edit && $count > 0 ) {
 			$gid = (int) $wpdb->get_var( $wpdb->prepare( "SELECT id FROM `$g_tbl` WHERE hunt_id=%d AND user_id=%d ORDER BY id DESC LIMIT 1", $hunt_id, $user_id ) );
 			if ( $gid ) {
-				$wpdb->update(
-					$g_tbl,
-					array(
-						'guess'      => $guess,
-						'updated_at' => current_time( 'mysql' ),
-					),
-					array( 'id' => $gid )
-				);
-				if ( wp_doing_ajax() ) {
-					wp_send_json_success();
-				}
-								wp_safe_redirect( wp_get_referer() ? wp_get_referer() : home_url() );
-				exit;
-			}
+$wpdb->update(
+$g_tbl,
+array(
+'guess'      => $guess,
+'updated_at' => current_time( 'mysql' ),
+),
+array( 'id' => $gid )
+);
+bhg_flush_hunt_cache( $hunt_id );
+if ( wp_doing_ajax() ) {
+wp_send_json_success();
+}
+wp_safe_redirect( wp_get_referer() ? wp_get_referer() : home_url() );
+exit;
+}
 		}
 		if ( wp_doing_ajax() ) {
 			wp_send_json_error( __( 'You have reached the maximum number of guesses.', 'bonus-hunt-guesser' ) );
@@ -531,20 +532,21 @@ function bhg_handle_submit_guess() {
 	}
 
 	// Insert
-	$wpdb->insert(
-		$g_tbl,
-		array(
-			'hunt_id'    => $hunt_id,
-			'user_id'    => $user_id,
-			'guess'      => $guess,
-			'created_at' => current_time( 'mysql' ),
-		),
-		array( '%d', '%d', '%f', '%s' )
-	);
+$wpdb->insert(
+$g_tbl,
+array(
+'hunt_id'    => $hunt_id,
+'user_id'    => $user_id,
+'guess'      => $guess,
+'created_at' => current_time( 'mysql' ),
+),
+array( '%d', '%d', '%f', '%s' )
+);
+bhg_flush_hunt_cache( $hunt_id );
 
-	if ( wp_doing_ajax() ) {
-		wp_send_json_success();
-	}
+if ( wp_doing_ajax() ) {
+wp_send_json_success();
+}
 
 		wp_safe_redirect( wp_get_referer() ? wp_get_referer() : home_url() );
 	exit;
