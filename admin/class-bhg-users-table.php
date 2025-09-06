@@ -1,4 +1,10 @@
 <?php
+/**
+ * Users list table.
+ *
+ * @package Bonus_Hunt_Guesser
+ */
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
@@ -8,12 +14,27 @@ if ( ! class_exists( 'WP_List_Table' ) ) {
 	require_once ABSPATH . 'wp-admin/includes/class-wp-list-table.php';
 }
 
+/**
+ * List table to display plugin users.
+ */
 class BHG_Users_Table extends WP_List_Table {
 
-	private $items_data  = array();
+	/**
+	 * Total items count.
+	 *
+	 * @var int
+	 */
 	private $total_items = 0;
-	private $per_page    = 30;
+	/**
+	 * Items per page.
+	 *
+	 * @var int
+	 */
+	private $per_page = 30;
 
+	/**
+	 * Constructor.
+	 */
 	public function __construct() {
 		parent::__construct(
 			array(
@@ -24,6 +45,11 @@ class BHG_Users_Table extends WP_List_Table {
 		);
 	}
 
+	/**
+	 * Retrieve table columns.
+	 *
+	 * @return array
+	 */
 	public function get_columns() {
 		return array(
 			'id'       => __( 'ID', 'bonus-hunt-guesser' ),
@@ -36,6 +62,11 @@ class BHG_Users_Table extends WP_List_Table {
 		);
 	}
 
+	/**
+	 * Retrieve sortable columns.
+	 *
+	 * @return array
+	 */
 	public function get_sortable_columns() {
 		return array(
 			'username' => array( 'username', true ),
@@ -46,10 +77,18 @@ class BHG_Users_Table extends WP_List_Table {
 		);
 	}
 
+	/**
+	 * Render default column output.
+	 *
+	 * @param array  $item        Item data.
+	 * @param string $column_name Column name.
+	 *
+	 * @return string
+	 */
 	public function column_default( $item, $column_name ) {
 		switch ( $column_name ) {
 			case 'id':
-				return (int) $item['id'];
+				return esc_html( (string) (int) $item['id'] );
 			case 'username':
 				return esc_html( $item['username'] );
 			case 'email':
@@ -57,9 +96,9 @@ class BHG_Users_Table extends WP_List_Table {
 			case 'role':
 				return esc_html( $item['role'] );
 			case 'guesses':
-				return (int) $item['guesses'];
+				return esc_html( (string) (int) $item['guesses'] );
 			case 'wins':
-				return (int) $item['wins'];
+				return esc_html( (string) (int) $item['wins'] );
 			case 'profile':
 				$url = esc_url( admin_url( 'user-edit.php?user_id=' . (int) $item['id'] ) );
 				return '<a class="button" href="' . $url . '">' . esc_html__( 'Edit', 'bonus-hunt-guesser' ) . '</a>';
@@ -67,25 +106,28 @@ class BHG_Users_Table extends WP_List_Table {
 		return '';
 	}
 
+	/**
+	 * Prepare table items.
+	 */
 	public function prepare_items() {
-			   $paged     = max( 1, absint( wp_unslash( $_GET['paged'] ?? '' ) ) );
-			   $orderby   = sanitize_key( wp_unslash( $_GET['orderby'] ?? 'username' ) );
-			   $order_raw = sanitize_key( wp_unslash( $_GET['order'] ?? '' ) );
-			   $order     = in_array( $order_raw, array( 'asc', 'desc' ), true ) ? strtoupper( $order_raw ) : 'ASC';
-			   $search    = sanitize_text_field( wp_unslash( $_GET['s'] ?? '' ) );
+				$paged     = max( 1, absint( wp_unslash( $_GET['paged'] ?? '' ) ) );
+				$orderby   = sanitize_key( wp_unslash( $_GET['orderby'] ?? 'username' ) );
+				$order_raw = sanitize_key( wp_unslash( $_GET['order'] ?? '' ) );
+				$order     = in_array( $order_raw, array( 'asc', 'desc' ), true ) ? strtoupper( $order_raw ) : 'ASC';
+				$search    = sanitize_text_field( wp_unslash( $_GET['s'] ?? '' ) );
 
-		// Whitelist orderby
+		// Whitelist orderby.
 		$allowed = array( 'username', 'email', 'role', 'guesses', 'wins' );
 		if ( ! in_array( $orderby, $allowed, true ) ) {
 			$orderby = 'username';
 		}
 
-		// Fetch users via WP_User_Query
+		// Fetch users via WP_User_Query.
 		$args = array(
 			'number'  => $this->per_page,
 			'offset'  => ( $paged - 1 ) * $this->per_page,
 			'fields'  => array( 'ID', 'user_login', 'user_email', 'roles' ),
-			'orderby' => in_array( $orderby, array( 'username', 'email' ) ) ? ( $orderby === 'username' ? 'login' : 'email' ) : 'login',
+			'orderby' => in_array( $orderby, array( 'username', 'email' ), true ) ? ( 'username' === $orderby ? 'login' : 'email' ) : 'login',
 			'order'   => $order,
 		);
 		if ( $search ) {
@@ -97,7 +139,7 @@ class BHG_Users_Table extends WP_List_Table {
 		$users             = (array) $query->get_results();
 		$this->total_items = (int) $query->get_total();
 
-		// Build base items
+		// Build base items.
 		$items = array();
 		$ids   = array();
 		foreach ( $users as $u ) {
@@ -123,11 +165,11 @@ class BHG_Users_Table extends WP_List_Table {
 			$g_table = $wpdb->prefix . 'bhg_guesses';
 			$w_table = $wpdb->prefix . 'bhg_tournament_results';
 
-			// Guesses per user
+			// Guesses per user.
 			$placeholders = implode( ',', array_fill( 0, count( $ids ), '%d' ) );
 			$sql_g        = "SELECT user_id, COUNT(*) c FROM `$g_table` WHERE user_id IN ($placeholders) GROUP BY user_id";
 			$prepared     = call_user_func_array( array( $wpdb, 'prepare' ), array_merge( array( $sql_g ), $ids ) );
-			$g_counts     = $wpdb->get_results( $prepared );
+			$g_counts     = $wpdb->get_results( $prepared ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
 			foreach ( (array) $g_counts as $row ) {
 				$uid = (int) $row->user_id;
 				if ( isset( $items[ $uid ] ) ) {
@@ -135,13 +177,13 @@ class BHG_Users_Table extends WP_List_Table {
 				}
 			}
 
-			// Wins per user (if table exists)
+			// Wins per user (if table exists).
 			$exists = $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $w_table ) );
 			if ( $exists ) {
 				$placeholders = implode( ',', array_fill( 0, count( $ids ), '%d' ) );
 				$sql_w        = "SELECT user_id, SUM(wins) c FROM `$w_table` WHERE user_id IN ($placeholders) GROUP BY user_id";
 				$prepared_w   = call_user_func_array( array( $wpdb, 'prepare' ), array_merge( array( $sql_w ), $ids ) );
-				$w_counts     = $wpdb->get_results( $prepared_w );
+				$w_counts     = $wpdb->get_results( $prepared_w ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
 				foreach ( (array) $w_counts as $row ) {
 					$uid = (int) $row->user_id;
 					if ( isset( $items[ $uid ] ) ) {
@@ -151,7 +193,7 @@ class BHG_Users_Table extends WP_List_Table {
 			}
 		}
 
-		// Server-side sort for role/guesses/wins
+		// Server-side sort for role/guesses/wins.
 		if ( in_array( $orderby, array( 'role', 'guesses', 'wins' ), true ) ) {
 			$items = array_values( $items );
 			usort(
@@ -159,10 +201,10 @@ class BHG_Users_Table extends WP_List_Table {
 				function ( $a, $b ) use ( $orderby, $order ) {
 					$av = $a[ $orderby ];
 					$bv = $b[ $orderby ];
-					if ( $av == $bv ) {
+					if ( $av === $bv ) {
 						return 0;
 					}
-					if ( $order === 'ASC' ) {
+					if ( 'ASC' === $order ) {
 						return ( $av < $bv ) ? -1 : 1;
 					}
 					return ( $av > $bv ) ? -1 : 1;
@@ -184,8 +226,13 @@ class BHG_Users_Table extends WP_List_Table {
 		);
 	}
 
+	/**
+	 * Output extra controls in the table nav.
+	 *
+	 * @param string $which Top or bottom position.
+	 */
 	public function extra_tablenav( $which ) {
-		if ( $which === 'top' ) {
+		if ( 'top' === $which ) {
 			echo '<div class="alignleft actions">';
 			$this->search_box( __( 'Search users', 'bonus-hunt-guesser' ), 'bhg-users' );
 			echo '</div>';
