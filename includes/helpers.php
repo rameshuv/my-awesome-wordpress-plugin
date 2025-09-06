@@ -518,6 +518,10 @@ if ( ! function_exists( 'bhg_reset_demo_and_seed' ) ) {
 	/**
 	 * Reset demo tables and seed sample data.
 	 *
+	 * Administrative utility for creating sample plugin data. Callers must
+	 * verify capabilities and nonces (e.g., via current_user_can() and
+	 * check_admin_referer()) before invoking.
+	 *
 	 * @return bool
 	 */
         function bhg_reset_demo_and_seed() {
