@@ -21,7 +21,6 @@ class BHG_Admin {
 		add_action( 'admin_post_bhg_tournament_save', array( $this, 'handle_save_tournament' ) );
 		add_action( 'admin_post_bhg_save_affiliate', array( $this, 'handle_save_affiliate' ) );
 		add_action( 'admin_post_bhg_delete_affiliate', array( $this, 'handle_delete_affiliate' ) );
-		add_action( 'admin_post_bhg_save_settings', array( $this, 'handle_save_settings' ) );
 		add_action( 'admin_post_bhg_save_user_meta', array( $this, 'handle_save_user_meta' ) );
 	}
 
@@ -465,25 +464,6 @@ class BHG_Admin {
 			$wpdb->delete( $table, array( 'id' => $id ), array( '%d' ) );
 		}
 		wp_safe_redirect( admin_url( 'admin.php?page=bhg-affiliates' ) );
-		exit;
-	}
-
-	/**
-	 * Save plugin settings.
-	 */
-	public function handle_save_settings() {
-		if ( ! current_user_can( 'manage_options' ) ) {
-			wp_die( esc_html__( 'No permission', 'bonus-hunt-guesser' ) );
-		}
-		check_admin_referer( 'bhg_save_settings', 'bhg_nonce' );
-		$opts = array(
-			'allow_guess_edit_until_close' => isset( $_POST['allow_guess_edit_until_close'] ) ? 'yes' : 'no',
-			'guesses_max'                  => isset( $_POST['guesses_max'] ) ? max( 1, absint( wp_unslash( $_POST['guesses_max'] ) ) ) : 1,
-		);
-		foreach ( $opts as $k => $v ) {
-			update_option( 'bhg_' . $k, $v, false );
-		}
-		wp_safe_redirect( admin_url( 'admin.php?page=bhg-settings&updated=1' ) );
 		exit;
 	}
 
