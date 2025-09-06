@@ -163,6 +163,7 @@ spl_autoload_register(
                         'BHG_Ads'            => 'includes/class-bhg-ads.php',
                         'BHG_Login_Redirect' => 'includes/class-bhg-login-redirect.php',
                         'BHG_Demo'           => 'admin/class-bhg-demo.php',
+                        'BHG_Bonus_Hunts_Controller' => 'admin/class-bhg-bonus-hunts-controller.php',
                 );
 
 		if ( isset( $class_map[ $class ] ) ) {
@@ -310,6 +311,9 @@ function bhg_init_plugin() {
                 }
                 if ( class_exists( 'BHG_Demo' ) ) {
                         new BHG_Demo();
+                }
+                if ( class_exists( 'BHG_Bonus_Hunts_Controller' ) ) {
+                        BHG_Bonus_Hunts_Controller::get_instance()->init();
                 }
         }
 
