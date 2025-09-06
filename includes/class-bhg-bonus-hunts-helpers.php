@@ -44,7 +44,7 @@ if ( ! function_exists( 'bhg_get_top_winners_for_hunt' ) ) {
 		if ( ! $hunt || $hunt->final_balance === null ) {
 			return array();
 		}
-            $limit = $winners_limit ? $winners_limit : ( (int) $hunt->winners_count ? (int) $hunt->winners_count : 3 );
+			$limit = $winners_limit ? $winners_limit : ( (int) $hunt->winners_count ? (int) $hunt->winners_count : 3 );
 
 		$sql = $wpdb->prepare(
 			"SELECT g.user_id, g.guess, ABS(g.guess - %f) AS diff

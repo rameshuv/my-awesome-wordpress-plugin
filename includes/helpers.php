@@ -357,7 +357,7 @@ function bhg_get_user_display_name( $user_id ) {
 		return __( 'Unknown User', 'bonus-hunt-guesser' );
 	}
 
-    $display_name = $user->display_name ? $user->display_name : $user->user_login;
+	$display_name = $user->display_name ? $user->display_name : $user->user_login;
 	$is_affiliate = bhg_is_user_affiliate( $user_id );
 
 	if ( $is_affiliate ) {
@@ -479,7 +479,7 @@ function bhg_render_ads( $placement = 'footer', $hunt_id = 0 ) {
 
 	$out = '<div class="bhg-ads bhg-ads-' . esc_attr( $placement ) . '">';
 	foreach ( $rows as $r ) {
-        $vis  = $r->visible_to ? $r->visible_to : 'all';
+		$vis  = $r->visible_to ? $r->visible_to : 'all';
 		$show = false;
 		if ( $vis === 'all' ) {
 			$show = true;
