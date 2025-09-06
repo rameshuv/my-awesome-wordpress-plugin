@@ -1,9 +1,15 @@
 <?php
+/**
+ * Bonus Hunt helper functions.
+ *
+ * @package BonusHuntGuesser
+ */
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-
+/* phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared */
 /**
  * Bonus hunt data helpers.
  */
@@ -17,17 +23,25 @@ class BHG_Bonus_Hunts {
 	 */
 	public static function get_latest_hunts_with_winners( $limit = 3 ) {
 		global $wpdb;
-		$hunts_table   = $wpdb->prefix . 'bhg_bonus_hunts';
-		$guesses_table = $wpdb->prefix . 'bhg_guesses';
+		$hunts_table   = esc_sql( $wpdb->prefix . 'bhg_bonus_hunts' );
+		$guesses_table = esc_sql( $wpdb->prefix . 'bhg_guesses' );
+		$users_table   = esc_sql( $wpdb->users );
 		$limit         = max( 1, (int) $limit );
 
-		$hunts = $wpdb->get_results(
+		$cache_key = 'bhg_latest_hunts_' . $limit;
+		$cached    = wp_cache_get( $cache_key, 'bhg' );
+		if ( false !== $cached ) {
+			return $cached;
+		}
+
+		$hunts = $wpdb->get_results( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 			$wpdb->prepare(
+	/* phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared */
 				"SELECT id, title, starting_balance, final_balance, winners_count, closed_at
-				 FROM `$hunts_table`
-				 WHERE status = %s AND final_balance IS NOT NULL AND closed_at IS NOT NULL
-				 ORDER BY closed_at DESC
-				 LIMIT %d",
+ FROM `{$hunts_table}`
+ WHERE status = %s AND final_balance IS NOT NULL AND closed_at IS NOT NULL
+ ORDER BY closed_at DESC
+ LIMIT %d",
 				'closed',
 				$limit
 			)
@@ -37,15 +51,15 @@ class BHG_Bonus_Hunts {
 
 		foreach ( (array) $hunts as $h ) {
 			$winners_count = max( 1, (int) $h->winners_count );
-			$winners       = $wpdb->get_results(
+			$winners       = $wpdb->get_results( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 				$wpdb->prepare(
-					"SELECT g.user_id, u.display_name, g.guess,
-							ABS(g.guess - %f) AS diff
-					 FROM `$guesses_table` g
-					 LEFT JOIN `$wpdb->users` u ON u.ID = g.user_id
-					 WHERE g.hunt_id = %d
-					 ORDER BY diff ASC, g.id ASC
-					 LIMIT %d",
+		/* phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared */
+					"SELECT g.user_id, u.display_name, g.guess, ABS(g.guess - %f) AS diff
+ FROM `{$guesses_table}` g
+ LEFT JOIN `{$users_table}` u ON u.ID = g.user_id
+ WHERE g.hunt_id = %d
+ ORDER BY diff ASC, g.id ASC
+ LIMIT %d",
 					$h->final_balance,
 					$h->id,
 					$winners_count
@@ -58,6 +72,8 @@ class BHG_Bonus_Hunts {
 			);
 		}
 
+		wp_cache_set( $cache_key, $out, 'bhg', HOUR_IN_SECONDS );
+
 		return $out;
 	}
 
@@ -69,9 +85,25 @@ class BHG_Bonus_Hunts {
 	 */
 	public static function get_hunt( $hunt_id ) {
 		global $wpdb;
-		$hunts_table = $wpdb->prefix . 'bhg_bonus_hunts';
+		$hunts_table = esc_sql( $wpdb->prefix . 'bhg_bonus_hunts' );
 
-				return $wpdb->get_row( $wpdb->prepare( "SELECT id, title, starting_balance, num_bonuses, prizes, affiliate_site_id, winners_count, final_balance, status, created_at, updated_at, closed_at FROM `$hunts_table` WHERE id=%d", (int) $hunt_id ) );
+		$cache_key = 'bhg_hunt_' . (int) $hunt_id;
+		$hunt      = wp_cache_get( $cache_key, 'bhg' );
+		if ( false !== $hunt ) {
+			return $hunt;
+		}
+
+		$hunt = $wpdb->get_row( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			$wpdb->prepare(
+	/* phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared */
+				"SELECT id, title, starting_balance, num_bonuses, prizes, affiliate_site_id, winners_count, final_balance, status, created_at, updated_at, closed_at FROM `{$hunts_table}` WHERE id=%d",
+				(int) $hunt_id
+			)
+		);
+
+		wp_cache_set( $cache_key, $hunt, 'bhg', HOUR_IN_SECONDS );
+
+		return $hunt;
 	}
 
 	/**
@@ -82,37 +114,51 @@ class BHG_Bonus_Hunts {
 	 */
 	public static function get_hunt_guesses_ranked( $hunt_id ) {
 		global $wpdb;
-		$hunts_table   = $wpdb->prefix . 'bhg_bonus_hunts';
-		$guesses_table = $wpdb->prefix . 'bhg_guesses';
+		$guesses_table = esc_sql( $wpdb->prefix . 'bhg_guesses' );
+		$users_table   = esc_sql( $wpdb->users );
 		$hunt          = self::get_hunt( $hunt_id );
 
 		if ( ! $hunt ) {
 			return array();
 		}
 
-		if ( null !== $hunt->final_balance ) {
-				return $wpdb->get_results(
-					$wpdb->prepare(
-						"SELECT g.id, g.user_id, g.guess, g.created_at, u.display_name, ABS(g.guess - %f) AS diff
-										 FROM `$guesses_table` g
-										 LEFT JOIN `$wpdb->users` u ON u.ID = g.user_id
-										 WHERE g.hunt_id = %d
-										 ORDER BY diff ASC, g.id ASC",
-						$hunt->final_balance,
-						$hunt_id
-					)
-				);
+		$cache_key_suffix = null === $hunt->final_balance ? 'open' : $hunt->final_balance;
+		$cache_key        = 'bhg_hunt_guesses_ranked_' . $hunt_id . '_' . $cache_key_suffix;
+		$cached           = wp_cache_get( $cache_key, 'bhg' );
+		if ( false !== $cached ) {
+			return $cached;
 		}
 
-				return $wpdb->get_results(
-					$wpdb->prepare(
-						"SELECT g.id, g.user_id, g.guess, g.created_at, u.display_name, NULL AS diff
-								 FROM `$guesses_table` g
-								 LEFT JOIN `$wpdb->users` u ON u.ID = g.user_id
-								 WHERE g.hunt_id = %d
-								 ORDER BY g.id ASC",
-						$hunt_id
-					)
-				);
+		if ( null !== $hunt->final_balance ) {
+			$results = $wpdb->get_results( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+				$wpdb->prepare(
+		/* phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared */
+					"SELECT g.id, g.user_id, g.guess, g.created_at, u.display_name, ABS(g.guess - %f) AS diff
+ FROM `{$guesses_table}` g
+ LEFT JOIN `{$users_table}` u ON u.ID = g.user_id
+ WHERE g.hunt_id = %d
+ ORDER BY diff ASC, g.id ASC",
+					$hunt->final_balance,
+					$hunt_id
+				)
+			);
+		} else {
+			$results = $wpdb->get_results( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+				$wpdb->prepare(
+		/* phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared */
+					"SELECT g.id, g.user_id, g.guess, g.created_at, u.display_name, NULL AS diff
+ FROM `{$guesses_table}` g
+ LEFT JOIN `{$users_table}` u ON u.ID = g.user_id
+ WHERE g.hunt_id = %d
+ ORDER BY g.id ASC",
+					$hunt_id
+				)
+			);
+		}
+
+		wp_cache_set( $cache_key, $results, 'bhg', HOUR_IN_SECONDS );
+
+		return $results;
 	}
 }
+/* phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared */
