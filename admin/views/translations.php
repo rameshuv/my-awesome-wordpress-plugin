@@ -16,9 +16,8 @@ if ( ! current_user_can( 'manage_options' ) ) {
 global $wpdb;
 $table = $wpdb->prefix . 'bhg_translations';
 
-if ( function_exists( 'bhg_seed_default_translations_if_empty' ) ) {
-	bhg_seed_default_translations_if_empty();
-}
+// Ensure default translations are present for listing.
+bhg_seed_default_translations_if_empty();
 
 $default_translations = function_exists( 'bhg_get_default_translations' ) ? bhg_get_default_translations() : array();
 $default_keys         = array_keys( $default_translations );
