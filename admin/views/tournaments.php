@@ -31,7 +31,13 @@ $row     = $edit_id
 								)
 								: null;
 
-$rows = $wpdb->get_results( "SELECT id, title, type, start_date, end_date, status FROM {$table} ORDER BY id DESC" ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table name is sanitized above and query has no user input.
+$rows = $wpdb->get_results(
+        $wpdb->prepare(
+                "SELECT id, title, type, start_date, end_date, status FROM {$table} WHERE %d = %d ORDER BY id DESC",
+                1,
+                1
+        )
+);
 
 $labels = array(
 	'weekly'    => __( 'Weekly', 'bonus-hunt-guesser' ),

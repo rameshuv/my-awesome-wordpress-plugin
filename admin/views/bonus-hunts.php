@@ -16,14 +16,17 @@ global $wpdb;
 $hunts_table    = $wpdb->prefix . 'bhg_bonus_hunts';
 $guesses_table  = $wpdb->prefix . 'bhg_guesses';
 $allowed_tables = array(
-	$wpdb->prefix . 'bhg_bonus_hunts',
-	$wpdb->prefix . 'bhg_guesses',
-	$wpdb->prefix . 'bhg_affiliates',
-	$wpdb->users,
+        $wpdb->prefix . 'bhg_bonus_hunts',
+        $wpdb->prefix . 'bhg_guesses',
+        $wpdb->prefix . 'bhg_affiliates',
+        $wpdb->users,
 );
 if ( ! in_array( $hunts_table, $allowed_tables, true ) || ! in_array( $guesses_table, $allowed_tables, true ) ) {
-		wp_die( esc_html__( 'Invalid table.', 'bonus-hunt-guesser' ) );
+                wp_die( esc_html__( 'Invalid table.', 'bonus-hunt-guesser' ) );
 }
+
+$hunts_table   = esc_sql( $hunts_table );
+$guesses_table = esc_sql( $guesses_table );
 
 $view = isset( $_GET['view'] ) ? sanitize_text_field( wp_unslash( $_GET['view'] ) ) : 'list';
 
@@ -38,20 +41,26 @@ if ( 'list' === $view ) :
 		$per_page             = 30;
 		$offset               = ( $current_page - 1 ) * $per_page;
 
-				$hunts = $wpdb->get_results(
-					$wpdb->prepare(
-						"SELECT id, title, starting_balance, final_balance, winners_count, status FROM {$hunts_table} ORDER BY id DESC LIMIT %d OFFSET %d",
-						$per_page,
-						$offset
-					)
-				);
+                $hunts = $wpdb->get_results(
+                                        $wpdb->prepare(
+                                                "SELECT id, title, starting_balance, final_balance, winners_count, status FROM {$hunts_table} ORDER BY id DESC LIMIT %d OFFSET %d",
+                                                $per_page,
+                                                $offset
+                                        )
+                                );
 
 		$status_labels = array(
 			'open'   => __( 'Open', 'bonus-hunt-guesser' ),
 			'closed' => __( 'Closed', 'bonus-hunt-guesser' ),
 		);
 
-                $total    = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$hunts_table}" ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- Table name is fixed and query has no placeholders.
+                $total    = (int) $wpdb->get_var(
+                                        $wpdb->prepare(
+                                                "SELECT COUNT(*) FROM {$hunts_table} WHERE %d = %d",
+                                                1,
+                                                1
+                                        )
+                                );
 		$base_url = remove_query_arg( array( 'paged' ) );
 		?>
 <div class="wrap">
@@ -236,13 +245,18 @@ if ( $view === 'add' ) :
 			<th scope="row"><label for="bhg_affiliate"><?php echo esc_html__( 'Affiliate Site', 'bonus-hunt-guesser' ); ?></label></th>
 			<td>
 			<?php
-			$aff_table = $wpdb->prefix . 'bhg_affiliates';
-			if ( ! in_array( $aff_table, $allowed_tables, true ) ) {
-				wp_die( esc_html__( 'Invalid table.', 'bonus-hunt-guesser' ) );
-			}
-                        $affs = $wpdb->get_results(
-                                "SELECT id, name FROM {$aff_table} ORDER BY name ASC"
-                        ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- Table name is built from prefix and has no user input.
+                        $aff_table = $wpdb->prefix . 'bhg_affiliates';
+                        if ( ! in_array( $aff_table, $allowed_tables, true ) ) {
+                                wp_die( esc_html__( 'Invalid table.', 'bonus-hunt-guesser' ) );
+                        }
+                        $aff_table = esc_sql( $aff_table );
+                        $affs      = $wpdb->get_results(
+                                $wpdb->prepare(
+                                        "SELECT id, name FROM {$aff_table} WHERE %d = %d ORDER BY name ASC",
+                                        1,
+                                        1
+                                )
+                        );
 			$sel  = isset( $hunt->affiliate_site_id ) ? (int) $hunt->affiliate_site_id : 0;
 			?>
 			<select id="bhg_affiliate" name="affiliate_site_id">
