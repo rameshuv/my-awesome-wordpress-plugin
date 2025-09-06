@@ -7,7 +7,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 if ( ! class_exists( 'BHG_Menus' ) ) {
 	class BHG_Menus {
 		private static $instance = null;
-		private $initialized     = false;
+		private $initialized	 = false;
 
 		public static function get_instance() {
 			if ( self::$instance === null ) {
@@ -93,24 +93,86 @@ if ( ! class_exists( 'BHG_Menus' ) ) {
 			}
 		}
 
+		/**
+		 * Render the Dashboard page.
+		 *
+		 * @return void
+		 */
 		public function render_dashboard() {
-			$this->view( 'dashboard' ); }
+			$this->view( 'dashboard' );
+		}
+
+		/**
+		 * Render the Bonus Hunts page.
+		 *
+		 * @return void
+		 */
 		public function render_bonus_hunts() {
-			$this->view( 'bonus-hunts' ); }
+			$this->view( 'bonus-hunts' );
+		}
+
+		/**
+		 * Render the Users page.
+		 *
+		 * @return void
+		 */
 		public function render_users() {
-			$this->view( 'users' ); }
+			$this->view( 'users' );
+		}
+
+		/**
+		 * Render the Affiliate Websites page.
+		 *
+		 * @return void
+		 */
 		public function render_affiliates() {
-			$this->view( 'affiliate-websites' ); }
+			$this->view( 'affiliate-websites' );
+		}
+
+		/**
+		 * Render the Tournaments page.
+		 *
+		 * @return void
+		 */
 		public function render_tournaments() {
-			$this->view( 'tournaments' ); }
+			$this->view( 'tournaments' );
+		}
+
+		/**
+		 * Render the Translations page.
+		 *
+		 * @return void
+		 */
 		public function render_translations() {
-			$this->view( 'translations' ); }
+			$this->view( 'translations' );
+		}
+
+		/**
+		 * Render the Settings page.
+		 *
+		 * @return void
+		 */
 		public function render_settings() {
-			$this->view( 'settings' ); }
+			$this->view( 'settings' );
+		}
+
+		/**
+		 * Render the Database page.
+		 *
+		 * @return void
+		 */
 		public function render_database() {
-			$this->view( 'database' ); }
+			$this->view( 'database' );
+		}
+
+		/**
+		 * Render the Tools page.
+		 *
+		 * @return void
+		 */
 		public function render_tools() {
-			$this->view( 'tools' ); }
+			$this->view( 'tools' );
+		}
 
 		public function register_locations() {
 			static $done = false;
