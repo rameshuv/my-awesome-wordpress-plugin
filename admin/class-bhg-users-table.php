@@ -123,7 +123,8 @@ class BHG_Users_Table extends WP_List_Table {
 			// Guesses per user
 			$placeholders = implode( ',', array_fill( 0, count( $ids ), '%d' ) );
 			$sql_g        = "SELECT user_id, COUNT(*) c FROM `$g_table` WHERE user_id IN ($placeholders) GROUP BY user_id";
-			$g_counts     = $wpdb->get_results( $wpdb->prepare( $sql_g, $ids ) );
+			$prepared     = call_user_func_array( array( $wpdb, 'prepare' ), array_merge( array( $sql_g ), $ids ) );
+			$g_counts     = $wpdb->get_results( $prepared );
 			foreach ( (array) $g_counts as $row ) {
 				$uid = (int) $row->user_id;
 				if ( isset( $items[ $uid ] ) ) {
@@ -136,7 +137,8 @@ class BHG_Users_Table extends WP_List_Table {
 			if ( $exists ) {
 				$placeholders = implode( ',', array_fill( 0, count( $ids ), '%d' ) );
 				$sql_w        = "SELECT user_id, SUM(wins) c FROM `$w_table` WHERE user_id IN ($placeholders) GROUP BY user_id";
-				$w_counts     = $wpdb->get_results( $wpdb->prepare( $sql_w, $ids ) );
+				$prepared_w   = call_user_func_array( array( $wpdb, 'prepare' ), array_merge( array( $sql_w ), $ids ) );
+				$w_counts     = $wpdb->get_results( $prepared_w );
 				foreach ( (array) $w_counts as $row ) {
 					$uid = (int) $row->user_id;
 					if ( isset( $items[ $uid ] ) ) {

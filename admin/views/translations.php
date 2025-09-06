@@ -51,7 +51,7 @@ if ( isset( $_SERVER['REQUEST_METHOD'] ) && 'POST' === $_SERVER['REQUEST_METHOD'
 }
 
 // Fetch rows.
-$rows = $wpdb->get_results( $wpdb->prepare( "SELECT tkey, tvalue FROM {$wpdb->prefix}bhg_translations ORDER BY tkey ASC" ) );
+$rows = $wpdb->get_results( "SELECT tkey, tvalue FROM {$wpdb->prefix}bhg_translations ORDER BY tkey ASC" );
 ?>
 <div class="wrap">
 	<h1><?php esc_html_e( 'Translations', 'bonus-hunt-guesser' ); ?></h1>
