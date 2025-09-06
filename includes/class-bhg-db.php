@@ -244,7 +244,7 @@ class BHG_DB {
                                                                 dbDelta( "ALTER TABLE `{$aff_table}` ADD UNIQUE KEY name_unique (name)" );
                                                 }
 		} catch ( Throwable $e ) {
-			if ( function_exists( 'error_log' ) ) {
+			if ( defined( 'WP_DEBUG' ) && WP_DEBUG && function_exists( 'error_log' ) ) {
 				error_log( '[BHG] Schema ensure error: ' . $e->getMessage() );
 			}
 		}

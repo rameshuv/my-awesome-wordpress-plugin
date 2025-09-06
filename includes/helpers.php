@@ -15,7 +15,9 @@ function bhg_log( $message ) {
 	if ( is_array( $message ) || is_object( $message ) ) {
 		$message = print_r( $message, true );
 	}
-	error_log( '[BHG] ' . $message );
+	if ( function_exists( 'error_log' ) ) {
+		error_log( '[BHG] ' . $message );
+	}
 }
 
 /**
