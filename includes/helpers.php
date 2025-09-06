@@ -547,7 +547,7 @@ if ( ! function_exists( 'bhg_reset_demo_and_seed' ) ) {
                                 // keep existing; we'll upsert below
                                 continue;
                         }
-                        $wpdb->query( "DELETE FROM `{$tbl}`" ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			$wpdb->delete( $tbl, array( 1 => 1 ), array( '%d' ) );
                 }
 
 		// Seed affiliate websites (idempotent upsert by slug)
@@ -649,7 +649,7 @@ if ( ! function_exists( 'bhg_reset_demo_and_seed' ) ) {
                 if ( $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $t_tbl ) ) === $t_tbl ) {
 			// Wipe results only
                         if ( $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $r_tbl ) ) === $r_tbl ) {
-                                $wpdb->query( "DELETE FROM `{$r_tbl}`" ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+				$wpdb->delete( $r_tbl, array( 1 => 1 ), array( '%d' ) );
                         }
                                                 $closed = $wpdb->get_results(
                                                         $wpdb->prepare(
