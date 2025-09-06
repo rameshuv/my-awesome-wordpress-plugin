@@ -347,7 +347,8 @@ if ( ! class_exists( 'BHG_Shortcodes' ) ) {
 					   WHERE " . implode( ' AND ', $where ) . "
 					   ORDER BY {$orderby} {$order}{$limit_sql}";
 
-			$rows = $wpdb->get_results( $wpdb->prepare( $sql, $params ) );
+                        $prepared = call_user_func_array( array( $wpdb, 'prepare' ), array_merge( array( $sql ), $params ) );
+                        $rows     = $wpdb->get_results( $prepared );
 			if ( ! $rows ) {
 					return '<p>' . esc_html__( 'No guesses found.', 'bonus-hunt-guesser' ) . '</p>';
 			}
@@ -433,7 +434,12 @@ if ( ! class_exists( 'BHG_Shortcodes' ) ) {
 					$sql .= ' LIMIT 10';
 			}
 
-				$rows = $params ? $wpdb->get_results( $wpdb->prepare( $sql, $params ) ) : $wpdb->get_results( $sql );
+                        if ( $params ) {
+                                $prepared = call_user_func_array( array( $wpdb, 'prepare' ), array_merge( array( $sql ), $params ) );
+                                $rows     = $wpdb->get_results( $prepared );
+                        } else {
+                                $rows = $wpdb->get_results( $sql );
+                        }
 			if ( ! $rows ) {
 					return '<p>' . esc_html__( 'No hunts found.', 'bonus-hunt-guesser' ) . '</p>';
 			}
@@ -520,7 +526,12 @@ if ( ! class_exists( 'BHG_Shortcodes' ) ) {
 					$sql .= ' LIMIT 5';
 			}
 
-				$hunts = $params ? $wpdb->get_results( $wpdb->prepare( $sql, $params ) ) : $wpdb->get_results( $sql );
+                                if ( $params ) {
+                                        $prepared = call_user_func_array( array( $wpdb, 'prepare' ), array_merge( array( $sql ), $params ) );
+                                        $hunts    = $wpdb->get_results( $prepared );
+                                } else {
+                                        $hunts = $wpdb->get_results( $sql );
+                                }
 			if ( ! $hunts ) {
 					return '<p>' . esc_html__( 'No hunts found.', 'bonus-hunt-guesser' ) . '</p>';
 			}
@@ -708,7 +719,12 @@ if ( ! class_exists( 'BHG_Shortcodes' ) ) {
 			}
 				$sql .= ' ORDER BY start_date DESC, id DESC';
 
-				$rows = $args ? $wpdb->get_results( $wpdb->prepare( $sql, $args ) ) : $wpdb->get_results( $sql );
+                                if ( $args ) {
+                                        $prepared = call_user_func_array( array( $wpdb, 'prepare' ), array_merge( array( $sql ), $args ) );
+                                        $rows     = $wpdb->get_results( $prepared );
+                                } else {
+                                        $rows = $wpdb->get_results( $sql );
+                                }
 			if ( ! $rows ) {
 					return '<p>' . esc_html__( 'No tournaments found.', 'bonus-hunt-guesser' ) . '</p>';
 			}
