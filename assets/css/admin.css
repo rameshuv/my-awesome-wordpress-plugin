@@ -90,6 +90,16 @@
     align-items:center;
     gap:4px;
 }
+.bhg-winner-name{
+    font-weight:600;
+    flex:1;
+}
+.bhg-winner-sep{
+    margin:0 4px;
+}
+.bhg-winner-guess{
+    font-weight:600;
+}
 .bhg-winner .bhg-icon{color:#f59e0b}
 .bhg-winner .bhg-diff{
     color:#6b7280;
