@@ -595,8 +595,8 @@ if ( ! function_exists( 'bhg_reset_demo_and_seed' ) ) {
 				continue;
 			}
 
-                                // Delete all rows from the table.
-                                $wpdb->delete( $tbl, '1=1' ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+// Delete all rows from the table.
+$wpdb->query( $wpdb->prepare( "DELETE FROM {$tbl} WHERE %d = %d", 1, 1 ) ); // Table name is dynamic and sanitized above. phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		}
 
 		// Seed affiliate websites (idempotent upsert by slug).
