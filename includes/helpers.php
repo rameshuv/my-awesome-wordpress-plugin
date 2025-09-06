@@ -1,5 +1,4 @@
 <?php
-// phpcs:ignoreFile -- Legacy helpers pending full WordPress Coding Standards compliance.
 
 if ( ! defined( 'ABSPATH' ) ) {
         exit;
@@ -720,14 +719,15 @@ if ( ! function_exists( 'bhg_reset_demo_and_seed' ) ) {
                                         if ( $tid && $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $r_tbl ) ) === $r_tbl ) {
                                                 $wpdb->query(
                                                         $wpdb->prepare(
-                                                                "INSERT INTO {$r_tbl} (tournament_id, user_id, wins) VALUES (%d, %d, 1) ON DUPLICATE KEY UPDATE wins = wins + 1", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-                                                                $tid,
-                                                                $uids
-                                                        )
-                                                );
-                                        }
-					}
-				}
+                                                               "INSERT INTO {$r_tbl} (tournament_id, user_id, wins) VALUES (%d, %d, %d) ON DUPLICATE KEY UPDATE wins = wins + 1", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+                                                               $tid,
+                                                               $uids,
+                                                               1
+                                                       )
+                                               );
+                                       }
+                                       }
+                               }
 			}
 		}
 
