@@ -1,24 +1,35 @@
 <?xml version="1.0"?>
-<ruleset name="Bonus Hunt Guesser">
-  <description>WordPress coding standards for this plugin.</description>
+<ruleset name="BHG Coding Standard">
+  <description>WordPress + PHPCompatibility + VariableAnalysis for this plugin.</description>
 
-  <!-- Scan only our code -->
+  <!-- Scope & performance -->
+  <arg name="basepath" value="."/>
+  <arg name="extensions" value="php"/>
+  <arg name="cache" value=".phpcs-cache"/>
+  <arg name="parallel" value="4"/>
+
+  <!-- What to scan -->
   <file>./</file>
+
+  <!-- What not to scan -->
   <exclude-pattern>vendor/*</exclude-pattern>
   <exclude-pattern>node_modules/*</exclude-pattern>
-  <exclude-pattern>*.min.js</exclude-pattern>
+  <exclude-pattern>tests/fixtures/*</exclude-pattern>
+  <exclude-pattern>*/.git/*</exclude-pattern>
 
-  <!-- Use WordPress Core rules; switch to 'WordPress-Extra' if your CI requires it -->
-  <rule ref="WordPress-Core" />
-  <!-- Uncomment if CI expects Extra/Docs too -->
-  <!-- <rule ref="WordPress-Extra" /> -->
-  <!-- <rule ref="WordPress-Docs" /> -->
+  <!-- WordPress full ruleset (includes Core, Docs, Extra) -->
+  <rule ref="WordPress"/>
 
-  <!-- Match your PHP version (you’re on 7.4.1) -->
-  <config name="php_version" value="70400"/>
+  <!-- PHP compatibility for WordPress projects -->
+  <rule ref="PHPCompatibilityWP"/>
+  <!-- Adjust if you support a different PHP range -->
+  <config name="testVersion" value="7.4-8.3"/>
 
-  <!-- Typical tweaks -->
-  <arg value="--extensions=php" />
-  <arg value="--report=full" />
-  <arg value="--basepath=." />
+  <!-- Variable usage analysis -->
+  <rule ref="VariableAnalysis"/>
+
+  <!-- Optional: fail build only on errors (warnings won't fail CI)
+       Uncomment the next line if your CI should pass with warnings.
+  -->
+  <!-- <arg name="runtime-set" value="ignore_warnings_on_exit 1"/> -->
 </ruleset>
