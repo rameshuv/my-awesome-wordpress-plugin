@@ -112,7 +112,7 @@ $affiliate_sites = $bhg_db->get_affiliate_websites();
 
 // Display status messages
 if ( isset( $_GET['message'] ) ) {
-        $message_type = sanitize_text_field( wp_unslash( $_GET['message'] ) );
+		$message_type = sanitize_text_field( wp_unslash( $_GET['message'] ) );
 	switch ( $message_type ) {
 		case 'success':
 			echo '<div class="notice notice-success is-dismissible"><p>' .

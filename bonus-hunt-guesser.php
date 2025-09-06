@@ -521,7 +521,7 @@ function bhg_handle_submit_guess() {
 				if ( wp_doing_ajax() ) {
 					wp_send_json_success();
 				}
-                                wp_safe_redirect( wp_get_referer() ? wp_get_referer() : home_url() );
+								wp_safe_redirect( wp_get_referer() ? wp_get_referer() : home_url() );
 				exit;
 			}
 		}
@@ -547,7 +547,7 @@ function bhg_handle_submit_guess() {
 		wp_send_json_success();
 	}
 
-        wp_safe_redirect( wp_get_referer() ? wp_get_referer() : home_url() );
+		wp_safe_redirect( wp_get_referer() ? wp_get_referer() : home_url() );
 	exit;
 }
 

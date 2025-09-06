@@ -66,11 +66,11 @@ class BHG_Users_Table extends WP_List_Table {
 	}
 
 	public function prepare_items() {
-               $paged     = max( 1, absint( wp_unslash( $_GET['paged'] ?? '' ) ) );
-               $orderby   = sanitize_key( wp_unslash( $_GET['orderby'] ?? 'username' ) );
-               $order_raw = sanitize_key( wp_unslash( $_GET['order'] ?? '' ) );
-               $order     = in_array( $order_raw, array( 'asc', 'desc' ), true ) ? strtoupper( $order_raw ) : 'ASC';
-               $search    = sanitize_text_field( wp_unslash( $_GET['s'] ?? '' ) );
+			   $paged     = max( 1, absint( wp_unslash( $_GET['paged'] ?? '' ) ) );
+			   $orderby   = sanitize_key( wp_unslash( $_GET['orderby'] ?? 'username' ) );
+			   $order_raw = sanitize_key( wp_unslash( $_GET['order'] ?? '' ) );
+			   $order     = in_array( $order_raw, array( 'asc', 'desc' ), true ) ? strtoupper( $order_raw ) : 'ASC';
+			   $search    = sanitize_text_field( wp_unslash( $_GET['s'] ?? '' ) );
 
 		// Whitelist orderby
 		$allowed = array( 'username', 'email', 'role', 'guesses', 'wins' );
