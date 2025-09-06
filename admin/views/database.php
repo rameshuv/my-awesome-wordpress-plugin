@@ -29,70 +29,70 @@ if ( isset( $_POST['bhg_action'] ) ) {
 	}
 }
 
+// Whitelisted table names.
+function bhg_get_allowed_tables() {
+        return array(
+                'bhg_bonus_hunts',
+                'bhg_guesses',
+                'bhg_tournaments',
+                'bhg_tournament_results',
+                'bhg_translations',
+                'bhg_affiliate_websites',
+                'bhg_hunt_winners',
+                'bhg_ads',
+        );
+}
+
 // Database cleanup function
 function bhg_database_cleanup() {
-	global $wpdb;
+        global $wpdb;
 
-	$tables = array(
-		$wpdb->prefix . 'bhg_bonus_hunts',
-		$wpdb->prefix . 'bhg_guesses',
-		$wpdb->prefix . 'bhg_tournaments',
-		$wpdb->prefix . 'bhg_tournament_results',
-		$wpdb->prefix . 'bhg_translations',
-		$wpdb->prefix . 'bhg_affiliate_websites',
-		$wpdb->prefix . 'bhg_hunt_winners',
-		$wpdb->prefix . 'bhg_ads',
-	);
+        foreach ( bhg_get_allowed_tables() as $slug ) {
+                $table = esc_sql( $wpdb->prefix . $slug );
+                if ( $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $table ) ) === $table ) {
+                        $wpdb->query( "TRUNCATE TABLE `{$table}`" );
+                }
+        }
 
-	foreach ( $tables as $table ) {
-		if ( $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $table ) ) === $table ) {
-			$wpdb->query( "TRUNCATE TABLE {$table}" );
-		}
-	}
-
-	// Reinsert default data if needed
-	bhg_insert_demo_data();
+        // Reinsert default data if needed
+        bhg_insert_demo_data();
 }
 
 // Database optimization function
 function bhg_database_optimize() {
-	global $wpdb;
+        global $wpdb;
 
-	$tables = array(
-		$wpdb->prefix . 'bhg_bonus_hunts',
-		$wpdb->prefix . 'bhg_guesses',
-		$wpdb->prefix . 'bhg_tournaments',
-		$wpdb->prefix . 'bhg_tournament_results',
-		$wpdb->prefix . 'bhg_translations',
-		$wpdb->prefix . 'bhg_affiliate_websites',
-		$wpdb->prefix . 'bhg_hunt_winners',
-		$wpdb->prefix . 'bhg_ads',
-	);
-
-	foreach ( $tables as $table ) {
-		if ( $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $table ) ) === $table ) {
-			$wpdb->query( "OPTIMIZE TABLE {$table}" );
-		}
-	}
+        foreach ( bhg_get_allowed_tables() as $slug ) {
+                $table = esc_sql( $wpdb->prefix . $slug );
+                if ( $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $table ) ) === $table ) {
+                        $wpdb->query( "OPTIMIZE TABLE `{$table}`" );
+                }
+        }
 }
 
 // Demo data insertion function (simplified version)
 function bhg_insert_demo_data() {
-	// This would typically be in a separate file like includes/demo.php
-	global $wpdb;
+        // This would typically be in a separate file like includes/demo.php
+        global $wpdb;
 
-	// Insert default bonus hunt
-	$wpdb->insert(
-		$wpdb->prefix . 'bhg_bonus_hunts',
-		array(
-			'title'             => __( 'Demo Bonus Hunt', 'bonus-hunt-guesser' ),
-			'starting_balance'  => 2000,
-			'number_of_bonuses' => 10,
-			'status'            => 'active',
-			'created_at'        => current_time( 'mysql' ),
-		),
-		array( '%s', '%d', '%d', '%s', '%s' )
-	);
+        $table_slug = 'bhg_bonus_hunts';
+        if ( ! in_array( $table_slug, bhg_get_allowed_tables(), true ) ) {
+                return;
+        }
+        $table = esc_sql( $wpdb->prefix . $table_slug );
+
+        // Insert default bonus hunt
+        $wpdb->insert(
+                $table,
+                array(
+                        'title'             => __( 'Demo Bonus Hunt', 'bonus-hunt-guesser' ),
+                        'starting_balance'  => 2000,
+                        'number_of_bonuses' => 10,
+                        'status'            => 'active',
+                        'created_at'        => current_time( 'mysql' ),
+                ),
+                array( '%s', '%d', '%d', '%s', '%s' )
+        );
 }
 ?>
 <div class="wrap bhg-wrap">
@@ -134,32 +134,21 @@ function bhg_insert_demo_data() {
 		</thead>
 		<tbody>
 			<?php
-			global $wpdb;
-			$tables = array(
-				'bhg_bonus_hunts',
-				'bhg_guesses',
-				'bhg_tournaments',
-				'bhg_tournament_results',
-				'bhg_translations',
-				'bhg_affiliate_websites',
-				'bhg_hunt_winners',
-				'bhg_ads',
-			);
+                        global $wpdb;
+                        foreach ( bhg_get_allowed_tables() as $table ) {
+                                $table_name = esc_sql( $wpdb->prefix . $table );
+                                $exists     = $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $table_name ) ) === $table_name;
+                                $row_count  = $exists ? (int) $wpdb->get_var( "SELECT COUNT(*) FROM `{$table_name}`" ) : 0;
 
-			foreach ( $tables as $table ) {
-				$table_name = $wpdb->prefix . $table;
-				$exists     = $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $table_name ) ) === $table_name;
-				$row_count  = $exists ? (int) $wpdb->get_var( "SELECT COUNT(*) FROM `{$table_name}`" ) : 0;
-
-				echo '<tr>';
-				echo '<td>' . esc_html( $table_name ) . '</td>';
-				echo '<td><span class="' . ( $exists ? 'dashicons dashicons-yes-alt" style="color: #46b450"' : 'dashicons dashicons-no" style="color: #dc3232"' ) . '"></span> ' . ( $exists ? esc_html__( 'Exists', 'bonus-hunt-guesser' ) : esc_html__( 'Missing', 'bonus-hunt-guesser' ) ) . '</td>';
-				echo '<td>' . esc_html( number_format_i18n( $row_count ) ) . '</td>';
-				echo '</tr>';
-			}
-			?>
-		</tbody>
-	</table>
+                                echo '<tr>';
+                                echo '<td>' . esc_html( $table_name ) . '</td>';
+                                echo '<td><span class="' . ( $exists ? 'dashicons dashicons-yes-alt" style="color: #46b450"' : 'dashicons dashicons-no" style="color: #dc3232"' ) . '"></span> ' . ( $exists ? esc_html__( 'Exists', 'bonus-hunt-guesser' ) : esc_html__( 'Missing', 'bonus-hunt-guesser' ) ) . '</td>';
+                                echo '<td>' . esc_html( number_format_i18n( $row_count ) ) . '</td>';
+                                echo '</tr>';
+                        }
+                        ?>
+                </tbody>
+        </table>
 	
 	<h2><?php esc_html_e( 'Database Maintenance', 'bonus-hunt-guesser' ); ?></h2>
 	<form method="post" action="">

@@ -1,6 +1,30 @@
 <?php
 if ( ! defined( 'ABSPATH' ) ) {
-	exit;
+        exit;
+}
+
+/**
+ * Get sanitized table name from whitelist.
+ *
+ * @param string $slug Table slug.
+ * @return string Sanitized table name or empty string.
+ */
+function bhg_demo_get_table_name( $slug ) {
+        global $wpdb;
+        $allowed = array(
+                'bhg_bonus_hunts',
+                'bhg_guesses',
+                'bhg_tournaments',
+                'bhg_affiliate_websites',
+                'bhg_ads',
+                'bhg_translations',
+        );
+
+        if ( in_array( $slug, $allowed, true ) ) {
+                return esc_sql( $wpdb->prefix . $slug );
+        }
+
+        return '';
 }
 
 
@@ -37,13 +61,17 @@ function bhg_seed_demo_on_activation() {
 		$user_ids[ $u['user_login'] ] = $uid ? intval( $uid ) : 0;
 	}
 
-	global $wpdb;
-	$hunts       = $wpdb->prefix . 'bhg_bonus_hunts';
-	$guesses     = $wpdb->prefix . 'bhg_guesses';
-	$tournaments = $wpdb->prefix . 'bhg_tournaments';
-	$aff         = $wpdb->prefix . 'bhg_affiliate_websites';
-	$ads         = $wpdb->prefix . 'bhg_ads';
-	$trans       = $wpdb->prefix . 'bhg_translations';
+        global $wpdb;
+        $hunts       = bhg_demo_get_table_name( 'bhg_bonus_hunts' );
+        $guesses     = bhg_demo_get_table_name( 'bhg_guesses' );
+        $tournaments = bhg_demo_get_table_name( 'bhg_tournaments' );
+        $aff         = bhg_demo_get_table_name( 'bhg_affiliate_websites' );
+        $ads         = bhg_demo_get_table_name( 'bhg_ads' );
+        $trans       = bhg_demo_get_table_name( 'bhg_translations' );
+
+        if ( ! $hunts || ! $guesses || ! $tournaments || ! $aff || ! $ads || ! $trans ) {
+                return;
+        }
 
 	// Insert affiliate sites
 	$wpdb->insert(
@@ -128,11 +156,11 @@ function bhg_seed_demo_on_activation() {
 
 				// Compute winner for the closed hunt (closest)
 				$rows = $wpdb->get_results(
-					$wpdb->prepare(
-						"SELECT user_id, guess_amount FROM {$guesses} WHERE hunt_id = %d",
-						$closed_id
-					)
-				);
+                                $wpdb->prepare(
+                                        "SELECT user_id, guess_amount FROM `{$guesses}` WHERE hunt_id = %d",
+                                        $closed_id
+                                )
+                );
 		$final        = 2420.00;
 		$winner_id    = 0;
 		$winner_diff  = null;
