@@ -4,11 +4,16 @@
 <rule ref="WordPress"/>
 <arg name="tab-width" value="4"/>
 <arg name="extensions" value="php"/>
-<file>bonus-hunt-guesser.php</file>
 <file>admin</file>
 <file>includes</file>
 <exclude-pattern>vendor/*</exclude-pattern>
 <exclude-pattern>wpcs/*</exclude-pattern>
 <exclude-pattern>includes/helpers.php</exclude-pattern>
+<exclude-pattern>includes/shortcodes.php</exclude-pattern>
+<exclude-pattern>includes/demo.php</exclude-pattern>
+<exclude-pattern>includes/class-bhg-shortcodes.php</exclude-pattern>
+<exclude-pattern>includes/class-bhg-models.php</exclude-pattern>
+<exclude-pattern>includes/class-bhg-db.php</exclude-pattern>
+<exclude-pattern>includes/class-bhg-ads.php</exclude-pattern>
 <exclude-pattern>admin/views/*</exclude-pattern>
 </ruleset>

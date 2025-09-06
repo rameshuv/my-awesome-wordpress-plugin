@@ -1,5 +1,4 @@
 <?php
-// phpcs:ignoreFile -- Legacy file requires refactoring for WordPress coding standards.
 /**
  * Shortcodes for Bonus Hunt Guesser
  *
