@@ -1,19 +1,23 @@
 <?php
+/**
+ * Admin dashboard view.
+ *
+ * @package BonusHuntGuesser
+ */
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-
 if ( ! current_user_can( 'manage_options' ) ) {
 	wp_die(
-		__( 'You do not have sufficient permissions to access this page.', 'bonus-hunt-guesser' )
+		esc_html__( 'You do not have sufficient permissions to access this page.', 'bonus-hunt-guesser' )
 	);
 }
 
 if ( ! function_exists( 'bhg_get_latest_closed_hunts' ) ) {
 	wp_die(
-		__(
+		esc_html__(
 			'Helper function bhg_get_latest_closed_hunts() missing. Please include class-bhg-bonus-hunts.php helpers.',
 			'bonus-hunt-guesser'
 		)
@@ -42,7 +46,8 @@ $hunts = bhg_get_latest_closed_hunts( 3 );
 						<?php if ( $winners ) : ?>
 							<?php foreach ( $winners as $i => $w ) : ?>
 								<?php
-								$u  = get_userdata( (int) $w->user_id );
+								$u = get_userdata( (int) $w->user_id );
+								/* translators: %d: user ID. */
 								$nm = $u ? $u->user_login : sprintf( __( 'User #%d', 'bonus-hunt-guesser' ), (int) $w->user_id );
 								?>
 								<li class="bhg-winner winner-<?php echo (int) $i + 1; ?>">
