@@ -409,7 +409,7 @@ class BHG_Admin {
 			wp_safe_redirect( add_query_arg( 'bhg_msg', 't_saved', admin_url( 'admin.php?page=bhg-tournaments' ) ) );
 			exit;
 		} catch ( Throwable $e ) {
-			if ( function_exists( 'error_log' ) ) {
+			if ( defined( 'WP_DEBUG' ) && WP_DEBUG && function_exists( 'error_log' ) ) {
 				error_log( '[BHG] tournament save error: ' . $e->getMessage() );
 			}
 			wp_safe_redirect( add_query_arg( 'bhg_msg', 't_error', admin_url( 'admin.php?page=bhg-tournaments' ) ) );

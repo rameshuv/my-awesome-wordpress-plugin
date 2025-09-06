@@ -478,7 +478,7 @@ function bhg_handle_submit_guess() {
 	$allow_edit = isset( $settings['allow_guess_changes'] ) && $settings['allow_guess_changes'] === 'yes';
 
 	if ( $guess < $min_guess || $guess > $max_guess ) {
-		if ( function_exists( 'error_log' ) ) {
+		if ( defined( 'WP_DEBUG' ) && WP_DEBUG && function_exists( 'error_log' ) ) {
 			error_log( '[BHG] invalid guess after parse: raw=' . print_r( $raw_guess, true ) . ' parsed=' . print_r( $guess, true ) );
 		}
 		if ( wp_doing_ajax() ) {
@@ -849,7 +849,7 @@ if ( ! function_exists( 'bhg_self_heal_db' ) ) {
 			$db = new BHG_DB();
 			$db->create_tables();
 		} catch ( Throwable $e ) {
-			if ( function_exists( 'error_log' ) ) {
+			if ( defined( 'WP_DEBUG' ) && WP_DEBUG && function_exists( 'error_log' ) ) {
 				error_log( '[BHG] DB self-heal failed: ' . $e->getMessage() );
 			}
 		}
