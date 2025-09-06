@@ -109,33 +109,52 @@ if ( ! function_exists( 'bhg_database_optimize' ) ) {
 	}
 }
 
+// Available maintenance tools.
+$maintenance_tools = array(
+        'demo_reseed' => array(
+                'label'        => __( 'Reset & Reseed Demo Data', 'bonus-hunt-guesser' ),
+                'nonce_action' => 'bhg_demo_reseed_action',
+                'callback'     => function () {
+                        if ( function_exists( 'bhg_reset_demo_and_seed' ) ) {
+                                bhg_reset_demo_and_seed();
+                        }
+                },
+                'notice'       => __( 'Demo data reseeded.', 'bonus-hunt-guesser' ),
+        ),
+        'db_cleanup'  => array(
+                'label'        => __( 'Run Database Cleanup', 'bonus-hunt-guesser' ),
+                'nonce_action' => 'bhg_db_cleanup_action',
+                'callback'     => 'bhg_database_cleanup',
+                'notice'       => __( 'Database cleanup completed.', 'bonus-hunt-guesser' ),
+                'confirm'      => __( 'Are you sure you want to run database cleanup? This action cannot be undone.', 'bonus-hunt-guesser' ),
+        ),
+        'db_optimize' => array(
+                'label'        => __( 'Optimize Database Tables', 'bonus-hunt-guesser' ),
+                'nonce_action' => 'bhg_db_optimize_action',
+                'callback'     => 'bhg_database_optimize',
+                'notice'       => __( 'Database optimization completed.', 'bonus-hunt-guesser' ),
+        ),
+);
+
 $notice = '';
 
 if ( isset( $_POST['bhg_action'] ) ) {
-	$post_action = sanitize_text_field( wp_unslash( $_POST['bhg_action'] ) );
-	$bhg_nonce   = isset( $_POST['bhg_nonce'] ) ? sanitize_text_field( wp_unslash( $_POST['bhg_nonce'] ) ) : '';
+        $action = sanitize_key( wp_unslash( $_POST['bhg_action'] ) );
+        $nonce  = isset( $_POST['bhg_nonce'] ) ? sanitize_text_field( wp_unslash( $_POST['bhg_nonce'] ) ) : '';
 
-	if ( 'demo_reseed' === $post_action && isset( $_POST['bhg_demo_reseed'] ) ) {
-		if ( ! $bhg_nonce || ! wp_verify_nonce( $bhg_nonce, 'bhg_demo_reseed_action' ) ) {
-			wp_die( esc_html__( 'Security check failed.', 'bonus-hunt-guesser' ) );
-		}
-		if ( function_exists( 'bhg_reset_demo_and_seed' ) ) {
-			bhg_reset_demo_and_seed();
-			$notice = __( 'Demo data reseeded.', 'bonus-hunt-guesser' );
-		}
-	} elseif ( 'db_cleanup' === $post_action && isset( $_POST['bhg_db_cleanup'] ) ) {
-		if ( ! $bhg_nonce || ! wp_verify_nonce( $bhg_nonce, 'bhg_db_cleanup_action' ) ) {
-			wp_die( esc_html__( 'Security check failed.', 'bonus-hunt-guesser' ) );
-		}
-		bhg_database_cleanup();
-		$notice = __( 'Database cleanup completed.', 'bonus-hunt-guesser' );
-	} elseif ( 'db_optimize' === $post_action && isset( $_POST['bhg_db_optimize'] ) ) {
-		if ( ! $bhg_nonce || ! wp_verify_nonce( $bhg_nonce, 'bhg_db_optimize_action' ) ) {
-			wp_die( esc_html__( 'Security check failed.', 'bonus-hunt-guesser' ) );
-		}
-		bhg_database_optimize();
-		$notice = __( 'Database optimization completed.', 'bonus-hunt-guesser' );
-	}
+        if ( isset( $maintenance_tools[ $action ] ) ) {
+                $tool = $maintenance_tools[ $action ];
+
+                if ( ! $nonce || ! wp_verify_nonce( $nonce, $tool['nonce_action'] ) ) {
+                        wp_die( esc_html__( 'Security check failed.', 'bonus-hunt-guesser' ) );
+                }
+
+                $callback = $tool['callback'];
+                if ( is_callable( $callback ) ) {
+                        call_user_func( $callback );
+                        $notice = $tool['notice'];
+                }
+        }
 }
 
 global $wpdb;
@@ -158,21 +177,23 @@ $tournaments   = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$tours_table}" ); 
 
 <div class="card" style="max-width:900px;padding:16px;margin-top:12px;">
 <h2><?php echo esc_html__( 'Maintenance Actions', 'bonus-hunt-guesser' ); ?></h2>
+<table class="widefat striped">
+<thead><tr><th><?php esc_html_e( 'Tool', 'bonus-hunt-guesser' ); ?></th><th><?php esc_html_e( 'Action', 'bonus-hunt-guesser' ); ?></th></tr></thead>
+<tbody>
+<?php foreach ( $maintenance_tools as $key => $tool ) : ?>
+<tr>
+<td><?php echo esc_html( $tool['label'] ); ?></td>
+<td>
 <form method="post">
-<?php wp_nonce_field( 'bhg_demo_reseed_action', 'bhg_nonce' ); ?>
-<input type="hidden" name="bhg_action" value="demo_reseed" />
-<p><input type="submit" name="bhg_demo_reseed" class="button button-secondary" value="<?php esc_attr_e( 'Reset & Reseed Demo Data', 'bonus-hunt-guesser' ); ?>" /></p>
+<?php wp_nonce_field( $tool['nonce_action'], 'bhg_nonce' ); ?>
+<input type="hidden" name="bhg_action" value="<?php echo esc_attr( $key ); ?>" />
+<button type="submit" class="button button-secondary"<?php if ( ! empty( $tool['confirm'] ) ) : ?> onclick="return confirm('<?php echo esc_js( $tool['confirm'] ); ?>');"<?php endif; ?>><?php esc_html_e( 'Run', 'bonus-hunt-guesser' ); ?></button>
 </form>
-<form method="post">
-<?php wp_nonce_field( 'bhg_db_cleanup_action', 'bhg_nonce' ); ?>
-<input type="hidden" name="bhg_action" value="db_cleanup" />
-<p><input type="submit" name="bhg_db_cleanup" class="button button-secondary" value="<?php esc_attr_e( 'Run Database Cleanup', 'bonus-hunt-guesser' ); ?>" onclick="return confirm('<?php echo esc_js( __( 'Are you sure you want to run database cleanup? This action cannot be undone.', 'bonus-hunt-guesser' ) ); ?>');" /></p>
-</form>
-<form method="post">
-<?php wp_nonce_field( 'bhg_db_optimize_action', 'bhg_nonce' ); ?>
-<input type="hidden" name="bhg_action" value="db_optimize" />
-<p><input type="submit" name="bhg_db_optimize" class="button button-secondary" value="<?php esc_attr_e( 'Optimize Database Tables', 'bonus-hunt-guesser' ); ?>" /></p>
-</form>
+</td>
+</tr>
+<?php endforeach; ?>
+</tbody>
+</table>
 </div>
 
 <div class="card" style="max-width:900px;padding:16px;margin-top:12px;">
