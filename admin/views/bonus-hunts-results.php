@@ -25,12 +25,16 @@ if ( ! $hunt ) {
 		return;
 }
 $rows = $wpdb->get_results( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.NoCaching -- Custom table query.
-	$wpdb->prepare(
-		"SELECT g.id, g.user_id, g.guess, u.display_name, ABS(g.guess - %f) as diff FROM `$guesses` g JOIN `$wpdb->users` u ON u.ID=g.user_id WHERE g.hunt_id=%d ORDER BY diff ASC, g.id ASC", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table name is dynamic.
-		(float) $hunt->final_balance,
-		$hunt_id
-	)
+        $wpdb->prepare(
+                "SELECT g.id, g.user_id, g.guess, u.display_name, ABS(g.guess - %f) as diff FROM `$guesses` g JOIN `$wpdb->users` u ON u.ID=g.user_id WHERE g.hunt_id=%d ORDER BY diff ASC, g.id ASC", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table name is dynamic.
+                (float) $hunt->final_balance,
+                $hunt_id
+        )
 );
+$winner_count = (int) $hunt->winners_count;
+if ( $winner_count < 1 ) {
+        $winner_count = 3;
+}
 ?>
 <div class="wrap">
 		<h1>
@@ -47,25 +51,15 @@ $rows = $wpdb->get_results( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.NoC
 		<th><?php esc_html_e( 'Difference', 'bonus-hunt-guesser' ); ?></th>
 	</tr></thead>
 	<tbody>
-	<?php
-	$pos = 1;
-	foreach ( $rows as $r ) :
-			$wcount = (int) $hunt->winners_count;
-		if ( $wcount < 1 ) {
-				$wcount = 3;
-		}
-						$is_winner = $pos <= $wcount;
-		?>
-				<tr
-			<?php
-			if ( $is_winner ) {
-				echo 'class="bhg-winner-row"';
-			}
-			?>
-				>
-		<td><?php echo (int) $pos; ?></td>
-		<td><?php echo esc_html( $r->display_name ); ?></td>
-		<td><?php echo esc_html( number_format_i18n( (float) $r->guess, 2 ) ); ?></td>
+        <?php
+        $pos = 1;
+        foreach ( $rows as $r ) :
+                $is_winner = $pos <= $winner_count;
+                ?>
+                                <tr <?php echo $is_winner ? 'class="bhg-winner-row"' : ''; ?>>
+                <td><?php echo (int) $pos; ?></td>
+                <td><?php echo esc_html( $r->display_name ); ?></td>
+                <td><?php echo esc_html( number_format_i18n( (float) $r->guess, 2 ) ); ?></td>
 		<td><?php echo esc_html( number_format_i18n( (float) $r->diff, 2 ) ); ?></td>
 		</tr>
 		<?php

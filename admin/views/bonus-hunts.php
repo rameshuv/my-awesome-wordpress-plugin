@@ -96,7 +96,15 @@ if ( 'list' === $view ) :
 				?>
 							"><?php echo esc_html( $h->title ); ?></a></td>
 			<td><?php echo esc_html( number_format_i18n( (float) $h->starting_balance, 2 ) ); ?></td>
-					<td><?php echo null !== $h->final_balance ? esc_html( number_format_i18n( (float) $h->final_balance, 2 ) ) : esc_html__( '—', 'bonus-hunt-guesser' ); ?></td>
+                        <td>
+                                <?php
+                                if ( 'closed' === $h->status && null !== $h->final_balance ) {
+                                        echo esc_html( number_format_i18n( (float) $h->final_balance, 2 ) );
+                                } else {
+                                        echo esc_html__( '—', 'bonus-hunt-guesser' );
+                                }
+                                ?>
+                        </td>
 			<td><?php echo (int) ( $h->winners_count ?? 3 ); ?></td>
 					<td><?php echo esc_html( $status_labels[ $h->status ] ?? $h->status ); ?></td>
 			<td>
@@ -126,8 +134,8 @@ if ( 'list' === $view ) :
 														);
 														?>
 														<a class="button" href="<?php echo esc_url( $close_url ); ?>"><?php echo esc_html__( 'Close Hunt', 'bonus-hunt-guesser' ); ?></a>
-												<?php elseif ( 'closed' === $h->status && null !== $h->final_balance ) : ?>
-														<a class="button button-primary" href="<?php echo esc_url( admin_url( 'admin.php?page=bhg-bonus-hunts-results&id=' . (int) $h->id ) ); ?>"><?php echo esc_html__( 'Results', 'bonus-hunt-guesser' ); ?></a>
+                                                                                                <?php elseif ( 'closed' === $h->status ) : ?>
+                                                                                                                <a class="button button-primary" href="<?php echo esc_url( admin_url( 'admin.php?page=bhg-bonus-hunts-results&id=' . (int) $h->id ) ); ?>"><?php echo esc_html__( 'Results', 'bonus-hunt-guesser' ); ?></a>
 												<?php endif; ?>
 			</td>
 		</tr>
