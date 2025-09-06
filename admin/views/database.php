@@ -9,24 +9,33 @@ if ( ! current_user_can( 'manage_options' ) ) {
 }
 
 // Handle form submissions
+$post_action = '';
+$bhg_nonce   = '';
+
 if ( isset( $_POST['bhg_action'] ) ) {
-	if ( $_POST['bhg_action'] === 'db_cleanup' && isset( $_POST['bhg_db_cleanup'] ) ) {
-		if ( ! wp_verify_nonce( $_POST['bhg_nonce'], 'bhg_db_cleanup_action' ) ) {
-			wp_die( esc_html__( 'Security check failed', 'bonus-hunt-guesser' ) );
-		}
+        $post_action = sanitize_text_field( wp_unslash( $_POST['bhg_action'] ) );
+}
 
-		// Perform database cleanup
-		bhg_database_cleanup();
-		$cleanup_completed = true;
-	} elseif ( $_POST['bhg_action'] === 'db_optimize' && isset( $_POST['bhg_db_optimize'] ) ) {
-		if ( ! wp_verify_nonce( $_POST['bhg_nonce'], 'bhg_db_optimize_action' ) ) {
-			wp_die( esc_html__( 'Security check failed', 'bonus-hunt-guesser' ) );
-		}
+if ( isset( $_POST['bhg_nonce'] ) ) {
+        $bhg_nonce = sanitize_text_field( wp_unslash( $_POST['bhg_nonce'] ) );
+}
 
-		// Perform database optimization
-		bhg_database_optimize();
-		$optimize_completed = true;
-	}
+if ( 'db_cleanup' === $post_action && isset( $_POST['bhg_db_cleanup'] ) ) {
+        if ( ! $bhg_nonce || ! wp_verify_nonce( $bhg_nonce, 'bhg_db_cleanup_action' ) ) {
+                wp_die( esc_html__( 'Security check failed', 'bonus-hunt-guesser' ) );
+        }
+
+        // Perform database cleanup
+        bhg_database_cleanup();
+        $cleanup_completed = true;
+} elseif ( 'db_optimize' === $post_action && isset( $_POST['bhg_db_optimize'] ) ) {
+        if ( ! $bhg_nonce || ! wp_verify_nonce( $bhg_nonce, 'bhg_db_optimize_action' ) ) {
+                wp_die( esc_html__( 'Security check failed', 'bonus-hunt-guesser' ) );
+        }
+
+        // Perform database optimization
+        bhg_database_optimize();
+        $optimize_completed = true;
 }
 
 // Whitelisted table names.
@@ -49,7 +58,7 @@ function bhg_database_cleanup() {
 
         foreach ( bhg_get_allowed_tables() as $slug ) {
                 $table = esc_sql( $wpdb->prefix . $slug );
-                if ( $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $table ) ) === $table ) {
+                if ( $table === $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $table ) ) ) {
                         $wpdb->query( "TRUNCATE TABLE `{$table}`" );
                 }
         }
@@ -64,7 +73,7 @@ function bhg_database_optimize() {
 
         foreach ( bhg_get_allowed_tables() as $slug ) {
                 $table = esc_sql( $wpdb->prefix . $slug );
-                if ( $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $table ) ) === $table ) {
+                if ( $table === $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $table ) ) ) {
                         $wpdb->query( "OPTIMIZE TABLE `{$table}`" );
                 }
         }
@@ -137,7 +146,7 @@ function bhg_insert_demo_data() {
                         global $wpdb;
                         foreach ( bhg_get_allowed_tables() as $table ) {
                                 $table_name = esc_sql( $wpdb->prefix . $table );
-                                $exists     = $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $table_name ) ) === $table_name;
+                                $exists     = $table_name === $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $table_name ) );
                                 $row_count  = $exists ? (int) $wpdb->get_var( "SELECT COUNT(*) FROM `{$table_name}`" ) : 0;
 
                                 echo '<tr>';
