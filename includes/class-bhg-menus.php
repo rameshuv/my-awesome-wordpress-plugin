@@ -1,6 +1,8 @@
 <?php
 if ( ! defined( 'ABSPATH' ) ) {
-	exit; }
+	exit;
+}
+
 
 if ( ! class_exists( 'BHG_Menus' ) ) {
 	class BHG_Menus {

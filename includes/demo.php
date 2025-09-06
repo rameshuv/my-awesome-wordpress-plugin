@@ -1,6 +1,8 @@
 <?php
 if ( ! defined( 'ABSPATH' ) ) {
-	exit; }
+	exit;
+}
+
 
 function bhg_seed_demo_on_activation() {
 	// Only seed once

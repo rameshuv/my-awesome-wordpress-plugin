@@ -12,8 +12,9 @@
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
-        exit;
+	exit;
 }
+
 
 class BHG_Models {
 
@@ -39,13 +40,13 @@ class BHG_Models {
 		$guesses_tbl = $wpdb->prefix . 'bhg_guesses';
 
 		// Determine number of winners for this hunt.
-                $winners_count = (int) $wpdb->get_var(
-                        $wpdb->prepare(
-                                // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table name is a variable.
-                                "SELECT winners_count FROM {$hunts_tbl} WHERE id = %d",
-                                $hunt_id
-                        )
-                );
+				$winners_count = (int) $wpdb->get_var(
+						$wpdb->prepare(
+								// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table name is a variable.
+								"SELECT winners_count FROM {$hunts_tbl} WHERE id = %d",
+								$hunt_id
+						)
+				);
 		if ( $winners_count <= 0 ) {
 			$winners_count = 1;
 		}
@@ -66,15 +67,15 @@ class BHG_Models {
 		);
 
 		// Fetch winners based on proximity to final balance.
-                $rows = $wpdb->get_results(
-                        $wpdb->prepare(
-                                // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table name is a variable.
-                                "SELECT user_id FROM {$guesses_tbl} WHERE hunt_id = %d ORDER BY ABS(guess - %f) ASC, id ASC LIMIT %d",
-                                $hunt_id,
-                                $final_balance,
-                                $winners_count
-                        )
-                );
+				$rows = $wpdb->get_results(
+						$wpdb->prepare(
+								// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table name is a variable.
+								"SELECT user_id FROM {$guesses_tbl} WHERE hunt_id = %d ORDER BY ABS(guess - %f) ASC, id ASC LIMIT %d",
+								$hunt_id,
+								$final_balance,
+								$winners_count
+						)
+				);
 
 		if ( empty( $rows ) ) {
 			return array();
