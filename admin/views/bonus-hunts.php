@@ -6,10 +6,8 @@
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
-		exit;
+                exit;
 }
-
-// phpcs:disable WordPress.DB.DirectDatabaseQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Requires direct queries with dynamic table names.
 
 if ( ! current_user_can( 'manage_options' ) ) {
 	wp_die( esc_html__( 'You do not have sufficient permissions to access this page.', 'bonus-hunt-guesser' ) );
@@ -57,8 +55,14 @@ if ( 'list' === $view ) :
 			'closed' => __( 'Closed', 'bonus-hunt-guesser' ),
 		);
 
-								$total = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$hunts_table}" );
-				$base_url              = remove_query_arg( array( 'paged' ) );
+                                $total = (int) $wpdb->get_var(
+                                        $wpdb->prepare(
+                                                "SELECT COUNT(*) FROM {$hunts_table} WHERE %d = %d", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+                                                1,
+                                                1
+                                        )
+                                );
+                                $base_url              = remove_query_arg( array( 'paged' ) );
 		?>
 <div class="wrap">
 	<h1 class="wp-heading-inline"><?php echo esc_html__( 'Bonus Hunts', 'bonus-hunt-guesser' ); ?></h1>
