@@ -927,18 +927,20 @@ if ( ! class_exists( 'BHG_Shortcodes' ) ) {
 						$params[] = $info['start'];
 						$params[] = $info['end'];
 					}
-					$sql = "SELECT u.ID as user_id, u.user_login, SUM(r.wins) as total_wins
-						FROM {$wins_tbl} r
-						INNER JOIN {$users_tbl} u ON u.ID = r.user_id
-						INNER JOIN {$tours_tbl} t ON t.id = r.tournament_id
-						WHERE {$where}
-						GROUP BY u.ID, u.user_login
-						ORDER BY total_wins DESC, u.user_login ASC
-						LIMIT %d";
-					array_unshift( $params, $sql );
-					$prepared        = call_user_func_array( array( $wpdb, 'prepare' ), $params );
-					$results[ $key ] = $wpdb->get_results( $prepared );
-				} else {
+                                       $sql = "SELECT u.ID as user_id, u.user_login, SUM(r.wins) as total_wins
+                                               FROM {$wins_tbl} r
+                                               INNER JOIN {$users_tbl} u ON u.ID = r.user_id
+                                               INNER JOIN {$tours_tbl} t ON t.id = r.tournament_id
+                                               WHERE {$where}
+                                               GROUP BY u.ID, u.user_login
+                                               ORDER BY total_wins DESC, u.user_login ASC
+                                               LIMIT %d";
+                                       $prepared = call_user_func_array(
+                                               array( $wpdb, 'prepare' ),
+                                               array_merge( array( $sql ), $params, array( 50 ) )
+                                       );
+                                       $results[ $key ] = $wpdb->get_results( $prepared );
+                               } else {
 					$sql                         = "SELECT u.ID as user_id, u.user_login, SUM(r.wins) as total_wins
 						FROM {$wins_tbl} r
 						INNER JOIN {$users_tbl} u ON u.ID = r.user_id
