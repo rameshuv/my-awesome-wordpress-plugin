@@ -1,21 +1,48 @@
 <?php
+/**
+ * Admin menu handler.
+ *
+ * @package bonus-hunt-guesser
+ */
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-
 if ( ! class_exists( 'BHG_Menus' ) ) {
+	/**
+	 * Handle admin menus and related helpers.
+	 */
 	class BHG_Menus {
+		/**
+		 * Singleton instance.
+		 *
+		 * @var BHG_Menus|null
+		 */
 		private static $instance = null;
-		private $initialized	 = false;
 
+		/**
+		 * Whether the class has been initialized.
+		 *
+		 * @var bool
+		 */
+		private $initialized = false;
+
+		/**
+		 * Retrieve singleton instance.
+		 *
+		 * @return BHG_Menus
+		 */
 		public static function get_instance() {
-			if ( self::$instance === null ) {
+			if ( null === self::$instance ) {
 				self::$instance = new self();
 			}
 			return self::$instance;
 		}
 
+		/**
+		 * Constructor.
+		 */
 		private function __construct() {}
 
 		/**
@@ -42,7 +69,7 @@ if ( ! class_exists( 'BHG_Menus' ) ) {
 		 * @return void
 		 */
 		public function assets( $hook ) {
-			if ( strpos( $hook, 'bhg' ) !== false ) {
+			if ( false !== strpos( $hook, 'bhg' ) ) {
 				wp_enqueue_style( 'bhg-admin', BHG_PLUGIN_URL . 'assets/css/admin.css', array(), defined( 'BHG_VERSION' ) ? BHG_VERSION : null );
 				wp_enqueue_script( 'bhg-admin', BHG_PLUGIN_URL . 'assets/js/admin.js', array( 'jquery' ), defined( 'BHG_VERSION' ) ? BHG_VERSION : null, true );
 			}
@@ -54,10 +81,10 @@ if ( ! class_exists( 'BHG_Menus' ) ) {
 		 * @return void
 		 */
 		public function admin_menu() {
-			// Prevent duplicate top-level menu
+			// Prevent duplicate top-level menu.
 			global $menu;
 			foreach ( (array) $menu as $item ) {
-				if ( isset( $item[2] ) && $item[2] === 'bhg' ) {
+				if ( isset( $item[2] ) && 'bhg' === $item[2] ) {
 					return;
 				}
 			}
@@ -89,7 +116,7 @@ if ( ! class_exists( 'BHG_Menus' ) ) {
 		/**
 		 * Get the capability required to access admin pages.
 		 *
-		 * @return void
+		 * @return string
 		 */
 		private function admin_capability() {
 			return apply_filters( 'bhg_admin_capability', 'manage_options' );
@@ -105,10 +132,15 @@ if ( ! class_exists( 'BHG_Menus' ) ) {
 		 */
 		public function view( $view, $vars = array() ) {
 			if ( ! current_user_can( $this->admin_capability() ) ) {
-				wp_die( __( 'You do not have sufficient permissions to access this page.', 'bonus-hunt-guesser' ) );
+				wp_die( esc_html__( 'You do not have sufficient permissions to access this page.', 'bonus-hunt-guesser' ) );
 			}
+
 			if ( is_array( $vars ) ) {
-				extract( $vars );
+				foreach ( $vars as $key => $value ) {
+					if ( is_string( $key ) && preg_match( '/^[a-zA-Z_\\x80-\\xff][a-zA-Z0-9_\\x80-\\xff]*$/', $key ) ) {
+						${$key} = $value;
+					}
+				}
 			}
 
 			$header_path = BHG_PLUGIN_DIR . 'admin/views/header.php';
@@ -116,12 +148,17 @@ if ( ! class_exists( 'BHG_Menus' ) ) {
 				include $header_path;
 			}
 
+			$view      = sanitize_file_name( $view );
 			$view_path = BHG_PLUGIN_DIR . 'admin/views/' . $view . '.php';
 			if ( file_exists( $view_path ) ) {
 				include $view_path;
 			} else {
 				echo '<div class=\'wrap\'><h2>' . esc_html__( 'View Not Found', 'bonus-hunt-guesser' ) . '</h2>';
-				echo '<p>' . sprintf( esc_html__( 'The requested view &quot;%s&quot; was not found.', 'bonus-hunt-guesser' ), esc_html( $view ) ) . '</p></div>';
+				echo '<p>' . sprintf(
+					/* translators: %s: requested view name. */
+					esc_html__( 'The requested view "%s" was not found.', 'bonus-hunt-guesser' ),
+					esc_html( $view )
+				) . '</p></div>';
 			}
 		}
 
@@ -228,7 +265,7 @@ if ( ! class_exists( 'BHG_Menus' ) ) {
 	}
 }
 
-// Bootstrap once
+// Bootstrap once.
 if ( class_exists( 'BHG_Menus' ) ) {
 	BHG_Menus::get_instance()->init();
 }
