@@ -1,6 +1,12 @@
 <?php
+/**
+ * Bonus hunt results view.
+ *
+ * @package Bonus_Hunt_Guesser
+ */
+
 if ( ! defined( 'ABSPATH' ) ) {
-	exit;
+		exit;
 }
 
 if ( ! current_user_can( 'manage_options' ) ) {
@@ -10,20 +16,29 @@ global $wpdb;
 $hunt_id = absint( wp_unslash( $_GET['id'] ?? '' ) );
 $hunts   = $wpdb->prefix . 'bhg_bonus_hunts';
 $guesses = $wpdb->prefix . 'bhg_guesses';
-$hunt    = $wpdb->get_row( $wpdb->prepare( "SELECT id, title, final_balance, winners_count FROM `$hunts` WHERE id=%d", $hunt_id ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.NoCaching -- Custom table query.
+$hunt    = $wpdb->get_row(
+        // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table name is dynamic.
+	$wpdb->prepare( "SELECT id, title, final_balance, winners_count FROM `$hunts` WHERE id=%d", $hunt_id )
+); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.NoCaching -- Custom table query.
 if ( ! $hunt ) {
-	echo '<div class="wrap"><h1>' . esc_html__( 'Hunt not found', 'bonus-hunt-guesser' ) . '</h1></div>';
-	return; }
+		echo '<div class="wrap"><h1>' . esc_html__( 'Hunt not found', 'bonus-hunt-guesser' ) . '</h1></div>';
+		return;
+}
 $rows = $wpdb->get_results( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.NoCaching -- Custom table query.
-		$wpdb->prepare(
-				"SELECT g.id, g.user_id, g.guess, u.display_name, ABS(g.guess - %f) as diff FROM `$guesses` g JOIN `$wpdb->users` u ON u.ID=g.user_id WHERE g.hunt_id=%d ORDER BY diff ASC, g.id ASC",
-				(float) $hunt->final_balance,
-				$hunt_id
-		)
+	$wpdb->prepare(
+		"SELECT g.id, g.user_id, g.guess, u.display_name, ABS(g.guess - %f) as diff FROM `$guesses` g JOIN `$wpdb->users` u ON u.ID=g.user_id WHERE g.hunt_id=%d ORDER BY diff ASC, g.id ASC", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table name is dynamic.
+		(float) $hunt->final_balance,
+		$hunt_id
+	)
 );
 ?>
 <div class="wrap">
-	<h1><?php printf( esc_html__( 'Results for %s', 'bonus-hunt-guesser' ), esc_html( $hunt->title ) ); ?></h1>
+		<h1>
+				<?php
+				/* translators: %s: Bonus hunt title. */
+				printf( esc_html__( 'Results for %s', 'bonus-hunt-guesser' ), esc_html( $hunt->title ) );
+				?>
+		</h1>
 	<table class="widefat striped">
 	<thead><tr>
 		<th><?php esc_html_e( 'Position', 'bonus-hunt-guesser' ); ?></th>
@@ -35,17 +50,19 @@ $rows = $wpdb->get_results( // phpcs:ignore WordPress.DB.DirectDatabaseQuery.NoC
 	<?php
 	$pos = 1;
 	foreach ( $rows as $r ) :
-		$wcount = (int) $hunt->winners_count;
+			$wcount = (int) $hunt->winners_count;
 		if ( $wcount < 1 ) {
-			$wcount = 3;
-		} $isWinner = $pos <= $wcount;
+				$wcount = 3;
+		}
+						$is_winner = $pos <= $wcount;
 		?>
-		<tr 
-		<?php
-		if ( $isWinner ) {
-			echo 'class="bhg-winner-row"';}
-		?>
-		>
+				<tr
+			<?php
+			if ( $is_winner ) {
+				echo 'class="bhg-winner-row"';
+			}
+			?>
+				>
 		<td><?php echo (int) $pos; ?></td>
 		<td><?php echo esc_html( $r->display_name ); ?></td>
 		<td><?php echo esc_html( number_format_i18n( (float) $r->guess, 2 ) ); ?></td>
