@@ -9,8 +9,12 @@ class BHG_DB {
                 $db = new self();
                 $db->create_tables();
 
-                                global $wpdb;
-                                $tours_table = esc_sql( $wpdb->prefix . 'bhg_tournaments' );
+                               global $wpdb;
+                               $tours_table    = $wpdb->prefix . 'bhg_tournaments';
+                               $allowed_tables = array( $wpdb->prefix . 'bhg_tournaments' );
+                               if ( ! in_array( $tours_table, $allowed_tables, true ) ) {
+                                       wp_die( esc_html__( 'Invalid table.', 'bonus-hunt-guesser' ) );
+                               }
 
                 // Drop legacy "period" column and related index if they exist.
                 if ( $db->column_exists( $tours_table, 'period' ) ) {
@@ -29,13 +33,13 @@ class BHG_DB {
 
 		$charset_collate = $wpdb->get_charset_collate();
 
-				$hunts_table                   = esc_sql( $wpdb->prefix . 'bhg_bonus_hunts' );
-								$guesses_table = esc_sql( $wpdb->prefix . 'bhg_guesses' );
-								$tours_table   = esc_sql( $wpdb->prefix . 'bhg_tournaments' );
-								$tres_table    = esc_sql( $wpdb->prefix . 'bhg_tournament_results' );
-								$ads_table     = esc_sql( $wpdb->prefix . 'bhg_ads' );
-								$trans_table   = esc_sql( $wpdb->prefix . 'bhg_translations' );
-								$aff_table     = esc_sql( $wpdb->prefix . 'bhg_affiliates' );
+                               $hunts_table  = $wpdb->prefix . 'bhg_bonus_hunts';
+                               $guesses_table = $wpdb->prefix . 'bhg_guesses';
+                               $tours_table  = $wpdb->prefix . 'bhg_tournaments';
+                               $tres_table   = $wpdb->prefix . 'bhg_tournament_results';
+                               $ads_table    = $wpdb->prefix . 'bhg_ads';
+                               $trans_table  = $wpdb->prefix . 'bhg_translations';
+                               $aff_table    = $wpdb->prefix . 'bhg_affiliates';
 
 		$sql = array();
 
