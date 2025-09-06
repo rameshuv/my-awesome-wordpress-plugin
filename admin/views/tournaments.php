@@ -42,11 +42,11 @@ $rows = $wpdb->get_results(
 );
 
 $labels = array(
-	'weekly'    => __( 'Weekly', 'bonus-hunt-guesser' ),
-	'monthly'   => __( 'Monthly', 'bonus-hunt-guesser' ),
-	'quarterly' => __( 'Quarterly', 'bonus-hunt-guesser' ),
-	'yearly'    => __( 'Yearly', 'bonus-hunt-guesser' ),
-	'alltime'   => __( 'Alltime', 'bonus-hunt-guesser' ),
+        'weekly'    => __( 'Weekly', 'bonus-hunt-guesser' ),
+        'monthly'   => __( 'Monthly', 'bonus-hunt-guesser' ),
+        'quarterly' => __( 'Quarterly', 'bonus-hunt-guesser' ),
+        'yearly'    => __( 'Yearly', 'bonus-hunt-guesser' ),
+        'alltime'   => __( 'All-Time', 'bonus-hunt-guesser' ),
 );
 
 $status_labels = array(
@@ -115,10 +115,10 @@ endif;
 		<tr>
 		<th><label for="bhg_t_type"><?php esc_html_e( 'Type', 'bonus-hunt-guesser' ); ?></label></th>
 		<td>
-			<?php
-			$types = array( 'weekly', 'monthly', 'quarterly', 'yearly', 'alltime' );
-			$cur   = $row->type ?? 'weekly';
-			?>
+                        <?php
+                        $types = array_keys( $labels );
+                        $cur   = $row->type ?? 'weekly';
+                        ?>
 			<select id="bhg_t_type" name="type">
 			<?php foreach ( $types as $t ) : ?>
 				<option value="<?php echo esc_attr( $t ); ?>" <?php selected( $cur, $t ); ?>><?php echo esc_html( $labels[ $t ] ); ?></option>

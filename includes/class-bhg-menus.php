@@ -56,9 +56,10 @@ if ( ! class_exists( 'BHG_Menus' ) ) {
 			}
 			$this->initialized = true;
 
-			add_action( 'admin_menu', array( $this, 'admin_menu' ) );
-			add_action( 'admin_enqueue_scripts', array( $this, 'assets' ) );
-			add_action( 'init', array( $this, 'register_locations' ), 5 );
+						add_action( 'admin_menu', array( $this, 'admin_menu' ) );
+						add_action( 'admin_enqueue_scripts', array( $this, 'assets' ) );
+						add_action( 'init', array( $this, 'register_locations' ), 5 );
+						add_action( 'admin_post_bhg_tournament_save', array( $this, 'handle_tournament_save' ) );
 		}
 
 		/**
@@ -240,6 +241,61 @@ if ( ! class_exists( 'BHG_Menus' ) ) {
 		 */
 		public function render_tools() {
 			$this->view( 'tools' );
+		}
+
+		/**
+		 * Handle tournament create/update requests.
+		 *
+		 * @return void
+		 */
+		public function handle_tournament_save() {
+			if ( ! current_user_can( $this->admin_capability() ) ) {
+				wp_die( esc_html__( 'You do not have sufficient permissions to access this page.', 'bonus-hunt-guesser' ) );
+			}
+
+			check_admin_referer( 'bhg_tournament_save_action' );
+
+			global $wpdb;
+			$table = $wpdb->prefix . 'bhg_tournaments';
+
+			$id          = isset( $_POST['id'] ) ? absint( $_POST['id'] ) : 0;
+			$title       = sanitize_text_field( wp_unslash( $_POST['title'] ?? '' ) );
+			$description = sanitize_textarea_field( wp_unslash( $_POST['description'] ?? '' ) );
+			$type        = sanitize_text_field( wp_unslash( $_POST['type'] ?? '' ) );
+			$start_date  = sanitize_text_field( wp_unslash( $_POST['start_date'] ?? '' ) );
+			$end_date    = sanitize_text_field( wp_unslash( $_POST['end_date'] ?? '' ) );
+			$status      = sanitize_text_field( wp_unslash( $_POST['status'] ?? '' ) );
+
+			$allowed_types  = array( 'weekly', 'monthly', 'quarterly', 'yearly', 'alltime' );
+			$allowed_status = array( 'active', 'archived' );
+
+			if ( ! in_array( $type, $allowed_types, true ) ) {
+				$type = 'weekly';
+			}
+
+			if ( ! in_array( $status, $allowed_status, true ) ) {
+				$status = 'active';
+			}
+
+			$data = array(
+				'title'       => $title,
+				'description' => $description,
+				'type'        => $type,
+				'start_date'  => $start_date,
+				'end_date'    => $end_date,
+				'status'      => $status,
+			);
+
+			$formats = array( '%s', '%s', '%s', '%s', '%s', '%s' );
+
+			if ( $id ) {
+				$wpdb->update( $table, $data, array( 'id' => $id ), $formats, array( '%d' ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
+			} else {
+				$wpdb->insert( $table, $data, $formats ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
+			}
+
+			wp_safe_redirect( admin_url( 'admin.php?page=bhg-tournaments' ) );
+			exit;
 		}
 
 		/**
