@@ -704,12 +704,12 @@ function bhg_generate_leaderboard_html( $timeframe ) {
 			GROUP BY g.user_id
 		) t";
 
-        if ( $args ) {
-                $prepared = call_user_func_array( array( $wpdb, 'prepare' ), array_merge( array( $sql_total ), $args ) );
-                $total    = (int) $wpdb->get_var( $prepared );
-        } else {
-                $total = (int) $wpdb->get_var( $sql_total );
-        }
+	if ( $args ) {
+			$prepared = call_user_func_array( array( $wpdb, 'prepare' ), array_merge( array( $sql_total ), $args ) );
+			$total    = (int) $wpdb->get_var( $prepared );
+	} else {
+			$total = (int) $wpdb->get_var( $sql_total );
+	}
 
 	$sql = "
 		SELECT g.user_id, u.user_login, COUNT(*) AS wins
@@ -725,11 +725,11 @@ function bhg_generate_leaderboard_html( $timeframe ) {
 		ORDER BY wins DESC, u.user_login ASC
 		LIMIT %d OFFSET %d";
 
-        $args_query   = $args;
-        $args_query[] = $per_page;
-        $args_query[] = $offset;
-        $prepared     = call_user_func_array( array( $wpdb, 'prepare' ), array_merge( array( $sql ), $args_query ) );
-        $rows         = $wpdb->get_results( $prepared );
+		$args_query   = $args;
+		$args_query[] = $per_page;
+		$args_query[] = $offset;
+		$prepared     = call_user_func_array( array( $wpdb, 'prepare' ), array_merge( array( $sql ), $args_query ) );
+		$rows         = $wpdb->get_results( $prepared );
 
 	if ( ! $rows ) {
 		return '<p>' . esc_html__( 'No data available.', 'bonus-hunt-guesser' ) . '</p>';
