@@ -151,19 +151,19 @@ spl_autoload_register(
 				return;
 		}
 
-                $class_map = array(
-                        'BHG_Shortcodes'     => 'includes/class-bhg-shortcodes.php',
-                        'BHG_Logger'         => 'includes/class-bhg-logger.php',
-                        'BHG_Settings'       => 'includes/class-bhg-settings.php',
-                        'BHG_Utils'          => 'includes/class-bhg-utils.php',
-                        'BHG_Models'         => 'includes/class-bhg-models.php',
-                        'BHG_Menus'          => 'includes/class-bhg-menus.php',
-                        'BHG_Front_Menus'    => 'includes/class-bhg-front-menus.php',
-                        'BHG_Ads'            => 'includes/class-bhg-ads.php',
-                        'BHG_Login_Redirect' => 'includes/class-bhg-login-redirect.php',
-                        'BHG_Demo'           => 'admin/class-bhg-demo.php',
-                        'BHG_Bonus_Hunts_Controller' => 'admin/class-bhg-bonus-hunts-controller.php',
-                );
+				$class_map = array(
+					'BHG_Shortcodes'             => 'includes/class-bhg-shortcodes.php',
+					'BHG_Logger'                 => 'includes/class-bhg-logger.php',
+					'BHG_Settings'               => 'includes/class-bhg-settings.php',
+					'BHG_Utils'                  => 'includes/class-bhg-utils.php',
+					'BHG_Models'                 => 'includes/class-bhg-models.php',
+					'BHG_Menus'                  => 'includes/class-bhg-menus.php',
+					'BHG_Front_Menus'            => 'includes/class-bhg-front-menus.php',
+					'BHG_Ads'                    => 'includes/class-bhg-ads.php',
+					'BHG_Login_Redirect'         => 'includes/class-bhg-login-redirect.php',
+					'BHG_Demo'                   => 'admin/class-bhg-demo.php',
+					'BHG_Bonus_Hunts_Controller' => 'admin/class-bhg-bonus-hunts-controller.php',
+				);
 
 		if ( isset( $class_map[ $class ] ) ) {
 			$file_path = BHG_PLUGIN_DIR . $class_map[ $class ];
@@ -303,18 +303,18 @@ function bhg_init_plugin() {
 	// Load text domain
 	load_plugin_textdomain( 'bonus-hunt-guesser', false, dirname( plugin_basename( __FILE__ ) ) . '/languages/' );
 
-        // Initialize components
-        if ( is_admin() ) {
-                if ( class_exists( 'BHG_Menus' ) ) {
-                        BHG_Menus::get_instance()->init();
-                }
-                if ( class_exists( 'BHG_Demo' ) ) {
-                        new BHG_Demo();
-                }
-                if ( class_exists( 'BHG_Bonus_Hunts_Controller' ) ) {
-                        BHG_Bonus_Hunts_Controller::get_instance()->init();
-                }
-        }
+		// Initialize components
+	if ( is_admin() ) {
+		if ( class_exists( 'BHG_Menus' ) ) {
+				BHG_Menus::get_instance()->init();
+		}
+		if ( class_exists( 'BHG_Demo' ) ) {
+				new BHG_Demo();
+		}
+		if ( class_exists( 'BHG_Bonus_Hunts_Controller' ) ) {
+				BHG_Bonus_Hunts_Controller::get_instance()->init();
+		}
+	}
 
 	if ( class_exists( 'BHG_Shortcodes' ) ) {
 		new BHG_Shortcodes();
@@ -349,10 +349,10 @@ function bhg_init_plugin() {
 			exit;
 		}
 	);
-        add_action( 'wp_ajax_submit_bhg_guess', 'bhg_handle_submit_guess' );
-        add_action( 'wp_ajax_nopriv_submit_bhg_guess', 'bhg_handle_submit_guess' );
-        add_action( 'admin_post_bhg_save_settings', 'bhg_handle_settings_save' );
-       add_action( 'admin_post_bhg_save_ad', 'bhg_handle_ad_save' );
+		add_action( 'wp_ajax_submit_bhg_guess', 'bhg_handle_submit_guess' );
+		add_action( 'wp_ajax_nopriv_submit_bhg_guess', 'bhg_handle_submit_guess' );
+		add_action( 'admin_post_bhg_save_settings', 'bhg_handle_settings_save' );
+		add_action( 'admin_post_bhg_save_ad', 'bhg_handle_ad_save' );
 }
 
 // Early table check on init
@@ -370,12 +370,12 @@ function bhg_handle_settings_save() {
 		wp_die( esc_html__( 'You do not have sufficient permissions to perform this action.', 'bonus-hunt-guesser' ) );
 	}
 
-// Verify nonce
-$nonce = isset( $_POST['bhg_nonce'] ) ? sanitize_text_field( wp_unslash( $_POST['bhg_nonce'] ) ) : '';
-if ( ! $nonce || ! wp_verify_nonce( $nonce, 'bhg_save_settings' ) ) {
-wp_safe_redirect( esc_url_raw( admin_url( 'admin.php?page=bhg_settings&error=nonce_failed' ) ) );
-exit;
-}
+	// Verify nonce
+	$nonce = isset( $_POST['bhg_nonce'] ) ? sanitize_text_field( wp_unslash( $_POST['bhg_nonce'] ) ) : '';
+	if ( ! $nonce || ! wp_verify_nonce( $nonce, 'bhg_save_settings' ) ) {
+		wp_safe_redirect( esc_url_raw( admin_url( 'admin.php?page=bhg_settings&error=nonce_failed' ) ) );
+		exit;
+	}
 
 	// Sanitize and validate data
 	$settings = array();
@@ -432,8 +432,8 @@ exit;
 	update_option( 'bhg_plugin_settings', array_merge( $existing, $settings ) );
 
 	// Redirect back to settings page
-        wp_safe_redirect( esc_url_raw( admin_url( 'admin.php?page=bhg_settings&message=saved' ) ) );
-        exit;
+		wp_safe_redirect( esc_url_raw( admin_url( 'admin.php?page=bhg_settings&message=saved' ) ) );
+		exit;
 }
 
 /**
@@ -442,56 +442,56 @@ exit;
  * @return void
  */
 function bhg_handle_ad_save() {
-       if ( ! current_user_can( 'manage_options' ) ) {
-               wp_die( esc_html__( 'You do not have sufficient permissions to perform this action.', 'bonus-hunt-guesser' ) );
-       }
+	if ( ! current_user_can( 'manage_options' ) ) {
+			wp_die( esc_html__( 'You do not have sufficient permissions to perform this action.', 'bonus-hunt-guesser' ) );
+	}
 
-       check_admin_referer( 'bhg_save_ad' );
+		check_admin_referer( 'bhg_save_ad' );
 
-       global $wpdb;
-       $table = $wpdb->prefix . 'bhg_ads';
+		global $wpdb;
+		$table = $wpdb->prefix . 'bhg_ads';
 
-       $id           = isset( $_POST['id'] ) ? absint( wp_unslash( $_POST['id'] ) ) : 0;
-       $title        = isset( $_POST['title'] ) ? sanitize_text_field( wp_unslash( $_POST['title'] ) ) : '';
-       $content      = isset( $_POST['content'] ) ? wp_kses_post( wp_unslash( $_POST['content'] ) ) : '';
-       $link_url     = isset( $_POST['link_url'] ) ? esc_url_raw( wp_unslash( $_POST['link_url'] ) ) : '';
-       $placement    = isset( $_POST['placement'] ) ? sanitize_key( wp_unslash( $_POST['placement'] ) ) : 'none';
-       $visible_to   = isset( $_POST['visible_to'] ) ? sanitize_key( wp_unslash( $_POST['visible_to'] ) ) : 'all';
-       $target_pages = isset( $_POST['target_pages'] ) ? sanitize_text_field( wp_unslash( $_POST['target_pages'] ) ) : '';
-       $active       = isset( $_POST['active'] ) ? 1 : 0;
+		$id           = isset( $_POST['id'] ) ? absint( wp_unslash( $_POST['id'] ) ) : 0;
+		$title        = isset( $_POST['title'] ) ? sanitize_text_field( wp_unslash( $_POST['title'] ) ) : '';
+		$content      = isset( $_POST['content'] ) ? wp_kses_post( wp_unslash( $_POST['content'] ) ) : '';
+		$link_url     = isset( $_POST['link_url'] ) ? esc_url_raw( wp_unslash( $_POST['link_url'] ) ) : '';
+		$placement    = isset( $_POST['placement'] ) ? sanitize_key( wp_unslash( $_POST['placement'] ) ) : 'none';
+		$visible_to   = isset( $_POST['visible_to'] ) ? sanitize_key( wp_unslash( $_POST['visible_to'] ) ) : 'all';
+		$target_pages = isset( $_POST['target_pages'] ) ? sanitize_text_field( wp_unslash( $_POST['target_pages'] ) ) : '';
+		$active       = isset( $_POST['active'] ) ? 1 : 0;
 
-       $allowed_placements = array( 'none', 'footer', 'bottom', 'sidebar', 'shortcode' );
-       if ( ! in_array( $placement, $allowed_placements, true ) ) {
-               $placement = 'none';
-       }
+		$allowed_placements = array( 'none', 'footer', 'bottom', 'sidebar', 'shortcode' );
+	if ( ! in_array( $placement, $allowed_placements, true ) ) {
+			$placement = 'none';
+	}
 
-       $allowed_visibility = array( 'all', 'guests', 'logged_in', 'affiliates', 'non_affiliates' );
-       if ( ! in_array( $visible_to, $allowed_visibility, true ) ) {
-               $visible_to = 'all';
-       }
+		$allowed_visibility = array( 'all', 'guests', 'logged_in', 'affiliates', 'non_affiliates' );
+	if ( ! in_array( $visible_to, $allowed_visibility, true ) ) {
+			$visible_to = 'all';
+	}
 
-       $data = array(
-               'title'        => $title,
-               'content'      => $content,
-               'link_url'     => $link_url,
-               'placement'    => $placement,
-               'visible_to'   => $visible_to,
-               'target_pages' => $target_pages,
-               'active'       => $active,
-               'updated_at'   => current_time( 'mysql' ),
-       );
+		$data = array(
+			'title'        => $title,
+			'content'      => $content,
+			'link_url'     => $link_url,
+			'placement'    => $placement,
+			'visible_to'   => $visible_to,
+			'target_pages' => $target_pages,
+			'active'       => $active,
+			'updated_at'   => current_time( 'mysql' ),
+		);
 
-       $formats = array( '%s', '%s', '%s', '%s', '%s', '%s', '%d', '%s' );
+		$formats = array( '%s', '%s', '%s', '%s', '%s', '%s', '%d', '%s' );
 
-       if ( $id > 0 ) {
-               $wpdb->update( $table, $data, array( 'id' => $id ), $formats, array( '%d' ) );
-       } else {
-               $data['created_at'] = current_time( 'mysql' );
-               $wpdb->insert( $table, $data, array_merge( $formats, array( '%s' ) ) );
-       }
+		if ( $id > 0 ) {
+				$wpdb->update( $table, $data, array( 'id' => $id ), $formats, array( '%d' ) );
+		} else {
+				$data['created_at'] = current_time( 'mysql' );
+				$wpdb->insert( $table, $data, array_merge( $formats, array( '%s' ) ) );
+		}
 
-       wp_safe_redirect( esc_url_raw( admin_url( 'admin.php?page=bhg_advertising&message=saved' ) ) );
-       exit;
+		wp_safe_redirect( esc_url_raw( admin_url( 'admin.php?page=bhg_advertising&message=saved' ) ) );
+		exit;
 }
 
 // Canonical guess submit handler
@@ -578,21 +578,21 @@ function bhg_handle_submit_guess() {
 		if ( $allow_edit && $count > 0 ) {
 			$gid = (int) $wpdb->get_var( $wpdb->prepare( "SELECT id FROM `$g_tbl` WHERE hunt_id=%d AND user_id=%d ORDER BY id DESC LIMIT 1", $hunt_id, $user_id ) );
 			if ( $gid ) {
-$wpdb->update(
-$g_tbl,
-array(
-'guess'      => $guess,
-'updated_at' => current_time( 'mysql' ),
-),
-array( 'id' => $gid )
-);
-bhg_flush_hunt_cache( $hunt_id );
-if ( wp_doing_ajax() ) {
-wp_send_json_success();
-}
-wp_safe_redirect( wp_get_referer() ? wp_get_referer() : home_url() );
-exit;
-}
+				$wpdb->update(
+					$g_tbl,
+					array(
+						'guess'      => $guess,
+						'updated_at' => current_time( 'mysql' ),
+					),
+					array( 'id' => $gid )
+				);
+				bhg_flush_hunt_cache( $hunt_id );
+				if ( wp_doing_ajax() ) {
+					wp_send_json_success();
+				}
+				wp_safe_redirect( wp_get_referer() ? wp_get_referer() : home_url() );
+				exit;
+			}
 		}
 		if ( wp_doing_ajax() ) {
 			wp_send_json_error( __( 'You have reached the maximum number of guesses.', 'bonus-hunt-guesser' ) );
@@ -601,21 +601,21 @@ exit;
 	}
 
 	// Insert
-$wpdb->insert(
-$g_tbl,
-array(
-'hunt_id'    => $hunt_id,
-'user_id'    => $user_id,
-'guess'      => $guess,
-'created_at' => current_time( 'mysql' ),
-),
-array( '%d', '%d', '%f', '%s' )
-);
-bhg_flush_hunt_cache( $hunt_id );
+	$wpdb->insert(
+		$g_tbl,
+		array(
+			'hunt_id'    => $hunt_id,
+			'user_id'    => $user_id,
+			'guess'      => $guess,
+			'created_at' => current_time( 'mysql' ),
+		),
+		array( '%d', '%d', '%f', '%s' )
+	);
+	bhg_flush_hunt_cache( $hunt_id );
 
-if ( wp_doing_ajax() ) {
-wp_send_json_success();
-}
+	if ( wp_doing_ajax() ) {
+		wp_send_json_success();
+	}
 
 		wp_safe_redirect( wp_get_referer() ? wp_get_referer() : home_url() );
 	exit;
@@ -842,8 +842,8 @@ function bhg_generate_leaderboard_html( $timeframe ) {
 	if ( $pages > 1 ) {
 		echo '<div class="bhg-pagination">';
 		for ( $p = 1; $p <= $pages; $p++ ) {
-			$current = $p === $paged ? ' class="current"' : '';
-			echo '<a href="#" data-page="' . (int) $p . '"' . $current . '>' . (int) $p . '</a> ';
+				$current_attr = $p === $paged ? ' current' : '';
+				echo '<a href="#" class="bhg-page' . esc_attr( $current_attr ) . '" data-page="' . (int) $p . '">' . (int) $p . '</a> ';
 		}
 		echo '</div>';
 	}
